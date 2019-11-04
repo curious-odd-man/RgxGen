@@ -1,0 +1,4 @@
+# Idea related directories and files
+.idea
+target/
+*.iml
