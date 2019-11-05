@@ -1,7 +1,7 @@
 package org.curious.regex.generator.visitors;
 
 import org.curious.regex.generator.nodes.*;
-import org.paukov.combinatorics3.Generator;
+import org.curious.regex.util.Permutations;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -11,13 +11,10 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     private Stream<String> aStringStream;
 
-    private void putOrMap(String... values) {
-        putOrMap(() -> Stream.of(values));
-    }
-
     /**
      * The supplier is required because stream cannot be reused.
      * We need new stream each time to map elements. TODO: Maybe there is better solution?
+     *
      * @param stream
      */
     private void putOrMap(Supplier<Stream<String>> stream) {
@@ -31,7 +28,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(AnySymbol node) {
-        putOrMap(AnySymbol.ALL_SYMBOLS);
+        putOrMap(() -> Stream.of(AnySymbol.ALL_SYMBOLS));
     }
 
     @Override
@@ -46,15 +43,12 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        putOrMap(node.getValue());
+        putOrMap(() -> Stream.of(node.getValue()));
     }
 
-    private static Stream<String> combine(String[] values, long takeCnt) {
-        return Generator.permutation(values)
-                        .withRepetitions((int) takeCnt)
-                        .stream()
-                        .map(l -> l.stream()
-                                   .reduce("", String::concat));
+    private static Stream<String> combine(String[] values, int takeCnt) {
+        return Permutations.withRepetitions(takeCnt, () -> Arrays.stream(values), arr -> Stream.of(arr)
+                                                                                               .reduce("", String::concat), String[]::new);
     }
 
     @Override
@@ -79,7 +73,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         putOrMap(() -> {
             Stream<String> tmp = Stream.empty();
             for (long i = node.getMin(); i <= node.getMax(); ++i) {
-                tmp = Stream.concat(tmp, combine(strings, i));
+                tmp = Stream.concat(tmp, combine(strings, (int) i));
             }
             return tmp;
         });

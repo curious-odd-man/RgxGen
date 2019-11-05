@@ -6,7 +6,7 @@
 
     <groupId>org.curious.regex</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.0</version>
+    <version>0.1</version>
 
     <properties>
         <log4j.version>2.12.1</log4j.version>
@@ -66,13 +66,6 @@
     </build>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.github.dpaukov</groupId>
-            <artifactId>combinatoricslib3</artifactId>
-            <version>3.3.0</version>
-        </dependency>
-
         <!-- Junit -->
         <dependency>
             <groupId>junit</groupId>
