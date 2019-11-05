@@ -73,6 +73,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         putOrMap(() -> {
             Stream<String> tmp = Stream.empty();
             for (long i = node.getMin(); i <= node.getMax(); ++i) {
+                // https://www.techempower.com/blog/2016/10/19/efficient-multiple-stream-concatenation-in-java/
                 tmp = Stream.concat(tmp, combine(strings, (int) i));
             }
             return tmp;
