@@ -54,7 +54,7 @@ By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of char
 When generating data that would mean that values of infinite length might be generated.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
 
-## Other tools for to generate values by regex and why this might be better
+## Other tools to generate values by regex and why this might be better
 
 There are 2 more libraries available to achieve same goal:
 1. https://github.com/mifmif/Generex
