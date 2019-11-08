@@ -52,6 +52,8 @@ Despite `distinct()` method is called on a stream, before returining it, it does
 
 By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of characters should be matched.
 When generating data that would mean that values of infinite length might be generated.
+It is highly doubtful that anyone would require a string of infinite lenght, thus I've artificially limited repetitions in such patterns to 100 symbols.
+Use `a{n,m}` if you require some specific number of repetitions.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
 
 ## Other tools to generate values by regex and why this might be better

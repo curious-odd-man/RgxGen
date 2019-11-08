@@ -71,9 +71,17 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         // Take and concatenate 2 from list
         // ...
 
-        putOrMap(() -> IntStream.rangeClosed(node.getMin(), node.getMax())
-                                .mapToObj(i -> combine(strings, i))
-                                .flatMap(Function.identity()));
+        IntStream is;
+        if (node.getMax() == -1) {
+            is = IntStream.iterate(node.getMin(), operand -> operand + 1);
+        } else if (node.getMax() < node.getMin()) {
+            is = IntStream.rangeClosed(node.getMin(), node.getMin());
+        } else {
+            is = IntStream.rangeClosed(node.getMin(), node.getMax());
+        }
+
+        putOrMap(() -> is.mapToObj(i -> combine(strings, i))
+                         .flatMap(Function.identity()));
     }
 
     @Override

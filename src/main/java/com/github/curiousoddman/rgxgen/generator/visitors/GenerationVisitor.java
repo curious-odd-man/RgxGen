@@ -30,10 +30,11 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        long repeat = node.getMin() == node.getMax() ?
-                      node.getMin() :
-                      ThreadLocalRandom.current()
-                                       .nextLong(node.getMin(), node.getMax());
+        int max = node.getMax() == -1 ? 100 : node.getMax();
+        int repeat = node.getMin() >= max ?
+                     node.getMin() :
+                     ThreadLocalRandom.current()
+                                      .nextInt(node.getMin(), max);
 
         for (long i = 0; i < repeat; ++i) {
             node.getNode()
