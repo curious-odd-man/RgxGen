@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -73,6 +74,11 @@ public class GenerateTests {
                 {
                         "(a{0,2}|b{0,2})",
                         new Choice(new Repeat(new FinalSymbol("a"), 0, 2), new Repeat(new FinalSymbol("b"), 0, 2)),
+                        Arrays.asList("", "a", "aa", "", "b", "bb")
+                },
+                {
+                        "(|(a{1,2}|b{1,2}))",
+                        new Choice(new FinalSymbol(""), new Choice(new Repeat(new FinalSymbol("a"), 1, 2), new Repeat(new FinalSymbol("b"), 1, 2))),
                         Arrays.asList("", "a", "aa", "b", "bb")
                 },
                 {
@@ -148,8 +154,6 @@ public class GenerateTests {
     public void generateUniqueTest() {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         aNode.visit(v);
-        List<String> actual = v.getUniqueStrings()
-                               .collect(Collectors.toList());
-        assertEquals(aExpectedUnique, actual);
+        assertEquals(aExpectedUnique, Util.iteratorToList(v.getUniqueStrings()));
     }
 }

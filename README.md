@@ -13,10 +13,10 @@ Maven dependency:
 
 Code: 
 ```
-RgxGen rgxGen = new RgxGen(aRegex);                 // Create generator
-String s = rgxGen.generate();                       // Generate new random value
-BigInteger estimation = rgxGen.numUnique();         // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-Stream<String> uniqueStrings = rgxGen.uStream();    // Stream unique values
+RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
+String s = rgxGen.generate();                           // Generate new random value
+BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+Iterator<String> uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax
@@ -24,8 +24,9 @@ Stream<String> uniqueStrings = rgxGen.uStream();    // Stream unique values
 ```
 . - any symbol
 ? - one or zero occurrences
-\+ - one or more occurrences
-\* - zero or more occurrences
++ - one or more occurrences
+* - zero or more occurrences
+\d - a digit. Equivalent to [0-9]
 {2} and {1,2} - repeatitions. NOTE {1,} not supported yet
 [] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
 () - to group multiple characters for the repetitions
@@ -33,26 +34,28 @@ Stream<String> uniqueStrings = rgxGen.uStream();    // Stream unique values
 escape character \ - to escape special characters (use \\ to generate single \ character)
 ```
 
-Any other character are treated as simple characters and are generated as is.
+Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
 
 ## Limitations
 
 ### Estimation
-rgxGen.numUnique() - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
+`rgxGen.numUnique()` - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
 For example: `"(a{0,2}|b{0,2})"`  will be estimated as 6, though actual number of unique values is 5. 
 That is because left and right alternative can produce same value.
 At the same time `"(|(a{1,2}|b{1,2}))"` will be correctly estimated to 5, though it will generate same values.
 
 ### Uniqueness
 
-For the similar reasons as with estimations - requested unique values stream can contain duplicates. 
-Despite `distinct()` method is called on a stream, before returining it, it does not guarantee uniquenes, as well.
+For the similar reasons as with estimations - requested unique values iterator can contain duplicates. 
 
 ### Infinite patterns
 
 By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of characters should be matched.
 When generating data that would mean that values of infinite length might be generated.
-It is highly doubtful that anyone would require a string of infinite lenght, thus I've artificially limited repetitions in such patterns to 100 symbols.
+It is highly doubtful that anyone would require a string of infinite length, thus I've artificially limited repetitions in such patterns to 100 symbols, when generating random values.
+
+On the contrast, when generating **unique values** - the number of maximum repetitions is increased to Integer.MAX_VALUE.
+
 Use `a{n,m}` if you require some specific number of repetitions.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
 
@@ -70,3 +73,4 @@ Though I found they have following issues:
 ## Support
 
 I plan to support this library, so you're welcome to open issues or reach me by e-mail in case of any questions.
+Any suggestions, feature requests or bug reports are welcome!

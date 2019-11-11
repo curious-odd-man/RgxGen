@@ -1,6 +1,9 @@
 package com.github.curiousoddman.rgxgen.util;
 
 import java.math.BigInteger;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 
 public final class Util {
     public static BigInteger factorial(long n) {
@@ -22,5 +25,15 @@ public final class Util {
         }
 
         return res;
+    }
+
+    public static <T> List<T> iteratorToList(Iterator<T> it) {
+        List<T> lst = new LinkedList<>();
+
+        while (it.hasNext()) {
+            lst.add(it.next());
+        }
+
+        return lst;
     }
 }

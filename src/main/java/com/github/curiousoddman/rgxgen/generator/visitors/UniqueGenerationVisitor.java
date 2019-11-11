@@ -1,55 +1,45 @@
 package com.github.curiousoddman.rgxgen.generator.visitors;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.util.Permutations;
+import com.github.curiousoddman.rgxgen.iterators.*;
 
-import java.util.Arrays;
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class UniqueGenerationVisitor implements NodeVisitor {
+    private List<Supplier<Iterator<String>>> aIterators = new ArrayList<>();
 
-    private Stream<String> aStringStream;
-
-    /**
-     * The supplier is required because stream cannot be reused.
-     * We need new stream each time to map elements. TODO: Maybe there is better solution?
-     *
-     * @param stream
-     */
-    private void putOrMap(Supplier<Stream<String>> stream) {
-        if (aStringStream == null) {
-            aStringStream = stream.get();
+    private static Iterator<String> permutationsOrFlat(List<Supplier<Iterator<String>>> itSupp) {
+        if (itSupp.size() == 1) {
+            return itSupp.get(0)
+                         .get();
         } else {
-            aStringStream = aStringStream.flatMap(v -> stream.get()
-                                                             .map(vv -> v + vv));
+            return new PermutationsIterator(itSupp);
         }
     }
 
     @Override
     public void visit(AnySymbol node) {
-        putOrMap(() -> Stream.of(AnySymbol.ALL_SYMBOLS));
+        aIterators.add(() -> new ArrayIterator(AnySymbol.ALL_SYMBOLS));
     }
 
     @Override
     public void visit(Choice node) {
-        putOrMap(() -> Arrays.stream(node.getNodes())
-                             .flatMap(n -> {
-                                 UniqueGenerationVisitor v = new UniqueGenerationVisitor();
-                                 n.visit(v);
-                                 return v.aStringStream;
-                             }));
+        List<List<Supplier<Iterator<String>>>> nodeIterators = new ArrayList<>(node.getNodes().length);
+        for (Node n : node.getNodes()) {
+            UniqueGenerationVisitor v = new UniqueGenerationVisitor();
+            n.visit(v);
+            nodeIterators.add(v.aIterators);
+        }
+
+        aIterators.add(() -> new ChoiceIterator(nodeIterators));
     }
 
     @Override
     public void visit(FinalSymbol node) {
-        putOrMap(() -> Stream.of(node.getValue()));
-    }
-
-    private static Stream<String> combine(String[] values, int takeCnt) {
-        return Permutations.withRepetitions(takeCnt, values);
+        aIterators.add(() -> new SingleValueIterator(node.getValue()));
     }
 
     @Override
@@ -58,7 +48,8 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         node.getNode()
             .visit(v);
-        String[] strings = v.aStringStream.toArray(String[]::new);
+
+        List<Supplier<Iterator<String>>> iterators = v.aIterators;
 
         // (a|b){1} -> "a", "b" --> "a", "b"
         // (a|b){2} -> "a", "b" --> "aa", "ab", "ba", "bb"
@@ -71,17 +62,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         // Take and concatenate 2 from list
         // ...
 
-        IntStream is;
-        if (node.getMax() == -1) {
-            is = IntStream.iterate(node.getMin(), operand -> operand + 1);
-        } else if (node.getMax() < node.getMin()) {
-            is = IntStream.rangeClosed(node.getMin(), node.getMin());
-        } else {
-            is = IntStream.rangeClosed(node.getMin(), node.getMax());
-        }
-
-        putOrMap(() -> is.mapToObj(i -> combine(strings, i))
-                         .flatMap(Function.identity()));
+        aIterators.add(() -> new IncrementalLengthIterator(() -> permutationsOrFlat(v.aIterators), node.getMin(), node.getMax()));
     }
 
     @Override
@@ -91,7 +72,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         }
     }
 
-    public Stream<String> getUniqueStrings() {
-        return aStringStream == null ? Stream.empty() : aStringStream.distinct();
+    public Iterator<String> getUniqueStrings() {
+        return permutationsOrFlat(aIterators);
     }
 }

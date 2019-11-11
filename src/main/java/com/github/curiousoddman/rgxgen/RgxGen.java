@@ -7,13 +7,13 @@ import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVi
 import com.github.curiousoddman.rgxgen.parsing.DefaultTreeBuilder;
 
 import java.math.BigInteger;
+import java.util.Iterator;
 import java.util.stream.Stream;
 
 /**
- *
+ * String values generator based on regular expression pattern
  */
 public class RgxGen {
-
     private final String aPattern;
     private final Node   aNode;
 
@@ -50,7 +50,7 @@ public class RgxGen {
      *
      * @return stream of unique generated strings
      */
-    public Stream<String> uStream() {
+    public Iterator<String> iterateUnique() {
         UniqueGenerationVisitor ugv = new UniqueGenerationVisitor();
         aNode.visit(ugv);
         return ugv.getUniqueStrings();
