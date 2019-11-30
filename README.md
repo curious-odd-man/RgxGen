@@ -8,7 +8,11 @@
 
 Maven dependency:
 ```
-    TBD
+<dependency>
+    <groupId>com.github.curious-odd-man</groupId>
+    <artifactId>rgxgen</artifactId>
+    <version>0.9</version>
+</dependency>
 ```
 
 Code: 
