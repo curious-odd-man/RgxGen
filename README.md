@@ -20,7 +20,7 @@ Code:
 RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
 String s = rgxGen.generate();                           // Generate new random value
 BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-Iterator<String> uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
+StringIterator uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax

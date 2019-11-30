@@ -1,6 +1,7 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.ArrayList;
@@ -18,6 +19,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         aExpr = expr;
     }
 
+    private static void sbToFinal(StringBuilder sb, ArrayList<Node> nodes) {
+        if (sb.length() != 0) {
+            nodes.add(new FinalSymbol(sb.toString()));
+            sb.delete(0, sb.length());
+        }
+    }
+
     public Node parseGroup() {
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
@@ -28,36 +36,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             char c = aExpr.charAt(aCurrentIndex++);
             switch (c) {
                 case '[':
-                    if (sb.length() != 0) {
-                        nodes.add(new FinalSymbol(sb.toString()));
-                        sb.delete(0, sb.length());
-                    }
+                    sbToFinal(sb, nodes);
                     nodes.add(handleCharacterVariations());
                     break;
 
                 case '(':
-                    if (sb.length() != 0) {
-                        nodes.add(new FinalSymbol(sb.toString()));
-                        sb.delete(0, sb.length());
-                    }
+                    sbToFinal(sb, nodes);
                     nodes.add(parseGroup());
                     break;
 
                 case '|':
-                    if (sb.length() != 0) {
-                        nodes.add(new FinalSymbol(sb.toString()));
-                        sb.delete(0, sb.length());
-                    }
+                    sbToFinal(sb, nodes);
                     choices.add(sequenceOrNot(nodes, choices, false));
                     nodes.clear();
                     isChoice = true;
                     break;
 
                 case ')':
-                    if (sb.length() != 0) {
-                        nodes.add(new FinalSymbol(sb.toString()));
-                        sb.delete(0, sb.length());
-                    }
+                    sbToFinal(sb, nodes);
                     if (isChoice) {
                         choices.add(sequenceOrNot(nodes, choices, false));
                         nodes.clear();
@@ -77,32 +73,23 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         // Repetition for the last character
                         char charToRepeat = sb.charAt(sb.length() - 1);
                         sb.deleteCharAt(sb.length() - 1);
-                        if (sb.length() > 0) {
-                            nodes.add(new FinalSymbol(sb.toString()));
-                            sb.delete(0, sb.length());
-                        }
+                        sbToFinal(sb, nodes);
                         repeatNode = new FinalSymbol(String.valueOf(charToRepeat));
                     }
                     nodes.add(handleRepeat(c, repeatNode));
                     break;
 
                 case '.':
-                    if (sb.length() != 0) {
-                        nodes.add(new FinalSymbol(sb.toString()));
-                        sb.delete(0, sb.length());
-                    }
-                    nodes.add(handleDot());
+                    sbToFinal(sb, nodes);
+                    nodes.add(new AnySymbol());
                     break;
 
                 case '\\':
                     // Skip backslash and add next symbol to characters
                     c = aExpr.charAt(aCurrentIndex++);
                     if (c == 'd') {
-                        if (sb.length() != 0) {
-                            nodes.add(new FinalSymbol(sb.toString()));
-                            sb.delete(0, sb.length());
-                        }
-
+                        // Any decimal digit
+                        sbToFinal(sb, nodes);
                         nodes.add(new Choice(IntStream.rangeClosed(0, 9)
                                                       .mapToObj(Integer::toString)
                                                       .map(FinalSymbol::new)
@@ -116,9 +103,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        if (sb.length() != 0) {
-            nodes.add(new FinalSymbol(sb.toString()));
-        }
+        sbToFinal(sb, nodes);
         return sequenceOrNot(nodes, choices, isChoice);
     }
 
@@ -180,10 +165,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 return new Sequence(nodes.toArray(new Node[0]));
             }
         }
-    }
-
-    private static Node handleDot() {
-        return new AnySymbol();
     }
 
     private Node handleCharacterVariations() {

@@ -1,9 +1,9 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 
-public class ArrayIterator implements Iterator<String> {
+public class ArrayIterator extends StringIterator {
 
     private String[] aStrings;
     private int      aIndex = 0;
@@ -18,11 +18,22 @@ public class ArrayIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         try {
             return aStrings[aIndex++];
         } catch (ArrayIndexOutOfBoundsException ignore) {
             throw new NoSuchElementException("Not enough elements in arrays");
         }
+    }
+
+    @Override
+    public void reset() {
+        aIndex = 0;
+    }
+
+    @Override
+    public String toString() {
+        return "ArrayIterator{" + Arrays.toString(aStrings) +
+                '}';
     }
 }

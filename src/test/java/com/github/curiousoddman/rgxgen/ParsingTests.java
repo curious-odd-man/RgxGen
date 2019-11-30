@@ -1,7 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.parsing.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -106,7 +106,8 @@ public class ParsingTests {
 
     @Test
     public void parseTest() {
-        Node node = new DefaultTreeBuilder(aRegex).get();
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aRegex);
+        Node node = defaultTreeBuilder.get();
         assertEquals(aExpected.toString(), node.toString());
     }
 }
