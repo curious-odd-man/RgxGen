@@ -78,6 +78,7 @@
                         <version>${gpg.plugin.version}</version>
                         <configuration>
                             <homedir>${gpg.home.dir}</homedir>
+                            <keyname>${gpg.key.name}</keyname>
                         </configuration>
                         <executions>
                             <execution>
