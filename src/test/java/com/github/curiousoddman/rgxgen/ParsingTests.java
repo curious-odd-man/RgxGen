@@ -8,6 +8,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -23,18 +24,15 @@ public class ParsingTests {
                 },
                 {
                         "[ab]",
-                        new Choice(new FinalSymbol("a"), new FinalSymbol("b"))
+                        new SymbolRange(new String[]{"a", "b"}, true)
                 },
                 {
                         "[0-9]",
-                        new Choice(IntStream.rangeClosed(0, 9)
-                                            .mapToObj(Integer::toString)
-                                            .map(FinalSymbol::new)
-                                            .toArray(FinalSymbol[]::new))
+                        new SymbolRange(Collections.singletonList(new SymbolRange.Range('0', '9')), true)
                 },
                 {
                         "[a-cA-C]",
-                        new Choice(new FinalSymbol("a"), new FinalSymbol("b"), new FinalSymbol("c"), new FinalSymbol("A"), new FinalSymbol("B"), new FinalSymbol("C"))
+                        new SymbolRange(Arrays.asList(new SymbolRange.Range('a', 'c'), new SymbolRange.Range('A', 'C')), true)
                 },
                 {
                         "\\d",
@@ -69,11 +67,11 @@ public class ParsingTests {
                 },
                 {
                         "a.",
-                        new Sequence(new FinalSymbol("a"), new AnySymbol())
+                        new Sequence(new FinalSymbol("a"), new SymbolRange())
                 },
                 {
                         "..",
-                        new Sequence(new AnySymbol(), new AnySymbol())
+                        new Sequence(new SymbolRange(), new SymbolRange())
                 },
                 {
                         "a*",
@@ -89,17 +87,30 @@ public class ParsingTests {
                 },
                 {
                         "a.*",
-                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new AnySymbol(), 0))
+                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolRange(), 0))
                 },
                 {
                         "(25[01]|2[01])",
-                        new Choice(new Sequence(new FinalSymbol("25"), new Choice(new FinalSymbol("0"), new FinalSymbol("1"))),
-                                   new Sequence(new FinalSymbol("2"), new Choice(new FinalSymbol("0"), new FinalSymbol("1"))))
+                        new Choice(new Sequence(new FinalSymbol("25"), new SymbolRange(new String[]{"0", "1"}, true)),
+                                   new Sequence(new FinalSymbol("2"), new SymbolRange(new String[]{"0", "1"}, true)))
                 },
                 {
                         "a{4,}",
                         Repeat.minimum(new FinalSymbol("a"), 4)
+                },
+                {
+                        "[^a]",
+                        new SymbolRange(Arrays.stream(SymbolRange.ALL_SYMBOLS)
+                                              .filter(s -> !s.equals("a"))
+                                              .toArray(String[]::new), true)
+                },
+                {
+                        "[^a-dE-F]",
+                        new SymbolRange(Arrays.stream(SymbolRange.ALL_SYMBOLS)
+                                              .filter(s -> !(s.equals("a") || s.equals("b") || s.equals("c") || s.equals("d") || s.equals("E") || s.equals("F")))
+                                              .toArray(String[]::new), true)
                 }
+
         });
     }
 

@@ -83,15 +83,15 @@ public class GenerateTests {
                 },
                 {
                         "a.",
-                        new Sequence(new FinalSymbol("a"), new AnySymbol()),
-                        Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new FinalSymbol("a"), new SymbolRange()),
+                        Arrays.stream(SymbolRange.ALL_SYMBOLS)
                               .map(s -> "a" + s).collect(Collectors.toList())
                 },
                 {
                         "..",
-                        new Sequence(new AnySymbol(), new AnySymbol()),
-                        Arrays.stream(AnySymbol.ALL_SYMBOLS)
-                              .flatMap(s -> Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new SymbolRange(), new SymbolRange()),
+                        Arrays.stream(SymbolRange.ALL_SYMBOLS)
+                              .flatMap(s -> Arrays.stream(SymbolRange.ALL_SYMBOLS)
                                                   .map(v -> s + v)).collect(Collectors.toList())
                 },
                 {
@@ -120,10 +120,10 @@ public class GenerateTests {
                 },
                 {
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new AnySymbol(), 0, 2)),
-                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(AnySymbol.ALL_SYMBOLS),
-                                                                   Arrays.stream(AnySymbol.ALL_SYMBOLS)
-                                                                         .flatMap(symbol -> Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new FinalSymbol("a"), new Repeat(new SymbolRange(), 0, 2)),
+                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolRange.ALL_SYMBOLS),
+                                                                   Arrays.stream(SymbolRange.ALL_SYMBOLS)
+                                                                         .flatMap(symbol -> Arrays.stream(SymbolRange.ALL_SYMBOLS)
                                                                                                   .map(v -> symbol + v))))
                               .map(v -> "a" + v)
                                 .collect(Collectors.toList())

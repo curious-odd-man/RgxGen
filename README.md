@@ -32,7 +32,8 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique v
 * - zero or more occurrences
 \d - a digit. Equivalent to [0-9]
 {2} and {1,2} - repeatitions. Use {n,} to repeat at least n times.
-[] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
+[...] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
+[^...] - single character except the ones in brackets. [^a] - any symbol except 'a'
 () - to group multiple characters for the repetitions
 (a|b) - alternatives 
 escape character \ - to escape special characters (use \\ to generate single \ character)

@@ -5,7 +5,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -81,7 +81,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '.':
                     sbToFinal(sb, nodes);
-                    nodes.add(new AnySymbol());
+                    nodes.add(new SymbolRange());
                     break;
 
                 case '\\':
@@ -172,23 +172,32 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     private Node handleCharacterVariations() {
+        boolean positive = true;
+        if (aExpr.charAt(aCurrentIndex) == '^') {
+            positive = false;
+            ++aCurrentIndex;
+        }
+
         StringBuilder sb = new StringBuilder();
+        List<SymbolRange.Range> ranges = new LinkedList<>();
+
         while (aExpr.length() > aCurrentIndex) {
             char c = aExpr.charAt(aCurrentIndex++);
             switch (c) {
                 case ']':
-                    Node[] nodes = Arrays.stream(Util.stringToCharsSubstrings(sb.toString()))
-                                         .map(FinalSymbol::new)
-                                         .toArray(Node[]::new);
-                    return new Choice(nodes);
+                    String[] strings;
+                    if (sb.length() == 0) {
+                        strings = new String[0];
+                    } else {
+                        strings = Util.stringToCharsSubstrings(sb.toString());
+                    }
+                    return new SymbolRange(ranges, strings, positive);
 
                 case '-':
                     c = aExpr.charAt(aCurrentIndex++);
                     char currentChar = sb.charAt(sb.length() - 1);
                     sb.deleteCharAt(sb.length() - 1);
-                    for (; currentChar <= c; ++currentChar) {
-                        sb.append(currentChar);
-                    }
+                    ranges.add(new SymbolRange.Range(currentChar, c));
                     break;
 
                 case '\\':
