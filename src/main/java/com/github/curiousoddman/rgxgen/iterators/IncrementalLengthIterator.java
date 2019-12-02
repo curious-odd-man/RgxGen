@@ -5,17 +5,17 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-public class IncrementalLengthIterator implements Iterator<String> {
-    private final Supplier<Iterator<String>> aSupplier;
-    private final int                        aMax;
+public class IncrementalLengthIterator extends StringIterator {
+    private final Supplier<StringIterator> aSupplier;
+    private final int                      aMax;
 
     private int                aCurrentLength;
     private Iterator<String>[] aCurrentIterators;
     private String[]           aGeneratedParts;
 
-    public IncrementalLengthIterator(Supplier<Iterator<String>> supplier, int min, int max) {
-        aCurrentLength = min;
+    public IncrementalLengthIterator(Supplier<StringIterator> supplier, int min, int max) {
         aSupplier = supplier;
+        aCurrentLength = min;
         aMax = max;
     }
 
@@ -43,7 +43,7 @@ public class IncrementalLengthIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         if (aCurrentLength == 0) {
             ++aCurrentLength;
             return "";

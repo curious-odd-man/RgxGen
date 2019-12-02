@@ -8,19 +8,19 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PermutationsIterator implements Iterator<String> {
-    private final List<Supplier<Iterator<String>>> aIteratorsSuppliers;
-    private final Iterator<String>[]               aIterators;
+public class PermutationsIterator extends StringIterator {
+    private final List<Supplier<StringIterator>> aIteratorsSuppliers;
+    private final StringIterator[]               aIterators;
     private final String[]                         aGeneratedParts;
 
-    public PermutationsIterator(List<Supplier<Iterator<String>>> iteratorsSuppliers) {
+    public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {
         aIteratorsSuppliers = iteratorsSuppliers;
-        aIterators = new Iterator[aIteratorsSuppliers.size()];
+        aIterators = new StringIterator[aIteratorsSuppliers.size()];
 
         aGeneratedParts = new String[aIterators.length];
 
         for (int i = 0; i < aIterators.length; i++) {
-            Iterator<String> iterator = aIteratorsSuppliers.get(i)
+            StringIterator iterator = aIteratorsSuppliers.get(i)
                                                            .get();
             aIterators[i] = iterator;
         }
@@ -32,8 +32,7 @@ public class PermutationsIterator implements Iterator<String> {
 
     public PermutationsIterator(int length, String[] values) {
         this(IntStream.range(0, length)
-                      .mapToObj(i -> ((Supplier<Iterator<String>>) () -> Arrays.stream(values)
-                                                                               .iterator()))
+                      .mapToObj(i -> ((Supplier<StringIterator>) () -> new ArrayIterator(values)))
                       .collect(Collectors.toList()));
     }
 
@@ -44,7 +43,7 @@ public class PermutationsIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         // Initialize all value
         if (aGeneratedParts[0] == null) {
             for (int i = 0; i < aGeneratedParts.length; i++) {
@@ -60,7 +59,7 @@ public class PermutationsIterator implements Iterator<String> {
                     // We can only reset other iterators. Head iterator should use all it's values only once
                     throw new NoSuchElementException("No more unique values");
                 } else {
-                    Iterator<String> iterator = aIteratorsSuppliers.get(i)
+                    StringIterator iterator = aIteratorsSuppliers.get(i)
                                                                    .get();
                     aIterators[i] = iterator;
                     aGeneratedParts[i] = iterator.next();

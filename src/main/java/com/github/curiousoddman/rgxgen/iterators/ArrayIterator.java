@@ -1,9 +1,8 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class ArrayIterator implements Iterator<String> {
+public class ArrayIterator extends StringIterator {
 
     private String[] aStrings;
     private int      aIndex = 0;
@@ -18,7 +17,7 @@ public class ArrayIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         try {
             return aStrings[aIndex++];
         } catch (ArrayIndexOutOfBoundsException ignore) {
