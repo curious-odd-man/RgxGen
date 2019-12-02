@@ -2,7 +2,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.Iterator;
 
-public class SingleValueIterator implements Iterator<String> {
+public class SingleValueIterator extends StringIterator {
     private String aV;
 
     public SingleValueIterator(String v) {
@@ -15,7 +15,7 @@ public class SingleValueIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         String tmp = aV;
         aV = null;
         return tmp;

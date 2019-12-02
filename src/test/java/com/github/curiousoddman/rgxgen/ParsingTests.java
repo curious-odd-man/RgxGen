@@ -1,7 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.parsing.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -95,6 +95,10 @@ public class ParsingTests {
                         "(25[01]|2[01])",
                         new Choice(new Sequence(new FinalSymbol("25"), new Choice(new FinalSymbol("0"), new FinalSymbol("1"))),
                                    new Sequence(new FinalSymbol("2"), new Choice(new FinalSymbol("0"), new FinalSymbol("1"))))
+                },
+                {
+                        "a{4,}",
+                        Repeat.minimum(new FinalSymbol("a"), 4)
                 }
         });
     }
@@ -106,7 +110,8 @@ public class ParsingTests {
 
     @Test
     public void parseTest() {
-        Node node = new DefaultTreeBuilder(aRegex).get();
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aRegex);
+        Node node = defaultTreeBuilder.get();
         assertEquals(aExpected.toString(), node.toString());
     }
 }

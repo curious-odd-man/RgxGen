@@ -20,7 +20,7 @@ Code:
 RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
 String s = rgxGen.generate();                           // Generate new random value
 BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-Iterator<String> uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
+StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax
@@ -31,7 +31,7 @@ Iterator<String> uniqueStrings = rgxGen.uStream();      // Iterate over unique v
 + - one or more occurrences
 * - zero or more occurrences
 \d - a digit. Equivalent to [0-9]
-{2} and {1,2} - repeatitions. NOTE {1,} not supported yet
+{2} and {1,2} - repeatitions. Use {n,} to repeat at least n times.
 [] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
 () - to group multiple characters for the repetitions
 (a|b) - alternatives 

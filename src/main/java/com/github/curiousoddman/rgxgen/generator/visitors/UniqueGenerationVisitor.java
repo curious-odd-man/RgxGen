@@ -4,14 +4,13 @@ import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 
 public class UniqueGenerationVisitor implements NodeVisitor {
-    private List<Supplier<Iterator<String>>> aIterators = new ArrayList<>();
+    private List<Supplier<StringIterator>> aIterators = new ArrayList<>();
 
-    private static Iterator<String> permutationsOrFlat(List<Supplier<Iterator<String>>> itSupp) {
+    private static StringIterator permutationsOrFlat(List<Supplier<StringIterator>> itSupp) {
         if (itSupp.size() == 1) {
             return itSupp.get(0)
                          .get();
@@ -27,7 +26,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Choice node) {
-        List<List<Supplier<Iterator<String>>>> nodeIterators = new ArrayList<>(node.getNodes().length);
+        List<List<Supplier<StringIterator>>> nodeIterators = new ArrayList<>(node.getNodes().length);
         for (Node n : node.getNodes()) {
             UniqueGenerationVisitor v = new UniqueGenerationVisitor();
             n.visit(v);
@@ -49,7 +48,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         node.getNode()
             .visit(v);
 
-        List<Supplier<Iterator<String>>> iterators = v.aIterators;
+        List<Supplier<StringIterator>> iterators = v.aIterators;
 
         // (a|b){1} -> "a", "b" --> "a", "b"
         // (a|b){2} -> "a", "b" --> "aa", "ab", "ba", "bb"
@@ -72,7 +71,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         }
     }
 
-    public Iterator<String> getUniqueStrings() {
+    public StringIterator getUniqueStrings() {
         return permutationsOrFlat(aIterators);
     }
 }

@@ -1,11 +1,15 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import static org.junit.Assert.assertFalse;
@@ -48,7 +52,7 @@ public class InfiniteGenerateTests {
     @Test
     public void aLotOfValuesAvailableTest() {
         RgxGen rgxGen = new RgxGen(aRegex);
-        Iterator<String> stringIterator = rgxGen.iterateUnique();
+        StringIterator stringIterator = rgxGen.iterateUnique();
         Set<String> set = new HashSet<>();
 
         for (int i = 0; i < ITERATIONS * ITERATIONS; i++) {

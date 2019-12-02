@@ -1,19 +1,20 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class ChoiceIterator implements Iterator<String> {
-    private final List<Supplier<Iterator<String>>> aIterators;
+public class ChoiceIterator extends StringIterator {
+    private final List<Supplier<StringIterator>> aIterators;
 
-    private Iterator<String> aCurrentIterator;
+    private StringIterator aCurrentIterator;
 
-    public ChoiceIterator(List<List<Supplier<Iterator<String>>>> iterators) {
+    public ChoiceIterator(List<List<Supplier<StringIterator>>> iterators) {
         aIterators = iterators.stream()
-                              .flatMap(v -> v.stream())
+                              .flatMap(Collection::stream)
                               .collect(Collectors.toList());
         aCurrentIterator = aIterators.remove(0)
                                      .get();
@@ -25,7 +26,7 @@ public class ChoiceIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         if (!aCurrentIterator.hasNext()) {
             if (aIterators.isEmpty()) {
                 throw new NoSuchElementException("No more values");

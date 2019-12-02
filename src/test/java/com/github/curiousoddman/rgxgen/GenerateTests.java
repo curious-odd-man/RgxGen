@@ -95,7 +95,7 @@ public class GenerateTests {
                                                   .map(v -> s + v)).collect(Collectors.toList())
                 },
                 {
-                        "a*", // If use unlimited repeteation that will cause an error when trying to save all data in memory, thus we limit repetition times
+                        "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Repeat(new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
                                  .limit(11)
@@ -109,7 +109,7 @@ public class GenerateTests {
                         Arrays.asList("a", "aa")
                 },
                 {
-                        "aa+", // If use unlimited repeteation that will cause an error when trying to save all data in memory, thus we limit repetition times
+                        "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
                                  .limit(10)
@@ -119,7 +119,7 @@ public class GenerateTests {
                                 .collect(Collectors.toList())
                 },
                 {
-                        "a.*",      // If use unlimited repeteation that will cause an error when trying to save all data in memory, thus we limit repetition times
+                        "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence(new FinalSymbol("a"), new Repeat(new AnySymbol(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(AnySymbol.ALL_SYMBOLS),
                                                                    Arrays.stream(AnySymbol.ALL_SYMBOLS)

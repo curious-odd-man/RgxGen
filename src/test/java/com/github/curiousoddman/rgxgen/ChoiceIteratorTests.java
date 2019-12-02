@@ -2,13 +2,13 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.ChoiceIterator;
 import com.github.curiousoddman.rgxgen.iterators.SingleValueIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -27,7 +27,7 @@ public class ChoiceIteratorTests {
                         "(A|B)",
                         Arrays.asList(
                                 Arrays.asList(
-                                        (Supplier<Iterator<String>>) () -> new SingleValueIterator("A"),
+                                        (Supplier<StringIterator>) () -> new SingleValueIterator("A"),
                                         () -> new SingleValueIterator("B")
                                 )
                         ),
@@ -37,7 +37,7 @@ public class ChoiceIteratorTests {
                         "(A|B|C|D|E|F)",
                         Arrays.asList(
                                 Arrays.asList(
-                                        (Supplier<Iterator<String>>) () -> new SingleValueIterator("A"),
+                                        (Supplier<StringIterator>) () -> new SingleValueIterator("A"),
                                         () -> new SingleValueIterator("B"),
                                         () -> new SingleValueIterator("C"),
                                         () -> new SingleValueIterator("D"),
@@ -51,15 +51,15 @@ public class ChoiceIteratorTests {
     }
 
     @Parameterized.Parameter
-    public String                                 aExpression;
+    public String                               aExpression;
     @Parameterized.Parameter(1)
-    public List<List<Supplier<Iterator<String>>>> aIterators;
+    public List<List<Supplier<StringIterator>>> aIterators;
     @Parameterized.Parameter(2)
-    public List<String>                           aExpectedValues;
+    public List<String>                         aExpectedValues;
 
     @Test
     public void countTest() {
-        Iterator<String> stringIterator = new ChoiceIterator(aIterators);
+        StringIterator stringIterator = new ChoiceIterator(aIterators);
         Iterable<String> i = () -> stringIterator;
 
         Stream<String> stream = StreamSupport.stream(i.spliterator(), false);
@@ -68,7 +68,7 @@ public class ChoiceIteratorTests {
 
     @Test
     public void valuesTest() {
-        Iterator<String> stringIterator = new ChoiceIterator(aIterators);
+        StringIterator stringIterator = new ChoiceIterator(aIterators);
         Iterable<String> i = () -> stringIterator;
         Stream<String> stream = StreamSupport.stream(i.spliterator(), false);
         assertEquals(aExpectedValues, stream.collect(Collectors.toList()));

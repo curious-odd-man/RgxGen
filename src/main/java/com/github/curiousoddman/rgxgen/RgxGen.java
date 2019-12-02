@@ -4,10 +4,10 @@ import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
-import com.github.curiousoddman.rgxgen.parsing.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.math.BigInteger;
-import java.util.Iterator;
 import java.util.stream.Stream;
 
 /**
@@ -50,7 +50,7 @@ public class RgxGen {
      *
      * @return stream of unique generated strings
      */
-    public Iterator<String> iterateUnique() {
+    public StringIterator iterateUnique() {
         UniqueGenerationVisitor ugv = new UniqueGenerationVisitor();
         aNode.visit(ugv);
         return ugv.getUniqueStrings();
