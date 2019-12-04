@@ -31,6 +31,11 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique v
 + - one or more occurrences
 * - zero or more occurrences
 \d - a digit. Equivalent to [0-9]
+\D - not a digit. Equivalent to [^0-9]
+\s - space, tab or newline
+\S - anything, but space, tab or newline
+\w - any word character. Equivalent to [a-zA-Z0-9_]
+\W - anything but a word character. Equivalent to [^a-zA-Z0-9_]
 {2} and {1,2} - repeatitions. Use {n,} to repeat at least n times.
 [...] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
 [^...] - single character except the ones in brackets. [^a] - any symbol except 'a'

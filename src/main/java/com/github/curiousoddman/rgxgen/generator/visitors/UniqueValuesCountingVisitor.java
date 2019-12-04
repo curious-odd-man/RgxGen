@@ -16,7 +16,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(SymbolRange node) {
+    public void visit(SymbolSet node) {
         applyOrSkip(v -> v.add(BigInteger.valueOf(node.getSymbols().length)));
     }
 

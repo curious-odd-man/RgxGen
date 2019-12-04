@@ -24,22 +24,15 @@ public class ParsingTests {
                 },
                 {
                         "[ab]",
-                        new SymbolRange(new String[]{"a", "b"}, true)
+                        new SymbolSet(new String[]{"a", "b"}, true)
                 },
                 {
                         "[0-9]",
-                        new SymbolRange(Collections.singletonList(new SymbolRange.Range('0', '9')), true)
+                        new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('0', '9')), true)
                 },
                 {
                         "[a-cA-C]",
-                        new SymbolRange(Arrays.asList(new SymbolRange.Range('a', 'c'), new SymbolRange.Range('A', 'C')), true)
-                },
-                {
-                        "\\d",
-                        new Choice(IntStream.rangeClosed(0, 9)
-                                            .mapToObj(Integer::toString)
-                                            .map(FinalSymbol::new)
-                                            .toArray(FinalSymbol[]::new))
+                        new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'c'), new SymbolSet.SymbolRange('A', 'C')), true)
                 },
                 {
                         "a{2,5}",
@@ -67,11 +60,11 @@ public class ParsingTests {
                 },
                 {
                         "a.",
-                        new Sequence(new FinalSymbol("a"), new SymbolRange())
+                        new Sequence(new FinalSymbol("a"), new SymbolSet())
                 },
                 {
                         "..",
-                        new Sequence(new SymbolRange(), new SymbolRange())
+                        new Sequence(new SymbolSet(), new SymbolSet())
                 },
                 {
                         "a*",
@@ -87,12 +80,12 @@ public class ParsingTests {
                 },
                 {
                         "a.*",
-                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolRange(), 0))
+                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolSet(), 0))
                 },
                 {
                         "(25[01]|2[01])",
-                        new Choice(new Sequence(new FinalSymbol("25"), new SymbolRange(new String[]{"0", "1"}, true)),
-                                   new Sequence(new FinalSymbol("2"), new SymbolRange(new String[]{"0", "1"}, true)))
+                        new Choice(new Sequence(new FinalSymbol("25"), new SymbolSet(new String[]{"0", "1"}, true)),
+                                   new Sequence(new FinalSymbol("2"), new SymbolSet(new String[]{"0", "1"}, true)))
                 },
                 {
                         "a{4,}",
@@ -100,17 +93,44 @@ public class ParsingTests {
                 },
                 {
                         "[^a]",
-                        new SymbolRange(Arrays.stream(SymbolRange.ALL_SYMBOLS)
-                                              .filter(s -> !s.equals("a"))
-                                              .toArray(String[]::new), true)
+                        new SymbolSet(Arrays.stream(SymbolSet.getAllSymbols())
+                                            .filter(s -> !s.equals("a"))
+                                            .toArray(String[]::new), true)
                 },
                 {
                         "[^a-dE-F]",
-                        new SymbolRange(Arrays.stream(SymbolRange.ALL_SYMBOLS)
-                                              .filter(s -> !(s.equals("a") || s.equals("b") || s.equals("c") || s.equals("d") || s.equals("E") || s.equals("F")))
-                                              .toArray(String[]::new), true)
+                        new SymbolSet(Arrays.stream(SymbolSet.getAllSymbols())
+                                            .filter(s -> !(s.equals("a") || s.equals("b") || s.equals("c") || s.equals("d") || s.equals("E") || s.equals("F")))
+                                            .toArray(String[]::new), true)
+                },
+                {
+                        "\\s",      // Any White Space
+                        new SymbolSet(new String[]{" ", "\t", "\n"}, true)
+                },
+                {
+                        "\\S",      // Any Non White Space
+                        new SymbolSet(new String[]{" ", "\t", "\n"}, false)
+                },
+                {
+                        "\\d",      // Any digit
+                        new SymbolSet(IntStream.rangeClosed(0, 9)
+                                               .mapToObj(Integer::toString)
+                                               .toArray(String[]::new), true)
+                },
+                {
+                        "\\D",      // Any non-digit
+                        new SymbolSet(IntStream.rangeClosed(0, 9)
+                                               .mapToObj(Integer::toString)
+                                               .toArray(String[]::new), false)
+                },
+                {
+                        "\\w",      // Any word character  [a-zA-Z0-9_]
+                        new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, true)
+                },
+                {
+                        "\\W",      // Any non-word symbol  [a-zA-Z0-9_]
+                        new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, false)
                 }
-
         });
     }
 
