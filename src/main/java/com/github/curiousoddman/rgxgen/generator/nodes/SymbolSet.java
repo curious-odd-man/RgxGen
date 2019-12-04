@@ -12,8 +12,12 @@ import java.util.stream.IntStream;
 /**
  * Generate Any printable character.
  */
-public class SymbolRange implements Node {
-    public static final String[] ALL_SYMBOLS = new String[127 - 32];
+public class SymbolSet implements Node {
+    private static final String[] ALL_SYMBOLS = new String[127 - 32];
+
+    public static String[] getAllSymbols() {
+        return ALL_SYMBOLS.clone();
+    }
 
     static {
         for (char c = 32; c < 127; ++c) {
@@ -22,11 +26,11 @@ public class SymbolRange implements Node {
         }
     }
 
-    public static class Range {
+    public static class SymbolRange {
         private final int aFrom;
         private final int aTo;
 
-        public Range(char from, char to) {
+        public SymbolRange(char from, char to) {
             aFrom = from;
             aTo = to;
         }
@@ -35,30 +39,30 @@ public class SymbolRange implements Node {
     private final String[] aSymbols;
 
     // AnySymbol
-    public SymbolRange() {
+    public SymbolSet() {
         aSymbols = ALL_SYMBOLS.clone();
     }
 
-    public SymbolRange(String[] symbols, boolean positive) {
+    public SymbolSet(String[] symbols, boolean positive) {
         this(Collections.emptyList(), symbols, positive);
     }
 
-    public SymbolRange(List<Range> ranges, boolean positive) {
-        this(ranges, new String[0], positive);
+    public SymbolSet(List<SymbolRange> symbolRanges, boolean positive) {
+        this(symbolRanges, new String[0], positive);
     }
 
-    public SymbolRange(List<Range> ranges, String[] symbols, boolean positive) {
+    public SymbolSet(List<SymbolRange> symbolRanges, String[] symbols, boolean positive) {
         List<String> initial = new ArrayList<>();
         if (!positive) {
             initial.addAll(Arrays.asList(ALL_SYMBOLS));
         }
 
         filterOrPut(initial, Arrays.asList(symbols), positive);
-        filterOrPut(initial, ranges.stream()
-                                   .flatMapToInt(r -> IntStream.rangeClosed(r.aFrom, r.aTo))
-                                   .mapToObj(i -> (char) i)
-                                   .map(Object::toString)
-                                   .collect(Collectors.toList()), positive);
+        filterOrPut(initial, symbolRanges.stream()
+                                         .flatMapToInt(r -> IntStream.rangeClosed(r.aFrom, r.aTo))
+                                         .mapToObj(i -> (char) i)
+                                         .map(Object::toString)
+                                         .collect(Collectors.toList()), positive);
 
         aSymbols = initial.toArray(new String[0]);
     }

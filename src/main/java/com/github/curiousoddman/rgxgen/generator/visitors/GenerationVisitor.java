@@ -8,7 +8,7 @@ public class GenerationVisitor implements NodeVisitor {
     private StringBuilder aStringBuilder = new StringBuilder();
 
     @Override
-    public void visit(SymbolRange node) {
+    public void visit(SymbolSet node) {
         String[] allSymbols = node.getSymbols();
         int idx = ThreadLocalRandom.current()
                                    .nextInt(allSymbols.length);

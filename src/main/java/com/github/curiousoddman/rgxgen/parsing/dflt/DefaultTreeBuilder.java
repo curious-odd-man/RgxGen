@@ -5,6 +5,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -19,7 +20,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         aExpr = expr;
     }
 
-    private static void sbToFinal(StringBuilder sb, ArrayList<Node> nodes) {
+    private static void sbToFinal(StringBuilder sb, List<Node> nodes) {
         if (sb.length() != 0) {
             nodes.add(new FinalSymbol(sb.toString()));
             sb.delete(0, sb.length());
@@ -29,7 +30,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     public Node parseGroup() {
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(aExpr.length());
         boolean isChoice = false;
 
         while (aExpr.length() > aCurrentIndex) {
@@ -81,22 +82,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '.':
                     sbToFinal(sb, nodes);
-                    nodes.add(new SymbolRange());
+                    nodes.add(new SymbolSet());
                     break;
 
                 case '\\':
-                    // Skip backslash and add next symbol to characters
-                    c = aExpr.charAt(aCurrentIndex++);
-                    if (c == 'd') {
-                        // Any decimal digit
-                        sbToFinal(sb, nodes);
-                        nodes.add(new Choice(IntStream.rangeClosed(0, 9)
-                                                      .mapToObj(Integer::toString)
-                                                      .map(FinalSymbol::new)
-                                                      .toArray(FinalSymbol[]::new)));
-                        break;
-                    }
-                    //noinspection fallthrough
+                    handleEscapedCharacter(sb, nodes);
+                    break;
+
                 default:
                     sb.append(c);
                     break;
@@ -105,6 +97,49 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         sbToFinal(sb, nodes);
         return sequenceOrNot(nodes, choices, isChoice);
+    }
+
+    /**
+     * Handles next character after escape sequence - \
+     * It will either:
+     * a) add new node to nodes, if that was any special esapce sequence, or
+     * b) append character to sb, otherwise
+     *
+     * @param sb    string builder containing all previous characters before the escape
+     * @param nodes previously created nodes; new node will be appended here
+     */
+    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes) {
+        char c = aExpr.charAt(aCurrentIndex++);
+        switch (c) {
+            case 'd':  // Any decimal digit
+            case 'D':  // Any non-decimal digit
+                sbToFinal(sb, nodes);
+                String[] digits = IntStream.rangeClosed(0, 9)
+                                           .mapToObj(Integer::toString)
+                                           .toArray(String[]::new);
+
+                nodes.add(new SymbolSet(digits, c == 'd'));
+                break;
+
+            case 's':  // Any white space
+            case 'S':  // Any non-white space
+                sbToFinal(sb, nodes);
+                String[] whiteSpaces = {" ", "\t", "\n"};
+                nodes.add(new SymbolSet(whiteSpaces, c == 's'));
+                break;
+
+            case 'w':  // Any word characters
+            case 'W':  // Any non-word characters
+                sbToFinal(sb, nodes);
+                String[] wordSymbols = {"_"};
+                nodes.add(new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), wordSymbols, c == 'w'));
+                break;
+
+            default:
+                sb.append(c);
+                break;
+        }
+
     }
 
     private Repeat handleRepeat(char c, Node repeatNode) {
@@ -171,6 +206,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
+    /**
+     * This function parses expression in square brackets [...]
+     * It should be called when aCurrentIndex has index of first character after opening bracket - [
+     *
+     * @return Node that covers expression in square brackets
+     */
     private Node handleCharacterVariations() {
         boolean positive = true;
         if (aExpr.charAt(aCurrentIndex) == '^') {
@@ -179,7 +220,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         StringBuilder sb = new StringBuilder();
-        List<SymbolRange.Range> ranges = new LinkedList<>();
+        List<SymbolSet.SymbolRange> symbolRanges = new LinkedList<>();
 
         while (aExpr.length() > aCurrentIndex) {
             char c = aExpr.charAt(aCurrentIndex++);
@@ -191,13 +232,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     } else {
                         strings = Util.stringToCharsSubstrings(sb.toString());
                     }
-                    return new SymbolRange(ranges, strings, positive);
+                    return new SymbolSet(symbolRanges, strings, positive);
 
                 case '-':
                     c = aExpr.charAt(aCurrentIndex++);
                     char currentChar = sb.charAt(sb.length() - 1);
                     sb.deleteCharAt(sb.length() - 1);
-                    ranges.add(new SymbolRange.Range(currentChar, c));
+                    symbolRanges.add(new SymbolSet.SymbolRange(currentChar, c));
                     break;
 
                 case '\\':

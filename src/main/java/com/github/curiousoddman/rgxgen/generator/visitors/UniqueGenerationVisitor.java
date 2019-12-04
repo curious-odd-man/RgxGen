@@ -20,7 +20,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(SymbolRange node) {
+    public void visit(SymbolSet node) {
         aIterators.add(() -> new ArrayIterator(node.getSymbols()));
     }
 

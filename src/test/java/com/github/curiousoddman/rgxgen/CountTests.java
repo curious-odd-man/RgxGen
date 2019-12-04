@@ -77,12 +77,12 @@ public class CountTests {
                 },
                 {
                         "a.",
-                        new Sequence(new FinalSymbol("a"), new SymbolRange()),
+                        new Sequence(new FinalSymbol("a"), new SymbolSet()),
                         BigInteger.valueOf(95)
                 },
                 {
                         "..",
-                        new Sequence(new SymbolRange(), new SymbolRange()),
+                        new Sequence(new SymbolSet(), new SymbolSet()),
                         BigInteger.valueOf(95 * 95)
                 },
                 {
@@ -102,7 +102,7 @@ public class CountTests {
                 },
                 {
                         "a.*",      // If use unlimited repeteation that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolRange(), 0)),
+                        new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolSet(), 0)),
                         null
                 }
         });
