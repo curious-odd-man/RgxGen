@@ -135,6 +135,31 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 nodes.add(new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), wordSymbols, c == 'w'));
                 break;
 
+            // Hex character:
+            //   \xNN or \x{NNNN}
+            case 'x':
+                c = aExpr.charAt(aCurrentIndex++);
+                int startIdx;
+                int endIndex;
+                if (c == '{') {
+                    startIdx = aCurrentIndex;
+                    while (aExpr.charAt(aCurrentIndex++) != '}') {
+                        if (aCurrentIndex >= aExpr.length()) {
+                            throw new RuntimeException("While parsing hex value at position " + startIdx + " at " + aExpr.substring(startIdx, startIdx + 5) + " did not find closing '}'");
+                        }
+                    }
+                    endIndex = aCurrentIndex - 1;
+                } else {
+                    startIdx = aCurrentIndex - 1;
+                    endIndex = startIdx + 2;
+                    aCurrentIndex = endIndex;
+                }
+
+                String hexValue = aExpr.substring(startIdx, endIndex);
+                int value = Integer.parseInt(hexValue, 16);
+                sb.append((char) value);
+                break;
+
             default:
                 sb.append(c);
                 break;
@@ -142,6 +167,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     }
 
+    /**
+     * Creates appropriate repetition for a node.
+     *
+     * @param c          character that starts repetitions pattern - *, +, ?, {
+     * @param repeatNode node that shall be repeated
+     * @return Repeat node
+     */
     private Repeat handleRepeat(char c, Node repeatNode) {
         if (c == '*') {
             return Repeat.minimum(repeatNode, 0);

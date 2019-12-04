@@ -130,6 +130,22 @@ public class ParsingTests {
                 {
                         "\\W",      // Any non-word symbol  [a-zA-Z0-9_]
                         new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, false)
+                },
+                {
+                        "\\x20", // Space
+                        new FinalSymbol(" ")
+                },
+                {
+                        "\\x{26F8}",
+                        new FinalSymbol("⛸")
+                },
+                {
+                        "\\x20a", // Space
+                        new FinalSymbol(" a")
+                },
+                {
+                        "\\x{26F8}a",
+                        new FinalSymbol("⛸a")
                 }
         });
     }
