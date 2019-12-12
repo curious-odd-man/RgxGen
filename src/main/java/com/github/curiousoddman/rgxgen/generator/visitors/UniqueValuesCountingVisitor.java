@@ -62,6 +62,11 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         }
     }
 
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        throw new RuntimeException("Not implemented");
+    }
+
     /**
      * Count of unique values that can be generated with this regex. {@code null} if infinite
      *

@@ -71,6 +71,11 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         }
     }
 
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        throw new RuntimeException("Not implemented");
+    }
+
     public StringIterator getUniqueStrings() {
         return permutationsOrFlat(aIterators);
     }
