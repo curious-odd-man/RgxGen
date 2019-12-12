@@ -12,4 +12,6 @@ public interface NodeVisitor {
     void visit(Repeat node);
 
     void visit(Sequence node);
+
+    void visit(NotSymbol notSymbol);
 }

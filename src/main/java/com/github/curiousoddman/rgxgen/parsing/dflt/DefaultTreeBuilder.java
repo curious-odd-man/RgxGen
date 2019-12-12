@@ -27,6 +27,32 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
+    private boolean handleLookAround() {
+        switch (aExpr.substring(aCurrentIndex, aCurrentIndex + 2)) {
+            case "?=":      // Positive Lookahead does not affect generation.
+            case "?:":      // Non-capture group does not affect generation.
+                aCurrentIndex += 2;
+                return false;
+
+            case "?!":
+                aCurrentIndex += 2;
+                return true;
+
+            case "?<":
+                boolean res = false;
+                if (aExpr.charAt(aCurrentIndex + 2) == '!') {
+                    res = true;
+                } else if (aExpr.charAt(aCurrentIndex + 2) != '=') {   // Positive Lookbehind does not affect generation.
+                    throw new RuntimeException("Unexpected symbol in pattern: " + aExpr.charAt(aCurrentIndex + 2) + " at " + aCurrentIndex);
+                }
+                aCurrentIndex += 3;
+                return res;
+
+            default:
+                return false;
+        }
+    }
+
     public Node parseGroup() {
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
@@ -43,7 +69,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '(':
                     sbToFinal(sb, nodes);
-                    nodes.add(parseGroup());
+                    boolean requireNotNode = handleLookAround();
+                    Node groupNode = parseGroup();
+                    if (requireNotNode) {
+                        nodes.add(new NotSymbol(groupNode));
+                    } else {
+                        nodes.add(groupNode);
+                    }
                     break;
 
                 case '|':
@@ -102,7 +134,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     /**
      * Handles next character after escape sequence - \
      * It will either:
-     * a) add new node to nodes, if that was any special esapce sequence, or
+     * a) add new node to nodes, if that was any special escape sequence, or
      * b) append character to sb, otherwise
      *
      * @param sb    string builder containing all previous characters before the escape
@@ -238,6 +270,17 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
+    private static boolean handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+        if (rangeStarted) {
+            char lastChar = sb.charAt(sb.length() - 1);
+            char firstChar = sb.charAt(sb.length() - 2);
+            sb.delete(sb.length() - 2, sb.length());
+            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+        }
+
+        return false;
+    }
+
     /**
      * This function parses expression in square brackets [...]
      * It should be called when aCurrentIndex has index of first character after opening bracket - [
@@ -253,11 +296,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         StringBuilder sb = new StringBuilder();
         List<SymbolSet.SymbolRange> symbolRanges = new LinkedList<>();
+        boolean rangeStarted = false;
 
         while (aExpr.length() > aCurrentIndex) {
             char c = aExpr.charAt(aCurrentIndex++);
             switch (c) {
                 case ']':
+                    handleRange(rangeStarted, sb, symbolRanges);
                     String[] strings;
                     if (sb.length() == 0) {
                         strings = new String[0];
@@ -267,18 +312,42 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     return new SymbolSet(symbolRanges, strings, positive);
 
                 case '-':
-                    c = aExpr.charAt(aCurrentIndex++);
-                    char currentChar = sb.charAt(sb.length() - 1);
-                    sb.deleteCharAt(sb.length() - 1);
-                    symbolRanges.add(new SymbolSet.SymbolRange(currentChar, c));
+                    if (aExpr.charAt(aCurrentIndex) == ']' || aExpr.charAt(aCurrentIndex - 2) == '[') {
+                        sb.append(c);
+                    } else {
+                        rangeStarted = true;
+                    }
                     break;
 
                 case '\\':
                     // Skip backslash and add next symbol to characters
-                    c = aExpr.charAt(aCurrentIndex++);
-                    //noinspection fallthrough
+                    List<Node> nodes = new LinkedList<>();
+                    handleEscapedCharacter(sb, nodes);
+                    if (rangeStarted) {
+                        if (!nodes.isEmpty()) {
+                            throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aExpr.substring(aCurrentIndex) + '\'');
+                        }
+                        rangeStarted =  handleRange(rangeStarted, sb, symbolRanges);
+                    }
+
+                    if (!nodes.isEmpty()) {
+                        if (nodes.size() > 1) {
+                            throw new RuntimeException("Multiple nodes found inside square brackets escape sequence before '" + aExpr.substring(aCurrentIndex) + '\'');
+                        } else {
+                            if (nodes.get(0) instanceof SymbolSet) {
+                                for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
+                                    sb.append(symbol);
+                                }
+                            } else {
+                                throw new RuntimeException("Unexpected node found inside square brackets escape sequence before '" + aExpr.substring(aCurrentIndex) + '\'');
+                            }
+                        }
+                    }
+                    break;
+
                 default:
                     sb.append(c);
+                    rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
             }
         }
         throw new RuntimeException("Unexpected End Of Expression. Didn't find closing ']'");

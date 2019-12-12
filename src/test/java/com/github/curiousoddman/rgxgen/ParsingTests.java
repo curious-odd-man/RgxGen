@@ -146,6 +146,22 @@ public class ParsingTests {
                 {
                         "\\x{26F8}a",
                         new FinalSymbol("⛸a")
+                },
+                {
+                        "foo(?=bar)",
+                        new Sequence(new FinalSymbol("foo"), new FinalSymbol("bar"))
+                },
+                {
+                        "foo(?!bar)",
+                        new Sequence(new FinalSymbol("foo"), new NotSymbol(new FinalSymbol("bar")))
+                },
+                {
+                        "(?<=foo)bar",
+                        new Sequence(new FinalSymbol("foo"), new FinalSymbol("bar"))
+                },
+                {
+                        "(?<!not)foo",
+                        new Sequence(new NotSymbol(new FinalSymbol("not")), new FinalSymbol("foo"))
                 }
         });
     }

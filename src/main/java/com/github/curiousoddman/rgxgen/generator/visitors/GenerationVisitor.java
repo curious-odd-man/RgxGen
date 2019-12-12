@@ -34,7 +34,7 @@ public class GenerationVisitor implements NodeVisitor {
         int repeat = node.getMin() >= max ?
                      node.getMin() :
                      ThreadLocalRandom.current()
-                                      .nextInt(node.getMin(), max);
+                                      .nextInt(node.getMin(), max + 1);
 
         for (long i = 0; i < repeat; ++i) {
             node.getNode()
@@ -47,6 +47,12 @@ public class GenerationVisitor implements NodeVisitor {
         for (Node n : node.getNodes()) {
             n.visit(this);
         }
+    }
+
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        throw new RuntimeException("Negative lookaround is not supported yet");
+
     }
 
     public String getString() {
