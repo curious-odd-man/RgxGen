@@ -153,7 +153,7 @@ public class ParsingTests {
                 },
                 {
                         "foo(?!bar)",
-                        new Sequence(new FinalSymbol("foo"), new NotSymbol(new FinalSymbol("bar")))
+                        new Sequence(new FinalSymbol("foo"), new NotSymbol("bar"))
                 },
                 {
                         "(?<=foo)bar",
@@ -161,7 +161,7 @@ public class ParsingTests {
                 },
                 {
                         "(?<!not)foo",
-                        new Sequence(new NotSymbol(new FinalSymbol("not")), new FinalSymbol("foo"))
+                        new Sequence(new NotSymbol("not"), new FinalSymbol("foo"))
                 }
         });
     }

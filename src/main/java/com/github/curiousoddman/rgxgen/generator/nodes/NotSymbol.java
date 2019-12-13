@@ -2,12 +2,14 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
+import java.util.regex.Pattern;
+
 public class NotSymbol implements Node {
 
-    private final Node aNode;
+    private final Pattern aSubPattern;
 
-    public NotSymbol(Node node) {
-        aNode = node;
+    public NotSymbol(String pattern) {
+        aSubPattern = Pattern.compile(pattern);
     }
 
     @Override
@@ -15,12 +17,12 @@ public class NotSymbol implements Node {
         visitor.visit(this);
     }
 
-    public Node getNode() {
-        return aNode;
+    public Pattern getSubPattern() {
+        return aSubPattern;
     }
 
     @Override
     public String toString() {
-        return "NotSymbol{" + aNode + '}';
+        return "NotSymbol{" + aSubPattern.pattern() + '}';
     }
 }

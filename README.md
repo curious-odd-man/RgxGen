@@ -43,6 +43,7 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique v
 | `[^...]`  | Single character except the ones in brackets. `[^a]` - any symbol except 'a' |
 | `()`  | To group multiple characters for the repetitions |
 | `foo(?=bar)` and `(?<=foo)bar`  | Positive lookahead and lookbehind. These are equivalent to `foobar` |
+| `foo(?!bar)` and `(?<!foo)bar`  | Negative lookahead and lookbehind. |
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 

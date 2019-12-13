@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.generator.visitors;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -51,8 +52,16 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol notSymbol) {
-        throw new RuntimeException("Negative lookaround is not supported yet");
+        String value = notSymbol.getSubPattern()
+                                .pattern();
+        String result = Util.randomString(value);
+        while (!notSymbol.getSubPattern()
+                         .matcher(value)
+                         .matches()) {
+            result = Util.randomString(result);
+        }
 
+        aStringBuilder.append(result);
     }
 
     public String getString() {
