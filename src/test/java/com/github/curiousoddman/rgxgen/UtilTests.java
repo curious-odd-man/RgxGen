@@ -18,22 +18,6 @@ public class UtilTests {
     }
 
     @Test
-    public void powTest() {
-        List<Integer[]> data = Arrays.asList(
-                new Integer[]{10, 0, 1},
-                new Integer[]{1, 1, 1},
-                new Integer[]{1, 2, 1},
-                new Integer[]{1, 3, 1},
-                new Integer[]{2, 2, 4},
-                new Integer[]{2, 10, 1024}
-        );
-
-        for (Object[] datum : data) {
-            assertEquals(datum[2], (int) Util.pow((int) datum[0], (int) datum[1]));
-        }
-    }
-
-    @Test
     public void substringUntilTest() {
         List<Object[]> data = Arrays.asList(
                 new Object[]{"()", 1, ')', ""},

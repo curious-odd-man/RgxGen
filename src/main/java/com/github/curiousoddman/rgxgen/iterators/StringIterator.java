@@ -1,7 +1,6 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 public abstract class StringIterator implements Iterator<String> {
 

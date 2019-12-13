@@ -3,7 +3,6 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -154,6 +153,6 @@ public class GenerateTests {
     public void generateUniqueTest() {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         aNode.visit(v);
-        assertEquals(aExpectedUnique, Util.iteratorToList(v.getUniqueStrings()));
+        assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 }

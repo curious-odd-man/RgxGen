@@ -38,7 +38,9 @@ public class SymbolSet implements Node {
 
     private final String[] aSymbols;
 
-    // AnySymbol
+    /**
+     * Symbol set containing all symbols
+     */
     public SymbolSet() {
         aSymbols = ALL_SYMBOLS.clone();
     }

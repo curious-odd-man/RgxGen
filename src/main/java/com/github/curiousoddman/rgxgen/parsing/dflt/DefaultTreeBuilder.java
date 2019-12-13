@@ -10,6 +10,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.IntStream;
 
+/**
+ * Default implementation of parser and NodeTreeBuilder.
+ * It reads expression and creates a hierarchy of {@code Node}.
+ */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private enum GroupType {
@@ -34,6 +38,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private int  aCurrentIndex = 0;
     private Node aNode;
 
+    /**
+     * Default implementation of parser and NodeTreeBuilder.
+     * It reads expression and creates a hierarchy of {@code com.github.curiousoddman.rgxgen.generator.nodes.Node}.
+     */
     public DefaultTreeBuilder(String expr) {
         aExpr = expr;
     }

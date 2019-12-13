@@ -2,46 +2,27 @@ package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
 
-import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.regex.Pattern;
 
+/**
+ * Utility methods collection
+ */
 public final class Util {
     private static final String SYMBOLS = Arrays.stream(SymbolSet.getAllSymbols())
                                                 .reduce("", String::concat);
 
-    public static BigInteger factorial(long n) {
-        BigInteger fact = BigInteger.ONE;
-        for (long i = 2; i <= n; ++i) {
-            fact = fact.multiply(BigInteger.valueOf(i));
-        }
-        return fact;
-    }
+    private static final Pattern EMPTY = Pattern.compile("");
 
+    /**
+     * Splits string into array of single-character strings
+     *
+     * @param str string to split
+     * @return array of single-character strings
+     */
     public static String[] stringToCharsSubstrings(String str) {
-        return str.split("");
-    }
-
-    public static long pow(int a, int pow) {
-        long res = 1;
-        for (int i = 0; i < pow; i++) {
-            res *= a;
-        }
-
-        return res;
-    }
-
-    public static <T> List<T> iteratorToList(Iterator<T> it) {
-        List<T> lst = new LinkedList<>();
-
-        while (it.hasNext()) {
-            lst.add(it.next());
-        }
-
-        return lst;
+        return EMPTY.split(str);
     }
 
     public static String substringUntil(String expr, int startIndex, char c) {
