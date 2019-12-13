@@ -11,6 +11,24 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 public class DefaultTreeBuilder implements NodeTreeBuilder {
+
+    private enum GroupType {
+        POSITIVE_LOOKAHEAD,
+        NEGATIVE_LOOKAHEAD,
+        POSITIVE_LOOKBEHIND,
+        NEGATIVE_LOOKBEHIND,
+        CAPTURE_GROUP,
+        NON_CAPTURE_GROUP;
+
+        public boolean isPositive() {
+            return this == POSITIVE_LOOKAHEAD || this == POSITIVE_LOOKBEHIND;
+        }
+
+        public boolean isNegative() {
+            return this == NEGATIVE_LOOKAHEAD || this == NEGATIVE_LOOKBEHIND;
+        }
+    }
+
     private final String aExpr;
 
     private int  aCurrentIndex = 0;
@@ -27,21 +45,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private boolean handleLookAround() {
+    private GroupType processGroupType() {
         switch (aExpr.substring(aCurrentIndex, aCurrentIndex + 2)) {
             case "?=":      // Positive Lookahead does not affect generation.
+                aCurrentIndex += 2;
+                return GroupType.POSITIVE_LOOKAHEAD;
+
             case "?:":      // Non-capture group does not affect generation.
                 aCurrentIndex += 2;
-                return false;
+                return GroupType.NON_CAPTURE_GROUP;
 
             case "?!":
                 aCurrentIndex += 2;
-                return true;
+                return GroupType.NEGATIVE_LOOKAHEAD;
 
             case "?<":
-                boolean res = false;
+                GroupType res = GroupType.POSITIVE_LOOKBEHIND;
                 if (aExpr.charAt(aCurrentIndex + 2) == '!') {
-                    res = true;
+                    res = GroupType.NEGATIVE_LOOKBEHIND;
                 } else if (aExpr.charAt(aCurrentIndex + 2) != '=') {   // Positive Lookbehind does not affect generation.
                     throw new RuntimeException("Unexpected symbol in pattern: " + aExpr.charAt(aCurrentIndex + 2) + " at " + aCurrentIndex);
                 }
@@ -49,7 +70,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 return res;
 
             default:
-                return false;
+                return GroupType.CAPTURE_GROUP;
         }
     }
 
@@ -69,12 +90,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '(':
                     sbToFinal(sb, nodes);
-                    boolean requireNotNode = handleLookAround();
-                    Node groupNode = parseGroup();
-                    if (requireNotNode) {
-                        nodes.add(new NotSymbol(groupNode));
+                    GroupType groupType = processGroupType();
+                    if (groupType.isNegative()) {
+                        String subPattern = Util.substringUntil(aExpr, aCurrentIndex, ')');
+                        nodes.add(new NotSymbol(subPattern));
+                        aCurrentIndex += subPattern.length() + 1;       // Past the closing ')'
                     } else {
-                        nodes.add(groupNode);
+                        nodes.add(parseGroup());
                     }
                     break;
 
@@ -327,7 +349,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         if (!nodes.isEmpty()) {
                             throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aExpr.substring(aCurrentIndex) + '\'');
                         }
-                        rangeStarted =  handleRange(rangeStarted, sb, symbolRanges);
+                        rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
                     }
 
                     if (!nodes.isEmpty()) {

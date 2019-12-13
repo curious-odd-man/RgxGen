@@ -11,7 +11,6 @@ public abstract class StringIterator implements Iterator<String> {
     @Override
     public String next() {
         aCurrent = nextImpl();
-        Objects.requireNonNull(aCurrent);
         return aCurrent;
     }
 

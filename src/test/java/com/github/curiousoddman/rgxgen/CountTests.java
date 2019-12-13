@@ -104,6 +104,16 @@ public class CountTests {
                         "a.*",      // If use unlimited repeteation that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence(new FinalSymbol("a"), Repeat.minimum(new SymbolSet(), 0)),
                         null
+                },
+                {
+                        "foo(?!bar)",
+                        new Sequence(new FinalSymbol("foo"), new NotSymbol("bar")),
+                        null
+                },
+                {
+                        "(?<!not)foo",
+                        new Sequence(new NotSymbol("not"), new FinalSymbol("foo")),
+                        null
                 }
         });
     }

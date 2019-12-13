@@ -15,14 +15,14 @@ import static org.junit.Assert.assertTrue;
  * Apparently lookahead and lookbehind does not match
  */
 @RunWith(Parameterized.class)
-public class CompleteFindTests {
+public class LookaroundTests {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Positive lookahead", "foo(?=b)"},
-//                {"Negative lookahead", "foo(?!bab)"},
+                {"Negative lookahead", "foo(?!bab)"},
                 {"Positive lookbehind", "(?<=foo)bar"},
-//                {"Negative lookbehind", "(?<!not)fof"}
+                {"Negative lookbehind", "(?<!not)fof"}
         });
     }
 
@@ -38,8 +38,8 @@ public class CompleteFindTests {
         for (int i = 0; i < 100; i++) {
             String s = rgxGen.generate();
             assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
-                                                                                       .matcher(s)
-                                                                                       .find());
+                                                                                   .matcher(s)
+                                                                                   .find());
         }
     }
 }

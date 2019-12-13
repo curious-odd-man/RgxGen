@@ -73,7 +73,10 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol notSymbol) {
-        throw new RuntimeException("Not implemented");
+        aIterators.add(() -> new NegativeStringIterator(
+                new IncrementalLengthIterator(() -> new ArrayIterator(SymbolSet.getAllSymbols()), 0, -1),
+                notSymbol.getSubPattern()
+        ));
     }
 
     public StringIterator getUniqueStrings() {

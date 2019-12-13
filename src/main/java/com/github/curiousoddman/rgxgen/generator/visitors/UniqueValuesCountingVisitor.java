@@ -64,7 +64,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol notSymbol) {
-        throw new RuntimeException("Not implemented");
+        aCount = null;
     }
 
     /**
