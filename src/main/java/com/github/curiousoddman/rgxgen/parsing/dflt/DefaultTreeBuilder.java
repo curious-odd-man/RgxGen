@@ -81,7 +81,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '.':
                     sbToFinal(sb, nodes);
-                    nodes.add(new AnySymbol());
+                    nodes.add(new SymbolSet());
                     break;
 
                 case '\\':

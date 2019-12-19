@@ -3,7 +3,6 @@ package com.github.curiousoddman.rgxgen.iterators;
 import java.util.regex.Pattern;
 
 public class NegativeStringIterator extends StringIterator {
-
     private final StringIterator aIterator;
     private final Pattern        aPattern;
 
@@ -20,6 +19,11 @@ public class NegativeStringIterator extends StringIterator {
         } while (aPattern.matcher(value)
                          .find());
         return value;
+    }
+
+    @Override
+    public void reset() {
+        // Nothing to do
     }
 
     @Override
