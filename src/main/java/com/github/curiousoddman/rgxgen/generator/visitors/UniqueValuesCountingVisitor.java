@@ -16,8 +16,8 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(AnySymbol node) {
-        applyOrSkip(v -> v.add(BigInteger.valueOf(AnySymbol.ALL_SYMBOLS.length)));
+    public void visit(SymbolSet node) {
+        applyOrSkip(v -> v.add(BigInteger.valueOf(node.getSymbols().length)));
     }
 
     @Override
@@ -60,6 +60,11 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
                 return v.equals(BigInteger.ZERO) ? countingVisitor.aCount : v.multiply(countingVisitor.aCount);
             });
         }
+    }
+
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        aCount = null;
     }
 
     /**

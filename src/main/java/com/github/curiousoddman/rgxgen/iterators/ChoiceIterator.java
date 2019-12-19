@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
+import java.util.Collection;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;

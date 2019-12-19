@@ -3,7 +3,6 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -83,15 +82,15 @@ public class GenerateTests {
                 },
                 {
                         "a.",
-                        new Sequence(new FinalSymbol("a"), new AnySymbol()),
-                        Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new FinalSymbol("a"), new SymbolSet()),
+                        Arrays.stream(SymbolSet.getAllSymbols())
                               .map(s -> "a" + s).collect(Collectors.toList())
                 },
                 {
                         "..",
-                        new Sequence(new AnySymbol(), new AnySymbol()),
-                        Arrays.stream(AnySymbol.ALL_SYMBOLS)
-                              .flatMap(s -> Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new SymbolSet(), new SymbolSet()),
+                        Arrays.stream(SymbolSet.getAllSymbols())
+                              .flatMap(s -> Arrays.stream(SymbolSet.getAllSymbols())
                                                   .map(v -> s + v)).collect(Collectors.toList())
                 },
                 {
@@ -120,10 +119,10 @@ public class GenerateTests {
                 },
                 {
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new AnySymbol(), 0, 2)),
-                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(AnySymbol.ALL_SYMBOLS),
-                                                                   Arrays.stream(AnySymbol.ALL_SYMBOLS)
-                                                                         .flatMap(symbol -> Arrays.stream(AnySymbol.ALL_SYMBOLS)
+                        new Sequence(new FinalSymbol("a"), new Repeat(new SymbolSet(), 0, 2)),
+                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
+                                                                   Arrays.stream(SymbolSet.getAllSymbols())
+                                                                         .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
                                                                                                   .map(v -> symbol + v))))
                               .map(v -> "a" + v)
                                 .collect(Collectors.toList())
@@ -154,6 +153,6 @@ public class GenerateTests {
     public void generateUniqueTest() {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         aNode.visit(v);
-        assertEquals(aExpectedUnique, Util.iteratorToList(v.getUniqueStrings()));
+        assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 }

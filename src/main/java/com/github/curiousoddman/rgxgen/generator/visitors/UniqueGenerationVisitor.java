@@ -20,8 +20,8 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(AnySymbol node) {
-        aIterators.add(() -> new ArrayIterator(AnySymbol.ALL_SYMBOLS));
+    public void visit(SymbolSet node) {
+        aIterators.add(() -> new ArrayIterator(node.getSymbols()));
     }
 
     @Override
@@ -71,9 +71,15 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         }
     }
 
-    public StringIterator
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        aIterators.add(() -> new NegativeStringIterator(
+                new IncrementalLengthIterator(() -> new ArrayIterator(SymbolSet.getAllSymbols()), 0, -1),
+                notSymbol.getSubPattern()
+        ));
+    }
 
-    getUniqueStrings() {
+    public StringIterator getUniqueStrings() {
         return permutationsOrFlat(aIterators);
     }
 }

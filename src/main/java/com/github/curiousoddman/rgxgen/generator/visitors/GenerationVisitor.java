@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.generator.visitors;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -8,8 +9,8 @@ public class GenerationVisitor implements NodeVisitor {
     private StringBuilder aStringBuilder = new StringBuilder();
 
     @Override
-    public void visit(AnySymbol node) {
-        String[] allSymbols = AnySymbol.ALL_SYMBOLS;
+    public void visit(SymbolSet node) {
+        String[] allSymbols = node.getSymbols();
         int idx = ThreadLocalRandom.current()
                                    .nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);
@@ -34,7 +35,7 @@ public class GenerationVisitor implements NodeVisitor {
         int repeat = node.getMin() >= max ?
                      node.getMin() :
                      ThreadLocalRandom.current()
-                                      .nextInt(node.getMin(), max);
+                                      .nextInt(node.getMin(), max + 1);
 
         for (long i = 0; i < repeat; ++i) {
             node.getNode()
@@ -47,6 +48,20 @@ public class GenerationVisitor implements NodeVisitor {
         for (Node n : node.getNodes()) {
             n.visit(this);
         }
+    }
+
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        String value = notSymbol.getSubPattern()
+                                .pattern();
+        String result = Util.randomString(value);
+        while (!notSymbol.getSubPattern()
+                         .matcher(value)
+                         .matches()) {
+            result = Util.randomString(result);
+        }
+
+        aStringBuilder.append(result);
     }
 
     public String getString() {

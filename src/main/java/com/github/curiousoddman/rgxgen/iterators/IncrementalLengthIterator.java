@@ -17,6 +17,7 @@ public class IncrementalLengthIterator extends StringIterator {
     public IncrementalLengthIterator(Supplier<StringIterator> supplier, int min, int max) {
         aSupplier = supplier;
         aMin = min;
+        aCurrentLength = min;
         aMax = max;
         reset();
     }

@@ -22,15 +22,20 @@ public class InfiniteGenerateTests {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"a*"},
-                {"a+"},
-                {"za*"},
-                {"za+"}
+                {"a*", false},
+                {"a+", false},
+                {"za*", false},
+                {"za+", false},
+                {"foo(?!bar)", true},
+                {"(?<!not)foo", true}
         });
     }
 
     @Parameterized.Parameter
     public String aRegex;
+
+    @Parameterized.Parameter(1)
+    public boolean aUseFind;
 
     private Pattern p;
 
@@ -44,8 +49,13 @@ public class InfiniteGenerateTests {
         RgxGen rgxGen = new RgxGen(aRegex);
         for (int i = 0; i < ITERATIONS; i++) {
             String s = rgxGen.generate();
-            assertTrue(s, p.matcher(s)
-                           .matches());
+            if (aUseFind) {
+                assertTrue(s, p.matcher(s)
+                               .find());
+            } else {
+                assertTrue(s, p.matcher(s)
+                               .matches());
+            }
         }
     }
 
@@ -58,8 +68,13 @@ public class InfiniteGenerateTests {
         for (int i = 0; i < ITERATIONS * ITERATIONS; i++) {
             String next = stringIterator.next();
             assertTrue(stringIterator.hasNext());
-            assertTrue(next, p.matcher(next)
-                              .matches());
+            if (aUseFind) {
+                assertTrue(next, p.matcher(next)
+                                  .find());
+            } else {
+                assertTrue(next, p.matcher(next)
+                                  .matches());
+            }
             assertFalse("Duplicate value: " + next, set.contains(next));
             set.add(next);
         }

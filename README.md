@@ -20,23 +20,32 @@ Code:
 RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
 String s = rgxGen.generate();                           // Generate new random value
 BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-StringIterator uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
+StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax
 
-```
-. - any symbol
-? - one or zero occurrences
-+ - one or more occurrences
-* - zero or more occurrences
-\d - a digit. Equivalent to [0-9]
-{2} and {1,2} - repeatitions. NOTE {1,} not supported yet
-[] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
-() - to group multiple characters for the repetitions
-(a|b) - alternatives 
-escape character \ - to escape special characters (use \\ to generate single \ character)
-```
+| Pattern   | Description  |
+| ---------: |-------------|
+| `.`  | Any symbol |
+| `?`  | One or zero occurrences |
+| `+`  | One or more occurrences |
+| `*`  | Zero or more occurrences |
+| `\d`  | A digit. Equivalent to `[0-9]` |
+| `\D`  | Not a digit. Equivalent to `[^0-9]` |
+| `\s`  | Space, tab or newline |
+| `\S`  | Anything, but space, tab or newline |
+| `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
+| `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
+| `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
+| `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
+| `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |
+| `[^...]`  | Single character except the ones in brackets. `[^a]` - any symbol except 'a' |
+| `()`  | To group multiple characters for the repetitions |
+| `foo(?=bar)` and `(?<=foo)bar`  | Positive lookahead and lookbehind. These are equivalent to `foobar` |
+| `foo(?!bar)` and `(?<!foo)bar`  | Negative lookahead and lookbehind. |
+| <code>(a&#124;b)</code> |  Alternatives  |
+| \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
 

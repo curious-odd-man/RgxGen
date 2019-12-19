@@ -3,7 +3,7 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 
 public interface NodeVisitor {
-    void visit(AnySymbol node);
+    void visit(SymbolSet node);
 
     void visit(Choice node);
 
@@ -12,4 +12,6 @@ public interface NodeVisitor {
     void visit(Repeat node);
 
     void visit(Sequence node);
+
+    void visit(NotSymbol notSymbol);
 }

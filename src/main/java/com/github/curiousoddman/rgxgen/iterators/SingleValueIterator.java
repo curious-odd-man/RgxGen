@@ -2,7 +2,6 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 public class SingleValueIterator extends StringIterator {
     private final String aInitial;
-
     private String aCurrent;
 
     public SingleValueIterator() {
