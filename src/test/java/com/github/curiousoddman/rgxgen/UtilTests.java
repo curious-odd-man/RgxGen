@@ -30,4 +30,17 @@ public class UtilTests {
             assertEquals(Arrays.toString(datum), datum[3], Util.substringUntil(datum[0].toString(), (int) datum[1], (char) datum[2]));
         }
     }
+
+    @Test
+    public void takeWhileTest() {
+        List<Object[]> data = Arrays.asList(
+                new Object[]{"asdf1234fdsa", 4, "1234"},
+                new Object[]{"asdf1234", 4, "1234"}
+        );
+
+        for (Object[] datum : data) {
+            assertEquals(Arrays.toString(datum), datum[2], Util.takeWhile(datum[0].toString(), (int) datum[1], Character::isDigit));
+        }
+    }
 }
+

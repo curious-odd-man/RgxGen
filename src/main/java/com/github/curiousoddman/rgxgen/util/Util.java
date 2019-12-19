@@ -4,6 +4,7 @@ import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -50,6 +51,14 @@ public final class Util {
             ++endIndex;
         }
 
+        return expr.substring(startIndex, endIndex);
+    }
+
+    public static String takeWhile(String expr, int startIndex, Predicate<Character> condition) {
+        int endIndex = startIndex;
+        while (endIndex < expr.length() && condition.test(expr.charAt(endIndex))) {
+            ++endIndex;
+        }
         return expr.substring(startIndex, endIndex);
     }
 

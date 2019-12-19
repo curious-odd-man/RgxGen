@@ -162,6 +162,18 @@ public class ParsingTests {
                 {
                         "(?<!not)foo",
                         new Sequence(new NotSymbol("not"), new FinalSymbol("foo"))
+                },
+                {
+                        "\\1",
+                        new GroupRef(1)
+                },
+                {
+                        "\\1asdf",
+                        new Sequence(new GroupRef(1), new FinalSymbol("asdf"))
+                },
+                {
+                        "\\123asdf",
+                        new Sequence(new GroupRef(123), new FinalSymbol("asdf"))
                 }
         });
     }

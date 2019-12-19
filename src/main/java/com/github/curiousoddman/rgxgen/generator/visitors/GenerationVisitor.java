@@ -64,6 +64,12 @@ public class GenerationVisitor implements NodeVisitor {
         aStringBuilder.append(result);
     }
 
+    @Override
+    public void visit(GroupRef groupRef) {
+        // FIXME:
+        throw new RuntimeException("Not implemented");
+    }
+
     public String getString() {
         return aStringBuilder.toString();
     }

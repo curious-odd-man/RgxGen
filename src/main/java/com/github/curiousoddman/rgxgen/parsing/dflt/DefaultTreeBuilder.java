@@ -148,7 +148,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    handleEscapedCharacter(sb, nodes);
+                    handleEscapedCharacter(sb, nodes, true);
                     break;
 
                 default:
@@ -170,7 +170,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    string builder containing all previous characters before the escape
      * @param nodes previously created nodes; new node will be appended here
      */
-    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes) {
+    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
         char c = aExpr.charAt(aCurrentIndex++);
         switch (c) {
             case 'd':  // Any decimal digit
@@ -222,6 +222,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 sb.append((char) value);
                 break;
 
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                if (groupRefAllowed) {
+                    String digitsSubstring = Util.takeWhile(aExpr, aCurrentIndex - 1, Character::isDigit);
+                    aCurrentIndex = aCurrentIndex - 1 + digitsSubstring.length();
+                    nodes.add(new GroupRef(Integer.parseInt(digitsSubstring)));
+                } else {
+                    throw new RuntimeException("Group ref is not expected here. " + aExpr.substring(aCurrentIndex));
+                }
+                break;
+
             default:
                 sb.append(c);
                 break;
@@ -266,6 +284,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                             }
                         }
 
+                        // TODO: Is it really possible and allowed???
                     case '\\':
                         // Skip backslash and add next symbol to characters
                         tmpc = aExpr.charAt(aCurrentIndex++);
@@ -352,7 +371,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '\\':
                     // Skip backslash and add next symbol to characters
                     List<Node> nodes = new LinkedList<>();
-                    handleEscapedCharacter(sb, nodes);
+                    handleEscapedCharacter(sb, nodes, false);
                     if (rangeStarted) {
                         if (!nodes.isEmpty()) {
                             throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aExpr.substring(aCurrentIndex) + '\'');

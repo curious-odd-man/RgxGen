@@ -79,6 +79,12 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         ));
     }
 
+    @Override
+    public void visit(GroupRef groupRef) {
+        // FIXME:
+        throw new RuntimeException("Not implemented");
+    }
+
     public StringIterator getUniqueStrings() {
         return permutationsOrFlat(aIterators);
     }
