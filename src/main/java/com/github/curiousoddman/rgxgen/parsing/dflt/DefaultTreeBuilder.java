@@ -35,8 +35,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final String aExpr;
 
-    private int  aCurrentIndex = 0;
+    private int  aCurrentIndex   = 0;
     private Node aNode;
+    private int  aNextGroupIndex = 1;
 
     /**
      * Default implementation of parser and NodeTreeBuilder.
@@ -82,7 +83,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    public Node parseGroup() {
+    public Node parseGroup(GroupType currentGroupType) {
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
         StringBuilder sb = new StringBuilder(aExpr.length());
@@ -104,13 +105,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         nodes.add(new NotSymbol(subPattern));
                         aCurrentIndex += subPattern.length() + 1;       // Past the closing ')'
                     } else {
-                        nodes.add(parseGroup());
+                        nodes.add(parseGroup(groupType));
                     }
                     break;
 
                 case '|':
                     sbToFinal(sb, nodes);
-                    choices.add(sequenceOrNot(nodes, choices, false));
+                    choices.add(sequenceOrNot(nodes, choices, false, GroupType.NON_CAPTURE_GROUP));
                     nodes.clear();
                     isChoice = true;
                     break;
@@ -118,10 +119,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case ')':
                     sbToFinal(sb, nodes);
                     if (isChoice) {
-                        choices.add(sequenceOrNot(nodes, choices, false));
+                        choices.add(sequenceOrNot(nodes, choices, false, GroupType.NON_CAPTURE_GROUP));
                         nodes.clear();
                     }
-                    return sequenceOrNot(nodes, choices, isChoice);
+                    return sequenceOrNot(nodes, choices, isChoice, currentGroupType);
 
                 case '{':
                 case '*':
@@ -158,7 +159,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         sbToFinal(sb, nodes);
-        return sequenceOrNot(nodes, choices, isChoice);
+        return sequenceOrNot(nodes, choices, isChoice, currentGroupType);
     }
 
     /**
@@ -231,6 +232,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '7':
             case '8':
             case '9':
+                sbToFinal(sb, nodes);
                 if (groupRefAllowed) {
                     String digitsSubstring = Util.takeWhile(aExpr, aCurrentIndex - 1, Character::isDigit);
                     aCurrentIndex = aCurrentIndex - 1 + digitsSubstring.length();
@@ -301,21 +303,29 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
     }
 
-    private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice) {
+    private Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, GroupType groupType) {
+        Node resultNode;
+
         if (nodes.size() == 1) {
-            return nodes.get(0);
+            resultNode = nodes.get(0);
         } else {
             if (isChoice) {
                 if (choices.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                return new Choice(choices.toArray(new Node[0]));
+                resultNode = new Choice(choices.toArray(new Node[0]));
             } else {
                 if (nodes.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                return new Sequence(nodes.toArray(new Node[0]));
+                resultNode = new Sequence(nodes.toArray(new Node[0]));
             }
+        }
+
+        if (groupType == GroupType.CAPTURE_GROUP) {
+            return new Group(aNextGroupIndex++, resultNode);
+        } else {
+            return resultNode;
         }
     }
 
@@ -403,7 +413,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     public void build() {
-        aNode = parseGroup();
+        aNode = parseGroup(GroupType.NON_CAPTURE_GROUP);
         if (aCurrentIndex < aExpr.length()) {
             throw new RuntimeException("Expression was not fully parsed");
         }

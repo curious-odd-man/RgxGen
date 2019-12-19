@@ -5,7 +5,6 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 import java.util.Arrays;
 
 public class Choice implements Node {
-
     private final Node[] aNodes;
 
     public Choice(Node... nodes) {

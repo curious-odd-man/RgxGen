@@ -16,4 +16,6 @@ public interface NodeVisitor {
     void visit(NotSymbol notSymbol);
 
     void visit(GroupRef groupRef);
+
+    void visit(Group group);
 }

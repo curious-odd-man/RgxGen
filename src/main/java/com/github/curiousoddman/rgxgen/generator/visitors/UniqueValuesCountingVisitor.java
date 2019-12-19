@@ -73,6 +73,12 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         throw new RuntimeException("Not implemented");
     }
 
+    @Override
+    public void visit(Group group) {
+        // FIXME:
+        throw new RuntimeException("Not implemented");
+    }
+
     /**
      * Count of unique values that can be generated with this regex. {@code null} if infinite
      *

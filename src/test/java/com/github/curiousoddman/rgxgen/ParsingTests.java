@@ -48,15 +48,15 @@ public class ParsingTests {
                 },
                 {
                         "(a|b){2}",
-                        new Repeat(new Choice(new FinalSymbol("a"), new FinalSymbol("b")), 2)
+                        new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2)
                 },
                 {
                         "(a|b){0,2}",
-                        new Repeat(new Choice(new FinalSymbol("a"), new FinalSymbol("b")), 0, 2)
+                        new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 0, 2)
                 },
                 {
                         "(a{0,2}|b{0,2})",
-                        new Choice(new Repeat(new FinalSymbol("a"), 0, 2), new Repeat(new FinalSymbol("b"), 0, 2))
+                        new Group(1, new Choice(new Repeat(new FinalSymbol("a"), 0, 2), new Repeat(new FinalSymbol("b"), 0, 2)))
                 },
                 {
                         "a.",
@@ -84,8 +84,8 @@ public class ParsingTests {
                 },
                 {
                         "(25[01]|2[01])",
-                        new Choice(new Sequence(new FinalSymbol("25"), new SymbolSet(new String[]{"0", "1"}, true)),
-                                   new Sequence(new FinalSymbol("2"), new SymbolSet(new String[]{"0", "1"}, true)))
+                        new Group(1, new Choice(new Sequence(new FinalSymbol("25"), new SymbolSet(new String[]{"0", "1"}, true)),
+                                                new Sequence(new FinalSymbol("2"), new SymbolSet(new String[]{"0", "1"}, true))))
                 },
                 {
                         "a{4,}",
@@ -174,6 +174,15 @@ public class ParsingTests {
                 {
                         "\\123asdf",
                         new Sequence(new GroupRef(123), new FinalSymbol("asdf"))
+                },
+                {
+                        "<([abc])>d<\\/\\1>",
+                        new Sequence(new FinalSymbol("<"),
+                                     new Group(1, new SymbolSet(new String[]{"a", "b", "c"}, true)),
+                                     new FinalSymbol(">d</"),
+                                     new GroupRef(1),
+                                     new FinalSymbol(">")
+                        )
                 }
         });
     }
