@@ -33,7 +33,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-
     private final String aExpr;
 
     private int  aCurrentIndex = 0;
@@ -283,23 +282,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
     }
 
-    private static boolean handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
-        if (rangeStarted) {
-            char lastChar = sb.charAt(sb.length() - 1);
-            char firstChar = sb.charAt(sb.length() - 2);
-            sb.delete(sb.length() - 2, sb.length());
-            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
-        }
-
-        return false;
-    }
-
-    /**
-     * This function parses expression in square brackets [...]
-     * It should be called when aCurrentIndex has index of first character after opening bracket - [
-     *
-     * @return Node that covers expression in square brackets
-     */
     private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice) {
         if (nodes.size() == 1) {
             return nodes.get(0);
@@ -318,6 +300,23 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
+    private static boolean handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+        if (rangeStarted) {
+            char lastChar = sb.charAt(sb.length() - 1);
+            char firstChar = sb.charAt(sb.length() - 2);
+            sb.delete(sb.length() - 2, sb.length());
+            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+        }
+
+        return false;
+    }
+
+    /**
+     * This function parses expression in square brackets [...]
+     * It should be called when aCurrentIndex has index of first character after opening bracket - [
+     *
+     * @return Node that covers expression in square brackets
+     */
     private Node handleCharacterVariations() {
         boolean positive = true;
         if (aExpr.charAt(aCurrentIndex) == '^') {
