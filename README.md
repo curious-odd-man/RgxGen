@@ -1,4 +1,4 @@
-# Text generator based on regular expression pattern
+# Java library for text generation based on regular expression pattern
 
 ## Status
 
@@ -6,7 +6,7 @@
 
 ## Usage
 
-Maven dependency:
+Maven dependency (latest available version):
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -24,6 +24,28 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique v
 ```
 
 ## Supported syntax
+
+<details>
+<summary><b>Latest version in maven</b></summary>
+
+```
+. - any symbol
+? - one or zero occurrences
++ - one or more occurrences
+* - zero or more occurrences
+\d - a digit. Equivalent to [0-9]
+{2} and {1,2} - repeatitions. NOTE {1,} not supported yet
+[] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
+() - to group multiple characters for the repetitions
+(a|b) - alternatives 
+escape character \ - to escape special characters (use \\ to generate single \ character)
+```
+
+Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+</details>
+
+<details>
+<summary><b>Latest dev version</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
@@ -48,6 +70,8 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique v
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+
+</details>
 
 ## Limitations
 
