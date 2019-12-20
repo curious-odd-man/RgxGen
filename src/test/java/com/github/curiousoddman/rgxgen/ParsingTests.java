@@ -183,6 +183,13 @@ public class ParsingTests {
                                      new GroupRef(1),
                                      new FinalSymbol(">")
                         )
+                },
+                {
+                        "(((c)))\\1\\2\\3",
+                        new Sequence(new Group(1, new Group(2, new Group(3, new FinalSymbol("c")))),
+                                     new GroupRef(1),
+                                     new GroupRef(2),
+                                     new GroupRef(3))
                 }
         });
     }

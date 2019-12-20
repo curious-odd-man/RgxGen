@@ -84,6 +84,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     public Node parseGroup(GroupType currentGroupType) {
+        Integer captureGroupIndex = null;
+        if (currentGroupType == GroupType.CAPTURE_GROUP) {
+            captureGroupIndex = aNextGroupIndex++;
+        }
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
         StringBuilder sb = new StringBuilder(aExpr.length());
@@ -111,7 +115,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '|':
                     sbToFinal(sb, nodes);
-                    choices.add(sequenceOrNot(nodes, choices, false, GroupType.NON_CAPTURE_GROUP));
+                    choices.add(sequenceOrNot(nodes, choices, false, null));
                     nodes.clear();
                     isChoice = true;
                     break;
@@ -119,10 +123,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case ')':
                     sbToFinal(sb, nodes);
                     if (isChoice) {
-                        choices.add(sequenceOrNot(nodes, choices, false, GroupType.NON_CAPTURE_GROUP));
+                        choices.add(sequenceOrNot(nodes, choices, false, null));
                         nodes.clear();
                     }
-                    return sequenceOrNot(nodes, choices, isChoice, currentGroupType);
+                    return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
 
                 case '{':
                 case '*':
@@ -159,7 +163,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         sbToFinal(sb, nodes);
-        return sequenceOrNot(nodes, choices, isChoice, currentGroupType);
+        return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
     }
 
     /**
@@ -303,7 +307,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
     }
 
-    private Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, GroupType groupType) {
+    private Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
         Node resultNode;
 
         if (nodes.size() == 1) {
@@ -322,10 +326,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        if (groupType == GroupType.CAPTURE_GROUP) {
-            return new Group(aNextGroupIndex++, resultNode);
-        } else {
+        if (captureGroupIndex == null) {
             return resultNode;
+        } else {
+            return new Group(captureGroupIndex, resultNode);
         }
     }
 
