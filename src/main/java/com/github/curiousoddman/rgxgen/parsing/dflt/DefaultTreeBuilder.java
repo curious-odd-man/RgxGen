@@ -114,9 +114,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '|':
-                    sbToFinal(sb, nodes);
-                    choices.add(sequenceOrNot(nodes, choices, false, null));
-                    nodes.clear();
+                    if (sb.length() == 0 && nodes.isEmpty()) {
+                        // Special case when '(|a)' is used - like empty or something
+                        choices.add(new FinalSymbol(""));
+                    } else {
+                        sbToFinal(sb, nodes);
+                        choices.add(sequenceOrNot(nodes, choices, false, null));
+                        nodes.clear();
+                    }
                     isChoice = true;
                     break;
 

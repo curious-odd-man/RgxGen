@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -32,15 +33,14 @@ public class GenerateTests {
                 },
                 {
                         "\\d",
-                        new Choice(IntStream.rangeClosed(0, 9)
-                                            .mapToObj(Integer::toString)
-                                            .map(FinalSymbol::new)
-                                            .toArray(FinalSymbol[]::new)),
+                        new SymbolSet(IntStream.rangeClosed(0, 9)
+                                               .mapToObj(Integer::toString)
+                                               .toArray(String[]::new), true),
                         Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")
                 },
                 {
                         "[ab]",
-                        new Choice(new FinalSymbol("a"), new FinalSymbol("b")),
+                        new SymbolSet(new String[]{"a", "b"}, true),
                         Arrays.asList("a", "b")
                 },
                 {
@@ -62,22 +62,22 @@ public class GenerateTests {
                 },
                 {
                         "(a|b){2}",
-                        new Repeat(new Choice(new FinalSymbol("a"), new FinalSymbol("b")), 2),
+                        new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2),
                         Arrays.asList("aa", "ab", "ba", "bb")
                 },
                 {
                         "(a|b){0,2}",
-                        new Repeat(new Choice(new FinalSymbol("a"), new FinalSymbol("b")), 0, 2),
+                        new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 0, 2),
                         Arrays.asList("", "a", "b", "aa", "ab", "ba", "bb")
                 },
                 {
                         "(a{0,2}|b{0,2})",
-                        new Choice(new Repeat(new FinalSymbol("a"), 0, 2), new Repeat(new FinalSymbol("b"), 0, 2)),
+                        new Group(1, new Choice(new Repeat(new FinalSymbol("a"), 0, 2), new Repeat(new FinalSymbol("b"), 0, 2))),
                         Arrays.asList("", "a", "aa", "", "b", "bb")
                 },
                 {
                         "(|(a{1,2}|b{1,2}))",
-                        new Choice(new FinalSymbol(""), new Choice(new Repeat(new FinalSymbol("a"), 1, 2), new Repeat(new FinalSymbol("b"), 1, 2))),
+                        new Group(1, new Choice(new FinalSymbol(""), new Group(2, new Choice(new Repeat(new FinalSymbol("a"), 1, 2), new Repeat(new FinalSymbol("b"), 1, 2))))),
                         Arrays.asList("", "a", "aa", "b", "bb")
                 },
                 {
@@ -94,38 +94,19 @@ public class GenerateTests {
                                                   .map(v -> s + v)).collect(Collectors.toList())
                 },
                 {
-                        "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Repeat(new FinalSymbol("a"), 0, 10),
-                        IntStream.iterate(0, value -> value + 1)
-                                 .limit(11)
-                                 .mapToObj(v -> Stream.generate(() -> "a")
-                                                      .limit(v)
-                                                      .reduce("", String::concat)).collect(Collectors.toList())
-                },
-                {
                         "aa?",
                         new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 0, 1)),
                         Arrays.asList("a", "aa")
                 },
                 {
-                        "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 1, 10)),
-                        IntStream.iterate(1, value -> value + 1)
-                                 .limit(10)
-                                 .mapToObj(v -> "a" + Stream.generate(() -> "a")
-                                                            .limit(v)
-                                                            .reduce("", String::concat))
-                                .collect(Collectors.toList())
-                },
-                {
-                        "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new SymbolSet(), 0, 2)),
-                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
-                                                                   Arrays.stream(SymbolSet.getAllSymbols())
-                                                                         .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
-                                                                                                  .map(v -> symbol + v))))
-                              .map(v -> "a" + v)
-                                .collect(Collectors.toList())
+                        "<([abc])>d<\\/\\1>",
+                        new Sequence(new FinalSymbol("<"),
+                                     new Group(1, new SymbolSet(new String[]{"a", "b", "c"}, true)),
+                                     new FinalSymbol(">d</"),
+                                     new GroupRef(1),
+                                     new FinalSymbol(">")
+                        ),
+                        Arrays.asList("<a>d</a>", "<b>d</b>", "<c>d</c>")
                 }
         });
     }
@@ -136,6 +117,13 @@ public class GenerateTests {
     public Node         aNode;
     @Parameterized.Parameter(2)
     public List<String> aExpectedUnique;
+
+    @Test
+    public void parseTest() {
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aRegex);
+        Node node = defaultTreeBuilder.get();
+        assertEquals(aNode.toString(), node.toString());
+    }
 
     @Test
     public void generateTest() {

@@ -88,6 +88,6 @@ public class SymbolSet implements Node {
 
     @Override
     public String toString() {
-        return "SymbolRange{" + Arrays.toString(aSymbols) + '}';
+        return "SymbolSet{" + Arrays.toString(aSymbols) + '}';
     }
 }
