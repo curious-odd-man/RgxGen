@@ -75,8 +75,8 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(Group group) {
-        // FIXME:
-        throw new RuntimeException("Not implemented");
+        group.getNode()
+             .visit(this);
     }
 
     /**

@@ -6,17 +6,11 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class IteratorResettingTests {
-
-    private static List<List<Supplier<StringIterator>>> choiceIterators() {
-        return null;
-    }
-
     private static class TestIterator extends StringIterator {
         private boolean ok = true;
 
