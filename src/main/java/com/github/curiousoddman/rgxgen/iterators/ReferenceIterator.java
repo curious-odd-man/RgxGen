@@ -1,8 +1,9 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
 public class ReferenceIterator extends StringIterator {
-    private StringIterator aOther = null;
+    private StringIterator aOther  = null;
     private boolean        hasNext = true;
+    private String         aLast   = null;
 
     public void setOther(StringIterator other) {
         aOther = other;
@@ -16,6 +17,7 @@ public class ReferenceIterator extends StringIterator {
 
     @Override
     public String current() {
+        aLast = aOther.current();
         return aOther.current();
     }
 
@@ -26,6 +28,6 @@ public class ReferenceIterator extends StringIterator {
 
     @Override
     public boolean hasNext() {
-        return hasNext;
+        return hasNext || !aOther.equals(aLast);
     }
 }

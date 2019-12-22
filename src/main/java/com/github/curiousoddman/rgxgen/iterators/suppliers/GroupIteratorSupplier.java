@@ -28,6 +28,7 @@ public class GroupIteratorSupplier implements Supplier<StringIterator> {
         aGroupIterators.put(aIndex, stringIterator);
         final List<ReferenceIterator> orDefault = aReferenceIteratorMap.getOrDefault(aIndex, Collections.emptyList());
         for (ReferenceIterator referenceIterator : orDefault) {
+            System.out.println("[B] Connection group " + aIndex);
             referenceIterator.setOther(stringIterator);
         }
         return stringIterator;

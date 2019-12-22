@@ -24,11 +24,15 @@ public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
         ReferenceIterator referenceIterator = new ReferenceIterator();
         final StringIterator stringIterator = aGroupIteratorsMap.get(aIndex);
         if (stringIterator == null) {
-            aReferenceIteratorMap.computeIfAbsent(aIndex, i -> new ArrayList<>())
-                                 .add(referenceIterator);
+            System.out.println("Adding to connection queue group " + aIndex);
         } else {
+            System.out.println("[A] Connection group " + aIndex);
             referenceIterator.setOther(stringIterator);
         }
+
+        aReferenceIteratorMap.computeIfAbsent(aIndex, i -> new ArrayList<>())
+                             .add(referenceIterator);
+
         return referenceIterator;
     }
 

@@ -19,9 +19,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <!-- Dependencies versions -->
-        <log4j.version>2.12.1</log4j.version>
         <junit.version>4.12</junit.version>
         <jmh.version>1.21</jmh.version>
+        <slf4j.version>1.7.29</slf4j.version>
 
         <!-- Plugins versions -->
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
@@ -29,6 +29,7 @@
         <sources.plugin.version>2.4</sources.plugin.version>
         <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
         <gpg.plugin.version>1.5</gpg.plugin.version>
+
     </properties>
 
     <licenses>
@@ -182,6 +183,23 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-simple -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
