@@ -14,6 +14,18 @@ public class IncrementalLengthIterator extends StringIterator {
     private StringIterator[] aCurrentIterators;
     private String[]         aGeneratedParts;
 
+
+    // (a|b){1} -> "a", "b" --> "a", "b"
+    // (a|b){2} -> "a", "b" --> "aa", "ab", "ba", "bb"
+    // (a|b){1,2} -> "a", "b" --> "a", "b", "aa", "ab", "ba", "bb"
+    // (a|b){0,2} -> "a", "b" --> "", "a", "b", "aa", "ab", "ba", "bb"
+
+
+    // Take 0 from list
+    // Take 1 from list
+    // Take and concatenate 2 from list
+    // ...
+
     public IncrementalLengthIterator(Supplier<StringIterator> supplier, int min, int max) {
         aSupplier = supplier;
         aMin = min;

@@ -5,7 +5,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -109,11 +112,11 @@ public class IteratorResettingTests {
                 {"Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 2, 3, Arrays.asList("ab", null, "ab")},
                 {"Perm", new PermutationsIterator(Arrays.asList(TestBiIterator::new, TestBiIterator::new)), 5, 6, Arrays.asList("xx", "xy", "yx", "yy", null, "xx")},
 
-                {"Choice", new ChoiceIterator(Collections.singletonList(Arrays.asList(TestIterator::new, TestBiIterator::new))), 1, 3, Arrays.asList("a", "a", "a")},
-                {"Choice", new ChoiceIterator(Collections.singletonList(Arrays.asList(TestIterator::new, TestBiIterator::new))), 2, 3, Arrays.asList("a", "x", "a")},
-                {"Choice", new ChoiceIterator(Collections.singletonList(Arrays.asList(TestIterator::new, TestBiIterator::new))), 3, 3, Arrays.asList("a", "x", "y")},
-                {"Choice", new ChoiceIterator(Collections.singletonList(Arrays.asList(TestIterator::new, TestBiIterator::new))), 4, 4, Arrays.asList("a", "x", "y", null)},
-                {"Choice", new ChoiceIterator(Collections.singletonList(Arrays.asList(TestIterator::new, TestBiIterator::new))), 4, 5, Arrays.asList("a", "x", "y", null, "a")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 1, 3, Arrays.asList("a", "a", "a")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 2, 3, Arrays.asList("a", "x", "a")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 3, 3, Arrays.asList("a", "x", "y")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, 4, Arrays.asList("a", "x", "y", null)},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, 5, Arrays.asList("a", "x", "y", null, "a")},
                 });
     }
 

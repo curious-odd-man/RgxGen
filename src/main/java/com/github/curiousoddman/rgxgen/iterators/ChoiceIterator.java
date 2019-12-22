@@ -1,22 +1,15 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
-import java.util.Collection;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.function.Supplier;
 
 public class ChoiceIterator extends StringIterator {
     private final StringIterator[] aIterators;
 
     private int aCurrentIteratorIndex = 0;
 
-    public ChoiceIterator(List<List<Supplier<StringIterator>>> iterators) {
-        aIterators = iterators.stream()
-                              .flatMap(Collection::stream)
-                              .map(Supplier::get)
-                              .toArray(StringIterator[]::new);
+    public ChoiceIterator(StringIterator[] iterators) {
+        aIterators = iterators;
     }
 
     @Override
