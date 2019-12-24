@@ -9,6 +9,16 @@ import java.util.function.Function;
 public class UniqueValuesCountingVisitor implements NodeVisitor {
     private BigInteger aCount = BigInteger.ZERO;
 
+    private final Node aParentNode;
+
+    public UniqueValuesCountingVisitor() {
+        this(null);
+    }
+
+    public UniqueValuesCountingVisitor(Node parentNode) {
+        aParentNode = parentNode;
+    }
+
     private void applyOrSkip(Function<BigInteger, BigInteger> func) {
         if (aCount != null) {
             aCount = func.apply(aCount);
@@ -35,7 +45,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor();
+        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node);
         node.getNode()
             .visit(countingVisitor);
 
@@ -51,13 +61,18 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(Sequence node) {
         for (Node vnode : node.getNodes()) {
-            UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor();
+            UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node);
             vnode.visit(countingVisitor);
             applyOrSkip(v -> {
                 if (countingVisitor.aCount == null) {
                     return null;
                 }
-                return v.equals(BigInteger.ZERO) ? countingVisitor.aCount : v.multiply(countingVisitor.aCount);
+
+                if (v.equals(BigInteger.ZERO)) {
+                    return countingVisitor.aCount;
+                }
+
+                return countingVisitor.aCount.equals(BigInteger.ZERO) ? v : v.multiply(countingVisitor.aCount);
             });
         }
     }
@@ -69,8 +84,14 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(GroupRef groupRef) {
-        // FIXME:
-        throw new RuntimeException("Not implemented");
+        if (aParentNode == null
+                || !(aParentNode instanceof Repeat)) {
+            // Do nothing. It does not add new unique values.
+        } else {
+            // When repeated multiple times - it adds as much unique values as it is repeated. So we should add 1 (it will be used in Repeat for calcuation).
+            // E.g. (a|b)\1{2,3} - captured value of group is repeated either 2 or 3 times - it gives 2 unique values.
+            aCount = aCount.add(BigInteger.ONE);
+        }
     }
 
     @Override
