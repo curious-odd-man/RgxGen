@@ -2,7 +2,11 @@
 
 ## Status
 
-[![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen)
+Build status:
+
+| Master Branch   | Dev branch  |
+| :---------: | :---------: |
+| [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
 
 ## Usage
 
