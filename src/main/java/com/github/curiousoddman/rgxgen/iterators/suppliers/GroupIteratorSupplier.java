@@ -16,23 +16,24 @@ public class GroupIteratorSupplier implements Supplier<StringIterator> {
 
     private final Supplier<StringIterator>              aIteratorSupplier;
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
-    private final Map<Integer, StringIterator>          aGroupIterators;
+    private final Map<Integer, StringIterator>          aGroupIteratorsMap;
     private final int                                   aIndex;
 
-    public GroupIteratorSupplier(Supplier<StringIterator> iteratorSupplier, Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIterators, int index) {
+    public GroupIteratorSupplier(Supplier<StringIterator> iteratorSupplier, Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIteratorsMap, int index) {
         aIteratorSupplier = iteratorSupplier;
         aReferenceIteratorMap = referenceIteratorMap;
-        aGroupIterators = groupIterators;
+        aGroupIteratorsMap = groupIteratorsMap;
         aIndex = index;
-        LOGGER.trace("Creating idx {}\n\tsrc: {}\n\trefs: {}\n\tgrps: {}", index, iteratorSupplier, referenceIteratorMap, groupIterators);
+        LOGGER.trace("Creating idx {}\n\tsrc: {}\n\trefs: {}\n\tgrps: {}", index, iteratorSupplier, referenceIteratorMap, groupIteratorsMap);
     }
 
     @Override
     public StringIterator get() {
-        LOGGER.trace(".");
+        LOGGER.trace("Getting idx {}\n\trefs: {}\n\tgrps: {}", aIndex, aReferenceIteratorMap, aGroupIteratorsMap);
         final StringIterator stringIterator = aIteratorSupplier.get();
-        aGroupIterators.put(aIndex, stringIterator);
+        aGroupIteratorsMap.put(aIndex, stringIterator);
         final List<ReferenceIterator> orDefault = aReferenceIteratorMap.getOrDefault(aIndex, Collections.emptyList());
+        LOGGER.debug("ReferenceIterators to connect: {}", orDefault);
         for (ReferenceIterator referenceIterator : orDefault) {
             LOGGER.debug("GroupRef[{}] connecting to group {} ", aIndex, stringIterator);
             referenceIterator.setOther(stringIterator);
@@ -45,7 +46,7 @@ public class GroupIteratorSupplier implements Supplier<StringIterator> {
         return "GroupIteratorSupplier{" +
                 "aIteratorSupplier=" + aIteratorSupplier +
                 ", aReferenceIteratorMap=" + aReferenceIteratorMap +
-                ", aGroupIterators=" + aGroupIterators +
+                ", aGroupIterators=" + aGroupIteratorsMap +
                 ", aIndex=" + aIndex +
                 '}';
     }

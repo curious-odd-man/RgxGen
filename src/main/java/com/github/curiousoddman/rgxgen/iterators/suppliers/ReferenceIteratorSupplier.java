@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
-import com.github.curiousoddman.rgxgen.generator.nodes.Choice;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.slf4j.Logger;
@@ -28,17 +27,17 @@ public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
 
     @Override
     public StringIterator get() {
-        LOGGER.trace(".");
+        LOGGER.trace("Getting idx {}\n\trefs: {}\n\tgrps: {}", aIndex, aReferenceIteratorMap, aGroupIteratorsMap);
         ReferenceIterator referenceIterator = new ReferenceIterator();
         final StringIterator stringIterator = aGroupIteratorsMap.get(aIndex);
-        if (stringIterator == null) {
-            LOGGER.debug("GroupRef[{}] adding to connection queue group ", aIndex);
-            aReferenceIteratorMap.computeIfAbsent(aIndex, i -> new ArrayList<>())
-                                 .add(referenceIterator);
-        } else {
+        if (stringIterator != null) {
             LOGGER.debug("GroupRef[{}] connecting to group {} ", aIndex, stringIterator);
             referenceIterator.setOther(stringIterator);
         }
+
+        LOGGER.debug("GroupRef[{}] adding to connection queue group ", aIndex);
+        aReferenceIteratorMap.computeIfAbsent(aIndex, i -> new ArrayList<>())
+                             .add(referenceIterator);
 
         return referenceIterator;
     }

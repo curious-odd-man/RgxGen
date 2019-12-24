@@ -1,5 +1,9 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
+import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.NoSuchElementException;
 
