@@ -30,7 +30,6 @@
         <sources.plugin.version>2.4</sources.plugin.version>
         <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
         <gpg.plugin.version>1.5</gpg.plugin.version>
-
     </properties>
 
     <licenses>
@@ -177,14 +176,6 @@
     </build>
 
     <dependencies>
-        <!-- Junit -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-            <scope>test</scope>
-        </dependency>
-
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -192,6 +183,13 @@
             <version>${slf4j.version}</version>
         </dependency>
 
+        <!-- Test scope below -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -210,9 +208,6 @@
             <version>${log4j.version}</version>
             <scope>test</scope>
         </dependency>
-
-
-
         <dependency>
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-core</artifactId>
