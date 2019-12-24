@@ -9,25 +9,23 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class PermutationsIterator extends StringIterator {
-    private final List<Supplier<StringIterator>> aIteratorsSuppliers;
-    private final StringIterator[]               aIterators;
-    private final String[]                         aGeneratedParts;
+    private final StringIterator[] aIterators;
+    // FIXME: Generated parts are no longer used since StringIterator has current() method.
+    private final String[]         aGeneratedParts;
 
     public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {
-        aIteratorsSuppliers = iteratorsSuppliers;
-        aIterators = new StringIterator[aIteratorsSuppliers.size()];
+        aIterators = new StringIterator[iteratorsSuppliers.size()];
 
         aGeneratedParts = new String[aIterators.length];
 
         for (int i = 0; i < aIterators.length; i++) {
-            StringIterator iterator = aIteratorsSuppliers.get(i)
-                                                           .get();
+            StringIterator iterator = iteratorsSuppliers.get(i)
+                                                        .get();
             aIterators[i] = iterator;
         }
 
         // Make sure it is null, because it's used for check later
         aGeneratedParts[0] = null;
-
     }
 
     public PermutationsIterator(int length, String[] values) {
@@ -59,22 +57,35 @@ public class PermutationsIterator extends StringIterator {
                     // We can only reset other iterators. Head iterator should use all it's values only once
                     throw new NoSuchElementException("No more unique values");
                 } else {
-                    StringIterator iterator = aIteratorsSuppliers.get(i)
-                                                                   .get();
-                    aIterators[i] = iterator;
-                    aGeneratedParts[i] = iterator.next();
+                    aIterators[i].reset();
+                    aGeneratedParts[i] = aIterators[i].next();
                 }
             }
         }
 
-        return Arrays.stream(aGeneratedParts.clone())
+        return Arrays.stream(aIterators)
+                     .map(StringIterator::current)
+                     .reduce("", String::concat);
+    }
+
+    @Override
+    public void reset() {
+        aGeneratedParts[0] = null;
+        for (StringIterator iterator : aIterators) {
+            iterator.reset();
+        }
+    }
+
+    @Override
+    public String current() {
+        return Arrays.stream(aIterators)
+                     .map(StringIterator::current)
                      .reduce("", String::concat);
     }
 
     @Override
     public String toString() {
         return "PermutationsIterator{" +
-                "aIteratorsSuppliers=" + aIteratorsSuppliers +
                 ", aIterators=" + Arrays.toString(aIterators) +
                 ", aGeneratedParts=" + Arrays.toString(aGeneratedParts) +
                 '}';

@@ -59,6 +59,7 @@ Any other character are treated as simple characters and are generated as is, th
 | `\S`  | Anything, but space, tab or newline |
 | `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
 | `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
+| `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
 | `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
 | `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
 | `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |

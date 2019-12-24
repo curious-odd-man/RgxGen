@@ -25,41 +25,36 @@ public class ChoiceIteratorTests {
         return Arrays.asList(new Object[][]{
                 {
                         "(A|B)",
-                        Arrays.asList(
-                                Arrays.asList(
-                                        (Supplier<StringIterator>) () -> new SingleValueIterator("A"),
-                                        () -> new SingleValueIterator("B")
-                                )
-                        ),
+                        (Supplier<StringIterator[]>) () -> new StringIterator[]{
+                                new SingleValueIterator("A"),
+                                new SingleValueIterator("B")
+                        },
                         Arrays.asList("A", "B")
                 },
                 {
                         "(A|B|C|D|E|F)",
-                        Arrays.asList(
-                                Arrays.asList(
-                                        (Supplier<StringIterator>) () -> new SingleValueIterator("A"),
-                                        () -> new SingleValueIterator("B"),
-                                        () -> new SingleValueIterator("C"),
-                                        () -> new SingleValueIterator("D"),
-                                        () -> new SingleValueIterator("E"),
-                                        () -> new SingleValueIterator("F")
-                                )
-                        ),
+                        (Supplier<StringIterator[]>) () -> new StringIterator[]{
+                                new SingleValueIterator("A"),
+                                new SingleValueIterator("B"),
+                                new SingleValueIterator("C"),
+                                new SingleValueIterator("D"),
+                                new SingleValueIterator("E"),
+                                new SingleValueIterator("F")},
                         Arrays.asList("A", "B", "C", "D", "E", "F")
                 }
         });
     }
 
     @Parameterized.Parameter
-    public String                               aExpression;
+    public String                     aExpression;
     @Parameterized.Parameter(1)
-    public List<List<Supplier<StringIterator>>> aIterators;
+    public Supplier<StringIterator[]> aIterators;
     @Parameterized.Parameter(2)
-    public List<String>                         aExpectedValues;
+    public List<String>               aExpectedValues;
 
     @Test
     public void countTest() {
-        StringIterator stringIterator = new ChoiceIterator(aIterators);
+        StringIterator stringIterator = new ChoiceIterator(aIterators.get());
         Iterable<String> i = () -> stringIterator;
 
         Stream<String> stream = StreamSupport.stream(i.spliterator(), false);
@@ -68,7 +63,7 @@ public class ChoiceIteratorTests {
 
     @Test
     public void valuesTest() {
-        StringIterator stringIterator = new ChoiceIterator(aIterators);
+        StringIterator stringIterator = new ChoiceIterator(aIterators.get());
         Iterable<String> i = () -> stringIterator;
         Stream<String> stream = StreamSupport.stream(i.spliterator(), false);
         assertEquals(aExpectedValues, stream.collect(Collectors.toList()));

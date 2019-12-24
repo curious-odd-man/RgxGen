@@ -3,9 +3,10 @@ package com.github.curiousoddman.rgxgen.iterators;
 import java.util.regex.Pattern;
 
 public class NegativeStringIterator extends StringIterator {
-
     private final StringIterator aIterator;
     private final Pattern        aPattern;
+
+    private String aValue;
 
     public NegativeStringIterator(StringIterator iterator, Pattern pattern) {
         aIterator = iterator;
@@ -14,16 +15,33 @@ public class NegativeStringIterator extends StringIterator {
 
     @Override
     protected String nextImpl() {
-        String value;
         do {
-            value = aIterator.next();
-        } while (aPattern.matcher(value)
+            aValue = aIterator.next();
+        } while (aPattern.matcher(aValue)
                          .find());
-        return value;
+        return aValue;
+    }
+
+    @Override
+    public void reset() {
+        // Nothing to do
+    }
+
+    @Override
+    public String current() {
+        return aValue;
     }
 
     @Override
     public boolean hasNext() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "NegativeStringIterator[" + aValue +
+                '\'' + aPattern +
+                "']{" + aIterator +
+                "} ";
     }
 }

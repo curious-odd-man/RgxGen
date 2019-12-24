@@ -1,49 +1,52 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ChoiceIterator extends StringIterator {
-    private final List<Supplier<StringIterator>> aIterators;
+    private final StringIterator[] aIterators;
 
-    private StringIterator aCurrentIterator;
+    private int aCurrentIteratorIndex = 0;
 
-    public ChoiceIterator(List<List<Supplier<StringIterator>>> iterators) {
-        aIterators = iterators.stream()
-                              .flatMap(Collection::stream)
-                              .collect(Collectors.toList());
-        aCurrentIterator = aIterators.remove(0)
-                                     .get();
+    public ChoiceIterator(StringIterator[] iterators) {
+        aIterators = iterators;
     }
 
     @Override
     public boolean hasNext() {
-        return aCurrentIterator.hasNext() || !aIterators.isEmpty();
+        return aIterators[aCurrentIteratorIndex].hasNext() || aCurrentIteratorIndex + 1 < aIterators.length;
     }
 
     @Override
     public String nextImpl() {
-        if (!aCurrentIterator.hasNext()) {
-            if (aIterators.isEmpty()) {
+        if (!aIterators[aCurrentIteratorIndex].hasNext()) {
+            ++aCurrentIteratorIndex;
+            if (aCurrentIteratorIndex >= aIterators.length) {
                 throw new NoSuchElementException("No more values");
-            } else {
-                aCurrentIterator = aIterators.remove(0)
-                                             .get();
             }
         }
 
-        return aCurrentIterator.next();
+        return aIterators[aCurrentIteratorIndex].next();
+    }
+
+    @Override
+    public String current() {
+        return aIterators[aCurrentIteratorIndex].current();
+    }
+
+    @Override
+    public void reset() {
+        aCurrentIteratorIndex = 0;
+        for (StringIterator iterator : aIterators) {
+            iterator.reset();
+        }
     }
 
     @Override
     public String toString() {
         return "ChoiceIterator{" +
-                "aIterators=" + aIterators +
-                ", aCurrentIterator=" + aCurrentIterator +
+                "aIterators=" + Arrays.toString(aIterators) +
+                ", aCurrentIteratorIndex=" + aCurrentIteratorIndex +
                 '}';
     }
 }

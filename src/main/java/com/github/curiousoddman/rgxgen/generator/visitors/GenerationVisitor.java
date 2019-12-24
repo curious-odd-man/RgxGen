@@ -3,10 +3,13 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.util.Util;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GenerationVisitor implements NodeVisitor {
-    private StringBuilder aStringBuilder = new StringBuilder();
+    private final StringBuilder        aStringBuilder = new StringBuilder();
+    private final Map<Integer, String> aGroupValues   = new HashMap<>();
 
     @Override
     public void visit(SymbolSet node) {
@@ -62,6 +65,19 @@ public class GenerationVisitor implements NodeVisitor {
         }
 
         aStringBuilder.append(result);
+    }
+
+    @Override
+    public void visit(GroupRef groupRef) {
+        aStringBuilder.append(aGroupValues.get(groupRef.getIndex()));
+    }
+
+    @Override
+    public void visit(Group group) {
+        int start = aStringBuilder.length();
+        group.getNode()
+             .visit(this);
+        aGroupValues.put(group.getIndex(), aStringBuilder.substring(start));
     }
 
     public String getString() {

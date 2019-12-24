@@ -35,8 +35,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final String aExpr;
 
-    private int  aCurrentIndex = 0;
+    private int  aCurrentIndex   = 0;
     private Node aNode;
+    private int  aNextGroupIndex = 1;
 
     /**
      * Default implementation of parser and NodeTreeBuilder.
@@ -82,7 +83,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    public Node parseGroup() {
+    public Node parseGroup(GroupType currentGroupType) {
+        Integer captureGroupIndex = null;
+        if (currentGroupType == GroupType.CAPTURE_GROUP) {
+            captureGroupIndex = aNextGroupIndex++;
+        }
         ArrayList<Node> choices = new ArrayList<>();
         ArrayList<Node> nodes = new ArrayList<>();
         StringBuilder sb = new StringBuilder(aExpr.length());
@@ -104,24 +109,29 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         nodes.add(new NotSymbol(subPattern));
                         aCurrentIndex += subPattern.length() + 1;       // Past the closing ')'
                     } else {
-                        nodes.add(parseGroup());
+                        nodes.add(parseGroup(groupType));
                     }
                     break;
 
                 case '|':
-                    sbToFinal(sb, nodes);
-                    choices.add(sequenceOrNot(nodes, choices, false));
-                    nodes.clear();
+                    if (sb.length() == 0 && nodes.isEmpty()) {
+                        // Special case when '(|a)' is used - like empty or something
+                        choices.add(new FinalSymbol(""));
+                    } else {
+                        sbToFinal(sb, nodes);
+                        choices.add(sequenceOrNot(nodes, choices, false, null));
+                        nodes.clear();
+                    }
                     isChoice = true;
                     break;
 
                 case ')':
                     sbToFinal(sb, nodes);
                     if (isChoice) {
-                        choices.add(sequenceOrNot(nodes, choices, false));
+                        choices.add(sequenceOrNot(nodes, choices, false, null));
                         nodes.clear();
                     }
-                    return sequenceOrNot(nodes, choices, isChoice);
+                    return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
 
                 case '{':
                 case '*':
@@ -148,7 +158,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    handleEscapedCharacter(sb, nodes);
+                    handleEscapedCharacter(sb, nodes, true);
                     break;
 
                 default:
@@ -158,7 +168,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         sbToFinal(sb, nodes);
-        return sequenceOrNot(nodes, choices, isChoice);
+        return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
     }
 
     /**
@@ -170,7 +180,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    string builder containing all previous characters before the escape
      * @param nodes previously created nodes; new node will be appended here
      */
-    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes) {
+    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
         char c = aExpr.charAt(aCurrentIndex++);
         switch (c) {
             case 'd':  // Any decimal digit
@@ -222,6 +232,25 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 sb.append((char) value);
                 break;
 
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                sbToFinal(sb, nodes);
+                if (groupRefAllowed) {
+                    String digitsSubstring = Util.takeWhile(aExpr, aCurrentIndex - 1, Character::isDigit);
+                    aCurrentIndex = aCurrentIndex - 1 + digitsSubstring.length();
+                    nodes.add(new GroupRef(Integer.parseInt(digitsSubstring)));
+                } else {
+                    throw new RuntimeException("Group ref is not expected here. " + aExpr.substring(aCurrentIndex));
+                }
+                break;
+
             default:
                 sb.append(c);
                 break;
@@ -266,6 +295,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                             }
                         }
 
+                        // TODO: Is it really possible and allowed???
                     case '\\':
                         // Skip backslash and add next symbol to characters
                         tmpc = aExpr.charAt(aCurrentIndex++);
@@ -282,21 +312,29 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
     }
 
-    private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice) {
+    private Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
+        Node resultNode;
+
         if (nodes.size() == 1) {
-            return nodes.get(0);
+            resultNode = nodes.get(0);
         } else {
             if (isChoice) {
                 if (choices.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                return new Choice(choices.toArray(new Node[0]));
+                resultNode = new Choice(choices.toArray(new Node[0]));
             } else {
                 if (nodes.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                return new Sequence(nodes.toArray(new Node[0]));
+                resultNode = new Sequence(nodes.toArray(new Node[0]));
             }
+        }
+
+        if (captureGroupIndex == null) {
+            return resultNode;
+        } else {
+            return new Group(captureGroupIndex, resultNode);
         }
     }
 
@@ -352,7 +390,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '\\':
                     // Skip backslash and add next symbol to characters
                     List<Node> nodes = new LinkedList<>();
-                    handleEscapedCharacter(sb, nodes);
+                    handleEscapedCharacter(sb, nodes, false);
                     if (rangeStarted) {
                         if (!nodes.isEmpty()) {
                             throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aExpr.substring(aCurrentIndex) + '\'');
@@ -384,7 +422,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     public void build() {
-        aNode = parseGroup();
+        aNode = parseGroup(GroupType.NON_CAPTURE_GROUP);
         if (aCurrentIndex < aExpr.length()) {
             throw new RuntimeException("Expression was not fully parsed");
         }

@@ -23,6 +23,8 @@ public class InfiniteGenerateTests {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"a*", false},
+                {"aa+", false},
+                {"a.*", false},
                 {"a+", false},
                 {"za*", false},
                 {"za+", false},
