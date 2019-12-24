@@ -6,30 +6,25 @@ import org.slf4j.LoggerFactory;
 import java.util.Iterator;
 
 public abstract class StringIterator implements Iterator<String> {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StringIterator.class);
-
-    private String aCurrent;
 
     @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
     @Override
     public String next() {
-        aCurrent = nextImpl();
-        LOGGER.trace("Produced value: '{}' using '{}'", aCurrent, this);
-        return aCurrent;
+        String current = nextImpl();
+        LOGGER.trace("Produced value: '{}' using '{}'", current, this);
+        return current;
     }
 
+    /**
+     * This method returns correct value only on top level iterator.
+     * For other iterators 2 steps are requied - next() and then current().
+     *
+     * @return
+     */
     protected abstract String nextImpl();
 
     public abstract void reset();
 
-    public String current() {
-        return aCurrent;
-    }
-
-    /*
-        Expected :[aaaa, aabb,       abbb, baaa, babb,       bbbb]
-        Actual   :[aaaa, aabb, abaa, abbb, baaa, babb, bbaa, bbbb]
-
-     */
+    public abstract String current();
 }

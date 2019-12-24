@@ -204,12 +204,12 @@ public enum TestPattern {
     CAPTURE_REPEAT("(a|b){2,3}\\1",
                    new Sequence(new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2, 3),
                                 new GroupRef(1)),
-                   BigInteger.valueOf(4),
-                   Arrays.asList("aaa", "abb", "baa", "bbb", "aaaa", "aabb", "abbb", "baaa", "babb", "bbbb")),
+                   BigInteger.valueOf(12),
+                   Arrays.asList("aaa", "abb", "baa", "bbb", "aaaa", "aabb", "abaa", "abbb", "baaa", "babb", "bbaa", "bbbb")),
     CAPTURE_REPEAT_0("(a|b){3}\\1",
                      new Sequence(new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 3, 3),
                                   new GroupRef(1)),
-                     BigInteger.valueOf(4),
+                     BigInteger.valueOf(8),
                      Arrays.asList("aaaa", "aabb", "abaa", "abbb", "baaa", "babb", "bbaa", "bbbb")),
     CAPTURE_REPEAT_1("(a|b){2}\\1",
                      new Sequence(new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2, 2),
@@ -226,8 +226,8 @@ public enum TestPattern {
             "(a|b){2,3}\\1{2,3}",
             new Sequence(new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2, 3),
                          new Repeat(new GroupRef(1), 2, 3)),
-            BigInteger.valueOf(8),       // The real count is 6 since `aaaaa` and `bbbbb` are repeated twice
-            Arrays.asList("aaaa", "aaaaa", "aaaaa", "aaaaaa", "bbbb", "bbbbb", "bbbbb", "bbbbbb")
+            BigInteger.valueOf(24),       // Real count is less, since some patterns repeat. e.g. "aaaaa"
+            Arrays.asList("aaaa", "aaaaa", "abbb", "abbbb", "baaa", "baaaa", "bbbb", "bbbbb", "aaaaa", "aaaaaa", "aabbb", "aabbbb", "abaaa", "abaaaa", "abbbb", "abbbbb", "baaaa", "baaaaa", "babbb", "babbbb", "bbaaa", "bbaaaa", "bbbbb", "bbbbbb")
     ),
     XML_NODE("<([abc])>d<\\/\\1>",
              new Sequence(new FinalSymbol("<"),

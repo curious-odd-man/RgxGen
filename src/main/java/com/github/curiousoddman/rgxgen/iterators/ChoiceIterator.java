@@ -30,6 +30,11 @@ public class ChoiceIterator extends StringIterator {
     }
 
     @Override
+    public String current() {
+        return aIterators[aCurrentIteratorIndex].current();
+    }
+
+    @Override
     public void reset() {
         aCurrentIteratorIndex = 0;
         for (StringIterator iterator : aIterators) {

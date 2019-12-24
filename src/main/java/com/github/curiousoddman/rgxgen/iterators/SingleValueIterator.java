@@ -1,40 +1,44 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
 public class SingleValueIterator extends StringIterator {
-    private final String aInitial;
-    private String aCurrent;
+    private final String aValue;
+
+    private boolean hasNext;
 
     public SingleValueIterator() {
-        aCurrent = "";
-        aInitial = aCurrent;
+        this("");
     }
 
     public SingleValueIterator(String s) {
-        aCurrent = s;
-        aInitial = s;
+        aValue = s;
+        hasNext = true;
     }
 
     @Override
     public boolean hasNext() {
-        return aCurrent != null;
+        return hasNext;
     }
 
     @Override
     public String nextImpl() {
-        String tmp = aCurrent;
-        aCurrent = null;
-        return tmp;
+        hasNext = false;
+        return aValue;
     }
 
     @Override
     public void reset() {
-        aCurrent = aInitial;
+        hasNext = true;
+    }
+
+    @Override
+    public String current() {
+        return aValue;
     }
 
     @Override
     public String toString() {
         return "SingleValueIterator{" +
-                "aValue='" + aCurrent + '\'' +
+                "aValue='" + aValue + '\'' +
                 '}';
     }
 }

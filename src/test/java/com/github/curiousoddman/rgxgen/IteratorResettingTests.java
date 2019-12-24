@@ -43,6 +43,11 @@ public class IteratorResettingTests {
         }
 
         @Override
+        public String current() {
+            return aValue;
+        }
+
+        @Override
         public boolean hasNext() {
             return ok;
         }
@@ -55,6 +60,8 @@ public class IteratorResettingTests {
 
     private static class TestBiIterator extends StringIterator {
 
+        private String aCurrent;
+
         private int ok = 0;
 
         @Override
@@ -62,10 +69,13 @@ public class IteratorResettingTests {
             if (hasNext()) {
                 ++ok;
                 if (ok == 1) {
+                    aCurrent = "x";
                     return "x";
                 } else if (ok == 2) {
+                    aCurrent = "y";
                     return "y";
                 } else {
+                    aCurrent = "ERROR";
                     return "ERROR";
                 }
             } else {
@@ -76,6 +86,11 @@ public class IteratorResettingTests {
         @Override
         public void reset() {
             ok = 0;
+        }
+
+        @Override
+        public String current() {
+            return aCurrent;
         }
 
         @Override

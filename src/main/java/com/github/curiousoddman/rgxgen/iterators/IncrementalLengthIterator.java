@@ -12,6 +12,7 @@ public class IncrementalLengthIterator extends StringIterator {
 
     private int              aCurrentLength;
     private StringIterator[] aCurrentIterators;
+    // FIXME: Generated parts are no longer used since StringIterator has current() method.
     private String[]         aGeneratedParts;
 
 
@@ -91,7 +92,9 @@ public class IncrementalLengthIterator extends StringIterator {
                 }
             }
 
-            return Arrays.stream(aGeneratedParts.clone())
+            // FIXME: A place for optimization. Doing it here and in current() does not make much sense
+            return Arrays.stream(aCurrentIterators)
+                         .map(StringIterator::current)
                          .reduce("", String::concat);
         }
     }
@@ -104,6 +107,13 @@ public class IncrementalLengthIterator extends StringIterator {
         for (int i = 0; i < aCurrentLength; i++) {
             aCurrentIterators[i] = aSupplier.get();
         }
+    }
+
+    @Override
+    public String current() {
+        return Arrays.stream(aCurrentIterators)
+                     .map(StringIterator::current)
+                     .reduce("", String::concat);
     }
 
     @Override

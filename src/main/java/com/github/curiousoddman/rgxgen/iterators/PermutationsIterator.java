@@ -77,6 +77,13 @@ public class PermutationsIterator extends StringIterator {
     }
 
     @Override
+    public String current() {
+        return Arrays.stream(aIterators)
+                     .map(StringIterator::current)
+                     .reduce("", String::concat);
+    }
+
+    @Override
     public String toString() {
         return "PermutationsIterator{" +
                 ", aIterators=" + Arrays.toString(aIterators) +
