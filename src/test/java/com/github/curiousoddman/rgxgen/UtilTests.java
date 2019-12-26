@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.parsing.dflt.CharIterator;
 import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 
@@ -27,7 +28,9 @@ public class UtilTests {
         );
 
         for (Object[] datum : data) {
-            assertEquals(Arrays.toString(datum), datum[3], Util.substringUntil(datum[0].toString(), (int) datum[1], (char) datum[2]));
+            final CharIterator charIterator = new CharIterator(datum[0].toString());
+            charIterator.next((int) datum[1]);
+            assertEquals(Arrays.toString(datum), datum[3], charIterator.nextUntil((char) datum[2]));
         }
     }
 
@@ -39,7 +42,9 @@ public class UtilTests {
         );
 
         for (Object[] datum : data) {
-            assertEquals(Arrays.toString(datum), datum[2], Util.takeWhile(datum[0].toString(), (int) datum[1], Character::isDigit));
+            final CharIterator charIterator = new CharIterator(datum[0].toString());
+            charIterator.next((int) datum[1]);
+            assertEquals(Arrays.toString(datum), datum[2], charIterator.takeWhile(Character::isDigit));
         }
     }
 }

@@ -15,6 +15,10 @@ public enum TestPattern {
              new FinalSymbol("a"),
              BigInteger.ONE,
              Collections.singletonList("a")),
+    SIMPLE_A_WITH_START_END("^a$",
+             new FinalSymbol("a"),
+             BigInteger.ONE,
+             Collections.singletonList("a")),
     ANY_DIGIT("\\d",
               new SymbolSet(IntStream.rangeClosed(0, 9)
                                      .mapToObj(Integer::toString)
