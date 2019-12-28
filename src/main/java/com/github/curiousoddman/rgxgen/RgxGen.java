@@ -5,6 +5,7 @@ import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.math.BigInteger;
@@ -14,12 +15,22 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-    private final String aPattern;
-    private final Node   aNode;
+    private final Node aNode;
 
+    /**
+     * Parse pattern using DefaultTreeBuilder.
+     *
+     * @param pattern regex pattern for values generation
+     */
     public RgxGen(String pattern) {
-        aPattern = pattern;
-        aNode = new DefaultTreeBuilder(aPattern).get();
+        this(new DefaultTreeBuilder(pattern));
+    }
+
+    /**
+     * Parse regex pattern using provided builder and prepare to generate values
+     */
+    public RgxGen(NodeTreeBuilder builder) {
+        aNode = builder.get();
     }
 
     /**
@@ -37,8 +48,8 @@ public class RgxGen {
 
     /**
      * Creates infinite stream of randomly generated values.
-     *
-     * @return stream of generated strings
+     * @see RgxGen#generate()
+     * @return stream of randomly generated strings
      */
     public Stream<String> stream() {
         return Stream.generate(this::generate);
@@ -56,7 +67,7 @@ public class RgxGen {
     }
 
     /**
-     * Generate string from the pattern.
+     * Generate random string from the pattern.
      *
      * @return generated string.
      */

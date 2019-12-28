@@ -4,7 +4,6 @@ import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 /**
@@ -26,13 +25,26 @@ public final class Util {
         return EMPTY.split(str);
     }
 
+    /**
+     * Creates random string up to 10 symbols long
+     *
+     * @param value seed used to select length
+     * @return random string up to 10 symbols long
+     */
     public static String randomString(String value) {
         int count = Math.abs(value.hashCode() % 10);
         StringBuilder builder = new StringBuilder(count);
         ThreadLocalRandom rnd = ThreadLocalRandom.current();
-        while (count-- != 0) {
-            builder.append(SYMBOLS.charAt(rnd.nextInt(0, SYMBOLS.length())));
+        while (count >= 0) {
+            builder.append(SYMBOLS.charAt(rnd.nextInt(SYMBOLS.length())));
+            --count;
         }
         return builder.toString();
+    }
+
+    /**
+     * Utility class can't be instantiated
+     */
+    private Util() {
     }
 }
