@@ -17,13 +17,11 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.util.Util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -54,13 +52,40 @@ public class SymbolSet implements Node {
         }
     }
 
+    /**
+     * POSITIVE - add characters and ranges
+     * NEGATIVE - all but characters and ranges
+     */
+    public enum TYPE {
+        POSITIVE,
+        NEGATIVE
+    }
+
+    /**
+     * Range of symbols
+     */
     public static class SymbolRange {
         private final int aFrom;
         private final int aTo;
 
+        /**
+         * Create range of symbols.
+         *
+         * @param from min character shall be less than {@code to}
+         * @param to   max character, shall be greater than {@code from}
+         * @apiNote No verifications are done!
+         */
         public SymbolRange(char from, char to) {
             aFrom = from;
             aTo = to;
+        }
+
+        int getFrom() {
+            return aFrom;
+        }
+
+        int getTo() {
+            return aTo;
         }
 
         @Override
@@ -78,39 +103,52 @@ public class SymbolSet implements Node {
      * Symbol set containing all symbols
      */
     public SymbolSet() {
-        this(ALL_SYMBOLS.clone(), true);
+        this(ALL_SYMBOLS.clone(), TYPE.POSITIVE);
     }
 
-    public SymbolSet(String[] symbols, boolean positive) {
-        this(Collections.emptyList(), symbols, positive);
+    public SymbolSet(String[] symbols, TYPE type) {
+        this(Collections.emptyList(), symbols, type);
     }
 
-    public SymbolSet(List<SymbolRange> symbolRanges, boolean positive) {
-        this(symbolRanges, new String[0], positive);
+    public SymbolSet(List<SymbolRange> symbolRanges, TYPE type) {
+        this(symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
     }
 
-    public SymbolSet(List<SymbolRange> symbolRanges, String[] symbols, boolean positive) {
+    /**
+     * Create SymbolSet from ranges and symbols according to type
+     *
+     * @param symbolRanges ranges of symbols to include/exclude
+     * @param symbols      symbols to include/exclude
+     * @param type         POSITIVE - include, NEGATIVE - exclude
+     */
+    public SymbolSet(List<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating [positive = {}] from {} and {}", positive, symbolRanges, Arrays.asList(symbols));
+            LOGGER.trace("Creating [positive = {}] from {} and {}", type, symbolRanges, Arrays.asList(symbols));
         }
 
-        List<String> initial = new ArrayList<>();
-        if (!positive) {
-            initial.addAll(Arrays.asList(ALL_SYMBOLS));
-        }
+        List<String> initial = type == TYPE.NEGATIVE
+                               ? new ArrayList<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
+                               : new ArrayList<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
-        filterOrPut(initial, Arrays.asList(symbols), positive);
+        filterOrPut(initial, Arrays.asList(symbols), type);
         filterOrPut(initial, symbolRanges.stream()
-                                         .flatMapToInt(r -> IntStream.rangeClosed(r.aFrom, r.aTo))
+                                         .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
                                          .mapToObj(i -> (char) i)
                                          .map(Object::toString)
-                                         .collect(Collectors.toList()), positive);
+                                         .collect(Collectors.toList()), type);
 
-        aSymbols = initial.toArray(new String[0]);
+        aSymbols = initial.toArray(Util.ZERO_LENGTH_STRING_ARRAY);
     }
 
-    private static void filterOrPut(List<String> input, List<String> symbols, boolean put) {
-        if (put) {
+    /**
+     * Depending on TYPE either add or remove characters
+     *
+     * @param input   collection to modify
+     * @param symbols add or remove these symbols
+     * @param type    add or remove
+     */
+    private static void filterOrPut(Collection<String> input, List<String> symbols, TYPE type) {
+        if (type == TYPE.POSITIVE) {
             input.addAll(symbols);
         } else {
             input.removeIf(symbols::contains);

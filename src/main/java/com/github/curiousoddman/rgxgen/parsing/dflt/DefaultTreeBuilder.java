@@ -199,21 +199,21 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                                            .mapToObj(Integer::toString)
                                            .toArray(String[]::new);
 
-                nodes.add(new SymbolSet(digits, c == 'd'));
+                nodes.add(new SymbolSet(digits, c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
                 String[] whiteSpaces = {" ", "\t", "\n"};
-                nodes.add(new SymbolSet(whiteSpaces, c == 's'));
+                nodes.add(new SymbolSet(whiteSpaces, c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
                 String[] wordSymbols = {"_"};
-                nodes.add(new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), wordSymbols, c == 'w'));
+                nodes.add(new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), wordSymbols, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             // Hex character:
@@ -355,9 +355,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return Node that covers expression in square brackets
      */
     private Node handleCharacterVariations() {
-        boolean positive = true;
+        SymbolSet.TYPE symbolSetType = SymbolSet.TYPE.POSITIVE;
         if (aCharIterator.peek() == '^') {
-            positive = false;
+            symbolSetType = SymbolSet.TYPE.NEGATIVE;
             aCharIterator.next();
         }
 
@@ -376,7 +376,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     } else {
                         strings = Util.stringToCharsSubstrings(sb.toString());
                     }
-                    return new SymbolSet(symbolRanges, strings, positive);
+                    return new SymbolSet(symbolRanges, strings, symbolSetType);
 
                 case '-':
                     if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
