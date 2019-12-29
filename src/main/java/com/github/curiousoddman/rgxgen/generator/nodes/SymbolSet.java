@@ -40,10 +40,13 @@ public class SymbolSet implements Node {
         return ALL_SYMBOLS.clone();
     }
 
+    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
+    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
+
     static {
-        for (char c = 32; c < 127; ++c) {
-            ALL_SYMBOLS[c - 32] = Character.valueOf(c)
-                                           .toString();
+        for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
+            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = Character.valueOf((char) i)
+                                                         .toString();
         }
 
         if (LOGGER.isTraceEnabled()) {

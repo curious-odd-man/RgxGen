@@ -4,11 +4,17 @@
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+#FIXME:
+[![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/#13.EliminateTechnicalDebt/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen)
+
+
 Build status:
 
 | Master Branch   | Dev branch  |
 | :---------: | :---------: |
 | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
+| [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
+
 
 ## Usage
 
