@@ -13,6 +13,8 @@ Build status:
 
 ## Try it now!!!
 
+Note: latest version in maven is imported there. See supported syntax below for details.
+
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1Ni2)
 
 Enter your pattern and see the results.
