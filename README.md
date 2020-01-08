@@ -13,7 +13,7 @@ Build status:
 
 ## Try it now!!!
 
-Follow the link to Online IDE with already created simple project: [JDoodle](jdoodle.com/a/1Ni2)
+Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1Ni2)
 
 Enter your pattern and see the results.
 
