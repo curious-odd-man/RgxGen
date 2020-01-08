@@ -2,7 +2,7 @@
 * text=lf
 
 # Default line endings for the OS
-*.md text
+*.md text eol=lf
 
 # Declare files that will always have LF line endings on checkout.
 *.java text eol=lf

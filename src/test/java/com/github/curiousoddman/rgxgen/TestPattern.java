@@ -16,34 +16,34 @@ public enum TestPattern {
              BigInteger.ONE,
              Collections.singletonList("a")),
     SIMPLE_A_WITH_START_END("^a$",
-             new FinalSymbol("a"),
-             BigInteger.ONE,
-             Collections.singletonList("a")),
+                            new FinalSymbol("a"),
+                            BigInteger.ONE,
+                            Collections.singletonList("a")),
     ANY_DIGIT("\\d",
               new SymbolSet(IntStream.rangeClosed(0, 9)
                                      .mapToObj(Integer::toString)
-                                     .toArray(String[]::new), true),
+                                     .toArray(String[]::new), SymbolSet.TYPE.POSITIVE),
               BigInteger.TEN,
               Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")),
     NOT_A_DIGIT("\\D",      // Any non-digit
                 new SymbolSet(IntStream.rangeClosed(0, 9)
                                        .mapToObj(Integer::toString)
-                                       .toArray(String[]::new), false)
+                                       .toArray(String[]::new), SymbolSet.TYPE.NEGATIVE)
     ),
     ANY_DIGIT_RANGE("[0-9]",
                     new SymbolSet(IntStream.rangeClosed(0, 9)
                                            .mapToObj(Integer::toString)
-                                           .toArray(String[]::new), true),
+                                           .toArray(String[]::new), SymbolSet.TYPE.POSITIVE),
                     BigInteger.TEN,
                     Arrays.asList("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")),
     LETTER_RANGE("[a-cA-C]",
-                 new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'c'), new SymbolSet.SymbolRange('A', 'C')), true)
+                 new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'c'), new SymbolSet.SymbolRange('A', 'C')), SymbolSet.TYPE.POSITIVE)
     ),
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
-                       new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, true)
+                       new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, SymbolSet.TYPE.POSITIVE)
     ),
     ANY_NON_WORD_CHARACTER("\\W",      // Any non-word symbol  [a-zA-Z0-9_]
-                           new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, false)
+                           new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, SymbolSet.TYPE.NEGATIVE)
     ),
     HEX_SPACE("\\x20", // Space
               new FinalSymbol(" ")
@@ -58,14 +58,14 @@ public enum TestPattern {
     A_OR_B("[ab]",
            new SymbolSet(new String[]{
                    "a", "b"
-           }, true),
+           }, SymbolSet.TYPE.POSITIVE),
            BigInteger.valueOf(2),
            Arrays.asList("a", "b")),
 
     A_OR_B_THEN_C("[ab]c",
                   new Sequence(new SymbolSet(new String[]{
                           "a", "b"
-                  }, true), new
+                  }, SymbolSet.TYPE.POSITIVE), new
 
                                        FinalSymbol("c")), BigInteger.valueOf(2)),
 
@@ -74,7 +74,7 @@ public enum TestPattern {
 
                                  SymbolSet(new String[]{
                                  "a", "b"
-                         }, true), new
+                         }, SymbolSet.TYPE.POSITIVE), new
 
                                               FinalSymbol("c")),
                          BigInteger.valueOf(2)),
@@ -149,25 +149,25 @@ public enum TestPattern {
     NOT_A("[^a]",
           new SymbolSet(Arrays.stream(SymbolSet.getAllSymbols())
                               .filter(s -> !s.equals("a"))
-                              .toArray(String[]::new), true)
+                              .toArray(String[]::new), SymbolSet.TYPE.POSITIVE)
     ),
 
     NOT_LETTER_RANGE("[^a-dE-F]",
                      new SymbolSet(Arrays.stream(SymbolSet.getAllSymbols())
                                          .filter(s -> !(s.equals("a") || s.equals("b") || s.equals("c") || s.equals("d") || s.equals("E") || s.equals("F")))
-                                         .toArray(String[]::new), true)
+                                         .toArray(String[]::new), SymbolSet.TYPE.POSITIVE)
     ),
 
     ANY_WHITESPACE("\\s",      // Any White Space
                    new SymbolSet(new String[]{
                            " ", "\t", "\n"
-                   }, true)
+                   }, SymbolSet.TYPE.POSITIVE)
     ),
 
     NOT_A_WHITESPACE("\\S",      // Any Non White Space
                      new SymbolSet(new String[]{
                              " ", "\t", "\n"
-                     }, false)
+                     }, SymbolSet.TYPE.NEGATIVE)
     ),
 
     A_THEN_A_OR_NOT("aa?",
@@ -237,7 +237,7 @@ public enum TestPattern {
              new Sequence(new FinalSymbol("<"),
                           new Group(1, new SymbolSet(new String[]{
                                   "a", "b", "c"
-                          }, true)),
+                          }, SymbolSet.TYPE.POSITIVE)),
                           new FinalSymbol(">d</"),
                           new GroupRef(1),
                           new FinalSymbol(">")

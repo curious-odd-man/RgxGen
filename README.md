@@ -2,11 +2,15 @@
 
 ## Status
 
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
 Build status:
 
 | Master Branch   | Dev branch  |
 | :---------: | :---------: |
 | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
+| [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
+
 
 ## Usage
 
@@ -21,10 +25,10 @@ Maven dependency (latest available version):
 
 Code: 
 ```
-RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
-String s = rgxGen.generate();                           // Generate new random value
-BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-StringIterator uniqueStrings = rgxGen.iterateUnique();  // Iterate over unique values (not accurate, see Limitations)
+RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+String s = rgxGen.generate();                                        // Generate new random value
+BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax

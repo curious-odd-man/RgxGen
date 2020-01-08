@@ -1,10 +1,27 @@
 package com.github.curiousoddman.rgxgen;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.math.BigInteger;
@@ -14,12 +31,22 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-    private final String aPattern;
-    private final Node   aNode;
+    private final Node aNode;
 
+    /**
+     * Parse pattern using DefaultTreeBuilder.
+     *
+     * @param pattern regex pattern for values generation
+     */
     public RgxGen(String pattern) {
-        aPattern = pattern;
-        aNode = new DefaultTreeBuilder(aPattern).get();
+        this(new DefaultTreeBuilder(pattern));
+    }
+
+    /**
+     * Parse regex pattern using provided builder and prepare to generate values
+     */
+    public RgxGen(NodeTreeBuilder builder) {
+        aNode = builder.get();
     }
 
     /**
@@ -38,7 +65,8 @@ public class RgxGen {
     /**
      * Creates infinite stream of randomly generated values.
      *
-     * @return stream of generated strings
+     * @return stream of randomly generated strings
+     * @see RgxGen#generate()
      */
     public Stream<String> stream() {
         return Stream.generate(this::generate);
@@ -56,7 +84,7 @@ public class RgxGen {
     }
 
     /**
-     * Generate string from the pattern.
+     * Generate random string from the pattern.
      *
      * @return generated string.
      */
