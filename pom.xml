@@ -155,6 +155,15 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
                     <version>${javadoc.plugin.version}</version>
+                    <configuration>
+                        <tags>
+                            <tag>
+                                <name>apiNote</name>
+                                <placement>m</placement>
+                                <head>API Note:</head>
+                            </tag>
+                        </tags>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>attach-javadocs</id>

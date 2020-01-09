@@ -53,6 +53,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     /**
      * Default implementation of parser and NodeTreeBuilder.
      * It reads expression and creates a hierarchy of {@code com.github.curiousoddman.rgxgen.generator.nodes.Node}.
+     *
+     * @param expr expression to parse
      */
     public DefaultTreeBuilder(String expr) {
         aCharIterator = new CharIterator(expr);

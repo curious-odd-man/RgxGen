@@ -44,6 +44,8 @@ public class RgxGen {
 
     /**
      * Parse regex pattern using provided builder and prepare to generate values
+     *
+     * @param builder node tree builder implementation
      */
     public RgxGen(NodeTreeBuilder builder) {
         aNode = builder.get();
