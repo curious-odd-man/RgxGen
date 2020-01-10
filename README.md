@@ -1,12 +1,28 @@
-# Text generator based on regular expression pattern
+# Java library for text generation based on regular expression pattern
 
 ## Status
 
-[![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+
+Build status:
+
+| Master Branch   | Dev branch  |
+| :---------: | :---------: |
+| [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
+| [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
+
+## Try it now!!!
+
+Note: latest version in maven is imported there. See supported syntax below for details.
+
+Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1Ni2)
+
+Enter your pattern and see the results.
+
 
 ## Usage
 
-Maven dependency:
+Maven dependency (latest available version):
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -17,13 +33,16 @@ Maven dependency:
 
 Code: 
 ```
-RgxGen rgxGen = new RgxGen(aRegex);                     // Create generator
-String s = rgxGen.generate();                           // Generate new random value
-BigInteger estimation = rgxGen.numUnique();             // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-Iterator<String> uniqueStrings = rgxGen.uStream();      // Iterate over unique values (not accurate, see Limitations)
+RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+String s = rgxGen.generate();                                        // Generate new random value
+BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
 ```
 
 ## Supported syntax
+
+<details>
+<summary><b>Latest version in maven</b></summary>
 
 ```
 . - any symbol
@@ -39,6 +58,37 @@ escape character \ - to escape special characters (use \\ to generate single \ c
 ```
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+</details>
+
+<details>
+<summary><b>Latest dev version</b></summary>
+
+| Pattern   | Description  |
+| ---------: |-------------|
+| `.`  | Any symbol |
+| `?`  | One or zero occurrences |
+| `+`  | One or more occurrences |
+| `*`  | Zero or more occurrences |
+| `\d`  | A digit. Equivalent to `[0-9]` |
+| `\D`  | Not a digit. Equivalent to `[^0-9]` |
+| `\s`  | Space, tab or newline |
+| `\S`  | Anything, but space, tab or newline |
+| `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
+| `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
+| `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
+| `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
+| `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
+| `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |
+| `[^...]`  | Single character except the ones in brackets. `[^a]` - any symbol except 'a' |
+| `()`  | To group multiple characters for the repetitions |
+| `foo(?=bar)` and `(?<=foo)bar`  | Positive lookahead and lookbehind. These are equivalent to `foobar` |
+| `foo(?!bar)` and `(?<!foo)bar`  | Negative lookahead and lookbehind. |
+| <code>(a&#124;b)</code> |  Alternatives  |
+| \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
+
+Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+
+</details>
 
 ## Limitations
 

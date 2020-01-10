@@ -1,5 +1,21 @@
 package com.github.curiousoddman.rgxgen.generator.visitors;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 
@@ -9,6 +25,16 @@ import java.util.function.Function;
 public class UniqueValuesCountingVisitor implements NodeVisitor {
     private BigInteger aCount = BigInteger.ZERO;
 
+    private final Node aParentNode;
+
+    public UniqueValuesCountingVisitor() {
+        this(null);
+    }
+
+    public UniqueValuesCountingVisitor(Node parentNode) {
+        aParentNode = parentNode;
+    }
+
     private void applyOrSkip(Function<BigInteger, BigInteger> func) {
         if (aCount != null) {
             aCount = func.apply(aCount);
@@ -16,8 +42,8 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(AnySymbol node) {
-        applyOrSkip(v -> v.add(BigInteger.valueOf(AnySymbol.ALL_SYMBOLS.length)));
+    public void visit(SymbolSet node) {
+        applyOrSkip(v -> v.add(BigInteger.valueOf(node.getSymbols().length)));
     }
 
     @Override
@@ -35,7 +61,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor();
+        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node);
         node.getNode()
             .visit(countingVisitor);
 
@@ -51,15 +77,43 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(Sequence node) {
         for (Node vnode : node.getNodes()) {
-            UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor();
+            UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node);
             vnode.visit(countingVisitor);
             applyOrSkip(v -> {
                 if (countingVisitor.aCount == null) {
                     return null;
                 }
-                return v.equals(BigInteger.ZERO) ? countingVisitor.aCount : v.multiply(countingVisitor.aCount);
+
+                if (v.equals(BigInteger.ZERO)) {
+                    return countingVisitor.aCount;
+                }
+
+                return countingVisitor.aCount.equals(BigInteger.ZERO) ? v : v.multiply(countingVisitor.aCount);
             });
         }
+    }
+
+    @Override
+    public void visit(NotSymbol notSymbol) {
+        aCount = null;
+    }
+
+    @Override
+    public void visit(GroupRef groupRef) {
+        if (aParentNode == null
+                || !(aParentNode instanceof Repeat)) {
+            // Do nothing. It does not add new unique values.
+        } else {
+            // When repeated multiple times - it adds as much unique values as it is repeated. So we should add 1 (it will be used in Repeat for calcuation).
+            // E.g. (a|b)\1{2,3} - captured value of group is repeated either 2 or 3 times - it gives 2 unique values.
+            aCount = aCount.add(BigInteger.ONE);
+        }
+    }
+
+    @Override
+    public void visit(Group group) {
+        group.getNode()
+             .visit(this);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.parsing.dflt.CharIterator;
 import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 
@@ -18,18 +19,33 @@ public class UtilTests {
     }
 
     @Test
-    public void powTest() {
-        List<Integer[]> data = Arrays.asList(
-                new Integer[]{10, 0, 1},
-                new Integer[]{1, 1, 1},
-                new Integer[]{1, 2, 1},
-                new Integer[]{1, 3, 1},
-                new Integer[]{2, 2, 4},
-                new Integer[]{2, 10, 1024}
+    public void substringUntilTest() {
+        List<Object[]> data = Arrays.asList(
+                new Object[]{"()", 1, ')', ""},
+                new Object[]{"(a)", 1, ')', "a"},
+                new Object[]{"(a\\)b)", 1, ')', "a\\)b"},
+                new Object[]{"(ac\\\\)", 1, ')', "ac\\\\"}
         );
 
         for (Object[] datum : data) {
-            assertEquals(datum[2], (int) Util.pow((int) datum[0], (int) datum[1]));
+            final CharIterator charIterator = new CharIterator(datum[0].toString());
+            charIterator.next((int) datum[1]);
+            assertEquals(Arrays.toString(datum), datum[3], charIterator.nextUntil((char) datum[2]));
+        }
+    }
+
+    @Test
+    public void takeWhileTest() {
+        List<Object[]> data = Arrays.asList(
+                new Object[]{"asdf1234fdsa", 4, "1234"},
+                new Object[]{"asdf1234", 4, "1234"}
+        );
+
+        for (Object[] datum : data) {
+            final CharIterator charIterator = new CharIterator(datum[0].toString());
+            charIterator.next((int) datum[1]);
+            assertEquals(Arrays.toString(datum), datum[2], charIterator.takeWhile(Character::isDigit));
         }
     }
 }
+

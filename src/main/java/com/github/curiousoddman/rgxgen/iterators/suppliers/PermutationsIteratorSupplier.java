@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,34 +16,34 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.iterators.PermutationsIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-public class FinalSymbol implements Node {
+import java.util.List;
+import java.util.function.Supplier;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FinalSymbol.class);
+public class PermutationsIteratorSupplier implements Supplier<StringIterator> {
 
-    private final String aValue;
+    private final List<Supplier<StringIterator>> aSuppliers;
 
-    public FinalSymbol(String value) {
-        LOGGER.trace("Creating '{}'", value);
-        aValue = value;
+    public PermutationsIteratorSupplier(List<Supplier<StringIterator>> suppliers) {
+        aSuppliers = suppliers;
     }
 
     @Override
-    public void visit(NodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    public String getValue() {
-        return aValue;
+    public StringIterator get() {
+        if (aSuppliers.size() == 1) {
+            return aSuppliers.get(0)
+                             .get();
+        } else {
+            return new PermutationsIterator(aSuppliers);
+        }
     }
 
     @Override
     public String toString() {
-        return "FinalSymbol{" +
-                '\'' + aValue + '\'' +
+        return "PermutationsIteratorSupplier{" +
+                aSuppliers +
                 '}';
     }
 }

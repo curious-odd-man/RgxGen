@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.iterators;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,45 +16,32 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-public class SingleValueIterator extends StringIterator {
-    private final String aValue;
+import com.github.curiousoddman.rgxgen.iterators.NegativeStringIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-    private boolean hasNext;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
-    public SingleValueIterator() {
-        this("");
+public class NegativeIteratorSupplier implements Supplier<StringIterator> {
+    private final Pattern                  aPattern;
+    private final Supplier<StringIterator> aIteratorSupplier;
+
+    public NegativeIteratorSupplier(Pattern pattern, Supplier<StringIterator> iteratorSupplier) {
+        aPattern = pattern;
+        aIteratorSupplier = iteratorSupplier;
     }
 
-    public SingleValueIterator(String s) {
-        aValue = s;
-        hasNext = true;
-    }
 
     @Override
-    public boolean hasNext() {
-        return hasNext;
-    }
-
-    @Override
-    public String nextImpl() {
-        hasNext = false;
-        return aValue;
-    }
-
-    @Override
-    public void reset() {
-        hasNext = true;
-    }
-
-    @Override
-    public String current() {
-        return aValue;
+    public StringIterator get() {
+        return new NegativeStringIterator(aIteratorSupplier.get(), aPattern);
     }
 
     @Override
     public String toString() {
-        return "SingleValueIterator{" +
-                "aValue='" + aValue + '\'' +
+        return "NegativeIteratorSupplier{" +
+                aPattern +
+                ',' + aIteratorSupplier +
                 '}';
     }
 }

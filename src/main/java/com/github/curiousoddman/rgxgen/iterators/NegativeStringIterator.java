@@ -16,48 +16,48 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
+import java.util.regex.Pattern;
 
-public class ArrayIterator extends StringIterator {
+public class NegativeStringIterator extends StringIterator {
+    private final StringIterator aIterator;
+    private final Pattern        aPattern;
 
-    private final int      aMaxIndex;
-    private final String[] aStrings;
+    private String aValue;
 
-    private int aIndex = -1;
-
-    public ArrayIterator(String[] strings) {
-        aStrings = strings;
-        aMaxIndex = aStrings.length - 1;        // Because of prefix increment in nextImpl()
+    public NegativeStringIterator(StringIterator iterator, Pattern pattern) {
+        aIterator = iterator;
+        aPattern = pattern;
     }
 
     @Override
-    public boolean hasNext() {
-        return aIndex < aMaxIndex;
-    }
-
-    @Override
-    public String nextImpl() {
-        try {
-            return aStrings[++aIndex];
-        } catch (ArrayIndexOutOfBoundsException ignore) {
-            throw new NoSuchElementException("Not enough elements in arrays");
-        }
+    protected String nextImpl() {
+        do {
+            aValue = aIterator.next();
+        } while (aPattern.matcher(aValue)
+                         .find());
+        return aValue;
     }
 
     @Override
     public void reset() {
-        aIndex = -1;
+        // Nothing to do
     }
 
     @Override
     public String current() {
-        return aStrings[aIndex];
+        return aValue;
+    }
+
+    @Override
+    public boolean hasNext() {
+        return true;
     }
 
     @Override
     public String toString() {
-        return "ArrayIterator[" + aIndex + "]{" + Arrays.toString(aStrings) +
-                '}';
+        return "NegativeStringIterator[" + aValue +
+                '\'' + aPattern +
+                "']{" + aIterator +
+                "} ";
     }
 }

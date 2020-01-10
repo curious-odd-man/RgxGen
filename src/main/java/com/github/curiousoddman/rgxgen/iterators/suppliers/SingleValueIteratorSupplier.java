@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,15 +16,26 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
+import com.github.curiousoddman.rgxgen.iterators.SingleValueIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-/**
- * Interface for the parser/nodes builder.
- */
-public interface NodeTreeBuilder {
+import java.util.function.Supplier;
 
-    /**
-     * @return Root node for the parsed pattern
-     */
-    Node get();
+public class SingleValueIteratorSupplier implements Supplier<StringIterator> {
+
+    private final String aValue;
+
+    public SingleValueIteratorSupplier(String value) {
+        aValue = value;
+    }
+
+    @Override
+    public StringIterator get() {
+        return new SingleValueIterator(aValue);
+    }
+
+    @Override
+    public String toString() {
+        return "SingleValueIteratorSupplier{" + aValue + '}';
+    }
 }

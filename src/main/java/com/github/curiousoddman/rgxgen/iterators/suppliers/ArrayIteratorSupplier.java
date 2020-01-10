@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,15 +16,26 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
+import com.github.curiousoddman.rgxgen.iterators.ArrayIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-/**
- * Interface for the parser/nodes builder.
- */
-public interface NodeTreeBuilder {
+import java.util.Arrays;
+import java.util.function.Supplier;
 
-    /**
-     * @return Root node for the parsed pattern
-     */
-    Node get();
+public class ArrayIteratorSupplier implements Supplier<StringIterator> {
+    private final String[] aSymbolSet;
+
+    public ArrayIteratorSupplier(String[] symbolSet) {
+        aSymbolSet = symbolSet;
+    }
+
+    @Override
+    public ArrayIterator get() {
+        return new ArrayIterator(aSymbolSet);
+    }
+
+    @Override
+    public String toString() {
+        return "ArrayIteratorSupplier{" + Arrays.toString(aSymbolSet) + '}';
+    }
 }

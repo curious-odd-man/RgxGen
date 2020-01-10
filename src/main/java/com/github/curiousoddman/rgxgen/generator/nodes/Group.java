@@ -20,23 +20,31 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+public class Group implements Node {
 
-public class Choice implements Node {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Group.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Choice.class);
+    private final Node    aNode;
+    private final int     aGroupIndex;
+    private final boolean aIsCapturable;
 
-    private final Node[] aNodes;
-
-    public Choice(Node... nodes) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating from {} ", Arrays.asList(nodes));
-        }
-        aNodes = nodes;
+    public Group(Node node) {
+        this(-1, node);
     }
 
-    public Node[] getNodes() {
-        return aNodes;
+    public Group(int index, Node node) {
+        LOGGER.trace("Crating idx = '{}' from '{}'", index, node);
+        aNode = node;
+        aGroupIndex = index;
+        aIsCapturable = index != -1;
+    }
+
+    public boolean isCapture() {
+        return aIsCapturable;
+    }
+
+    public int getIndex() {
+        return aGroupIndex;
     }
 
     @Override
@@ -44,8 +52,14 @@ public class Choice implements Node {
         visitor.visit(this);
     }
 
+    public Node getNode() {
+        return aNode;
+    }
+
     @Override
     public String toString() {
-        return "Choice" + Arrays.toString(aNodes);
+        return "Group[" + aGroupIndex +
+                "]{" + aNode +
+                '}';
     }
 }

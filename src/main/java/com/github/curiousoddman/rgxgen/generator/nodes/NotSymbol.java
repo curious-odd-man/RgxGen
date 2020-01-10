@@ -20,23 +20,17 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
+import java.util.regex.Pattern;
 
-public class Choice implements Node {
+public class NotSymbol implements Node {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Choice.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotSymbol.class);
 
-    private final Node[] aNodes;
+    private final Pattern aSubPattern;
 
-    public Choice(Node... nodes) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating from {} ", Arrays.asList(nodes));
-        }
-        aNodes = nodes;
-    }
-
-    public Node[] getNodes() {
-        return aNodes;
+    public NotSymbol(String pattern) {
+        LOGGER.trace("Crating '{}'", pattern);
+        aSubPattern = Pattern.compile(pattern);
     }
 
     @Override
@@ -44,8 +38,12 @@ public class Choice implements Node {
         visitor.visit(this);
     }
 
+    public Pattern getSubPattern() {
+        return aSubPattern;
+    }
+
     @Override
     public String toString() {
-        return "Choice" + Arrays.toString(aNodes);
+        return "NotSymbol{" + aSubPattern.pattern() + '}';
     }
 }

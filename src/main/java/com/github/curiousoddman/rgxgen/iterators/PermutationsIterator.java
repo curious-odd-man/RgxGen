@@ -1,5 +1,21 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
@@ -8,32 +24,29 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class PermutationsIterator implements Iterator<String> {
-    private final List<Supplier<Iterator<String>>> aIteratorsSuppliers;
-    private final Iterator<String>[]               aIterators;
-    private final String[]                         aGeneratedParts;
+public class PermutationsIterator extends StringIterator {
+    private final StringIterator[] aIterators;
+    // FIXME: Generated parts are no longer used since StringIterator has current() method.
+    private final String[]         aGeneratedParts;
 
-    public PermutationsIterator(List<Supplier<Iterator<String>>> iteratorsSuppliers) {
-        aIteratorsSuppliers = iteratorsSuppliers;
-        aIterators = new Iterator[aIteratorsSuppliers.size()];
+    public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {
+        aIterators = new StringIterator[iteratorsSuppliers.size()];
 
         aGeneratedParts = new String[aIterators.length];
 
         for (int i = 0; i < aIterators.length; i++) {
-            Iterator<String> iterator = aIteratorsSuppliers.get(i)
-                                                           .get();
+            StringIterator iterator = iteratorsSuppliers.get(i)
+                                                        .get();
             aIterators[i] = iterator;
         }
 
         // Make sure it is null, because it's used for check later
         aGeneratedParts[0] = null;
-
     }
 
     public PermutationsIterator(int length, String[] values) {
         this(IntStream.range(0, length)
-                      .mapToObj(i -> ((Supplier<Iterator<String>>) () -> Arrays.stream(values)
-                                                                               .iterator()))
+                      .mapToObj(i -> ((Supplier<StringIterator>) () -> new ArrayIterator(values)))
                       .collect(Collectors.toList()));
     }
 
@@ -44,7 +57,7 @@ public class PermutationsIterator implements Iterator<String> {
     }
 
     @Override
-    public String next() {
+    public String nextImpl() {
         // Initialize all value
         if (aGeneratedParts[0] == null) {
             for (int i = 0; i < aGeneratedParts.length; i++) {
@@ -60,22 +73,35 @@ public class PermutationsIterator implements Iterator<String> {
                     // We can only reset other iterators. Head iterator should use all it's values only once
                     throw new NoSuchElementException("No more unique values");
                 } else {
-                    Iterator<String> iterator = aIteratorsSuppliers.get(i)
-                                                                   .get();
-                    aIterators[i] = iterator;
-                    aGeneratedParts[i] = iterator.next();
+                    aIterators[i].reset();
+                    aGeneratedParts[i] = aIterators[i].next();
                 }
             }
         }
 
-        return Arrays.stream(aGeneratedParts.clone())
+        return Arrays.stream(aIterators)
+                     .map(StringIterator::current)
+                     .reduce("", String::concat);
+    }
+
+    @Override
+    public void reset() {
+        aGeneratedParts[0] = null;
+        for (StringIterator iterator : aIterators) {
+            iterator.reset();
+        }
+    }
+
+    @Override
+    public String current() {
+        return Arrays.stream(aIterators)
+                     .map(StringIterator::current)
                      .reduce("", String::concat);
     }
 
     @Override
     public String toString() {
         return "PermutationsIterator{" +
-                "aIteratorsSuppliers=" + aIteratorsSuppliers +
                 ", aIterators=" + Arrays.toString(aIterators) +
                 ", aGeneratedParts=" + Arrays.toString(aGeneratedParts) +
                 '}';

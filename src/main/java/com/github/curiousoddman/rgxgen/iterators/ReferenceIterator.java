@@ -16,48 +16,50 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Arrays;
-import java.util.NoSuchElementException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class ArrayIterator extends StringIterator {
+public class ReferenceIterator extends StringIterator {
 
-    private final int      aMaxIndex;
-    private final String[] aStrings;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceIterator.class);
 
-    private int aIndex = -1;
+    private StringIterator aOther  = null;
+    private boolean        hasNext = true;
+    private String         aLast   = null;
 
-    public ArrayIterator(String[] strings) {
-        aStrings = strings;
-        aMaxIndex = aStrings.length - 1;        // Because of prefix increment in nextImpl()
+    public void setOther(StringIterator other) {
+        aOther = other;
     }
 
     @Override
-    public boolean hasNext() {
-        return aIndex < aMaxIndex;
-    }
-
-    @Override
-    public String nextImpl() {
-        try {
-            return aStrings[++aIndex];
-        } catch (ArrayIndexOutOfBoundsException ignore) {
-            throw new NoSuchElementException("Not enough elements in arrays");
-        }
-    }
-
-    @Override
-    public void reset() {
-        aIndex = -1;
+    protected String nextImpl() {
+        hasNext = false;
+        return aOther.current();
     }
 
     @Override
     public String current() {
-        return aStrings[aIndex];
+        aLast = aOther.current();
+        return aOther.current();
+    }
+
+    @Override
+    public void reset() {
+        hasNext = true;
+    }
+
+    @Override
+    public boolean hasNext() {
+        LOGGER.trace("hasNext = {}, aOther.current() = {}, aLast = {}", hasNext, aOther.current(), aLast);
+        return hasNext || !aOther.current()
+                                 .equals(aLast);
     }
 
     @Override
     public String toString() {
-        return "ArrayIterator[" + aIndex + "]{" + Arrays.toString(aStrings) +
-                '}';
+        return "ReferenceIterator[" +
+                aOther +
+                "]{" + aLast +
+                "} ";
     }
 }
