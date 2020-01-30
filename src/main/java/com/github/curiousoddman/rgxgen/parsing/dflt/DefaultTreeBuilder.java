@@ -89,7 +89,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 return res;
 
             default:
-                aCharIterator.move(-2);
+                aCharIterator.skip(-2);
                 return GroupType.CAPTURE_GROUP;
         }
     }
@@ -224,9 +224,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 c = aCharIterator.peek();
                 String hexValue;
                 if (c == '{') {
-                    aCharIterator.move();
+                    aCharIterator.skip();
                     hexValue = aCharIterator.nextUntil('}');
-                    aCharIterator.move();
+                    aCharIterator.skip();
                 } else {
                     hexValue = aCharIterator.next(2);
                 }
