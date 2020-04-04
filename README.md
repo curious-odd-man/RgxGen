@@ -72,8 +72,13 @@ Any other character are treated as simple characters and are generated as is, th
 </details>
 
 <details>
-<summary><b>Differences with dev branch</b></summary>
+<summary><b>SNAPSHOT version changes</b></summary>
+| Pattern   | Description  |
+| ---------: |-------------|
+| `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
+| `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 
+Fixed issue #23.
 </details>
 
 ## Limitations
