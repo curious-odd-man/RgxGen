@@ -207,7 +207,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                String[] whiteSpaces = {" ", "\t", "\n"};
+                String[] whiteSpaces = {"\r", "\f", "\u000B", " ", "\t", "\n"};     // "\u000B" - is a vertical tab
                 nodes.add(new SymbolSet(whiteSpaces, c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
@@ -391,12 +391,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '\\':
                     // Skip backslash and add next symbol to characters
                     List<Node> nodes = new LinkedList<>();
-                    handleEscapedCharacter(sb, nodes, false);
+
+                    // When range started - we use 2 last characters to find out bounds of the range
+                    // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
                     if (rangeStarted) {
+                        handleEscapedCharacter(sb, nodes, false);
                         if (!nodes.isEmpty()) {
                             throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
                         }
                         rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
+                    } else {
+                        StringBuilder tmpSb = new StringBuilder(0);
+                        handleEscapedCharacter(tmpSb, nodes, false);
+                        sb.append(tmpSb);
                     }
 
                     if (!nodes.isEmpty()) {

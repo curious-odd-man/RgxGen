@@ -160,13 +160,13 @@ public enum TestPattern {
 
     ANY_WHITESPACE("\\s",      // Any White Space
                    new SymbolSet(new String[]{
-                           " ", "\t", "\n"
+                           "\r", "\f", "\u000B", " ", "\t", "\n"
                    }, SymbolSet.TYPE.POSITIVE)
     ),
 
     NOT_A_WHITESPACE("\\S",      // Any Non White Space
                      new SymbolSet(new String[]{
-                             " ", "\t", "\n"
+                             "\r", "\f", "\u000B", " ", "\t", "\n"
                      }, SymbolSet.TYPE.NEGATIVE)
     ),
 
@@ -243,7 +243,12 @@ public enum TestPattern {
                           new FinalSymbol(">")
              ),
              BigInteger.valueOf(3),
-             Arrays.asList("<a>d</a>", "<b>d</b>", "<c>d</c>"));
+             Arrays.asList("<a>d</a>", "<b>d</b>", "<c>d</c>")),
+    METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
+                                    new SymbolSet(new String[]{"'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n"}, SymbolSet.TYPE.POSITIVE),
+                                    BigInteger.valueOf(10),
+                                    Arrays.asList("'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n")
+    );
 
     final String       aPattern;
     final Node         aResultNode;
