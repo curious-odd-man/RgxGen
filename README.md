@@ -79,7 +79,7 @@ Any other character are treated as simple characters and are generated as is, th
 | `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 | `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 
-Fixed issue #23.
+Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23)
 </details>
 
 ## Limitations
