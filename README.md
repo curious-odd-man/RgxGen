@@ -13,7 +13,7 @@ Build status:
 
 ## Try it now!!!
 
-Note: latest version in maven is imported there. See supported syntax below for details.
+Note: latest RELEASE version is imported there. See supported syntax below for details.
 
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
 
@@ -22,7 +22,9 @@ Enter your pattern and see the results.
 
 ## Usage
 
-Maven dependency (latest available version):
+### Maven dependency
+
+latest RELEASE:
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -30,8 +32,25 @@ Maven dependency (latest available version):
     <version>1.0</version>
 </dependency>
 ```
+latest SNAPSHOT:
+```
+<dependency>
+    <groupId>com.github.curious-odd-man</groupId>
+    <artifactId>rgxgen</artifactId>
+    <version>1.1-SNAPSHOT</version>
+</dependency>
+```
+NOTE: To use snapshot add snapshots repository:
+```
+<repositories>
+    <repository>
+        <id>asd</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+</repositories>
+```
 
-Code: 
+### Code: 
 ```
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 String s = rgxGen.generate();                                        // Generate new random value
@@ -42,7 +61,7 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 ## Supported syntax
 
 <details>
-<summary><b>Latest version in maven</b></summary>
+<summary><b>Latest RELEASE</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
@@ -72,7 +91,7 @@ Any other character are treated as simple characters and are generated as is, th
 </details>
 
 <details>
-<summary><b>SNAPSHOT version changes</b></summary>
+<summary><b>SNAPSHOT changes</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
