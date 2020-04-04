@@ -73,6 +73,7 @@ Any other character are treated as simple characters and are generated as is, th
 
 <details>
 <summary><b>SNAPSHOT version changes</b></summary>
+
 | Pattern   | Description  |
 | ---------: |-------------|
 | `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
