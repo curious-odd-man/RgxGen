@@ -34,7 +34,7 @@ public abstract class StringIterator implements Iterator<String> {
 
     /**
      * This method returns correct value only on top level iterator.
-     * For other iterators 2 steps are requied - next() and then current().
+     * For other iterators 2 steps are required - next() and then current().
      *
      * @return next String.
      */
