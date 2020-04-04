@@ -24,7 +24,7 @@ Enter your pattern and see the results.
 
 ### Maven dependency
 
-latest RELEASE:
+#### latest RELEASE:
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -32,7 +32,7 @@ latest RELEASE:
     <version>1.0</version>
 </dependency>
 ```
-latest SNAPSHOT:
+#### latest SNAPSHOT:
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -40,7 +40,7 @@ latest SNAPSHOT:
     <version>1.1-SNAPSHOT</version>
 </dependency>
 ```
-NOTE: To use snapshot add snapshots repository:
+**NOTE: To use snapshot add snapshots repository:**
 ```
 <repositories>
     <repository>
