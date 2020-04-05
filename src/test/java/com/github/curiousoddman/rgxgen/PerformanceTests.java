@@ -4,6 +4,7 @@ import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
+import org.openjdk.jmh.results.format.ResultFormatType;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
@@ -33,6 +34,8 @@ public class PerformanceTests {
                 .shouldDoGC(true)
                 //.jvmArgs("-XX:+UnlockDiagnosticVMOptions", "-XX:+PrintInlining")
                 //.addProfiler(WinPerfAsmProfiler.class)
+                .resultFormat(ResultFormatType.TEXT)
+                .result("performance.txt")
                 .build();
 
         new Runner(opt).run();
