@@ -62,7 +62,7 @@ public class IteratorResettingTests {
 
         private String aCurrent;
 
-        private int ok = 0;
+        private int ok;
 
         @Override
         protected String nextImpl() {

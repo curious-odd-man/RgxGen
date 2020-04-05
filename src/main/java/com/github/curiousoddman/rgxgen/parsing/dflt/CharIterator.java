@@ -28,7 +28,7 @@ public class CharIterator implements Iterator<Character> {
     private final String aValue;
 
     private int aLastIndex;
-    private int aCurrentIndex = 0;
+    private int aCurrentIndex;
 
     public CharIterator(String value) {
         aValue = value;
