@@ -20,10 +20,7 @@ import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.IntStream;
 
 /**
@@ -48,8 +45,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private final CharIterator aCharIterator;
 
     private static class Provider {
-        private String[] aDigits;
-        private String[] aWhiteSpaces;     // "\u000B" - is a vertical tab
+        private String[]                    aDigits;
+        private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
+        private List<SymbolSet.SymbolRange> aWordCharRanges;
 
         public String[] getDigits() {
             if (aDigits == null) {
@@ -66,6 +64,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
             }
             return aWhiteSpaces;
+        }
+
+        public List<SymbolSet.SymbolRange> getWordCharRanges() {
+            if (aWordCharRanges == null) {
+                aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS));
+            }
+
+            return aWordCharRanges;
         }
     }
 
@@ -234,7 +240,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
                 String[] wordSymbols = {"_"};
-                nodes.add(new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), wordSymbols, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), wordSymbols, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             // Hex character:
