@@ -125,7 +125,7 @@ public enum TestPattern {
                        SymbolSet()),
                BigInteger.valueOf(95),
                Arrays.stream(SymbolSet.getAllSymbols())
-                     .map(s -> "a" + s)
+                     .map(s -> 'a' + s)
                      .collect(Collectors.toList())),
 
     ANY_THEN_ANY("..",

@@ -47,6 +47,30 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final CharIterator aCharIterator;
 
+    private static class Provider {
+        private String[] aDigits;
+        private String[] aWhiteSpaces;     // "\u000B" - is a vertical tab
+
+        public String[] getDigits() {
+            if (aDigits == null) {
+                aDigits = IntStream.rangeClosed(0, 9)
+                                   .mapToObj(Integer::toString)
+                                   .toArray(String[]::new);
+            }
+
+            return aDigits;
+        }
+
+        public String[] getWhitespaces() {
+            if (aWhiteSpaces == null) {
+                aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
+            }
+            return aWhiteSpaces;
+        }
+    }
+
+    private static final Provider PROVIDER = new Provider();
+
     private Node aNode;
     private int  aNextGroupIndex = 1;
 
@@ -197,18 +221,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                String[] digits = IntStream.rangeClosed(0, 9)
-                                           .mapToObj(Integer::toString)
-                                           .toArray(String[]::new);
-
-                nodes.add(new SymbolSet(digits, c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                String[] whiteSpaces = {"\r", "\f", "\u000B", " ", "\t", "\n"};     // "\u000B" - is a vertical tab
-                nodes.add(new SymbolSet(whiteSpaces, c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 'w':  // Any word characters
@@ -274,7 +293,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else if (c == '+') {
             return Repeat.minimum(repeatNode, 1);
         } else if (c == '{') {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new StringBuilder(10);
             int min = -1;
             while (aCharIterator.hasNext()) {
                 char tmpc = aCharIterator.next();
@@ -313,7 +332,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
     }
 
-    private Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
+    private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
         Node resultNode;
 
         if (nodes.size() == 1) {
@@ -348,6 +367,41 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         return false;
+    }
+
+    private boolean handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+        // Skip backslash and add next symbol to characters
+        List<Node> nodes = new LinkedList<>();
+
+        // When range started - we use 2 last characters to find out bounds of the range
+        // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
+        if (rangeStarted) {
+            handleEscapedCharacter(sb, nodes, false);
+            if (!nodes.isEmpty()) {
+                throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
+            }
+            rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
+        } else {
+            StringBuilder tmpSb = new StringBuilder(0);
+            handleEscapedCharacter(tmpSb, nodes, false);
+            sb.append(tmpSb);
+        }
+
+        if (!nodes.isEmpty()) {
+            if (nodes.size() > 1) {
+                throw new RuntimeException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+            } else {
+                if (nodes.get(0) instanceof SymbolSet) {
+                    for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
+                        sb.append(symbol);
+                    }
+                } else {
+                    throw new RuntimeException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+                }
+            }
+        }
+
+        return rangeStarted;
     }
 
     /**
@@ -389,36 +443,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    // Skip backslash and add next symbol to characters
-                    List<Node> nodes = new LinkedList<>();
-
-                    // When range started - we use 2 last characters to find out bounds of the range
-                    // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
-                    if (rangeStarted) {
-                        handleEscapedCharacter(sb, nodes, false);
-                        if (!nodes.isEmpty()) {
-                            throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
-                        }
-                        rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
-                    } else {
-                        StringBuilder tmpSb = new StringBuilder(0);
-                        handleEscapedCharacter(tmpSb, nodes, false);
-                        sb.append(tmpSb);
-                    }
-
-                    if (!nodes.isEmpty()) {
-                        if (nodes.size() > 1) {
-                            throw new RuntimeException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-                        } else {
-                            if (nodes.get(0) instanceof SymbolSet) {
-                                for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
-                                    sb.append(symbol);
-                                }
-                            } else {
-                                throw new RuntimeException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-                            }
-                        }
-                    }
+                    rangeStarted = handleBackslashCharacter(rangeStarted, sb, symbolRanges);
                     break;
 
                 default:

@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 public class RegressionTests {
 
     @Test
-    public void bug23_parseEscapeCharaterInSquareBrackets() {
+    public void bug23_parseEscapeCharacterInSquareBrackets() {
         String pattern = "[A-Z0-9'\\-/\\.\\s]{0,2}";
         final Pattern compile = Pattern.compile(pattern);
         final RgxGen rgxGen = new RgxGen(pattern);
