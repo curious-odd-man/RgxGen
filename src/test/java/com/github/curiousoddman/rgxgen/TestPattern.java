@@ -40,10 +40,10 @@ public enum TestPattern {
                  new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'c'), new SymbolSet.SymbolRange('A', 'C')), SymbolSet.TYPE.POSITIVE)
     ),
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
-                       new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, SymbolSet.TYPE.POSITIVE)
+                       new SymbolSet(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS), new String[]{"_"}, SymbolSet.TYPE.POSITIVE)
     ),
     ANY_NON_WORD_CHARACTER("\\W",      // Any non-word symbol  [a-zA-Z0-9_]
-                           new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('A', 'Z'), new SymbolSet.SymbolRange('0', '9')), new String[]{"_"}, SymbolSet.TYPE.NEGATIVE)
+                           new SymbolSet(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS), new String[]{"_"}, SymbolSet.TYPE.NEGATIVE)
     ),
     HEX_SPACE("\\x20", // Space
               new FinalSymbol(" ")
@@ -125,7 +125,7 @@ public enum TestPattern {
                        SymbolSet()),
                BigInteger.valueOf(95),
                Arrays.stream(SymbolSet.getAllSymbols())
-                     .map(s -> "a" + s)
+                     .map(s -> 'a' + s)
                      .collect(Collectors.toList())),
 
     ANY_THEN_ANY("..",

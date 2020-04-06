@@ -29,8 +29,8 @@ public final class Util {
     private static final String SYMBOLS = Arrays.stream(SymbolSet.getAllSymbols())
                                                 .reduce("", String::concat);
 
-    private static final Pattern EMPTY = Pattern.compile("");
-    public static final String[] ZERO_LENGTH_STRING_ARRAY = new String[0];
+    private static final Pattern  EMPTY                       = Pattern.compile("");
+    public static final String[] ZERO_LENGTH_STRING_ARRAY   = new String[0];
 
     /**
      * Splits string into array of single-character strings
