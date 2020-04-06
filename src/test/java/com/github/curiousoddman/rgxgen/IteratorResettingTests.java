@@ -19,11 +19,11 @@ public class IteratorResettingTests {
 
         private String aValue = "a";
 
-        public TestIterator() {
+        TestIterator() {
 
         }
 
-        public TestIterator(String value) {
+        TestIterator(String value) {
             aValue = value;
         }
 

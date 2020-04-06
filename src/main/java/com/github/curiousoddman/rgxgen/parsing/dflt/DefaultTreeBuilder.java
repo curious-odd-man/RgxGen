@@ -42,6 +42,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
+    private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
+
     private final CharIterator aCharIterator;
 
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
@@ -180,7 +182,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '?':
                 case '+':
                     // We had separate characters before
-                    Node repeatNode = null;
+                    Node repeatNode;
                     if (sb.length() == 0) {
                         // Repetition for the last node
                         repeatNode = nodes.remove(nodes.size() - 1);
@@ -232,6 +234,15 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return Integer.parseInt(hexValue, 16);
     }
 
+    private void handleGroupReference(boolean groupRefAllowed, List<Node> nodes, char firstCharacter) {
+        if (groupRefAllowed) {
+            String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
+            nodes.add(new GroupRef(Integer.parseInt(firstCharacter + digitsSubstring)));
+        } else {
+            throw new RuntimeException("Group ref is not expected here. " + aCharIterator.context());
+        }
+    }
+
     /**
      * Handles next character after escape sequence - \
      * It will either:
@@ -259,7 +270,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), Util.SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             // Hex character:
@@ -268,6 +279,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 sb.append((char) parseHexadecimal());
                 break;
 
+            // Group reference number
             case '1':
             case '2':
             case '3':
@@ -278,12 +290,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '8':
             case '9':
                 sbToFinal(sb, nodes);
-                if (groupRefAllowed) {
-                    String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
-                    nodes.add(new GroupRef(Integer.parseInt(c + digitsSubstring)));
-                } else {
-                    throw new RuntimeException("Group ref is not expected here. " + aCharIterator.context());
-                }
+                handleGroupReference(groupRefAllowed, nodes, c);
                 break;
 
             default:
@@ -291,6 +298,47 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
         }
 
+    }
+
+    /**
+     * Parses min and max repetitions from the {min,max} or {max} expressions (starting after {
+     *
+     * @param repeatNode node that should be repeated
+     * @return Repeat node
+     */
+    private Repeat handleRepeatInCurvyBraces(Node repeatNode) {
+        StringBuilder sb = new StringBuilder(10);
+        int min = -1;
+        while (aCharIterator.hasNext()) {
+            char c = aCharIterator.next();
+            switch (c) {
+                case ',': {
+                    min = Integer.parseInt(sb.toString());
+                    sb.delete(0, sb.length());
+                }
+                break;
+
+                case '}':
+                    if (min == -1) {
+                        return new Repeat(repeatNode, Integer.parseInt(sb.toString()));
+                    } else {
+                        if (sb.length() == 0) {
+                            return Repeat.minimum(repeatNode, min);
+                        } else {
+                            return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
+                        }
+                    }
+
+                case '\\':
+                    throw new RuntimeException("Escape character inside curvy repetition is not supported. " + aCharIterator.context());
+
+                default:
+                    sb.append(c);
+                    break;
+            }
+        }
+
+        throw new RuntimeException("Unbalanced '{' - missing '}'");
     }
 
     /**
@@ -308,40 +356,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else if (c == '+') {
             return Repeat.minimum(repeatNode, 1);
         } else if (c == '{') {
-            StringBuilder sb = new StringBuilder(10);
-            int min = -1;
-            while (aCharIterator.hasNext()) {
-                char tmpc = aCharIterator.next();
-                switch (tmpc) {
-                    case ',': {
-                        min = Integer.parseInt(sb.toString());
-                        sb.delete(0, sb.length());
-                    }
-                    break;
-
-                    case '}':
-                        if (min == -1) {
-                            return new Repeat(repeatNode, Integer.parseInt(sb.toString()));
-                        } else {
-                            if (sb.length() == 0) {
-                                return Repeat.minimum(repeatNode, min);
-                            } else {
-                                return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
-                            }
-                        }
-
-                        // TODO: Is it really possible and allowed???
-                    case '\\':
-                        // Skip backslash and add next symbol to characters
-                        tmpc = aCharIterator.next();
-                        //noinspection fallthrough
-                    default:
-                        sb.append(tmpc);
-                        break;
-                }
-            }
-
-            throw new RuntimeException("Unbalanced '{' - missing '}'");
+            return handleRepeatInCurvyBraces(repeatNode);
         }
 
         throw new RuntimeException("Unknown repetition character '" + c + '\'');
@@ -395,7 +410,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             if (!nodes.isEmpty()) {
                 throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
             }
-            rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
+            rangeStarted = handleRange(true, sb, symbolRanges);
         } else {
             StringBuilder tmpSb = new StringBuilder(0);
             handleEscapedCharacter(tmpSb, nodes, false);
