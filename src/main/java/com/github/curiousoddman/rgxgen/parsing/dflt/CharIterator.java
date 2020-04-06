@@ -180,7 +180,7 @@ public class CharIterator implements Iterator<Character> {
     /**
      * Returns last character that would be iterated over
      *
-     * @return
+     * @return last character that would be iterated over
      */
     public char last() {
         return aValue.charAt(aLastIndex - 1);

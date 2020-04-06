@@ -44,12 +44,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final CharIterator aCharIterator;
 
+    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
     private static class Provider {
         private String[]                    aDigits;
         private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
         private List<SymbolSet.SymbolRange> aWordCharRanges;
 
-        public String[] getDigits() {
+        String[] getDigits() {
             if (aDigits == null) {
                 aDigits = IntStream.rangeClosed(0, 9)
                                    .mapToObj(Integer::toString)
@@ -59,14 +60,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             return aDigits;
         }
 
-        public String[] getWhitespaces() {
+        String[] getWhitespaces() {
             if (aWhiteSpaces == null) {
                 aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
             }
             return aWhiteSpaces;
         }
 
-        public List<SymbolSet.SymbolRange> getWordCharRanges() {
+        List<SymbolSet.SymbolRange> getWordCharRanges() {
             if (aWordCharRanges == null) {
                 aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS));
             }
@@ -213,6 +214,25 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     /**
+     * Parse hexadecimal string into a integer value.
+     * Format: NN or {NNNN}
+     *
+     * @return integer value
+     */
+    private int parseHexadecimal() {
+        char c = aCharIterator.peek();
+        String hexValue;
+        if (c == '{') {
+            aCharIterator.skip();
+            hexValue = aCharIterator.nextUntil('}');
+            aCharIterator.skip();
+        } else {
+            hexValue = aCharIterator.next(2);
+        }
+        return Integer.parseInt(hexValue, 16);
+    }
+
+    /**
      * Handles next character after escape sequence - \
      * It will either:
      * a) add new node to nodes, if that was any special escape sequence, or
@@ -239,24 +259,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                String[] wordSymbols = {"_"};
-                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), wordSymbols, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), Util.SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             // Hex character:
             //   \xNN or \x{NNNN}
             case 'x':
-                c = aCharIterator.peek();
-                String hexValue;
-                if (c == '{') {
-                    aCharIterator.skip();
-                    hexValue = aCharIterator.nextUntil('}');
-                    aCharIterator.skip();
-                } else {
-                    hexValue = aCharIterator.next(2);
-                }
-                int value = Integer.parseInt(hexValue, 16);
-                sb.append((char) value);
+                sb.append((char) parseHexadecimal());
                 break;
 
             case '1':
