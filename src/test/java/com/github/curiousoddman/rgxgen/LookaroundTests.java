@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -37,6 +38,18 @@ public class LookaroundTests {
         RgxGen rgxGen = new RgxGen(aRegex);
         for (int i = 0; i < 100; i++) {
             String s = rgxGen.generate();
+            assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
+                                                                                   .matcher(s)
+                                                                                   .find());
+        }
+    }
+
+    @Test
+    public void generateInfiniteTest() {
+        RgxGen rgxGen = new RgxGen(aRegex);
+        StringIterator stringIterator = rgxGen.iterateUnique();
+        for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
+            String s = stringIterator.next();
             assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
                                                                                    .matcher(s)
                                                                                    .find());
