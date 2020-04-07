@@ -34,20 +34,20 @@ Enter your pattern and see the results.
 ```
 #### latest SNAPSHOT:
 ```
+<repositories>
+    <repository>
+        <id>snapshots-repository</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+</repositories>
+
+// ....
+
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
     <version>1.1-SNAPSHOT</version>
 </dependency>
-```
-**NOTE: To use snapshot add snapshots repository:**
-```
-<repositories>
-    <repository>
-        <id>asd</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
-</repositories>
 ```
 
 ### Code: 
