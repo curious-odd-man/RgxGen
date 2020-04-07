@@ -44,12 +44,6 @@ public class PermutationsIterator extends StringIterator {
         aGeneratedParts[0] = null;
     }
 
-    public PermutationsIterator(int length, String[] values) {
-        this(IntStream.range(0, length)
-                      .mapToObj(i -> ((Supplier<StringIterator>) () -> new ArrayIterator(values)))
-                      .collect(Collectors.toList()));
-    }
-
     @Override
     public boolean hasNext() {
         return aGeneratedParts[0] == null || Arrays.stream(aIterators)

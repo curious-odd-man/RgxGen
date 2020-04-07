@@ -12,7 +12,9 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -78,5 +80,21 @@ public class CombinedTests {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         aTestPattern.aResultNode.visit(v);
         assertEquals(aTestPattern.aAllUniqueValues, TestingUtilities.iteratorToList(v.getUniqueStrings()));
+    }
+
+    @Test
+    public void classRgxGenTest() {
+        RgxGen rgxGen = new RgxGen(aTestPattern.aPattern);
+        if (aTestPattern.hasEstimatedCound()) {
+            assertEquals(aTestPattern.aEstimatedCount, rgxGen.numUnique());
+        }
+        List<String> strings = rgxGen.stream()
+                                     .limit(1000)
+                                     .collect(Collectors.toList());
+        for (String string : strings) {
+            boolean result = validateGenerated(string);
+            assertTrue("Text: '" + string + "'does not match pattern " + aTestPattern.aPattern, result);
+
+        }
     }
 }

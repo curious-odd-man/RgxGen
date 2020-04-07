@@ -65,18 +65,12 @@ public enum TestPattern {
     A_OR_B_THEN_C("[ab]c",
                   new Sequence(new SymbolSet(new String[]{
                           "a", "b"
-                  }, SymbolSet.TYPE.POSITIVE), new
-
-                                       FinalSymbol("c")), BigInteger.valueOf(2)),
+                  }, SymbolSet.TYPE.POSITIVE), new FinalSymbol("c")), BigInteger.valueOf(2)),
 
     D_THEN_A_OR_B_THEN_C("d[ab]c",
-                         new Sequence(new FinalSymbol("d"), new
-
-                                 SymbolSet(new String[]{
+                         new Sequence(new FinalSymbol("d"), new SymbolSet(new String[]{
                                  "a", "b"
-                         }, SymbolSet.TYPE.POSITIVE), new
-
-                                              FinalSymbol("c")),
+                         }, SymbolSet.TYPE.POSITIVE), new FinalSymbol("c")),
                          BigInteger.valueOf(2)),
 
     A_REPEAT_RANGE("a{2,5}",
@@ -98,8 +92,7 @@ public enum TestPattern {
 
     A_OR_B_REPEAT_CONST(
             "(a|b){2}",
-            new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new
-                    FinalSymbol("b"))), 2),
+            new Repeat(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), 2),
             BigInteger.valueOf(4),
             Arrays.asList("aa", "ab", "ba", "bb")),
 
@@ -120,18 +113,14 @@ public enum TestPattern {
                                     Arrays.asList("", "a", "aa", "b", "bb")),
 
     A_THEN_ANY("a.",
-               new Sequence(new FinalSymbol("a"), new
-
-                       SymbolSet()),
+               new Sequence(new FinalSymbol("a"), new SymbolSet()),
                BigInteger.valueOf(95),
                Arrays.stream(SymbolSet.getAllSymbols())
                      .map(s -> 'a' + s)
                      .collect(Collectors.toList())),
 
     ANY_THEN_ANY("..",
-                 new Sequence(new SymbolSet(), new
-
-                         SymbolSet()),
+                 new Sequence(new SymbolSet(), new SymbolSet()),
                  BigInteger.valueOf(95 * 95),
                  Arrays.stream(SymbolSet.getAllSymbols())
                        .flatMap(s -> Arrays.stream(SymbolSet.getAllSymbols())
