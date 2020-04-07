@@ -21,25 +21,32 @@ import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 
 public class GenerationVisitor implements NodeVisitor {
     private final StringBuilder        aStringBuilder = new StringBuilder();
     private final Map<Integer, String> aGroupValues   = new HashMap<>();
+    private final Random               aRandom;
+
+    public GenerationVisitor() {
+        this(new Random());
+    }
+
+    public GenerationVisitor(Random random) {
+        aRandom = random;
+    }
 
     @Override
     public void visit(SymbolSet node) {
         String[] allSymbols = node.getSymbols();
-        int idx = ThreadLocalRandom.current()
-                                   .nextInt(allSymbols.length);
+        int idx = aRandom.nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);
     }
 
     @Override
     public void visit(Choice node) {
         Node[] nodes = node.getNodes();
-        int idx = ThreadLocalRandom.current()
-                                   .nextInt(nodes.length);
+        int idx = aRandom.nextInt(nodes.length);
         nodes[idx].visit(this);
     }
 
@@ -53,8 +60,7 @@ public class GenerationVisitor implements NodeVisitor {
         int max = node.getMax() == -1 ? 100 : node.getMax();
         int repeat = node.getMin() >= max ?
                      node.getMin() :
-                     ThreadLocalRandom.current()
-                                      .nextInt(node.getMin(), max + 1);
+                     node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
 
         for (long i = 0; i < repeat; ++i) {
             node.getNode()
@@ -73,11 +79,11 @@ public class GenerationVisitor implements NodeVisitor {
     public void visit(NotSymbol notSymbol) {
         String value = notSymbol.getSubPattern()
                                 .pattern();
-        String result = Util.randomString(value);
+        String result = Util.randomString(aRandom, value);
         while (!notSymbol.getSubPattern()
                          .matcher(value)
                          .matches()) {
-            result = Util.randomString(result);
+            result = Util.randomString(aRandom, result);
         }
 
         aStringBuilder.append(result);

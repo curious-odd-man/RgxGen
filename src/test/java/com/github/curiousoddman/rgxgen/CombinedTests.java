@@ -13,6 +13,8 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -95,6 +97,21 @@ public class CombinedTests {
             boolean result = validateGenerated(string);
             assertTrue("Text: '" + string + "'does not match pattern " + aTestPattern.aPattern, result);
 
+        }
+    }
+
+    @Test
+    public void repeatableGenerationTest() {
+        long seed = ThreadLocalRandom.current()
+                                     .nextLong();
+
+        Random rnd1 = new Random(seed);
+        Random rnd2 = new Random(seed);
+
+        RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
+        RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
+        for (int i = 0; i < 1000; i++) {
+            assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
         }
     }
 }
