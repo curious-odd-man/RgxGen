@@ -248,7 +248,15 @@ public enum TestPattern {
                                     new SymbolSet(new String[]{"'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n"}, SymbolSet.TYPE.POSITIVE),
                                     BigInteger.valueOf(10),
                                     Arrays.asList("'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n")
-    );
+    ),
+    CURVY_BRACES_MALFORMED_WITH_LETTER("a{1,x}",
+                                       new FinalSymbol("a{1,x}"),
+                                       BigInteger.ONE,
+                                       Collections.singletonList("a{1,x}")),
+    CURVY_BRACES_MALFORMED_WITH_ESCAPE_SEQUENCE("a{1,\\x{26F8}}",
+                                                new FinalSymbol("a{1,⛸"),
+                                                BigInteger.ONE,
+                                                Collections.singletonList("a{1,⛸"));
 
     final String       aPattern;
     final Node         aResultNode;
