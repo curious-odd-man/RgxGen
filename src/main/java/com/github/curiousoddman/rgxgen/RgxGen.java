@@ -25,6 +25,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.math.BigInteger;
+import java.util.Random;
 import java.util.stream.Stream;
 
 /**
@@ -92,6 +93,18 @@ public class RgxGen {
      */
     public String generate() {
         GenerationVisitor gv = new GenerationVisitor();
+        aNode.visit(gv);
+        return gv.getString();
+    }
+
+    /**
+     * Generate random string from the pattern.
+     *
+     * @param random random to use for the generation.
+     * @return generated string.
+     */
+    public String generate(Random random) {
+        GenerationVisitor gv = new GenerationVisitor(random);
         aNode.visit(gv);
         return gv.getString();
     }

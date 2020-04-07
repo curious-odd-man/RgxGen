@@ -98,7 +98,24 @@ Any other character are treated as simple characters and are generated as is, th
 | `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 | `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 
-Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23)
+Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
+
+</details>
+
+<details>
+<summary><b>dev branch changes</b></summary>
+
+TO BE ADDED:
+Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducable random sequences.
+```
+RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+Random rnd = new Random(1234)
+String s = rgxGen.generate(rnd);                                     // Generate first value
+String s1 = rgxGen.generate(rnd);                                    // Generate second value
+String s2 = rgxGen.generate(rnd);                                    // Generate third value
+// On each launch s, s1 and s2 will be the same
+```
+
 </details>
 
 ## Limitations
