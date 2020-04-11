@@ -84,7 +84,7 @@ public class CharIterator implements Iterator<Character> {
         try {
             return aValue.charAt(aCurrentIndex++);
         } catch (StringIndexOutOfBoundsException e) {
-            final NoSuchElementException noSuchElementException = new NoSuchElementException("");
+            final NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
             noSuchElementException.initCause(e);
             throw noSuchElementException;
         }
@@ -110,7 +110,9 @@ public class CharIterator implements Iterator<Character> {
     public String context() {
         int start = Math.max(0, aCurrentIndex - 5);
         int end = Math.min(aLastIndex, aCurrentIndex + 5);
-        return aValue.substring(start, end) + " at " + aCurrentIndex;
+        StringBuilder sb = new StringBuilder("          ");
+        sb.insert(1 + Math.min(start, 5), '^');     // 1 offset for the '
+        return "\n'" + aValue.substring(start, end) + "' at \n" + sb;
     }
 
     /**
@@ -128,7 +130,7 @@ public class CharIterator implements Iterator<Character> {
      *
      * @param c character to search for
      * @return substring from next character up to next not escaped character {@code c}
-     * @throws RuntimeException if no such character present after next character
+     * @throws NoSuchElementException if no such character present after next character
      */
     public String nextUntil(char c) {
         int startIndex = aCurrentIndex;
@@ -136,7 +138,7 @@ public class CharIterator implements Iterator<Character> {
             // Find ending character
             aCurrentIndex = aValue.indexOf(c, aCurrentIndex);
             if (aCurrentIndex == -1) {
-                throw new RuntimeException("Could not find character '" + c + "' in string: '" + aValue.substring(startIndex));
+                throw new NoSuchElementException("Could not find character '" + c + "' in string: '" + aValue.substring(startIndex));
             }
             int cnt = 1;        // One, because we subtract it later from endIndex. Just to avoid extra subtraction
             // Count how much backslashes there are -
