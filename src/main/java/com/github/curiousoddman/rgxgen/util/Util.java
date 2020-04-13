@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 /**
  * Utility methods collection
@@ -74,18 +73,19 @@ public final class Util {
     /**
      * Repeats text multiple times
      *
-     * @param text text to repeat
+     * @param c     character to repeat
      * @param times number of times. Values less or equal to zero will result in empty string
      * @return text repeated multiple times
      */
-    public static String multiplicate(String text, int times) {
+    public static String multiplicate(char c, int times) {
         if (times < 0) {
             return "";
         }
-        return Stream.generate(() -> text)
-                     .limit(times)
-                     .reduce(String::concat)
-                     .orElse("");
+
+        char[] result = new char[times];
+        Arrays.fill(result, c);
+
+        return new String(result);
     }
 
     /**

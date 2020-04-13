@@ -50,9 +50,9 @@ public class UtilTests {
 
     @Test
     public void multiplicateTest() {
-        assertEquals("", Util.multiplicate(" ", -1));
-        assertEquals("   ", Util.multiplicate(" ", 3));
-        assertEquals("XxXXxX", Util.multiplicate("XxX", 2));
+        assertEquals("", Util.multiplicate(' ', -1));
+        assertEquals("   ", Util.multiplicate(' ', 3));
+        assertEquals("XX", Util.multiplicate('X', 2));
     }
 }
 
