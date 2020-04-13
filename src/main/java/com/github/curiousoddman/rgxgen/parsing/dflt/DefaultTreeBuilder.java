@@ -117,7 +117,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 if (next == '!') {
                     res = GroupType.NEGATIVE_LOOKBEHIND;
                 } else if (next != '=') {   // Positive Lookbehind does not affect generation.
-                    throw new RuntimeException("Unexpected symbol in pattern: " + aCharIterator.context());
+                    throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
                 }
                 return res;
 
@@ -239,7 +239,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
             nodes.add(new GroupRef(Integer.parseInt(firstCharacter + digitsSubstring)));
         } else {
-            throw new RuntimeException("Group ref is not expected here. " + aCharIterator.context());
+            throw new RgxGenParseException("Group ref is not expected here. " + aCharIterator.context());
         }
     }
 
@@ -330,7 +330,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     }
 
                 case '\\':
-                    throw new RuntimeException("Escape character inside curvy repetition is not supported. " + aCharIterator.context());
+                    throw new RgxGenParseException("Escape character inside curvy repetition is not supported. " + aCharIterator.context());
 
                 default:
                     sb.append(c);
@@ -338,7 +338,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        throw new RuntimeException("Unbalanced '{' - missing '}'");
+        // FIXME: Show the original {
+        throw new RgxGenParseException("Unbalanced '{' - missing '}'");
     }
 
     /**
@@ -359,9 +360,18 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             return handleRepeatInCurvyBraces(repeatNode);
         }
 
-        throw new RuntimeException("Unknown repetition character '" + c + '\'');
+        throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
     }
 
+    /**
+     * Wraps multiple nodes into correct container node (Choice, Sequence) or node as is and wraps it into Group node, if this is a capture group
+     *
+     * @param nodes             list of nodes (sequence or single node)
+     * @param choices           list of nodes to select one from
+     * @param isChoice          true when {@code} choices should be used
+     * @param captureGroupIndex index of capture group
+     * @return Group, Node
+     */
     private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
         Node resultNode;
 
@@ -408,7 +418,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (rangeStarted) {
             handleEscapedCharacter(sb, nodes, false);
             if (!nodes.isEmpty()) {
-                throw new RuntimeException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
+                throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
             }
             rangeStarted = handleRange(true, sb, symbolRanges);
         } else {
@@ -419,14 +429,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         if (!nodes.isEmpty()) {
             if (nodes.size() > 1) {
-                throw new RuntimeException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+                throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
             } else {
                 if (nodes.get(0) instanceof SymbolSet) {
                     for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
                         sb.append(symbol);
                     }
                 } else {
-                    throw new RuntimeException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+                    throw new RgxGenParseException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
                 }
             }
         }
@@ -481,7 +491,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
             }
         }
-        throw new RuntimeException("Unexpected End Of Expression. Didn't find closing ']'");
+        // FIXME: print context around origin of the problem
+        throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'");
     }
 
     public void build() {
@@ -495,7 +506,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         aNode = parseGroup(GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
-            throw new RuntimeException("Expression was not fully parsed");
+            throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());
         }
     }
 

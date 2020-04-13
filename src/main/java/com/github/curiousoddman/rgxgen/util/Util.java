@@ -71,6 +71,24 @@ public final class Util {
     }
 
     /**
+     * Repeats text multiple times
+     *
+     * @param c     character to repeat
+     * @param times number of times. Values less or equal to zero will result in empty string
+     * @return text repeated multiple times
+     */
+    public static String multiplicate(char c, int times) {
+        if (times < 0) {
+            return "";
+        }
+
+        char[] result = new char[times];
+        Arrays.fill(result, c);
+
+        return new String(result);
+    }
+
+    /**
      * Utility class can't be instantiated
      */
     private Util() {
