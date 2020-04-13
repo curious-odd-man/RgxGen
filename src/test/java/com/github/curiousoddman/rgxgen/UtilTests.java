@@ -47,5 +47,12 @@ public class UtilTests {
             assertEquals(Arrays.toString(datum), datum[2], charIterator.takeWhile(Character::isDigit));
         }
     }
+
+    @Test
+    public void multiplicateTest() {
+        assertEquals("", Util.multiplicate(" ", -1));
+        assertEquals("   ", Util.multiplicate(" ", 3));
+        assertEquals("XxXXxX", Util.multiplicate("XxX", 2));
+    }
 }
 

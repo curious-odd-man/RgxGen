@@ -22,6 +22,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * Utility methods collection
@@ -68,6 +69,23 @@ public final class Util {
             --count;
         }
         return builder.toString();
+    }
+
+    /**
+     * Repeats text multiple times
+     *
+     * @param text text to repeat
+     * @param times number of times. Values less or equal to zero will result in empty string
+     * @return text repeated multiple times
+     */
+    public static String multiplicate(String text, int times) {
+        if (times < 0) {
+            return "";
+        }
+        return Stream.generate(() -> text)
+                     .limit(times)
+                     .reduce(String::concat)
+                     .orElse("");
     }
 
     /**

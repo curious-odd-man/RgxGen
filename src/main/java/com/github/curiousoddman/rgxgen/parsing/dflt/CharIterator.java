@@ -16,6 +16,8 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.util.Util;
+
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Predicate;
@@ -110,9 +112,10 @@ public class CharIterator implements Iterator<Character> {
     public String context() {
         int start = Math.max(0, aCurrentIndex - 5);
         int end = Math.min(aLastIndex, aCurrentIndex + 5);
-        StringBuilder sb = new StringBuilder("          ");
-        sb.insert(1 + Math.min(start, 5), '^');     // 1 offset for the '
-        return "\n'" + aValue.substring(start, end) + "' at \n" + sb;
+        int offsetOfPointer = start == 0
+                              ? aCurrentIndex
+                              : Math.max(5, Math.min(start, 5));
+        return "\n'" + aValue.substring(start, end) + "' at \n" + Util.multiplicate(" ", 1 + offsetOfPointer) + '^';
     }
 
     /**
