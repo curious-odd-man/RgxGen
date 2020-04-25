@@ -20,7 +20,6 @@ import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
 
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 
 /**
@@ -41,16 +40,6 @@ public final class Util {
      */
     public static String[] stringToCharsSubstrings(String str) {
         return EMPTY.split(str);
-    }
-
-    /**
-     * Creates random string up to 10 symbols long
-     *
-     * @param value seed used to select length
-     * @return random string up to 10 symbols long
-     */
-    public static String randomString(String value) {
-        return randomString(ThreadLocalRandom.current(), value);
     }
 
     /**

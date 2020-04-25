@@ -110,12 +110,24 @@ public class CharIterator implements Iterator<Character> {
      * @return substring [-5,+5) chars from current position
      */
     public String context() {
-        int start = Math.max(0, aCurrentIndex - 5);
-        int end = Math.min(aLastIndex, aCurrentIndex + 5);
+        // -1 is because when we take character (using next()) we already move aCurrentIndex further!
+        // So we need to point to previous index, actually
+        return context(aCurrentIndex - 1);
+    }
+
+    /**
+     * Returns context around passed index
+     *
+     * @param index center point of context
+     * @return substring [-5,+5) chars from index
+     */
+    public String context(int index) {
+        int start = Math.max(0, index - 5);
+        int end = Math.min(aLastIndex, index + 5);
         int offsetOfPointer = start == 0
-                              ? aCurrentIndex
+                              ? index
                               : Math.max(5, Math.min(start, 5));
-        return "\n'" + aValue.substring(start, end) + "' at \n" + Util.multiplicate(' ', 1 + offsetOfPointer) + '^';
+        return "\n'" + aValue.substring(start, end) + "'\n" + Util.multiplicate(' ', 1 + offsetOfPointer) + '^';
     }
 
     /**
@@ -200,4 +212,12 @@ public class CharIterator implements Iterator<Character> {
         aLastIndex += offset;
     }
 
+    /**
+     * Return position of last symbol returned by next()
+     *
+     * @return index
+     */
+    public int pos() {
+        return aCurrentIndex - 1;
+    }
 }

@@ -46,8 +46,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final CharIterator aCharIterator;
 
+    /**
+     * Helper class for lazy initialization and reuse of some constants that are re-used.
+     * Use with caution - don't modify values inside those!!!
+     */
     @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private static class Provider {
+    private static class ConstantsProvider {
         private String[]                    aDigits;
         private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
         private List<SymbolSet.SymbolRange> aWordCharRanges;
@@ -78,7 +82,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static final Provider PROVIDER = new Provider();
+    private static final ConstantsProvider CONST_PROVIDER = new ConstantsProvider();
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -132,8 +136,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
             captureGroupIndex = aNextGroupIndex++;
         }
-        ArrayList<Node> choices = new ArrayList<>();
-        ArrayList<Node> nodes = new ArrayList<>();
+        List<Node> choices = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>();
         StringBuilder sb = new StringBuilder(aCharIterator.remaining());
         boolean isChoice = false;
 
@@ -234,7 +238,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return Integer.parseInt(hexValue, 16);
     }
 
-    private void handleGroupReference(boolean groupRefAllowed, List<Node> nodes, char firstCharacter) {
+    private void handleGroupReference(boolean groupRefAllowed, Collection<Node> nodes, char firstCharacter) {
         if (groupRefAllowed) {
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
             nodes.add(new GroupRef(Integer.parseInt(firstCharacter + digitsSubstring)));
@@ -258,19 +262,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                nodes.add(new SymbolSet(CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
                 break;
 
             // Hex character:
@@ -309,11 +313,17 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private Repeat handleRepeatInCurvyBraces(Node repeatNode) {
         StringBuilder sb = new StringBuilder(10);
         int min = -1;
+        int contextIndex = aCharIterator.pos();
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ',': {
-                    min = Integer.parseInt(sb.toString());
+                    int tmpContextIndex = aCharIterator.pos() - 1;
+                    try {
+                        min = Integer.parseInt(sb.toString());
+                    } catch (NumberFormatException e) {
+                        throw new RgxGenParseException("Malformed lower bound number." + aCharIterator.context(tmpContextIndex), e);
+                    }
                     sb.delete(0, sb.length());
                 }
                 break;
@@ -325,7 +335,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         if (sb.length() == 0) {
                             return Repeat.minimum(repeatNode, min);
                         } else {
-                            return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
+                            try {
+                                return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
+                            } catch (NumberFormatException e) {
+                                throw new RgxGenParseException("Malformed upper bound number." + aCharIterator.context(), e);
+                            }
                         }
                     }
 
@@ -338,8 +352,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        // FIXME: Show the original {
-        throw new RgxGenParseException("Unbalanced '{' - missing '}'");
+        throw new RgxGenParseException("Unbalanced '{' - missing '}' at " + aCharIterator.context(contextIndex));
     }
 
     /**
@@ -451,6 +464,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return Node that covers expression in square brackets
      */
     private Node handleCharacterVariations() {
+        int openSquareBraceIndex = aCharIterator.pos();
         SymbolSet.TYPE symbolSetType = SymbolSet.TYPE.POSITIVE;
         if (aCharIterator.peek() == '^') {
             symbolSetType = SymbolSet.TYPE.NEGATIVE;
@@ -491,8 +505,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
             }
         }
-        // FIXME: print context around origin of the problem
-        throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'");
+
+        throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
     public void build() {

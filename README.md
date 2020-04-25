@@ -106,7 +106,7 @@ Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequ
 <summary><b>dev branch changes</b></summary>
 
 
-Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducable random sequences.
+Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
 ```
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 Random rnd = new Random(1234)
