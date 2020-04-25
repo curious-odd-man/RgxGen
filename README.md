@@ -29,7 +29,7 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.0</version>
+    <version>1.1</version>
 </dependency>
 ```
 #### latest SNAPSHOT:
@@ -71,8 +71,8 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 | `*`  | Zero or more occurrences |
 | `\d`  | A digit. Equivalent to `[0-9]` |
 | `\D`  | Not a digit. Equivalent to `[^0-9]` |
-| `\s`  | Space, tab or newline |
-| `\S`  | Anything, but space, tab or newline |
+| `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
+| `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 | `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
 | `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
 | `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
@@ -88,26 +88,9 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
 
-</details>
-
-<details>
-<summary><b>SNAPSHOT changes</b></summary>
-
-| Pattern   | Description  |
-| ---------: |-------------|
-| `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
-| `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
-
 Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
-
-</details>
-
-<details>
-<summary><b>dev branch changes</b></summary>
-
-
 Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
-```
+```java
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 Random rnd = new Random(1234)
 String s = rgxGen.generate(rnd);                                     // Generate first value
