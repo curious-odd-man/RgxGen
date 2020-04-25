@@ -88,8 +88,9 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
 
-Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
-Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
+* Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
+* Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
+
 ```java
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 Random rnd = new Random(1234)
