@@ -43,13 +43,25 @@ public class FailingParsingTests {
     }
 
     @Test
-    public void escapeCharacterInsideCurvyRepetitionTest() {
+    public void malformedUpperBoundNumberTest() {
         expectedEx.expect(RgxGenParseException.class);
-        expectedEx.expectMessage("Escape character inside curvy braces is not allowed. \n" +
+        expectedEx.expectMessage("Malformed upper bound number.\n" +
                                          "'a{1,\t}'\n" +
                                          "      ^");
 
         String pattern = "a{1,\t}";
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
+        defaultTreeBuilder.build();
+    }
+
+    @Test
+    public void malformedLowerBoundNumberTest() {
+        expectedEx.expect(RgxGenParseException.class);
+        expectedEx.expectMessage("Malformed lower bound number.\n" +
+                                         "'a{c,3}'\n" +
+                                         "   ^");
+
+        String pattern = "a{c,3}";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
         defaultTreeBuilder.build();
     }
@@ -101,12 +113,12 @@ public class FailingParsingTests {
     }
 
     @Test
-    public void unbalancedFigureBracesTest() {
+    public void escapeCharacterInCurvyBracesTest() {
         expectedEx.expect(RgxGenParseException.class);
-        expectedEx.expectMessage("Unbalanced '{' - missing '}' at \n" +
-                                         "'a{3,'\n" +
-                                         "  ^");
+        expectedEx.expectMessage("Escape character inside curvy repetition is not supported. \n" +
+                                         "'a{\\'\n" +
+                                         "   ^");
 
-        RgxGen gem = new RgxGen("a{3,");
+        RgxGen gem = new RgxGen("a{\\");
     }
 }

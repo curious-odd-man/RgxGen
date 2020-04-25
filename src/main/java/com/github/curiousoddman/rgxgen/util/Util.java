@@ -46,16 +46,6 @@ public final class Util {
     /**
      * Creates random string up to 10 symbols long
      *
-     * @param value seed used to select length
-     * @return random string up to 10 symbols long
-     */
-    public static String randomString(String value) {
-        return randomString(ThreadLocalRandom.current(), value);
-    }
-
-    /**
-     * Creates random string up to 10 symbols long
-     *
      * @param rnd   random to be used
      * @param value seed used to select length
      * @return random string up to 10 symbols long

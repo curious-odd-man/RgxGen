@@ -318,7 +318,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             char c = aCharIterator.next();
             switch (c) {
                 case ',': {
-                    min = Integer.parseInt(sb.toString());
+                    int tmpContextIndex = aCharIterator.pos() - 1;
+                    try {
+                        min = Integer.parseInt(sb.toString());
+                    } catch (NumberFormatException e) {
+                        throw new RgxGenParseException("Malformed lower bound number." + aCharIterator.context(tmpContextIndex), e);
+                    }
                     sb.delete(0, sb.length());
                 }
                 break;
@@ -333,7 +338,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                             try {
                                 return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
                             } catch (NumberFormatException e) {
-                                throw new RgxGenParseException("Escape character inside curvy braces is not allowed. " + aCharIterator.context(), e);
+                                throw new RgxGenParseException("Malformed upper bound number." + aCharIterator.context(), e);
                             }
                         }
                     }
