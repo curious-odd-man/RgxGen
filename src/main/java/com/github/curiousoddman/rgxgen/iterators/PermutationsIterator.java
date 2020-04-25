@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class PermutationsIterator extends StringIterator {
     private final StringIterator[] aIterators;

@@ -104,7 +104,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
                 || !(aParentNode instanceof Repeat)) {
             // Do nothing. It does not add new unique values.
         } else {
-            // When repeated multiple times - it adds as much unique values as it is repeated. So we should add 1 (it will be used in Repeat for calcuation).
+            // When repeated multiple times - it adds as much unique values as it is repeated. So we should add 1 (it will be used in Repeat for calculation).
             // E.g. (a|b)\1{2,3} - captured value of group is repeated either 2 or 3 times - it gives 2 unique values.
             aCount = aCount.add(BigInteger.ONE);
         }
