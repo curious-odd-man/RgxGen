@@ -13,25 +13,44 @@ Build status:
 
 ## Try it now!!!
 
-Note: latest version in maven is imported there. See supported syntax below for details.
+Note: latest RELEASE version is imported there. See supported syntax below for details.
 
-Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1Ni2)
+Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
 
 Enter your pattern and see the results.
 
 
 ## Usage
 
-Maven dependency (latest available version):
+### Maven dependency
+
+#### latest RELEASE:
 ```
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>0.9</version>
+    <version>1.1</version>
+</dependency>
+```
+#### latest SNAPSHOT:
+```
+<repositories>
+    <repository>
+        <id>snapshots-repository</id>
+        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </repository>
+</repositories>
+
+// ....
+
+<dependency>
+    <groupId>com.github.curious-odd-man</groupId>
+    <artifactId>rgxgen</artifactId>
+    <version>1.1-SNAPSHOT</version>
 </dependency>
 ```
 
-Code: 
+### Code: 
 ```
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 String s = rgxGen.generate();                                        // Generate new random value
@@ -42,26 +61,7 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 ## Supported syntax
 
 <details>
-<summary><b>Latest version in maven</b></summary>
-
-```
-. - any symbol
-? - one or zero occurrences
-+ - one or more occurrences
-* - zero or more occurrences
-\d - a digit. Equivalent to [0-9]
-{2} and {1,2} - repeatitions. NOTE {1,} not supported yet
-[] - single character from ones that are inside brackets. [a-zA-Z] (dash) also supported
-() - to group multiple characters for the repetitions
-(a|b) - alternatives 
-escape character \ - to escape special characters (use \\ to generate single \ character)
-```
-
-Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
-</details>
-
-<details>
-<summary><b>Latest dev version</b></summary>
+<summary><b>Latest RELEASE</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
@@ -71,8 +71,8 @@ Any other character are treated as simple characters and are generated as is, th
 | `*`  | Zero or more occurrences |
 | `\d`  | A digit. Equivalent to `[0-9]` |
 | `\D`  | Not a digit. Equivalent to `[^0-9]` |
-| `\s`  | Space, tab or newline |
-| `\S`  | Anything, but space, tab or newline |
+| `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
+| `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
 | `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
 | `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
 | `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
@@ -87,6 +87,17 @@ Any other character are treated as simple characters and are generated as is, th
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+
+Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
+Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
+```java
+RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+Random rnd = new Random(1234)
+String s = rgxGen.generate(rnd);                                     // Generate first value
+String s1 = rgxGen.generate(rnd);                                    // Generate second value
+String s2 = rgxGen.generate(rnd);                                    // Generate third value
+// On each launch s, s1 and s2 will be the same
+```
 
 </details>
 

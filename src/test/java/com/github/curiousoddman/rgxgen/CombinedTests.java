@@ -12,7 +12,11 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -78,5 +82,36 @@ public class CombinedTests {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
         aTestPattern.aResultNode.visit(v);
         assertEquals(aTestPattern.aAllUniqueValues, TestingUtilities.iteratorToList(v.getUniqueStrings()));
+    }
+
+    @Test
+    public void classRgxGenTest() {
+        RgxGen rgxGen = new RgxGen(aTestPattern.aPattern);
+        if (aTestPattern.hasEstimatedCound()) {
+            assertEquals(aTestPattern.aEstimatedCount, rgxGen.numUnique());
+        }
+        List<String> strings = rgxGen.stream()
+                                     .limit(1000)
+                                     .collect(Collectors.toList());
+        for (String string : strings) {
+            boolean result = validateGenerated(string);
+            assertTrue("Text: '" + string + "'does not match pattern " + aTestPattern.aPattern, result);
+
+        }
+    }
+
+    @Test
+    public void repeatableGenerationTest() {
+        long seed = ThreadLocalRandom.current()
+                                     .nextLong();
+
+        Random rnd1 = new Random(seed);
+        Random rnd2 = new Random(seed);
+
+        RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
+        RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
+        for (int i = 0; i < 1000; i++) {
+            assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
+        }
     }
 }

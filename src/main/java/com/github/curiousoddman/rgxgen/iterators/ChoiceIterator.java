@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 public class ChoiceIterator extends StringIterator {
     private final StringIterator[] aIterators;
 
-    private int aCurrentIteratorIndex = 0;
+    private int aCurrentIteratorIndex;
 
     public ChoiceIterator(StringIterator[] iterators) {
         aIterators = iterators;

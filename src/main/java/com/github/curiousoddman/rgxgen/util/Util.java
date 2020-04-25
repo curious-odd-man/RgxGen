@@ -19,7 +19,7 @@ package com.github.curiousoddman.rgxgen.util;
 import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
 
 import java.util.Arrays;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 /**
@@ -29,8 +29,8 @@ public final class Util {
     private static final String SYMBOLS = Arrays.stream(SymbolSet.getAllSymbols())
                                                 .reduce("", String::concat);
 
-    private static final Pattern EMPTY = Pattern.compile("");
-    public static final String[] ZERO_LENGTH_STRING_ARRAY = new String[0];
+    private static final Pattern  EMPTY                    = Pattern.compile("");
+    public static final  String[] ZERO_LENGTH_STRING_ARRAY = new String[0];
 
     /**
      * Splits string into array of single-character strings
@@ -45,18 +45,36 @@ public final class Util {
     /**
      * Creates random string up to 10 symbols long
      *
+     * @param rnd   random to be used
      * @param value seed used to select length
      * @return random string up to 10 symbols long
      */
-    public static String randomString(String value) {
+    public static String randomString(Random rnd, String value) {
         int count = Math.abs(value.hashCode() % 10);
         StringBuilder builder = new StringBuilder(count);
-        ThreadLocalRandom rnd = ThreadLocalRandom.current();
         while (count >= 0) {
             builder.append(SYMBOLS.charAt(rnd.nextInt(SYMBOLS.length())));
             --count;
         }
         return builder.toString();
+    }
+
+    /**
+     * Repeats text multiple times
+     *
+     * @param c     character to repeat
+     * @param times number of times. Values less or equal to zero will result in empty string
+     * @return text repeated multiple times
+     */
+    public static String multiplicate(char c, int times) {
+        if (times < 0) {
+            return "";
+        }
+
+        char[] result = new char[times];
+        Arrays.fill(result, c);
+
+        return new String(result);
     }
 
     /**

@@ -65,6 +65,10 @@ public class SymbolSet implements Node {
      * Range of symbols
      */
     public static class SymbolRange {
+        public static final SymbolRange SMALL_LETTERS   = new SymbolSet.SymbolRange('a', 'z');
+        public static final SymbolRange CAPITAL_LETTERS = new SymbolSet.SymbolRange('A', 'Z');
+        public static final SymbolRange DIGITS          = new SymbolSet.SymbolRange('0', '9');
+
         private final int aFrom;
         private final int aTo;
 

@@ -37,7 +37,7 @@ public class LimitedInfinitePatternsTests {
                         new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
                                  .limit(10)
-                                 .mapToObj(v -> "a" + Stream.generate(() -> "a")
+                                 .mapToObj(v -> 'a' + Stream.generate(() -> "a")
                                                             .limit(v)
                                                             .reduce("", String::concat))
                                 .collect(Collectors.toList())
@@ -49,7 +49,7 @@ public class LimitedInfinitePatternsTests {
                                                                    Arrays.stream(SymbolSet.getAllSymbols())
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
                                                                                                   .map(v -> symbol + v))))
-                              .map(v -> "a" + v)
+                              .map(v -> 'a' + v)
                                 .collect(Collectors.toList())
                 }
         });

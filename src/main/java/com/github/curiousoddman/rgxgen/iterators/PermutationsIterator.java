@@ -21,8 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 public class PermutationsIterator extends StringIterator {
     private final StringIterator[] aIterators;
@@ -42,12 +40,6 @@ public class PermutationsIterator extends StringIterator {
 
         // Make sure it is null, because it's used for check later
         aGeneratedParts[0] = null;
-    }
-
-    public PermutationsIterator(int length, String[] values) {
-        this(IntStream.range(0, length)
-                      .mapToObj(i -> ((Supplier<StringIterator>) () -> new ArrayIterator(values)))
-                      .collect(Collectors.toList()));
     }
 
     @Override
