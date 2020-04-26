@@ -13,9 +13,11 @@ Build status:
 
 ## Try it now!!!
 
-Note: latest RELEASE version is imported there. See supported syntax below for details.
-
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
+
+Note: 1.0 version is imported there - unfortunately currently I can't change it to latest (1.1).
+
+Luckly there is no big difference between 1.0 and 1.1
 
 Enter your pattern and see the results.
 
@@ -25,7 +27,7 @@ Enter your pattern and see the results.
 ### Maven dependency
 
 #### latest RELEASE:
-```
+```xml
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
@@ -33,7 +35,7 @@ Enter your pattern and see the results.
 </dependency>
 ```
 #### latest SNAPSHOT:
-```
+```xml
 <repositories>
     <repository>
         <id>snapshots-repository</id>
@@ -51,11 +53,20 @@ Enter your pattern and see the results.
 ```
 
 ### Code: 
-```
+```java
 RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
 String s = rgxGen.generate();                                        // Generate new random value
 BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
 StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
+```
+
+```java
+RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+Random rnd = new Random(1234)
+String s = rgxGen.generate(rnd);                                     // Generate first value
+String s1 = rgxGen.generate(rnd);                                    // Generate second value
+String s2 = rgxGen.generate(rnd);                                    // Generate third value
+// On each launch s, s1 and s2 will be the same
 ```
 
 ## Supported syntax
@@ -87,18 +98,6 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
 Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
-
-* Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
-* Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
-
-```java
-RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-Random rnd = new Random(1234)
-String s = rgxGen.generate(rnd);                                     // Generate first value
-String s1 = rgxGen.generate(rnd);                                    // Generate second value
-String s2 = rgxGen.generate(rnd);                                    // Generate third value
-// On each launch s, s1 and s2 will be the same
-```
 
 </details>
 
