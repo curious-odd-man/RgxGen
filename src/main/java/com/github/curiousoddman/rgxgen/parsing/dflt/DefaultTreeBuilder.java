@@ -131,7 +131,16 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    public Node parseGroup(GroupType currentGroupType) {
+    private Node handleGroupEnd(StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex) {
+        sbToFinal(sb, nodes);
+        if (isChoice) {
+            choices.add(sequenceOrNot(nodes, choices, false, null));
+            nodes.clear();
+        }
+        return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
+    }
+
+    private Node parseGroup(GroupType currentGroupType) {
         Integer captureGroupIndex = null;
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
             captureGroupIndex = aNextGroupIndex++;
@@ -174,12 +183,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case ')':
-                    sbToFinal(sb, nodes);
-                    if (isChoice) {
-                        choices.add(sequenceOrNot(nodes, choices, false, null));
-                        nodes.clear();
-                    }
-                    return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
+                    return handleGroupEnd(sb, nodes, isChoice, choices, captureGroupIndex);
 
                 case '{':
                 case '*':
@@ -215,8 +219,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        sbToFinal(sb, nodes);
-        return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
+        return handleGroupEnd(sb, nodes, isChoice, choices, captureGroupIndex);
     }
 
     /**
