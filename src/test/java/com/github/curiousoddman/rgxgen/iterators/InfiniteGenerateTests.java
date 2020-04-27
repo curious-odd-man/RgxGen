@@ -1,6 +1,6 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.iterators;
 
-import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.RgxGen;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

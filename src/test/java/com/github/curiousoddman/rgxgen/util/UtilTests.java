@@ -1,7 +1,6 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.parsing.dflt.CharIterator;
-import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.Test;
 
 import java.util.Arrays;

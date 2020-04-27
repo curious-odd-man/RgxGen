@@ -1,9 +1,8 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.parsing.dflt;
 
+import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.generator.nodes.FinalSymbol;
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
-import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
-import com.github.curiousoddman.rgxgen.parsing.dflt.RgxGenParseException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

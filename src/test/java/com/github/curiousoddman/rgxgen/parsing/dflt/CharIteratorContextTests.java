@@ -1,6 +1,5 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.parsing.dflt.CharIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

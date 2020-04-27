@@ -1,8 +1,5 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.iterators;
 
-import com.github.curiousoddman.rgxgen.iterators.ChoiceIterator;
-import com.github.curiousoddman.rgxgen.iterators.SingleValueIterator;
-import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

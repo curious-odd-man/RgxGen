@@ -36,20 +36,22 @@ Enter your pattern and see the results.
 ```
 #### latest SNAPSHOT:
 ```xml
-<repositories>
-    <repository>
-        <id>snapshots-repository</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
-</repositories>
-
-// ....
-
-<dependency>
-    <groupId>com.github.curious-odd-man</groupId>
-    <artifactId>rgxgen</artifactId>
-    <version>1.1-SNAPSHOT</version>
-</dependency>
+<project>
+    <repositories>
+        <repository>
+            <id>snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+    
+    <!--  .... -->
+    
+    <dependency>
+        <groupId>com.github.curious-odd-man</groupId>
+        <artifactId>rgxgen</artifactId>
+        <version>1.1-SNAPSHOT</version>
+    </dependency>
+</project>
 ```
 
 ### Code: 
