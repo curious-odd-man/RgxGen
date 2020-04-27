@@ -49,10 +49,15 @@ Enter your pattern and see the results.
     <dependency>
         <groupId>com.github.curious-odd-man</groupId>
         <artifactId>rgxgen</artifactId>
-        <version>1.1-SNAPSHOT</version>
+        <version>1.2-SNAPSHOT</version>
     </dependency>
 </project>
 ```
+
+Changes:
+
+- Fixed: Top level alternatives without group now working properly: https://github.com/curious-odd-man/RgxGen/issues/31
+ 
 
 ### Code: 
 ```java
