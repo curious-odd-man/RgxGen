@@ -236,8 +236,11 @@ public enum TestPattern {
     METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
                                     new SymbolSet(new String[]{"'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n"}, SymbolSet.TYPE.POSITIVE),
                                     BigInteger.valueOf(10),
-                                    Arrays.asList("'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n")
-    );
+                                    Arrays.asList("'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n")),
+    TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
+                                         new Choice(new FinalSymbol("a"), new FinalSymbol("b")),
+                                         BigInteger.valueOf(2),
+                                         Arrays.asList("a", "b"));
 
     final String       aPattern;
     final Node         aResultNode;
