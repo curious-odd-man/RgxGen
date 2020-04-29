@@ -4,7 +4,7 @@ import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
-import com.github.curiousoddman.rgxgen.optimizer.DefaultOptimizer;
+import com.github.curiousoddman.rgxgen.simplifier.DefaultSimplifier;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,8 +49,8 @@ public class CombinedTests {
 
     @Test
     public void optimizeTest() {
-        DefaultOptimizer defaultOptimizer = new DefaultOptimizer();
-        Node node = defaultOptimizer.optimize(aTestPattern.aParseResultNode);
+        DefaultSimplifier defaultOptimizer = new DefaultSimplifier();
+        Node node = defaultOptimizer.simplify(aTestPattern.aParseResultNode);
         assertEquals(aTestPattern.aOptimizeResultNode.toString(), node.toString());
     }
 

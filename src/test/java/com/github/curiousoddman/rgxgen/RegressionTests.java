@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.simplifier.PatternDoesntMatchAnyStringException;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -49,14 +50,9 @@ public class RegressionTests {
         assertFalse(stringIterator.hasNext());
     }
 
-    @Test
+    @Test(expected = PatternDoesntMatchAnyStringException.class)
     public void bug32_capAndDollarMakesNoMatches() {
         String pattern = "c(^x|y$)a";
-        final Pattern compile = Pattern.compile(pattern);
-        final RgxGen rgxGen = new RgxGen(pattern);
-        assertNotNull(rgxGen); // Not throwing an exception is a success
-        final StringIterator stringIterator = rgxGen.iterateUnique();
-        assertEquals(BigInteger.ZERO, rgxGen.numUnique());
-        assertFalse(stringIterator.hasNext());
+        RgxGen rgxGen = new RgxGen(pattern);
     }
 }

@@ -16,6 +16,9 @@ public enum TestPattern {
              BigInteger.ONE,
              Collections.singletonList("a")),
     SIMPLE_A_WITH_START_END("^a$",
+                            new Sequence(new LineStart(),
+                                         new FinalSymbol("a"),
+                                         new LineEnd()),
                             new FinalSymbol("a"),
                             BigInteger.ONE,
                             Collections.singletonList("a")),
@@ -242,29 +245,83 @@ public enum TestPattern {
                                          BigInteger.valueOf(2),
                                          Arrays.asList("a", "b")),
     CAP_IN_THE_MIDDLE("(x|^c)def",
-                      new SymbolSet(),
+                      new Sequence(
+                              new Group(1,
+                                        new Choice(
+                                                new FinalSymbol("x"),
+                                                new Sequence(
+                                                        new LineStart(),
+                                                        new FinalSymbol("c"))
+                                        )
+                              ), new FinalSymbol("def")
+                      ),
+                      new Sequence(
+                              new Group(1,
+                                        new Choice(
+                                                new FinalSymbol("x"),
+                                                new FinalSymbol("c")
+                                        )
+                              ), new FinalSymbol("def")
+                      ),
                       BigInteger.valueOf(2),
                       Arrays.asList("xdef", "cdef")),
+
     DOLLAR_IN_THE_MIDDLE("def(a|r$)",
-                            new SymbolSet(),
-                            BigInteger.valueOf(2),
-                            Arrays.asList("defa", "defr")),
-    BAD_CAP_IN_THE_MIDDLE("def^c",
-                          new SymbolSet(),
-                          BigInteger.valueOf(0),
-                          Collections.emptyList()),
-    BAD_DOLLAR_IN_THE_MIDDLE("r$def",
-                                new SymbolSet(),
-                                BigInteger.valueOf(0),
-                                Collections.emptyList()),
+                         new Sequence(
+                                 new FinalSymbol("def"),
+                                 new Group(1,
+                                           new Choice(
+                                                   new FinalSymbol("a"),
+                                                   new Sequence(
+                                                           new FinalSymbol("r"),
+                                                           new LineEnd()
+                                                   )
+                                           )
+                                 )
+                         ),
+                         new Sequence(
+                                 new FinalSymbol("def"),
+                                 new Group(1,
+                                           new Choice(
+                                                   new FinalSymbol("a"),
+                                                   new FinalSymbol("r")
+                                           )
+                                 )
+                         ),
+                         BigInteger.valueOf(2),
+                         Arrays.asList("defa", "defr")),
     BAD_CAP_IN_CHOICE_MIDDLE("def(x|^c)",
-                             new SymbolSet(),
+                             new Sequence(
+                                     new FinalSymbol("def"),
+                                     new Group(1,
+                                               new Choice(
+                                                       new FinalSymbol("x"),
+                                                       new Sequence(
+                                                               new LineStart(),
+                                                               new FinalSymbol("c")
+                                                       )
+                                               )
+                                     )
+                             ),
+                             new FinalSymbol("defx"),
                              BigInteger.valueOf(1),
                              Collections.singletonList("defx")),
     BAD_DOLLAR_IN_CHOICE_MIDDLE("(x|r$)def",
-                                   new SymbolSet(),
-                                   BigInteger.valueOf(1),
-                                   Collections.singletonList("xdef"));
+                                new Sequence(
+                                        new Group(1,
+                                                  new Choice(
+                                                          new FinalSymbol("x"),
+                                                          new Sequence(
+                                                                  new FinalSymbol("c"),
+                                                                  new LineEnd()
+                                                          )
+                                                  )
+                                        ),
+                                        new FinalSymbol("def")
+                                ),
+                                new FinalSymbol("xdef"),
+                                BigInteger.valueOf(1),
+                                Collections.singletonList("xdef"));
 
     final String       aPattern;
     final Node         aParseResultNode;
