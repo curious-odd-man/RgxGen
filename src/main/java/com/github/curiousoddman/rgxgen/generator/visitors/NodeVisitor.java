@@ -34,4 +34,8 @@ public interface NodeVisitor {
     void visit(GroupRef groupRef);
 
     void visit(Group group);
+
+    void visit(LineStart lineStart);
+
+    void visit(LineEnd lineEnd);
 }

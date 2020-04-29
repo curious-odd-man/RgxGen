@@ -4,6 +4,7 @@ import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.optimizer.DefaultOptimizer;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,14 @@ public class CombinedTests {
     public void parseTest() {
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.aPattern);
         Node node = defaultTreeBuilder.get();
-        assertEquals(aTestPattern.aResultNode.toString(), node.toString());
+        assertEquals(aTestPattern.aParseResultNode.toString(), node.toString());
+    }
+
+    @Test
+    public void optimizeTest() {
+        DefaultOptimizer defaultOptimizer = new DefaultOptimizer();
+        Node node = defaultOptimizer.optimize(aTestPattern.aParseResultNode);
+        assertEquals(aTestPattern.aOptimizeResultNode.toString(), node.toString());
     }
 
     @Test
@@ -51,7 +59,7 @@ public class CombinedTests {
         assumeTrue(aTestPattern.hasEstimatedCound());
 
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
-        aTestPattern.aResultNode.visit(v);
+        aTestPattern.aOptimizeResultNode.visit(v);
         assertEquals(aTestPattern.aEstimatedCount, v.getCount());
     }
 
@@ -69,7 +77,7 @@ public class CombinedTests {
     public void generateTest() {
         for (int i = 0; i < 100; i++) {
             GenerationVisitor generationVisitor = new GenerationVisitor();
-            aTestPattern.aResultNode.visit(generationVisitor);
+            aTestPattern.aOptimizeResultNode.visit(generationVisitor);
             boolean result = validateGenerated(generationVisitor.getString());
             assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
         }
@@ -80,7 +88,7 @@ public class CombinedTests {
         assumeTrue(aTestPattern.hasAllUniqueValues());
 
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
-        aTestPattern.aResultNode.visit(v);
+        aTestPattern.aParseResultNode.visit(v);
         assertEquals(aTestPattern.aAllUniqueValues, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 

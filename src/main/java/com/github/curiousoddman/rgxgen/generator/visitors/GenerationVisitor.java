@@ -102,6 +102,16 @@ public class GenerationVisitor implements NodeVisitor {
         aGroupValues.put(group.getIndex(), aStringBuilder.substring(start));
     }
 
+    @Override
+    public void visit(LineStart lineStart) {
+        throw new UnsupportedOperationException("Cannot generate text with LineStart: " + lineStart.getContext());
+    }
+
+    @Override
+    public void visit(LineEnd lineEnd) {
+        throw new UnsupportedOperationException("Cannot generate text with LineEnd: " + lineEnd.getContext());
+    }
+
     public String getString() {
         return aStringBuilder.toString();
     }

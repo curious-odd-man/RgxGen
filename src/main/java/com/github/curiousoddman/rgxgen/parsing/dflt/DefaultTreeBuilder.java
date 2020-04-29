@@ -153,6 +153,16 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
+                case '^':
+                    sbToFinal(sb, nodes);
+                    nodes.add(new LineStart(aCharIterator.context()));
+                    break;
+
+                case '$':
+                    sbToFinal(sb, nodes);
+                    nodes.add(new LineEnd(aCharIterator.context()));
+                    break;
+
                 case '[':
                     sbToFinal(sb, nodes);
                     nodes.add(handleCharacterVariations());
@@ -513,14 +523,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     public void build() {
-        if (aCharIterator.peek() == '^') {
-            aCharIterator.next();
-        }
-
-        if (aCharIterator.last() == '$') {
-            aCharIterator.setBound(-1);
-        }
-
         aNode = parseGroup(GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
             throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());

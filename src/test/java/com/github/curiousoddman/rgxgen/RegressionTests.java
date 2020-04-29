@@ -35,4 +35,28 @@ public class RegressionTests {
         assertEquals("2", stringIterator.next());
         assertFalse(stringIterator.hasNext());
     }
+
+    @Test
+    public void bug32_capAndDollarInTheMiddleAreNotHandled() {
+        String pattern = "(^x|y$)";
+        final Pattern compile = Pattern.compile(pattern);
+        final RgxGen rgxGen = new RgxGen(pattern);
+        assertNotNull(rgxGen); // Not throwing an exception is a success
+        final StringIterator stringIterator = rgxGen.iterateUnique();
+        assertEquals(BigInteger.valueOf(2), rgxGen.numUnique());
+        assertEquals("x", stringIterator.next());
+        assertEquals("y", stringIterator.next());
+        assertFalse(stringIterator.hasNext());
+    }
+
+    @Test
+    public void bug32_capAndDollarMakesNoMatches() {
+        String pattern = "c(^x|y$)a";
+        final Pattern compile = Pattern.compile(pattern);
+        final RgxGen rgxGen = new RgxGen(pattern);
+        assertNotNull(rgxGen); // Not throwing an exception is a success
+        final StringIterator stringIterator = rgxGen.iterateUnique();
+        assertEquals(BigInteger.ZERO, rgxGen.numUnique());
+        assertFalse(stringIterator.hasNext());
+    }
 }

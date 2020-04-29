@@ -240,10 +240,35 @@ public enum TestPattern {
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
                                          new Choice(new FinalSymbol("a"), new FinalSymbol("b")),
                                          BigInteger.valueOf(2),
-                                         Arrays.asList("a", "b"));
+                                         Arrays.asList("a", "b")),
+    CAP_IN_THE_MIDDLE("(x|^c)def",
+                      new SymbolSet(),
+                      BigInteger.valueOf(2),
+                      Arrays.asList("xdef", "cdef")),
+    DOLLAR_IN_THE_MIDDLE("def(a|r$)",
+                            new SymbolSet(),
+                            BigInteger.valueOf(2),
+                            Arrays.asList("defa", "defr")),
+    BAD_CAP_IN_THE_MIDDLE("def^c",
+                          new SymbolSet(),
+                          BigInteger.valueOf(0),
+                          Collections.emptyList()),
+    BAD_DOLLAR_IN_THE_MIDDLE("r$def",
+                                new SymbolSet(),
+                                BigInteger.valueOf(0),
+                                Collections.emptyList()),
+    BAD_CAP_IN_CHOICE_MIDDLE("def(x|^c)",
+                             new SymbolSet(),
+                             BigInteger.valueOf(1),
+                             Collections.singletonList("defx")),
+    BAD_DOLLAR_IN_CHOICE_MIDDLE("(x|r$)def",
+                                   new SymbolSet(),
+                                   BigInteger.valueOf(1),
+                                   Collections.singletonList("xdef"));
 
     final String       aPattern;
-    final Node         aResultNode;
+    final Node         aParseResultNode;
+    final Node         aOptimizeResultNode;
     final BigInteger   aEstimatedCount;
     final List<String> aAllUniqueValues;
 
@@ -256,8 +281,13 @@ public enum TestPattern {
     }
 
     TestPattern(String pattern, Node resultNode, BigInteger estimatedCount, List<String> allUniqueValues) {
+        this(pattern, resultNode, resultNode, estimatedCount, null);
+    }
+
+    TestPattern(String pattern, Node parseResultNode, Node optimizeResultNode, BigInteger estimatedCount, List<String> allUniqueValues) {
         aPattern = pattern;
-        aResultNode = resultNode;
+        aParseResultNode = parseResultNode;
+        aOptimizeResultNode = optimizeResultNode;
         aEstimatedCount = estimatedCount;
         aAllUniqueValues = allUniqueValues;
     }

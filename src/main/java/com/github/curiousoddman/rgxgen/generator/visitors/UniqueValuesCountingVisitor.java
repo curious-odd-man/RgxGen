@@ -116,6 +116,16 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
              .visit(this);
     }
 
+    @Override
+    public void visit(LineStart lineStart) {
+        throw new UnsupportedOperationException("Cannot generate text with LineStart: " + lineStart.getContext());
+    }
+
+    @Override
+    public void visit(LineEnd lineEnd) {
+        throw new UnsupportedOperationException("Cannot generate text with LineEnd: " + lineEnd.getContext());
+    }
+
     /**
      * Count of unique values that can be generated with this regex. {@code null} if infinite
      *

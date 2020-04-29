@@ -104,6 +104,16 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, group.getIndex()));
     }
 
+    @Override
+    public void visit(LineStart lineStart) {
+        throw new UnsupportedOperationException("Cannot generate text with LineStart: " + lineStart.getContext());
+    }
+
+    @Override
+    public void visit(LineEnd lineEnd) {
+        throw new UnsupportedOperationException("Cannot generate text with LineEnd: " + lineEnd.getContext());
+    }
+
     public StringIterator getUniqueStrings() {
         return new PermutationsIteratorSupplier(aIterators).get();
     }
