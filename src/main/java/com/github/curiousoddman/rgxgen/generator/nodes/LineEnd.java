@@ -5,6 +5,10 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 public class LineEnd implements Node {
     private final String aContext;
 
+    public LineEnd() {
+        this("");
+    }
+
     public LineEnd(String context) {
         aContext = context;
     }
@@ -20,8 +24,6 @@ public class LineEnd implements Node {
 
     @Override
     public String toString() {
-        return "LineEnd{" +
-                "aContext='" + aContext + '\'' +
-                '}';
+        return "LineEnd{}";
     }
 }

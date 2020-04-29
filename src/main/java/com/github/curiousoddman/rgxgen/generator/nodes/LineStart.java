@@ -5,6 +5,10 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 public class LineStart implements Node {
     private final String aContext;
 
+    public LineStart() {
+        this("");
+    }
+
     public LineStart(String context) {
         aContext = context;
     }
@@ -20,8 +24,6 @@ public class LineStart implements Node {
 
     @Override
     public String toString() {
-        return "LineStart{" +
-                "aContext='" + aContext + '\'' +
-                '}';
+        return "LineStart{}";
     }
 }
