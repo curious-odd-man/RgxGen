@@ -25,7 +25,11 @@ public class SimplificationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Sequence node) {
-
+        // Empty Sequence -> PatternDoesntMatchAnyStringException
+        // LineStart or LineEnd in the middle -> PatternDoesntMatchAnyStringException
+        // LineStart at first position or LineEnd at last position -> Remove, but depends on outside
+        // Sequence with only one child -> unwrap child
+        // PatternDoesntMatchAnyStringException from any node -> PatternDoesntMatchAnyStringException
     }
 
     @Override
