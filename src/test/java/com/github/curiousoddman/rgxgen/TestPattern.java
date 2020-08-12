@@ -240,7 +240,15 @@ public enum TestPattern {
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
                                          new Choice(new FinalSymbol("a"), new FinalSymbol("b")),
                                          BigInteger.valueOf(2),
-                                         Arrays.asList("a", "b"));
+                                         Arrays.asList("a", "b")),
+    EMPTY_CHOICE_AT_THE_START_OF_CHOICES("(|A)",
+                                         new Group(1, new Choice(new FinalSymbol(""), new FinalSymbol("A"))),
+                                         BigInteger.valueOf(2),
+                                         Arrays.asList("", "A")),
+    EMPTY_CHOICE_AT_THE_END_OF_CHOICES("(A|)",
+                                       new Group(1, new Choice(new FinalSymbol("A"), new FinalSymbol(""))),
+                                       BigInteger.valueOf(2),
+                                       Arrays.asList("A", ""));
 
     final String       aPattern;
     final Node         aResultNode;
