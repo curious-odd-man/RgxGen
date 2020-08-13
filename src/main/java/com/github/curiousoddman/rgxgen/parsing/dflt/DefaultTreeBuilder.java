@@ -131,8 +131,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Node handleGroupEnd(StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex) {
-        sbToFinal(sb, nodes);
+    private static Node handleGroupEnd(StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex) {
+        if (sb.length() == 0 && nodes.isEmpty()) {
+            // Special case when '(a|)' is used - like empty
+            nodes.add(new FinalSymbol(""));
+        } else {
+            sbToFinal(sb, nodes);
+        }
+
         if (isChoice) {
             choices.add(sequenceOrNot(nodes, choices, false, null));
             nodes.clear();
