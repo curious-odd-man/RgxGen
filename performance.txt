@@ -1,3 +1,3 @@
-Benchmark                            Mode  Cnt       Score       Error  Units
-PerformanceTests.generateTest        avgt    5      88.374 ±     4.447  us/op
-PerformanceTests.generateUniqueTest  avgt    5  223167.433 ± 31382.610  us/op
+Benchmark                            Mode  Cnt       Score      Error  Units
+PerformanceTests.generateTest        avgt    5      67,432 ±    9,455  us/op
+PerformanceTests.generateUniqueTest  avgt    5  169395,264 ± 1917,036  us/op
