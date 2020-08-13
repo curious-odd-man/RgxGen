@@ -24,8 +24,8 @@ public class PerformanceTests {
                 .mode(Mode.AverageTime)
                 .timeUnit(TimeUnit.MICROSECONDS)
                 // .warmupTime(TimeValue.seconds(1))
-                .warmupIterations(5)
-                .measurementIterations(5)
+                .warmupIterations(3)
+                .measurementIterations(3)
                 .threads(1)
                 .forks(1)
                 .shouldFailOnError(true)
@@ -66,7 +66,7 @@ public class PerformanceTests {
     @Benchmark
     public void generateUniqueTest() {
         final StringIterator stringIterator = RGXGEN.iterateUnique();
-        for (int i = 0; i < 100000 && stringIterator.hasNext(); i++) {
+        for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             stringIterator.next();
         }
     }

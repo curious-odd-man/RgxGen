@@ -67,7 +67,7 @@ public class InfiniteGenerateTests {
         StringIterator stringIterator = rgxGen.iterateUnique();
         Set<String> set = new HashSet<>();
 
-        for (int i = 0; i < ITERATIONS * ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             String next = stringIterator.next();
             assertTrue(stringIterator.hasNext());
             if (aUseFind) {
