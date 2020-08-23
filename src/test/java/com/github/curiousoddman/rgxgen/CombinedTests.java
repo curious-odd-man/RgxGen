@@ -18,8 +18,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
@@ -55,7 +54,7 @@ public class CombinedTests {
         assertEquals(aTestPattern.aEstimatedCount, v.getCount());
     }
 
-    private boolean validateGenerated(String value) {
+    private boolean isValidGenerated(String value) {
         if (aTestPattern.useFindForMatching()) {
             return aPattern.matcher(value)
                            .find();
@@ -70,7 +69,7 @@ public class CombinedTests {
         for (int i = 0; i < 100; i++) {
             GenerationVisitor generationVisitor = new GenerationVisitor();
             aTestPattern.aResultNode.visit(generationVisitor);
-            boolean result = validateGenerated(generationVisitor.getString());
+            boolean result = isValidGenerated(generationVisitor.getString());
             assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
         }
     }
@@ -94,7 +93,7 @@ public class CombinedTests {
                                      .limit(1000)
                                      .collect(Collectors.toList());
         for (String string : strings) {
-            boolean result = validateGenerated(string);
+            boolean result = isValidGenerated(string);
             assertTrue("Text: '" + string + "'does not match pattern " + aTestPattern.aPattern, result);
 
         }
@@ -112,6 +111,17 @@ public class CombinedTests {
         RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
         for (int i = 0; i < 1000; i++) {
             assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
+        }
+    }
+
+    @Test
+    public void generateNotMatchingTest() {
+        for (int i = 0; i < 100; i++) {
+            // FIXME: Other means to call it
+            GenerationVisitor generationVisitor = new GenerationVisitor();
+            aTestPattern.aResultNode.visit(generationVisitor);
+            boolean result = isValidGenerated(generationVisitor.getString());
+            assertFalse("Text: '" + generationVisitor.getString() + "'matches pattern " + aTestPattern.aPattern, result);
         }
     }
 }
