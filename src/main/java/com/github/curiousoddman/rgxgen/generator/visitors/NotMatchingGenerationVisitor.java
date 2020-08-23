@@ -17,6 +17,8 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.util.Random;
 
@@ -56,7 +58,12 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        throw new RuntimeException("not implemented");
+        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getSubPattern()
+                                                             .pattern());
+        Node subNode = builder.get();
+        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom);
+        subNode.visit(generationVisitor);
+        aStringBuilder.append(generationVisitor.getString());
     }
 
     @Override

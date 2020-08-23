@@ -22,14 +22,21 @@ import static org.junit.Assert.assertFalse;
 @RunWith(Parameterized.class)
 public class NotMatchingGenerationTests {
 
-    public static Collection<Object[]> initialData() {
+    private static Collection<Object[]> initialData() {
         return Arrays.asList(new Object[][]{
                 {"[a-z0-5]", new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('0', '5')), SymbolSet.TYPE.POSITIVE)},
                 {"abc|def", new Choice(new FinalSymbol("abc"), new FinalSymbol("def"))},
                 {"helloworld", new FinalSymbol("helloworld")},
                 {"a{2,3}", new Repeat(new FinalSymbol("a"), 2, 3)},
-                {"a[a-z]", new Sequence(new FinalSymbol("a"), new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE))}
-                // TODO: NotSymbol, Group and GroupRef
+                {"a[a-z]", new Sequence(new FinalSymbol("a"), new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE))},
+                {"([a-z])\\1", new Sequence(new Group(1,
+                                                      new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE)),
+                                            new GroupRef(1)
+                )},
+                {"foo(?!bar)", new Sequence(
+                        new FinalSymbol("foo"),
+                        new NotSymbol("bar")
+                )}
         });
     }
 
