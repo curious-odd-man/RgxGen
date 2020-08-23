@@ -55,27 +55,14 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     @Override
-    public void visit(Repeat node) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
-    public void visit(Sequence node) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
     public void visit(NotSymbol node) {
         throw new RuntimeException("not implemented");
     }
 
     @Override
     public void visit(GroupRef node) {
-        throw new RuntimeException("not implemented");
-    }
-
-    @Override
-    public void visit(Group node) {
-        throw new RuntimeException("not implemented");
+        // Note: How will this work if we will change only some of the nodes???
+        FinalSymbol finalSymbol = new FinalSymbol(aGroupValues.get(node.getIndex()));
+        visit(finalSymbol);
     }
 }

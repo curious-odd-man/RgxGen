@@ -76,13 +76,13 @@ public class GenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(NotSymbol notSymbol) {
-        String value = notSymbol.getSubPattern()
-                                .pattern();
+    public void visit(NotSymbol node) {
+        String value = node.getSubPattern()
+                           .pattern();
         String result = Util.randomString(aRandom, value);
-        while (!notSymbol.getSubPattern()
-                         .matcher(value)
-                         .matches()) {
+        while (!node.getSubPattern()
+                    .matcher(value)
+                    .matches()) {
             result = Util.randomString(aRandom, result);
         }
 
@@ -90,16 +90,16 @@ public class GenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(GroupRef groupRef) {
-        aStringBuilder.append(aGroupValues.get(groupRef.getIndex()));
+    public void visit(GroupRef node) {
+        aStringBuilder.append(aGroupValues.get(node.getIndex()));
     }
 
     @Override
-    public void visit(Group group) {
+    public void visit(Group node) {
         int start = aStringBuilder.length();
-        group.getNode()
-             .visit(this);
-        aGroupValues.put(group.getIndex(), aStringBuilder.substring(start));
+        node.getNode()
+            .visit(this);
+        aGroupValues.put(node.getIndex(), aStringBuilder.substring(start));
     }
 
     public String getString() {
