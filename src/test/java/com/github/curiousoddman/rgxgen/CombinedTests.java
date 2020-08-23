@@ -2,7 +2,7 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchigGenerationVisitor;
+import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -119,7 +119,7 @@ public class CombinedTests {
     public void generateNotMatchingTest() {
         for (int i = 0; i < 100; i++) {
             // FIXME: Other means to call it
-            GenerationVisitor generationVisitor = new NotMatchigGenerationVisitor();
+            GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor();
             aTestPattern.aResultNode.visit(generationVisitor);
             boolean result = isValidGenerated(generationVisitor.getString());
             assertFalse("Text: '" + generationVisitor.getString() + "'matches pattern " + aTestPattern.aPattern, result);

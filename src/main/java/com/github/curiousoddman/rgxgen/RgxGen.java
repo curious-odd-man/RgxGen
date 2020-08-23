@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchigGenerationVisitor;
+import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
@@ -126,7 +126,7 @@ public class RgxGen {
      * @return generated string.
      */
     public String generateNotMatching(Random random) {
-        NotMatchigGenerationVisitor nmgv = new NotMatchigGenerationVisitor(random);
+        NotMatchingGenerationVisitor nmgv = new NotMatchingGenerationVisitor(random);
         aNode.visit(nmgv);
         return nmgv.getString();
     }
