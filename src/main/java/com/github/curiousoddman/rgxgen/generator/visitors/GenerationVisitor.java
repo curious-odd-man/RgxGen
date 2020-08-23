@@ -24,9 +24,9 @@ import java.util.Map;
 import java.util.Random;
 
 public class GenerationVisitor implements NodeVisitor {
-    private final StringBuilder        aStringBuilder = new StringBuilder();
-    private final Map<Integer, String> aGroupValues   = new HashMap<>();
-    private final Random               aRandom;
+    protected final StringBuilder        aStringBuilder = new StringBuilder();
+    protected final Map<Integer, String> aGroupValues   = new HashMap<>();
+    protected final Random               aRandom;
 
     public GenerationVisitor() {
         this(new Random());
