@@ -36,9 +36,10 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     @Override
     public void visit(SymbolSet node) {
         // There is only one way to generate not matching for any character - is to not generate anything
-        if (!node.isAnyChar()) {
-            String pattern = node.getPattern();
-            super.visit(new SymbolSet("[^" + pattern.substring(1), node.getSymbols(), SymbolSet.TYPE.NEGATIVE));
+        String pattern = node.getPattern();
+        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), node.getSymbols(), SymbolSet.TYPE.NEGATIVE);
+        if (!symbolSet.isEmpty()) {
+            super.visit(symbolSet);
         }
     }
 
@@ -49,10 +50,10 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         // We need to add existing group values, so that we could later use it in matching pattern
         StringBuilder groupsBuilder = new StringBuilder();
         StringBuilder valuePrefixBuilder = new StringBuilder();
-        for (int i = 0; i < aGroupValues.size(); i++) {
+        for (int i = 1; i < aGroupValues.size(); i++) {
             String s = aGroupValues.get(i);
             groupsBuilder.append('(')
-                         .append(s)
+                         .append(Pattern.quote(s))
                          .append(')');
             valuePrefixBuilder.append(s);
         }

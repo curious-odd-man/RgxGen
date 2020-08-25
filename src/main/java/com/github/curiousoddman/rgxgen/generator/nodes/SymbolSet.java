@@ -163,7 +163,7 @@ public class SymbolSet extends Node {
         return "SymbolSet{" + Arrays.toString(aSymbols) + '}';
     }
 
-    public boolean isAnyChar() {
-        return Arrays.deepEquals(aSymbols, ALL_SYMBOLS);
+    public boolean isEmpty() {
+        return aSymbols.length == 0;
     }
 }
