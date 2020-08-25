@@ -50,11 +50,17 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         // We need to add existing group values, so that we could later use it in matching pattern
         StringBuilder groupsBuilder = new StringBuilder();
         StringBuilder valuePrefixBuilder = new StringBuilder();
-        for (int i = 1; i < aGroupValues.size(); i++) {
+        int groupValuesUsed = 0;
+        for (int i = 1; groupValuesUsed < aGroupValues.size(); i++) {
             String s = aGroupValues.get(i);
-            groupsBuilder.append('(')
-                         .append(Pattern.quote(s))
-                         .append(')');
+            groupsBuilder.append('(');
+            // In complex expressions we might skip some groups (due to inlined choices/groups/whatever).
+            // But still we should properly generate this test
+            if (s != null) {
+                groupsBuilder.append(Pattern.quote(s));
+                ++groupValuesUsed;
+            }
+            groupsBuilder.append(')');
             valuePrefixBuilder.append(s);
         }
 
