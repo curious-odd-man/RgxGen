@@ -46,6 +46,7 @@ public class CombinedTests extends CombinedTestTemplate {
         assertEquals(aTestPattern.aEstimatedCount, v.getCount());
     }
 
+    @Test
     public void generateUniqueTest() {
         assumeTrue(aTestPattern.hasAllUniqueValues());
 

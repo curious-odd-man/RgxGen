@@ -80,22 +80,22 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(NotSymbol notSymbol) {
-        aIterators.add(new NegativeIteratorSupplier(notSymbol.getSubPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
+    public void visit(NotSymbol node) {
+        aIterators.add(new NegativeIteratorSupplier(node.getSubPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
     }
 
     @Override
-    public void visit(GroupRef groupRef) {
-        aIterators.add(new ReferenceIteratorSupplier(aReferenceIteratorMap, aGroupIterators, groupRef.getIndex()));
+    public void visit(GroupRef node) {
+        aIterators.add(new ReferenceIteratorSupplier(aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
     @Override
-    public void visit(Group group) {
+    public void visit(Group node) {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators);
-        group.getNode()
-             .visit(v);
+        node.getNode()
+            .visit(v);
 
-        aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, group.getIndex()));
+        aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
     public StringIterator getUniqueStrings() {
