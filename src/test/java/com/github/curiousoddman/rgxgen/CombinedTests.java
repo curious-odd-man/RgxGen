@@ -15,22 +15,28 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public class CombinedTests {
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object> data() {
-        return Arrays.asList(TestPattern.values());
+    @Parameterized.Parameters(name = "{1}: {0}")
+    public static Collection<Object[]> data() {
+        return Arrays.stream(TestPattern.values())
+                     .flatMap(testPattern -> IntStream.range(0, 100)
+                                                      .mapToObj(index -> new Object[]{testPattern, index}))
+                     .collect(Collectors.toList());
     }
 
     @Parameterized.Parameter
     public TestPattern aTestPattern;
+
+    @Parameterized.Parameter(1)
+    public int aSeed;
 
     private Pattern aPattern;
 
@@ -41,6 +47,7 @@ public class CombinedTests {
 
     @Test
     public void parseTest() {
+        assumeTrue("Only need this test once", aSeed == 0);
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.aPattern);
         Node node = defaultTreeBuilder.get();
         assertEquals(aTestPattern.aResultNode.toString(), node.toString());
@@ -54,6 +61,7 @@ public class CombinedTests {
 
     @Test
     public void countTest() {
+        assumeTrue("Only need this test once", aSeed == 0);
         assumeTrue(aTestPattern.hasEstimatedCound());
 
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
@@ -73,16 +81,15 @@ public class CombinedTests {
 
     @Test
     public void generateTest() {
-        for (int i = 0; i < 100; i++) {
-            GenerationVisitor generationVisitor = new GenerationVisitor();
-            aTestPattern.aResultNode.visit(generationVisitor);
-            boolean result = isValidGenerated(generationVisitor.getString());
-            assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
-        }
+        GenerationVisitor generationVisitor = new GenerationVisitor(new Random(aSeed));
+        aTestPattern.aResultNode.visit(generationVisitor);
+        boolean result = isValidGenerated(generationVisitor.getString());
+        assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
     }
 
     @Test
     public void generateUniqueTest() {
+        assumeTrue("Only need this test once", aSeed == 0);
         assumeTrue(aTestPattern.hasAllUniqueValues());
 
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
@@ -92,6 +99,7 @@ public class CombinedTests {
 
     @Test
     public void classRgxGenTest() {
+        assumeTrue("Only need this test once", aSeed == 0);
         RgxGen rgxGen = new RgxGen(aTestPattern.aPattern);
         if (aTestPattern.hasEstimatedCound()) {
             assertEquals(aTestPattern.aEstimatedCount, rgxGen.numUnique());
@@ -108,41 +116,29 @@ public class CombinedTests {
 
     @Test
     public void repeatableGenerationTest() {
-        long seed = ThreadLocalRandom.current()
-                                     .nextLong();
-
-        Random rnd1 = new Random(seed);
-        Random rnd2 = new Random(seed);
+        Random rnd1 = new Random(aSeed);
+        Random rnd2 = new Random(aSeed);
 
         RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
         RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
-        for (int i = 0; i < 1000; i++) {
-            assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
-        }
+        assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
     }
 
     @Test(timeout = 5000)
     public void generateNotMatchingTest() {
-        for (int i = 0; i < 100; i++) {
-            GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor();
-            aTestPattern.aResultNode.visit(generationVisitor);
-            boolean result = isValidGenerated(generationVisitor.getString());
-            assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.aPattern, result);
-        }
+        GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor(new Random(aSeed));
+        aTestPattern.aResultNode.visit(generationVisitor);
+        boolean result = isValidGenerated(generationVisitor.getString());
+        assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.aPattern, result);
     }
 
     @Test(timeout = 10000)
     public void repeatableNotMatchingGenerationTest() {
-        long seed = ThreadLocalRandom.current()
-                                     .nextLong();
-
-        Random rnd1 = new Random(seed);
-        Random rnd2 = new Random(seed);
+        Random rnd1 = new Random(aSeed);
+        Random rnd2 = new Random(aSeed);
 
         RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
         RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
-        for (int i = 0; i < 1000; i++) {
-            assertEquals(rgxGen_1.generateNotMatching(rnd1), rgxGen_2.generateNotMatching(rnd2));
-        }
+        assertEquals(rgxGen_1.generateNotMatching(rnd1), rgxGen_2.generateNotMatching(rnd2));
     }
 }
