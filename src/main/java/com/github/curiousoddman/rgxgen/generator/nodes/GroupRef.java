@@ -18,10 +18,11 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
-public class GroupRef implements Node {
+public class GroupRef extends Node {
     private final int aIndex;
 
-    public GroupRef(int index) {
+    public GroupRef(String pattern, int index) {
+        super(pattern);
         aIndex = index;
     }
 

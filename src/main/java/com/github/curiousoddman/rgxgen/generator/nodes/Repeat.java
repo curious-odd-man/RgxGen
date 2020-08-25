@@ -18,20 +18,21 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
-public class Repeat implements Node {
+public class Repeat extends Node {
     private final Node aNode;
     private final int  aMin;
     private final int  aMax;
 
-    public static Repeat minimum(Node node, int times) {
-        return new Repeat(node, times, -1);
+    public static Repeat minimum(String pattern, Node node, int times) {
+        return new Repeat(pattern, node, times, -1);
     }
 
-    public Repeat(Node node, int times) {
-        this(node, times, times);
+    public Repeat(String pattern, Node node, int times) {
+        this(pattern, node, times, times);
     }
 
-    public Repeat(Node node, int min, int max) {
+    public Repeat(String pattern, Node node, int min, int max) {
+        super(pattern);
         aNode = node;
         aMin = min;
         aMax = max;

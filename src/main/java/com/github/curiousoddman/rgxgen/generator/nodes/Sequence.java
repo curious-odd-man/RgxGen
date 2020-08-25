@@ -20,10 +20,11 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
 import java.util.Arrays;
 
-public class Sequence implements Node {
+public class Sequence extends Node {
     private final Node[] aNodes;
 
-    public Sequence(Node... nodes) {
+    public Sequence(String pattern, Node... nodes) {
+        super(pattern);
         aNodes = nodes;
     }
 

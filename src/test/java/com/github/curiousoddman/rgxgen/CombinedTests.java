@@ -44,6 +44,12 @@ public class CombinedTests {
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.aPattern);
         Node node = defaultTreeBuilder.get();
         assertEquals(aTestPattern.aResultNode.toString(), node.toString());
+        NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(aTestPattern.aResultNode);
+        node.visit(visitor);
+        assertTrue(visitor.getErrors()
+                          .toString(),
+                   visitor.getErrors()
+                          .isEmpty());
     }
 
     @Test
@@ -115,10 +121,9 @@ public class CombinedTests {
         }
     }
 
-    @Test
+    @Test(timeout = 5000)
     public void generateNotMatchingTest() {
         for (int i = 0; i < 100; i++) {
-            // FIXME: Other means to call it
             GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor();
             aTestPattern.aResultNode.visit(generationVisitor);
             boolean result = isValidGenerated(generationVisitor.getString());
@@ -126,7 +131,7 @@ public class CombinedTests {
         }
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void repeatableNotMatchingGenerationTest() {
         long seed = ThreadLocalRandom.current()
                                      .nextLong();

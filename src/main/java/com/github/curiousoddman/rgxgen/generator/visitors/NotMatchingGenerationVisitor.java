@@ -21,6 +21,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.util.Random;
+import java.util.regex.Pattern;
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
     private static final String[] allSymbols = SymbolSet.getAllSymbols();
@@ -34,26 +35,65 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        super.visit(new SymbolSet(node.getSymbols(), SymbolSet.TYPE.NEGATIVE));
+        // There is only one way to generate not matching for any character - is to not generate anything
+        if (!node.isAnyChar()) {
+            String pattern = node.getPattern();
+            super.visit(new SymbolSet("[^" + pattern.substring(1), node.getSymbols(), SymbolSet.TYPE.NEGATIVE));
+        }
     }
 
     @Override
     public void visit(Choice node) {
-        throw new RuntimeException("not implemented");
+        Node[] nodes = node.getNodes();
+        int pos = aStringBuilder.length();
+        // We need to add existing group values, so that we could later use it in matching pattern
+        StringBuilder groupsBuilder = new StringBuilder();
+        StringBuilder valuePrefixBuilder = new StringBuilder();
+        for (int i = 0; i < aGroupValues.size(); i++) {
+            String s = aGroupValues.get(i);
+            groupsBuilder.append('(')
+                         .append(s)
+                         .append(')');
+            valuePrefixBuilder.append(s);
+        }
+
+        // Add groups values to pattern - in case there are group refs used inside the node.getPattern()
+        Pattern pattern = Pattern.compile(groupsBuilder + node.getPattern());
+
+        do {
+            aStringBuilder.delete(pos, Integer.MAX_VALUE);
+            int i = aRandom.nextInt(nodes.length);
+            nodes[i].visit(this);
+            // To match group values along with generated values - we need to prepend groups values before the generated
+        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos))
+                        .matches());
     }
 
     @Override
     public void visit(FinalSymbol node) {
         String nodeValue = node.getValue();
-        StringBuilder builder = new StringBuilder(nodeValue.length());
+        if (nodeValue.isEmpty()) {
+            aStringBuilder.append(allSymbols[aRandom.nextInt(allSymbols.length)].charAt(0));
+        } else {
+            StringBuilder builder = new StringBuilder(nodeValue.length());
+            do {
+                builder.delete(0, Integer.MAX_VALUE);
+                nodeValue.chars()
+                         .map(c -> allSymbols[aRandom.nextInt(allSymbols.length)].charAt(0))
+                         .forEachOrdered(c -> builder.append((char) c));
+            } while (nodeValue.equals(builder.toString()));
+            aStringBuilder.append(builder);
+        }
+    }
 
-        do {
-            builder.delete(0, builder.length());
-            nodeValue.chars()
-                     .map(c -> allSymbols[aRandom.nextInt(allSymbols.length)].charAt(0))
-                     .forEachOrdered(c -> builder.append((char) c));
-        } while (nodeValue.equals(builder.toString()));
-        aStringBuilder.append(builder);
+    @Override
+    public void visit(Repeat node) {
+        // Zero length repeat will match pattern despite what node is repeated.
+        if (node.getMin() == 0) {
+            super.visit(new Repeat(node.getPattern(), node.getNode(), 1, node.getMax()));
+        } else {
+            super.visit(node);
+        }
     }
 
     @Override

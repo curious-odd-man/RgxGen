@@ -29,9 +29,9 @@ public interface NodeVisitor {
 
     void visit(Sequence node);
 
-    void visit(NotSymbol notSymbol);
+    void visit(NotSymbol node);
 
-    void visit(GroupRef groupRef);
+    void visit(GroupRef node);
 
-    void visit(Group group);
+    void visit(Group node);
 }

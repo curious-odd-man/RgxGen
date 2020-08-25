@@ -20,11 +20,12 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
 import java.util.Arrays;
 
-public class Choice implements Node {
+public class Choice extends Node {
 
     private final Node[] aNodes;
 
-    public Choice(Node... nodes) {
+    public Choice(String pattern, Node... nodes) {
+        super(pattern);
         aNodes = nodes;
     }
 

@@ -20,10 +20,12 @@ import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
 import java.util.regex.Pattern;
 
-public class NotSymbol implements Node {
+public class NotSymbol extends Node {
     private final Pattern aSubPattern;
 
+    // TODO: Parse this pattern always!!
     public NotSymbol(String pattern) {
+        super(pattern);
         aSubPattern = Pattern.compile(pattern);
     }
 

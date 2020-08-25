@@ -24,18 +24,19 @@ public class NotMatchingGenerationTests {
 
     private static Collection<Object[]> initialData() {
         return Arrays.asList(new Object[][]{
-                {"[a-z0-5]", new SymbolSet(Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('0', '5')), SymbolSet.TYPE.POSITIVE)},
-                {"abc|def", new Choice(new FinalSymbol("abc"), new FinalSymbol("def"))},
+                {"[a-z0-5]", new SymbolSet("[a-z0-5]", Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('0', '5')), SymbolSet.TYPE.POSITIVE)},
+                {"abc|def", new Choice("abc|def", new FinalSymbol("abc"), new FinalSymbol("def"))},
                 {"helloworld", new FinalSymbol("helloworld")},
-                {"a{2,3}", new Repeat(new FinalSymbol("a"), 2, 3)},
-                {"a[a-z]", new Sequence(new FinalSymbol("a"), new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE))},
-                {"([a-z])\\1", new Sequence(new Group(1,
-                                                      new SymbolSet(Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE)),
-                                            new GroupRef(1)
+                {"a{2,3}", new Repeat("a{2,3}", new FinalSymbol("a"), 2, 3)},
+                {"a[a-z]", new Sequence("a[a-z]", new FinalSymbol("a"),
+                                        new SymbolSet("[a-z]", Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE))},
+                {"([a-z])\\1", new Sequence("([a-z])\\1", new Group("([a-z])", 1,
+                                                                    new SymbolSet("[a-z]", Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE)),
+                                            new GroupRef("\\1", 1)
                 )},
-                {"foo(?!bar)", new Sequence(
-                        new FinalSymbol("foo"),
-                        new NotSymbol("bar")
+                {"foo(?!bar)", new Sequence("foo(?!bar)",
+                                            new FinalSymbol("foo"),
+                                            new NotSymbol("bar")
                 )}
         });
     }

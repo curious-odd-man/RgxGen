@@ -25,7 +25,7 @@ public class LimitedInfinitePatternsTests {
         return Arrays.asList(new Object[][]{
                 {
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Repeat(new FinalSymbol("a"), 0, 10),
+                        new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
                                  .limit(11)
                                  .mapToObj(v -> Stream.generate(() -> "a")
@@ -34,7 +34,7 @@ public class LimitedInfinitePatternsTests {
                 },
                 {
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 1, 10)),
+                        new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
                                  .limit(10)
                                  .mapToObj(v -> 'a' + Stream.generate(() -> "a")
@@ -44,7 +44,7 @@ public class LimitedInfinitePatternsTests {
                 },
                 {
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new SymbolSet(), 0, 2)),
+                        new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", new SymbolSet(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
                                                                    Arrays.stream(SymbolSet.getAllSymbols())
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())

@@ -25,4 +25,19 @@ public class CharIteratorTests {
         iterator.next();    // Skip 'x' character
         iterator.nextUntil('x');
     }
+
+    @Test
+    public void substringToCurrPosTest() {
+        CharIterator iterator = new CharIterator("0123456789");
+        String s = iterator.substringToCurrPos(0);
+        assertEquals("", s);
+        iterator.next();
+        iterator.next();
+        iterator.next();
+        s = iterator.substringToCurrPos(0);
+        assertEquals("012", s);
+        iterator.next();
+        s = iterator.substringToCurrPos(0);
+        assertEquals("0123", s);
+    }
 }

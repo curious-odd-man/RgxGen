@@ -220,4 +220,8 @@ public class CharIterator implements Iterator<Character> {
     public int pos() {
         return aCurrentIndex - 1;
     }
+
+    public String substringToCurrPos(int pos) {
+        return aValue.substring(pos, aCurrentIndex);
+    }
 }

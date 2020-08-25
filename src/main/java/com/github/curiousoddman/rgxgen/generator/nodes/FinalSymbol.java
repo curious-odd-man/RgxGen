@@ -18,10 +18,11 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
-public class FinalSymbol implements Node {
+public class FinalSymbol extends Node {
     private final String aValue;
 
     public FinalSymbol(String value) {
+        super(value);
         aValue = value;
     }
 

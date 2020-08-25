@@ -26,7 +26,7 @@ import java.util.stream.IntStream;
 /**
  * Generate Any printable character.
  */
-public class SymbolSet implements Node {
+public class SymbolSet extends Node {
     private static final String[] ALL_SYMBOLS = new String[127 - 32];
 
     public static String[] getAllSymbols() {
@@ -37,9 +37,11 @@ public class SymbolSet implements Node {
     private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
     static {
+        StringBuilder sb = new StringBuilder("[");
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
-            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = Character.valueOf((char) i)
-                                                         .toString();
+            Character character = (char) i;
+            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = character.toString();
+            sb.append(character);
         }
     }
 
@@ -98,15 +100,15 @@ public class SymbolSet implements Node {
      * Symbol set containing all symbols
      */
     public SymbolSet() {
-        this(ALL_SYMBOLS.clone(), TYPE.POSITIVE);
+        this(".", ALL_SYMBOLS.clone(), TYPE.POSITIVE);
     }
 
-    public SymbolSet(String[] symbols, TYPE type) {
-        this(Collections.emptyList(), symbols, type);
+    public SymbolSet(String pattern, String[] symbols, TYPE type) {
+        this(pattern, Collections.emptyList(), symbols, type);
     }
 
-    public SymbolSet(Collection<SymbolRange> symbolRanges, TYPE type) {
-        this(symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
+    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, TYPE type) {
+        this(pattern, symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
     }
 
     /**
@@ -116,7 +118,8 @@ public class SymbolSet implements Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public SymbolSet(Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
+    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
+        super(pattern);
         List<String> initial = type == TYPE.NEGATIVE
                                ? new ArrayList<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
                                : new ArrayList<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
@@ -158,5 +161,9 @@ public class SymbolSet implements Node {
     @Override
     public String toString() {
         return "SymbolSet{" + Arrays.toString(aSymbols) + '}';
+    }
+
+    public boolean isAnyChar() {
+        return Arrays.deepEquals(aSymbols, ALL_SYMBOLS);
     }
 }
