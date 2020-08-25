@@ -15,12 +15,9 @@ Build status:
 
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
 
-Note: 1.0 version is imported there - unfortunately currently I can't change it to latest (1.1).
-
-Luckly there is no big difference between 1.0 and 1.1
+> Note: 1.0 version is there. 
 
 Enter your pattern and see the results.
-
 
 ## Usage
 
@@ -56,24 +53,36 @@ Enter your pattern and see the results.
 
 Changes:
 
-- Fixed: Top level alternatives without group now working properly: https://github.com/curious-odd-man/RgxGen/issues/31
+- Fixed: Top level alternatives without group now working properly: [#31](https://github.com/curious-odd-man/RgxGen/issues/31)
+- Fixed: Empty alternatives not always work: [#35](https://github.com/curious-odd-man/RgxGen/issues/35)
+- Feature: Now it is possible to generate strings that does not match a pattern (see usage below) [#36](https://github.com/curious-odd-man/RgxGen/issues/36)
  
 
 ### Code: 
 ```java
-RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-String s = rgxGen.generate();                                        // Generate new random value
-BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
+public class Main {
+    public static void main(String[] args){
+        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        String s = rgxGen.generate();                                        // Generate new random value
+        BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+        StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
+        String notMatching = rgxGen.generateNotMatching();                   // Generate not matching string
+    }
+}
 ```
 
 ```java
-RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-Random rnd = new Random(1234)
-String s = rgxGen.generate(rnd);                                     // Generate first value
-String s1 = rgxGen.generate(rnd);                                    // Generate second value
-String s2 = rgxGen.generate(rnd);                                    // Generate third value
-// On each launch s, s1 and s2 will be the same
+public class Main {
+    public static void main(String[] args){
+        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        Random rnd = new Random(1234)
+        String s = rgxGen.generate(rnd);                                     // Generate first value
+        String s1 = rgxGen.generate(rnd);                                    // Generate second value
+        String s2 = rgxGen.generate(rnd);                                    // Generate third value
+        String notMatching = rgxGen.generateNotMatching(rnd);                // Generate not matching string
+        // On each launch s, s1 and s2 will be the same
+    }
+}
 ```
 
 ## Supported syntax
@@ -130,6 +139,13 @@ On the contrast, when generating **unique values** - the number of maximum repet
 
 Use `a{n,m}` if you require some specific number of repetitions.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
+
+### Not matching values generation
+
+The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though it is not always possible.
+For example pattern `.` - any symbol - would yield empty string as not matching string. 
+Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings would be only 1 or 2 symbols long.
+I chose these approaches because they seem predictible and easier to implement.
 
 ## Other tools to generate values by regex and why this might be better
 
