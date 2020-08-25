@@ -20,8 +20,6 @@ import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +28,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class UniqueGenerationVisitor implements NodeVisitor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UniqueGenerationVisitor.class);
-
     private final List<Supplier<StringIterator>>        aIterators = new ArrayList<>();
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
     private final Map<Integer, StringIterator>          aGroupIterators;
@@ -42,7 +37,6 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     public UniqueGenerationVisitor(Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIterators) {
-        LOGGER.trace("Creating\n\trefs: {}\n\tgrps: {}", referenceIteratorMap, groupIterators);
         aReferenceIteratorMap = referenceIteratorMap;
         aGroupIterators = groupIterators;
     }

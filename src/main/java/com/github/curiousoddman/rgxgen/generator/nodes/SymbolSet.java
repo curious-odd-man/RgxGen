@@ -18,8 +18,6 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 import com.github.curiousoddman.rgxgen.util.Util;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -29,9 +27,6 @@ import java.util.stream.IntStream;
  * Generate Any printable character.
  */
 public class SymbolSet implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(SymbolSet.class);
-
     private static final String[] ALL_SYMBOLS = new String[127 - 32];
 
     public static String[] getAllSymbols() {
@@ -45,10 +40,6 @@ public class SymbolSet implements Node {
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
             ALL_SYMBOLS[i - SPACE_ASCII_CODE] = Character.valueOf((char) i)
                                                          .toString();
-        }
-
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("All symbols {} ", Arrays.asList(ALL_SYMBOLS));
         }
     }
 
@@ -114,7 +105,7 @@ public class SymbolSet implements Node {
         this(Collections.emptyList(), symbols, type);
     }
 
-    public SymbolSet(List<SymbolRange> symbolRanges, TYPE type) {
+    public SymbolSet(Collection<SymbolRange> symbolRanges, TYPE type) {
         this(symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
     }
 
@@ -125,11 +116,7 @@ public class SymbolSet implements Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public SymbolSet(List<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating [positive = {}] from {} and {}", type, symbolRanges, Arrays.asList(symbols));
-        }
-
+    public SymbolSet(Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
         List<String> initial = type == TYPE.NEGATIVE
                                ? new ArrayList<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
                                : new ArrayList<>(ALL_SYMBOLS.length);          // Most probably it will be enough.

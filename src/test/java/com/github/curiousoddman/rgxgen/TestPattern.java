@@ -246,13 +246,17 @@ public enum TestPattern {
                                          BigInteger.valueOf(2),
                                          Arrays.asList("", "A")),
     EMPTY_CHOICE_IN_THE_MIDDLE_OF_CHOICES("(B||A)",
-                                         new Group(1, new Choice(new FinalSymbol("B"), new FinalSymbol(""), new FinalSymbol("A"))),
-                                         BigInteger.valueOf(3),
-                                         Arrays.asList("B", "", "A")),
+                                          new Group(1, new Choice(new FinalSymbol("B"), new FinalSymbol(""), new FinalSymbol("A"))),
+                                          BigInteger.valueOf(3),
+                                          Arrays.asList("B", "", "A")),
     EMPTY_CHOICE_AT_THE_END_OF_CHOICES("(A|)",
                                        new Group(1, new Choice(new FinalSymbol("A"), new FinalSymbol(""))),
                                        BigInteger.valueOf(2),
-                                       Arrays.asList("A", ""));
+                                       Arrays.asList("A", "")),
+    CHOICE_IS_A_GROUP("(a|b)\\1",
+                      new Sequence(new Group(1, new Choice(new FinalSymbol("a"), new FinalSymbol("b"))), new GroupRef(1)),
+                      BigInteger.valueOf(2),
+                      Arrays.asList("aa", "bb"));
 
     final String       aPattern;
     final Node         aResultNode;

@@ -122,7 +122,7 @@ public class CombinedTests {
             GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor();
             aTestPattern.aResultNode.visit(generationVisitor);
             boolean result = isValidGenerated(generationVisitor.getString());
-            assertFalse("Text: '" + generationVisitor.getString() + "'matches pattern " + aTestPattern.aPattern, result);
+            assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.aPattern, result);
         }
     }
 

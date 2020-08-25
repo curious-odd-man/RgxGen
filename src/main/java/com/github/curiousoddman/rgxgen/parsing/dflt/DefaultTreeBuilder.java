@@ -117,7 +117,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
             case "?<":
                 GroupType res = GroupType.POSITIVE_LOOKBEHIND;
-                final char next = aCharIterator.next();
+                char next = aCharIterator.next();
                 if (next == '!') {
                     res = GroupType.NEGATIVE_LOOKBEHIND;
                 } else if (next != '=') {   // Positive Lookbehind does not affect generation.

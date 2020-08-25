@@ -43,7 +43,7 @@ public class NotMatchingGenerationTests {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return initialData().stream()
-                            .flatMap(arr -> IntStream.range(0, 1000)
+                            .flatMap(arr -> IntStream.range(0, 100)
                                                      .mapToObj(i -> new Object[]{arr[0], arr[1], i}))
                             .collect(Collectors.toList());
     }
