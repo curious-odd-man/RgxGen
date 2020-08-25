@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PerformanceTests {
 
+    @Ignore
     @Test
     public void launchBenchmark() throws Exception {
         Options opt = new OptionsBuilder()

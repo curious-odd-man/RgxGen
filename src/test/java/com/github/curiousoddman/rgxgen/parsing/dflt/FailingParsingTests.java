@@ -7,8 +7,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import static org.junit.Assert.fail;
 
@@ -88,6 +90,10 @@ public class FailingParsingTests {
         String pattern = "a{1,2";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
         try {
+            Field aNodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
+            aNodesStartPos.setAccessible(true);
+            Map<Node, Integer> o = (Map<Node, Integer>) aNodesStartPos.get(defaultTreeBuilder);
+            o.put(dummyNode, 0);
             Method handleRepeat = DefaultTreeBuilder.class.getDeclaredMethod("handleRepeat", char.class, Node.class);
             handleRepeat.setAccessible(true);
             handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);

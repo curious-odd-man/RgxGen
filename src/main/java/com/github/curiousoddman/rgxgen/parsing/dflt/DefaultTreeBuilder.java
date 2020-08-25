@@ -43,8 +43,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
+    private static final int      HEX_RADIX                  = 16;
+    private static final String[] EMPTY_STRINGS_ARR          = new String[0];
+    private static final Node[]   EMPTY_NODES_ARR            = new Node[0];
 
-    private final CharIterator aCharIterator;
+    private final CharIterator       aCharIterator;
+    private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
 
     /**
      * Helper class for lazy initialization and reuse of some constants that are re-used.
@@ -97,13 +101,29 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         aCharIterator = new CharIterator(expr);
     }
 
-    private static void sbToFinal(StringBuilder sb, List<Node> nodes) {
+    /**
+     * Convert all text aggregated in StringBuilder into FinalSymbol node.
+     * Does nothing, if sb is empty
+     *
+     * @param sb    StringBuilder, that is read and emptied
+     * @param nodes nodes collection to add created node to.
+     */
+    private void sbToFinal(StringBuilder sb, List<Node> nodes) {
         if (sb.length() != 0) {
-            nodes.add(new FinalSymbol(sb.toString()));
-            sb.delete(0, sb.length());
+            FinalSymbol finalSymbol = new FinalSymbol(sb.toString());
+            aNodesStartPos.put(finalSymbol, aCharIterator.pos() - finalSymbol.getValue()
+                                                                             .length());
+            nodes.add(finalSymbol);
+            sb.delete(0, Integer.MAX_VALUE);
         }
     }
 
+    /**
+     * Discovers GroupType starting from current position.
+     * After execution cursor is on first unprocessed character.
+     *
+     * @return type of the group (@see GroupType enum)
+     */
     private GroupType processGroupType() {
         switch (aCharIterator.next(2)) {
             case "?=":      // Positive Lookahead does not affect generation.
@@ -117,7 +137,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
             case "?<":
                 GroupType res = GroupType.POSITIVE_LOOKBEHIND;
-                final char next = aCharIterator.next();
+                char next = aCharIterator.next();
                 if (next == '!') {
                     res = GroupType.NEGATIVE_LOOKBEHIND;
                 } else if (next != '=') {   // Positive Lookbehind does not affect generation.
@@ -131,22 +151,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static Node handleGroupEnd(StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex) {
+    private Node handleGroupEnd(int startPos, StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex) {
         if (sb.length() == 0 && nodes.isEmpty()) {
             // Special case when '(a|)' is used - like empty
-            nodes.add(new FinalSymbol(""));
+            FinalSymbol finalSymbol = new FinalSymbol("");
+            aNodesStartPos.put(finalSymbol, startPos);
+            nodes.add(finalSymbol);
         } else {
             sbToFinal(sb, nodes);
         }
 
         if (isChoice) {
-            choices.add(sequenceOrNot(nodes, choices, false, null));
+            choices.add(sequenceOrNot(startPos, nodes, choices, false, null));
             nodes.clear();
         }
-        return sequenceOrNot(nodes, choices, isChoice, captureGroupIndex);
+        return sequenceOrNot(startPos, nodes, choices, isChoice, captureGroupIndex);
     }
 
-    private Node parseGroup(GroupType currentGroupType) {
+    private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
         Integer captureGroupIndex = null;
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
             captureGroupIndex = aNextGroupIndex++;
@@ -155,6 +177,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         List<Node> nodes = new ArrayList<>();
         StringBuilder sb = new StringBuilder(aCharIterator.remaining());
         boolean isChoice = false;
+        int choicesStartPos = groupStartPos;
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
@@ -166,30 +189,37 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '(':
                     sbToFinal(sb, nodes);
+                    int intGroupStartPos = aCharIterator.pos();
                     GroupType groupType = processGroupType();
                     if (groupType.isNegative()) {
+                        // FIXME: Does it really work correctly? I mean why can't there be (x(asd)) - where after first ( matching will be second )
                         String subPattern = aCharIterator.nextUntil(')');
-                        nodes.add(new NotSymbol(subPattern));
+                        NotSymbol notSymbol = new NotSymbol(subPattern);
+                        aNodesStartPos.put(notSymbol, intGroupStartPos);
+                        nodes.add(notSymbol);
                         aCharIterator.next();       // Past the closing ')'
                     } else {
-                        nodes.add(parseGroup(groupType));
+                        nodes.add(parseGroup(intGroupStartPos, groupType));
                     }
                     break;
 
                 case '|':
                     if (sb.length() == 0 && nodes.isEmpty()) {
                         // Special case when '(|a)' is used - like empty or something
-                        choices.add(new FinalSymbol(""));
+                        FinalSymbol finalSymbol = new FinalSymbol("");
+                        aNodesStartPos.put(finalSymbol, aCharIterator.pos() + 1);
+                        choices.add(finalSymbol);
                     } else {
                         sbToFinal(sb, nodes);
-                        choices.add(sequenceOrNot(nodes, choices, false, null));
+                        choices.add(sequenceOrNot(choicesStartPos, nodes, choices, false, null));
+                        choicesStartPos = aCharIterator.pos() + 1;
                         nodes.clear();
                     }
                     isChoice = true;
                     break;
 
                 case ')':
-                    return handleGroupEnd(sb, nodes, isChoice, choices, captureGroupIndex);
+                    return handleGroupEnd(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex);
 
                 case '{':
                 case '*':
@@ -206,13 +236,16 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         sb.deleteCharAt(sb.length() - 1);
                         sbToFinal(sb, nodes);
                         repeatNode = new FinalSymbol(String.valueOf(charToRepeat));
+                        aNodesStartPos.put(repeatNode, aCharIterator.pos() - 1);
                     }
                     nodes.add(handleRepeat(c, repeatNode));
                     break;
 
                 case '.':
                     sbToFinal(sb, nodes);
-                    nodes.add(new SymbolSet());
+                    SymbolSet symbolSet = new SymbolSet();
+                    aNodesStartPos.put(symbolSet, aCharIterator.pos());
+                    nodes.add(symbolSet);
                     break;
 
                 case '\\':
@@ -225,7 +258,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        return handleGroupEnd(sb, nodes, isChoice, choices, captureGroupIndex);
+        return handleGroupEnd(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex);
     }
 
     /**
@@ -244,13 +277,27 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             hexValue = aCharIterator.next(2);
         }
-        return Integer.parseInt(hexValue, 16);
+        return Integer.parseInt(hexValue, HEX_RADIX);
     }
 
+    /**
+     * Create group reference node.
+     * It starts after escape character AND first digit of group index.
+     * aCharIterator after execution is on position right after group index digits.
+     *
+     * @param groupRefAllowed if at this position group reference is allowed
+     * @param nodes           nodes to which add group reference node when created.
+     * @param firstCharacter  first digit character, since we're starting after that
+     * @throws RgxGenParseException if groupRefAllowed is false
+     */
     private void handleGroupReference(boolean groupRefAllowed, Collection<Node> nodes, char firstCharacter) {
         if (groupRefAllowed) {
+            int startPos = aCharIterator.pos() - 1;
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
-            nodes.add(new GroupRef(Integer.parseInt(firstCharacter + digitsSubstring)));
+            String groupNumber = firstCharacter + digitsSubstring;
+            GroupRef groupRef = new GroupRef("\\" + groupNumber, Integer.parseInt(groupNumber));
+            aNodesStartPos.put(groupRef, startPos);
+            nodes.add(groupRef);
         } else {
             throw new RgxGenParseException("Group ref is not expected here. " + aCharIterator.context());
         }
@@ -267,23 +314,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
+        SymbolSet symbolSet = null;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                nodes.add(new SymbolSet(CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE));
+                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             // Hex character:
@@ -311,6 +359,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
         }
 
+        if (symbolSet != null) {
+            aNodesStartPos.put(symbolSet, aCharIterator.pos() - 1);
+            nodes.add(symbolSet);
+        }
     }
 
     /**
@@ -319,7 +371,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param repeatNode node that should be repeated
      * @return Repeat node
      */
-    private Repeat handleRepeatInCurvyBraces(Node repeatNode) {
+    private Repeat handleRepeatInCurvyBraces(int startPos, Node repeatNode) {
         StringBuilder sb = new StringBuilder(10);
         int min = -1;
         int contextIndex = aCharIterator.pos();
@@ -339,13 +391,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '}':
                     if (min == -1) {
-                        return new Repeat(repeatNode, Integer.parseInt(sb.toString()));
+                        return new Repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, Integer.parseInt(sb.toString()));
                     } else {
                         if (sb.length() == 0) {
-                            return Repeat.minimum(repeatNode, min);
+                            return Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, min);
                         } else {
                             try {
-                                return new Repeat(repeatNode, min, Integer.parseInt(sb.toString()));
+                                return new Repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, min, Integer.parseInt(sb.toString()));
                             } catch (NumberFormatException e) {
                                 throw new RgxGenParseException("Malformed upper bound number." + aCharIterator.context(), e);
                             }
@@ -372,14 +424,26 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return Repeat node
      */
     private Repeat handleRepeat(char c, Node repeatNode) {
-        if (c == '*') {
-            return Repeat.minimum(repeatNode, 0);
-        } else if (c == '?') {
-            return new Repeat(repeatNode, 0, 1);
-        } else if (c == '+') {
-            return Repeat.minimum(repeatNode, 1);
-        } else if (c == '{') {
-            return handleRepeatInCurvyBraces(repeatNode);
+        int startPos = aNodesStartPos.get(repeatNode);
+        Repeat node = null;
+        switch (c) {
+            case '*':
+                node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 0);
+                break;
+            case '?':
+                node = new Repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, 0, 1);
+                break;
+            case '+':
+                node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 1);
+                break;
+            case '{':
+                node = handleRepeatInCurvyBraces(startPos, repeatNode);
+                break;
+        }
+
+        if (node != null) {
+            aNodesStartPos.put(node, startPos);
+            return node;
         }
 
         throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
@@ -394,7 +458,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param captureGroupIndex index of capture group
      * @return Group, Node
      */
-    private static Node sequenceOrNot(List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
+    private Node sequenceOrNot(int startPos, List<Node> nodes, List<Node> choices, boolean isChoice, Integer captureGroupIndex) {
         Node resultNode;
 
         if (nodes.size() == 1) {
@@ -404,31 +468,32 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 if (choices.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                resultNode = new Choice(choices.toArray(new Node[0]));
+                resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(EMPTY_NODES_ARR));
             } else {
                 if (nodes.isEmpty()) {
                     throw new RuntimeException("Empty nodes");
                 }
-                resultNode = new Sequence(nodes.toArray(new Node[0]));
+                resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(EMPTY_NODES_ARR));
             }
         }
 
+        aNodesStartPos.put(resultNode, startPos);
         if (captureGroupIndex == null) {
             return resultNode;
         } else {
-            return new Group(captureGroupIndex, resultNode);
+            Group group = new Group(aCharIterator.substringToCurrPos(startPos), captureGroupIndex, resultNode);
+            aNodesStartPos.put(group, startPos);
+            return group;
         }
     }
 
-    private static boolean handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+    private static void handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
         if (rangeStarted) {
             char lastChar = sb.charAt(sb.length() - 1);
             char firstChar = sb.charAt(sb.length() - 2);
             sb.delete(sb.length() - 2, sb.length());
             symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
         }
-
-        return false;
     }
 
     private boolean handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
@@ -442,7 +507,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             if (!nodes.isEmpty()) {
                 throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
             }
-            rangeStarted = handleRange(true, sb, symbolRanges);
+            handleRange(true, sb, symbolRanges);
+            rangeStarted = false;
         } else {
             StringBuilder tmpSb = new StringBuilder(0);
             handleEscapedCharacter(tmpSb, nodes, false);
@@ -491,11 +557,14 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     handleRange(rangeStarted, sb, symbolRanges);
                     String[] strings;
                     if (sb.length() == 0) {
-                        strings = new String[0];
+                        strings = EMPTY_STRINGS_ARR;
                     } else {
                         strings = Util.stringToCharsSubstrings(sb.toString());
                     }
-                    return new SymbolSet(symbolRanges, strings, symbolSetType);
+
+                    SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);
+                    aNodesStartPos.put(symbolSet, openSquareBraceIndex);
+                    return symbolSet;
 
                 case '-':
                     if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
@@ -511,7 +580,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 default:
                     sb.append(c);
-                    rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
+                    handleRange(rangeStarted, sb, symbolRanges);
+                    rangeStarted = false;
             }
         }
 
@@ -527,7 +597,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             aCharIterator.setBound(-1);
         }
 
-        aNode = parseGroup(GroupType.NON_CAPTURE_GROUP);
+        aNode = parseGroup(aCharIterator.pos() + 1, GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
             throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());
         }

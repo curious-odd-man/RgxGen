@@ -6,15 +6,19 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Parameterized.class)
 public class CompleteTests {
-    @Parameterized.Parameters(name = "{0}")
+    @Parameterized.Parameters(name = "{2}: {0}")
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
+        return Arrays.stream(new Object[][]{
                 {"Card number", "[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{4}[0-9]{7}([a-zA-Z0-9]?){0,16}"},
                 {"IP v4", "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])"},
                 {"IP v6", "(([0-9a-f]{1,4}:){1,1}(:[0-9a-f]{1,4}){1,6})|(([0-9a-f]{1,4}:){1,2}(:[0-9a-f]{1,4}){1,5})|" +
@@ -39,7 +43,10 @@ public class CompleteTests {
                 {"Email after @ - dns name", "[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\."},
                 {"Email after @", "(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"},
                 {"Email pattern", "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"},
-                });
+                })
+                     .flatMap(arr -> IntStream.range(0, 100)
+                                              .mapToObj(index -> new Object[]{arr[0], arr[1], index}))
+                     .collect(Collectors.toList());
     }
 
     @Parameterized.Parameter
@@ -48,14 +55,24 @@ public class CompleteTests {
     @Parameterized.Parameter(1)
     public String aRegex;
 
+    @Parameterized.Parameter(2)
+    public int aSeed;
+
     @Test
     public void generateTest() {
         RgxGen rgxGen = new RgxGen(aRegex);
-        for (int i = 0; i < 100; i++) {
-            String s = rgxGen.generate();
-            assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
-                                                                                   .matcher(s)
-                                                                                   .matches());
-        }
+        String s = rgxGen.generate(new Random(aSeed));
+        assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
+                                                                               .matcher(s)
+                                                                               .matches());
+    }
+
+    @Test
+    public void generateNotMatchingTest() {
+        RgxGen rgxGen = new RgxGen(aRegex);
+        String s = rgxGen.generateNotMatching(new Random(aSeed));
+        assertFalse("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
+                                                                                .matcher(s)
+                                                                                .matches());
     }
 }

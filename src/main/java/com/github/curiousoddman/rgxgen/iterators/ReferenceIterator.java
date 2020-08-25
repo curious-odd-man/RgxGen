@@ -16,13 +16,7 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class ReferenceIterator extends StringIterator {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceIterator.class);
-
     private StringIterator aOther;
     private boolean        hasNext = true;
     private String         aLast;
@@ -50,7 +44,6 @@ public class ReferenceIterator extends StringIterator {
 
     @Override
     public boolean hasNext() {
-        LOGGER.trace("hasNext = {}, aOther.current() = {}, aLast = {}", hasNext, aOther.current(), aLast);
         return hasNext || !aOther.current()
                                  .equals(aLast);
     }

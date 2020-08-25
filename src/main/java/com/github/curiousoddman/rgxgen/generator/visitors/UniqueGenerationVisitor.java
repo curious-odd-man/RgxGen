@@ -20,8 +20,6 @@ import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +28,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class UniqueGenerationVisitor implements NodeVisitor {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(UniqueGenerationVisitor.class);
-
     private final List<Supplier<StringIterator>>        aIterators = new ArrayList<>();
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
     private final Map<Integer, StringIterator>          aGroupIterators;
@@ -42,7 +37,6 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     public UniqueGenerationVisitor(Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIterators) {
-        LOGGER.trace("Creating\n\trefs: {}\n\tgrps: {}", referenceIteratorMap, groupIterators);
         aReferenceIteratorMap = referenceIteratorMap;
         aGroupIterators = groupIterators;
     }
@@ -86,22 +80,22 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(NotSymbol notSymbol) {
-        aIterators.add(new NegativeIteratorSupplier(notSymbol.getSubPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
+    public void visit(NotSymbol node) {
+        aIterators.add(new NegativeIteratorSupplier(node.getSubPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
     }
 
     @Override
-    public void visit(GroupRef groupRef) {
-        aIterators.add(new ReferenceIteratorSupplier(aReferenceIteratorMap, aGroupIterators, groupRef.getIndex()));
+    public void visit(GroupRef node) {
+        aIterators.add(new ReferenceIteratorSupplier(aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
     @Override
-    public void visit(Group group) {
+    public void visit(Group node) {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators);
-        group.getNode()
-             .visit(v);
+        node.getNode()
+            .visit(v);
 
-        aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, group.getIndex()));
+        aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
     public StringIterator getUniqueStrings() {
