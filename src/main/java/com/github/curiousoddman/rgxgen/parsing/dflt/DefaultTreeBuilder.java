@@ -43,6 +43,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
+    private static final int      HEX_RADIX                  = 16;
 
     private final CharIterator aCharIterator;
 
@@ -244,7 +245,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             hexValue = aCharIterator.next(2);
         }
-        return Integer.parseInt(hexValue, 16);
+        return Integer.parseInt(hexValue, HEX_RADIX);
     }
 
     private void handleGroupReference(boolean groupRefAllowed, Collection<Node> nodes, char firstCharacter) {
@@ -372,14 +373,15 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return Repeat node
      */
     private Repeat handleRepeat(char c, Node repeatNode) {
-        if (c == '*') {
-            return Repeat.minimum(repeatNode, 0);
-        } else if (c == '?') {
-            return new Repeat(repeatNode, 0, 1);
-        } else if (c == '+') {
-            return Repeat.minimum(repeatNode, 1);
-        } else if (c == '{') {
-            return handleRepeatInCurvyBraces(repeatNode);
+        switch (c) {
+            case '*':
+                return Repeat.minimum(repeatNode, 0);
+            case '?':
+                return new Repeat(repeatNode, 0, 1);
+            case '+':
+                return Repeat.minimum(repeatNode, 1);
+            case '{':
+                return handleRepeatInCurvyBraces(repeatNode);
         }
 
         throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
@@ -420,15 +422,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static boolean handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+    private static void handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
         if (rangeStarted) {
             char lastChar = sb.charAt(sb.length() - 1);
             char firstChar = sb.charAt(sb.length() - 2);
             sb.delete(sb.length() - 2, sb.length());
             symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
         }
-
-        return false;
     }
 
     private boolean handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
@@ -442,7 +442,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             if (!nodes.isEmpty()) {
                 throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
             }
-            rangeStarted = handleRange(true, sb, symbolRanges);
+            handleRange(true, sb, symbolRanges);
+            rangeStarted = false;
         } else {
             StringBuilder tmpSb = new StringBuilder(0);
             handleEscapedCharacter(tmpSb, nodes, false);
@@ -511,7 +512,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 default:
                     sb.append(c);
-                    rangeStarted = handleRange(rangeStarted, sb, symbolRanges);
+                    handleRange(rangeStarted, sb, symbolRanges);
+                    rangeStarted = false;
             }
         }
 

@@ -86,7 +86,7 @@ public class CharIterator implements Iterator<Character> {
         try {
             return aValue.charAt(aCurrentIndex++);
         } catch (StringIndexOutOfBoundsException e) {
-            final NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
+            NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
             noSuchElementException.initCause(e);
             throw noSuchElementException;
         }
@@ -99,7 +99,7 @@ public class CharIterator implements Iterator<Character> {
      * @return substring start from next of {@code length} characters
      */
     public String next(int length) {
-        final String substring = aValue.substring(aCurrentIndex, aCurrentIndex + length);
+        String substring = aValue.substring(aCurrentIndex, aCurrentIndex + length);
         aCurrentIndex += length;
         return substring;
     }

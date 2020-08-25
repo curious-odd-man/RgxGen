@@ -38,7 +38,7 @@ public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
     @Override
     public StringIterator get() {
         ReferenceIterator referenceIterator = new ReferenceIterator();
-        final StringIterator stringIterator = aGroupIteratorsMap.get(aIndex);
+        StringIterator stringIterator = aGroupIteratorsMap.get(aIndex);
         if (stringIterator != null) {
             referenceIterator.setOther(stringIterator);
         }

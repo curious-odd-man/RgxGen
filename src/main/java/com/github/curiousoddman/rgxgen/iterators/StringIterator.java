@@ -22,8 +22,7 @@ public abstract class StringIterator implements Iterator<String> {
     @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
     @Override
     public String next() {
-        String current = nextImpl();
-        return current;
+        return nextImpl();
     }
 
     /**
