@@ -1,5 +1,21 @@
 # Use regex to generate matching and non-matching strings
 
+This is a java library that, given a regex pattern, allows to:
+1. Generate matching strings
+1. Iterate through unique matching strings
+1. Generate not matching strings
+
+# Table of contents
+
+[Status](https://github.com/curious-odd-man/RgxGen#status)
+[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now)
+[Usage](https://github.com/curious-odd-man/RgxGen#usage)
+[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax)
+[Limitations](https://github.com/curious-odd-man/RgxGen#limitations)
+[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better)
+[Support](https://github.com/curious-odd-man/RgxGen#support)
+
+
 ## Status
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
@@ -51,7 +67,7 @@ Enter your pattern and see the results.
 </project>
 ```
 
-Changes:
+Changes in snapshot:
 
 - Fixed: Top level alternatives without group now working properly: [#31](https://github.com/curious-odd-man/RgxGen/issues/31)
 - Fixed: Empty alternatives not always work: [#35](https://github.com/curious-odd-man/RgxGen/issues/35)
