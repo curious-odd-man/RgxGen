@@ -1,4 +1,4 @@
-# Use regex to generate matching and non-matching strings
+# Regex: generate matching and non-matching strings
 
 This is a java library that, given a regex pattern, allows to:
 1. Generate matching strings
