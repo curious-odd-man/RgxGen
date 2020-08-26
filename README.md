@@ -1,4 +1,4 @@
-# Java library for text generation based on regular expression pattern
+# Use regex to generate matching and non-matching strings
 
 ## Status
 
