@@ -7,14 +7,13 @@ This is a java library that, given a regex pattern, allows to:
 
 # Table of contents
 
-[Status](https://github.com/curious-odd-man/RgxGen#status)
-[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now)
-[Usage](https://github.com/curious-odd-man/RgxGen#usage)
-[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax)
-[Limitations](https://github.com/curious-odd-man/RgxGen#limitations)
-[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better)
+[Status](https://github.com/curious-odd-man/RgxGen#status)<br>
+[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now)<br>
+[Usage](https://github.com/curious-odd-man/RgxGen#usage)<br>
+[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax)<br>
+[Limitations](https://github.com/curious-odd-man/RgxGen#limitations)<br>
+[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better)<br>
 [Support](https://github.com/curious-odd-man/RgxGen#support)
-
 
 ## Status
 
