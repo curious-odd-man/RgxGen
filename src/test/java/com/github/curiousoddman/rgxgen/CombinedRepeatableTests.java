@@ -29,7 +29,9 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
 
     @Test
     public void generateTest() {
-        GenerationVisitor generationVisitor = new GenerationVisitor(new Random(aSeed));
+        GenerationVisitor generationVisitor = GenerationVisitor.builder()
+                                                               .withRandom(new Random(aSeed))
+                                                               .get();
         aTestPattern.aResultNode.visit(generationVisitor);
         boolean result = isValidGenerated(generationVisitor.getString());
         assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
@@ -47,7 +49,9 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
 
     @Test(timeout = 5000)
     public void generateNotMatchingTest() {
-        GenerationVisitor generationVisitor = new NotMatchingGenerationVisitor(new Random(aSeed));
+        GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
+                                                                          .withRandom(new Random(aSeed))
+                                                                          .get();
         aTestPattern.aResultNode.visit(generationVisitor);
         boolean result = isValidGenerated(generationVisitor.getString());
         assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.aPattern, result);

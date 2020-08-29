@@ -104,7 +104,9 @@ public class RgxGen {
      * @return generated string.
      */
     public String generate(Random random) {
-        GenerationVisitor gv = new GenerationVisitor(random);
+        GenerationVisitor gv = GenerationVisitor.builder()
+                                                .withRandom(random)
+                                                .get();
         aNode.visit(gv);
         return gv.getString();
     }
@@ -126,7 +128,9 @@ public class RgxGen {
      * @return generated string.
      */
     public String generateNotMatching(Random random) {
-        NotMatchingGenerationVisitor nmgv = new NotMatchingGenerationVisitor(random);
+        GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
+                                                             .withRandom(random)
+                                                             .get();
         aNode.visit(nmgv);
         return nmgv.getString();
     }

@@ -81,7 +81,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        aIterators.add(new NegativeIteratorSupplier(node.getSubPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
+        aIterators.add(new NegativeIteratorSupplier(node.getPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
     }
 
     @Override

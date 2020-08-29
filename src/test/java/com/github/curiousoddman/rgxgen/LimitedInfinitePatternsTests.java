@@ -67,7 +67,8 @@ public class LimitedInfinitePatternsTests {
         Pattern p = Pattern.compile(aRegex);
 
         for (int i = 0; i < 100; i++) {
-            GenerationVisitor generationVisitor = new GenerationVisitor();
+            GenerationVisitor generationVisitor = GenerationVisitor.builder()
+                                                                   .get();
             aNode.visit(generationVisitor);
             assertTrue(p.matcher(generationVisitor.getString())
                         .matches());

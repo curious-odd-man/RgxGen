@@ -26,8 +26,8 @@ public class NegativeIteratorSupplier implements Supplier<StringIterator> {
     private final Pattern                  aPattern;
     private final Supplier<StringIterator> aIteratorSupplier;
 
-    public NegativeIteratorSupplier(Pattern pattern, Supplier<StringIterator> iteratorSupplier) {
-        aPattern = pattern;
+    public NegativeIteratorSupplier(String pattern, Supplier<StringIterator> iteratorSupplier) {
+        aPattern = Pattern.compile(pattern);
         aIteratorSupplier = iteratorSupplier;
     }
 

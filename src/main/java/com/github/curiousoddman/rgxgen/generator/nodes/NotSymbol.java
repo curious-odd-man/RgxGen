@@ -18,15 +18,12 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
-import java.util.regex.Pattern;
-
 public class NotSymbol extends Node {
-    private final Pattern aSubPattern;
+    private final Node aNode;
 
-    // TODO: Parse this pattern always!!
-    public NotSymbol(String pattern) {
+    public NotSymbol(String pattern, Node node) {
         super(pattern);
-        aSubPattern = Pattern.compile(pattern);
+        aNode = node;
     }
 
     @Override
@@ -34,12 +31,12 @@ public class NotSymbol extends Node {
         visitor.visit(this);
     }
 
-    public Pattern getSubPattern() {
-        return aSubPattern;
+    public Node getNode() {
+        return aNode;
     }
 
     @Override
     public String toString() {
-        return "NotSymbol{" + aSubPattern.pattern() + '}';
+        return "NotSymbol{" + aNode + '}';
     }
 }

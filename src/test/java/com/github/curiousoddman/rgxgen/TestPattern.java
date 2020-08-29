@@ -218,7 +218,7 @@ public enum TestPattern {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKAHEAD("foo(?!bar)",
                        new Sequence("foo(?!bar)",
-                                    new FinalSymbol("foo"), new NotSymbol("bar")),
+                                    new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar"))),
                        null),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKBEHIND("(?<=foo)bar",
@@ -228,7 +228,7 @@ public enum TestPattern {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKBEHIND("(?<!not)foo",
                         new Sequence("(?<!not)foo",
-                                     new NotSymbol("not"), new FinalSymbol("foo")),
+                                     new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo")),
                         null),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     CHOICE_CAPTURED("(a|b)\\1",

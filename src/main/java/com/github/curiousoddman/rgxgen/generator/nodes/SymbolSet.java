@@ -37,11 +37,9 @@ public class SymbolSet extends Node {
     private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
     static {
-        StringBuilder sb = new StringBuilder("[");
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
             Character character = (char) i;
             ALL_SYMBOLS[i - SPACE_ASCII_CODE] = character.toString();
-            sb.append(character);
         }
     }
 

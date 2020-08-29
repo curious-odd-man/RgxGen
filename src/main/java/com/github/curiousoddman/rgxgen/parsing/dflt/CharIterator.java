@@ -126,7 +126,7 @@ public class CharIterator implements Iterator<Character> {
         int end = Math.min(aLastIndex, index + 5);
         int offsetOfPointer = start == 0
                               ? index
-                              : Math.max(5, Math.min(start, 5));
+                              : 5;
         return "\n'" + aValue.substring(start, end) + "'\n" + Util.multiplicate(' ', 1 + offsetOfPointer) + '^';
     }
 
