@@ -18,7 +18,7 @@ This is a java library that, given a regex pattern, allows to:
 ## Status
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=plastic)](https://opensource.org/licenses/Apache-2.0)
-![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
 
 Build status:
 
@@ -30,9 +30,6 @@ Build status:
 ## Try it now!!!
 
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
-
-> Note: 1.0 version is there. 
-
 Enter your pattern and see the results.
 
 ## Usage
@@ -44,36 +41,9 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 </dependency>
 ```
-#### latest SNAPSHOT:
-```xml
-<project>
-    <repositories>
-        <repository>
-            <id>snapshots-repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-    
-    <!--  .... -->
-    
-    <dependency>
-        <groupId>com.github.curious-odd-man</groupId>
-        <artifactId>rgxgen</artifactId>
-        <version>1.2-SNAPSHOT</version>
-    </dependency>
-</project>
-```
-
-Changes in snapshot:
-
-- Fixed: Top level alternatives without group now working properly: [#31](https://github.com/curious-odd-man/RgxGen/issues/31)
-- Fixed: Empty alternatives not always work: [#35](https://github.com/curious-odd-man/RgxGen/issues/35)
-- Feature: Now it is possible to generate strings that does not match a pattern (see usage below) [#36](https://github.com/curious-odd-man/RgxGen/issues/36)
- 
-
 ### Code: 
 ```java
 public class Main {
@@ -91,7 +61,7 @@ public class Main {
 public class Main {
     public static void main(String[] args){
         RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-        Random rnd = new Random(1234)
+        Random rnd = new Random(1234);
         String s = rgxGen.generate(rnd);                                     // Generate first value
         String s1 = rgxGen.generate(rnd);                                    // Generate second value
         String s2 = rgxGen.generate(rnd);                                    // Generate third value
@@ -104,7 +74,7 @@ public class Main {
 ## Supported syntax
 
 <details>
-<summary><b>Latest RELEASE</b></summary>
+<summary><b>Supported syntax</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
@@ -129,7 +99,7 @@ public class Main {
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
-Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
+Any other characters are treated as simple characters and are generated as is, thought allowed to escape them.
 
 </details>
 
