@@ -17,17 +17,13 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Group implements Node {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Group.class);
-
+public class Group extends Node {
     private final Node aNode;
     private final int  aGroupIndex;
 
-    public Group(int index, Node node) {
-        LOGGER.trace("Crating idx = '{}' from '{}'", index, node);
+    public Group(String pattern, int index, Node node) {
+        super(pattern);
         aNode = node;
         aGroupIndex = index;
     }

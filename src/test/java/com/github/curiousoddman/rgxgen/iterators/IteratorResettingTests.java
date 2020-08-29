@@ -1,6 +1,5 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.iterators;
 
-import com.github.curiousoddman.rgxgen.iterators.*;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

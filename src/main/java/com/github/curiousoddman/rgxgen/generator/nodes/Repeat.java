@@ -17,27 +17,22 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class Repeat implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Repeat.class);
-
+public class Repeat extends Node {
     private final Node aNode;
     private final int  aMin;
     private final int  aMax;
 
-    public static Repeat minimum(Node node, int times) {
-        return new Repeat(node, times, -1);
+    public static Repeat minimum(String pattern, Node node, int times) {
+        return new Repeat(pattern, node, times, -1);
     }
 
-    public Repeat(Node node, int times) {
-        this(node, times, times);
+    public Repeat(String pattern, Node node, int times) {
+        this(pattern, node, times, times);
     }
 
-    public Repeat(Node node, int min, int max) {
-        LOGGER.trace("Crating ({} to {}) '{}'", min, max, node);
+    public Repeat(String pattern, Node node, int min, int max) {
+        super(pattern);
         aNode = node;
         aMin = min;
         aMax = max;

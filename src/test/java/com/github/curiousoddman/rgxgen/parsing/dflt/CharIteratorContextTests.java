@@ -1,6 +1,5 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.parsing.dflt.CharIterator;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -48,7 +47,6 @@ public class CharIteratorContextTests {
         String[] split = context.split("\n");
         assertEquals("", split[0]);
         int i = split[2].indexOf('^');
-        System.out.println(context);
         // -1 because actual context is taken from previous symbol, not from actual at index, but previous.
         assertEquals(String.format("%X", aOffset - 1), split[1].substring(i, i + 1));
     }
@@ -62,7 +60,6 @@ public class CharIteratorContextTests {
         String[] split = context.split("\n");
         assertEquals("", split[0]);
         int i = split[2].indexOf('^');        // -1 for the ' at the start of previous line
-        System.out.println(context);
         assertEquals(String.format("%X", aOffset), split[1].substring(i, i + 1));
     }
 

@@ -33,7 +33,7 @@ public class ChoiceIteratorSupplier implements Supplier<StringIterator> {
 
     @Override
     public StringIterator get() {
-        final StringIterator[] stringIterators = aStringIteratorsSuppliers.stream()
+        StringIterator[] stringIterators = aStringIteratorsSuppliers.stream()
                                                                           .flatMap(Collection::stream)
                                                                           .map(Supplier::get)
                                                                           .toArray(StringIterator[]::new);

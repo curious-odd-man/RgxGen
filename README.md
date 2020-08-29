@@ -1,67 +1,80 @@
-# Java library for text generation based on regular expression pattern
+# Regex: generate matching and non-matching strings
+
+This is a java library that, given a regex pattern, allows to:
+1. Generate matching strings
+1. Iterate through unique matching strings
+1. Generate not matching strings
+
+# Table of contents
+
+[Status](https://github.com/curious-odd-man/RgxGen#status)<br>
+[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now)<br>
+[Usage](https://github.com/curious-odd-man/RgxGen#usage)<br>
+[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax)<br>
+[Limitations](https://github.com/curious-odd-man/RgxGen#limitations)<br>
+[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better)<br>
+[Support](https://github.com/curious-odd-man/RgxGen#support)
 
 ## Status
 
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=plastic)](https://opensource.org/licenses/Apache-2.0)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
 
 Build status:
 
-| Master Branch   | Dev branch  |
+| Latest Release   | Latest snapshot  |
 | :---------: | :---------: |
 | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
 | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
 
 ## Try it now!!!
 
-Note: latest RELEASE version is imported there. See supported syntax below for details.
-
 Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
-
 Enter your pattern and see the results.
-
 
 ## Usage
 
 ### Maven dependency
 
 #### latest RELEASE:
-```
+```xml
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
 </dependency>
 ```
-#### latest SNAPSHOT:
-```
-<repositories>
-    <repository>
-        <id>snapshots-repository</id>
-        <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-    </repository>
-</repositories>
-
-// ....
-
-<dependency>
-    <groupId>com.github.curious-odd-man</groupId>
-    <artifactId>rgxgen</artifactId>
-    <version>1.1-SNAPSHOT</version>
-</dependency>
-```
-
 ### Code: 
+```java
+public class Main {
+    public static void main(String[] args){
+        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        String s = rgxGen.generate();                                        // Generate new random value
+        BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+        StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
+        String notMatching = rgxGen.generateNotMatching();                   // Generate not matching string
+    }
+}
 ```
-RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-String s = rgxGen.generate();                                        // Generate new random value
-BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
-StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
+
+```java
+public class Main {
+    public static void main(String[] args){
+        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        Random rnd = new Random(1234);
+        String s = rgxGen.generate(rnd);                                     // Generate first value
+        String s1 = rgxGen.generate(rnd);                                    // Generate second value
+        String s2 = rgxGen.generate(rnd);                                    // Generate third value
+        String notMatching = rgxGen.generateNotMatching(rnd);                // Generate not matching string
+        // On each launch s, s1 and s2 will be the same
+    }
+}
 ```
 
 ## Supported syntax
 
 <details>
-<summary><b>Latest RELEASE</b></summary>
+<summary><b>Supported syntax</b></summary>
 
 | Pattern   | Description  |
 | ---------: |-------------|
@@ -86,18 +99,7 @@ StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate 
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
-Any other character are treated as simple characters and are generated as is, thought allowed to escape them.
-
-Fixed issue [#23.](https://github.com/curious-odd-man/RgxGen/issues/23) Metasequences inside square brackets.
-Fixed issue [#18.](https://github.com/curious-odd-man/RgxGen/issues/18). Reproducible random sequences.
-```java
-RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
-Random rnd = new Random(1234)
-String s = rgxGen.generate(rnd);                                     // Generate first value
-String s1 = rgxGen.generate(rnd);                                    // Generate second value
-String s2 = rgxGen.generate(rnd);                                    // Generate third value
-// On each launch s, s1 and s2 will be the same
-```
+Any other characters are treated as simple characters and are generated as is, thought allowed to escape them.
 
 </details>
 
@@ -123,6 +125,13 @@ On the contrast, when generating **unique values** - the number of maximum repet
 
 Use `a{n,m}` if you require some specific number of repetitions.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
+
+### Not matching values generation
+
+The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though it is not always possible.
+For example pattern `.` - any symbol - would yield empty string as not matching string. 
+Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings would be only 1 or 2 symbols long.
+I chose these approaches because they seem predictible and easier to implement.
 
 ## Other tools to generate values by regex and why this might be better
 

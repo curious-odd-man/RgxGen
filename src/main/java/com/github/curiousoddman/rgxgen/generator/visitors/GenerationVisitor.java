@@ -17,23 +17,23 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class GenerationVisitor implements NodeVisitor {
-    private final StringBuilder        aStringBuilder = new StringBuilder();
-    private final Map<Integer, String> aGroupValues   = new HashMap<>();
-    private final Random               aRandom;
 
-    public GenerationVisitor() {
-        this(new Random());
+    public static GenerationVisitorBuilder builder() {
+        return new GenerationVisitorBuilder(GenerationVisitor::new);
     }
 
-    public GenerationVisitor(Random random) {
+    protected final StringBuilder        aStringBuilder = new StringBuilder();
+    protected final Map<Integer, String> aGroupValues;
+    protected final Random               aRandom;
+
+    protected GenerationVisitor(Random random, Map<Integer, String> groupValues) {
         aRandom = random;
+        aGroupValues = groupValues;
     }
 
     @Override
@@ -76,30 +76,24 @@ public class GenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(NotSymbol notSymbol) {
-        String value = notSymbol.getSubPattern()
-                                .pattern();
-        String result = Util.randomString(aRandom, value);
-        while (!notSymbol.getSubPattern()
-                         .matcher(value)
-                         .matches()) {
-            result = Util.randomString(aRandom, result);
-        }
-
-        aStringBuilder.append(result);
+    public void visit(NotSymbol node) {
+        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues);
+        node.getNode()
+            .visit(nmgv);
+        aStringBuilder.append(nmgv.aStringBuilder);
     }
 
     @Override
-    public void visit(GroupRef groupRef) {
-        aStringBuilder.append(aGroupValues.get(groupRef.getIndex()));
+    public void visit(GroupRef node) {
+        aStringBuilder.append(aGroupValues.get(node.getIndex()));
     }
 
     @Override
-    public void visit(Group group) {
+    public void visit(Group node) {
         int start = aStringBuilder.length();
-        group.getNode()
-             .visit(this);
-        aGroupValues.put(group.getIndex(), aStringBuilder.substring(start));
+        node.getNode()
+            .visit(this);
+        aGroupValues.put(node.getIndex(), aStringBuilder.substring(start));
     }
 
     public String getString() {

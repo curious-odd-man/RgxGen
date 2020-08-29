@@ -18,6 +18,16 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
 
-public interface Node {
-    void visit(NodeVisitor visitor);
+public abstract class Node {
+    private final String aPattern;
+
+    protected Node(String pattern) {
+        aPattern = pattern;
+    }
+
+    public abstract void visit(NodeVisitor visitor);
+
+    public String getPattern() {
+        return aPattern;
+    }
 }

@@ -1,6 +1,6 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.iterators;
 
-import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.RgxGen;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +67,7 @@ public class InfiniteGenerateTests {
         StringIterator stringIterator = rgxGen.iterateUnique();
         Set<String> set = new HashSet<>();
 
-        for (int i = 0; i < ITERATIONS * ITERATIONS; i++) {
+        for (int i = 0; i < ITERATIONS; i++) {
             String next = stringIterator.next();
             assertTrue(stringIterator.hasNext());
             if (aUseFind) {

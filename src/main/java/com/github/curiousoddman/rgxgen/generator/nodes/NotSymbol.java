@@ -17,20 +17,13 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.regex.Pattern;
+public class NotSymbol extends Node {
+    private final Node aNode;
 
-public class NotSymbol implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotSymbol.class);
-
-    private final Pattern aSubPattern;
-
-    public NotSymbol(String pattern) {
-        LOGGER.trace("Crating '{}'", pattern);
-        aSubPattern = Pattern.compile(pattern);
+    public NotSymbol(String pattern, Node node) {
+        super(pattern);
+        aNode = node;
     }
 
     @Override
@@ -38,12 +31,12 @@ public class NotSymbol implements Node {
         visitor.visit(this);
     }
 
-    public Pattern getSubPattern() {
-        return aSubPattern;
+    public Node getNode() {
+        return aNode;
     }
 
     @Override
     public String toString() {
-        return "NotSymbol{" + aSubPattern.pattern() + '}';
+        return "NotSymbol{" + aNode + '}';
     }
 }

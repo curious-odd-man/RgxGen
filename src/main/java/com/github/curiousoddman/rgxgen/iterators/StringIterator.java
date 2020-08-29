@@ -16,20 +16,13 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Iterator;
 
 public abstract class StringIterator implements Iterator<String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StringIterator.class);
-
     @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
     @Override
     public String next() {
-        String current = nextImpl();
-        LOGGER.trace("Produced value: '{}' using '{}'", current, this);
-        return current;
+        return nextImpl();
     }
 
     /**

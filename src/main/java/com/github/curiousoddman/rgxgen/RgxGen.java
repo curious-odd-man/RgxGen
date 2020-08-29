@@ -18,6 +18,7 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
@@ -89,23 +90,48 @@ public class RgxGen {
     /**
      * Generate random string from the pattern.
      *
-     * @return generated string.
+     * @return matching random string
      */
     public String generate() {
-        GenerationVisitor gv = new GenerationVisitor();
-        aNode.visit(gv);
-        return gv.getString();
+        return generate(new Random());
     }
 
     /**
      * Generate random string from the pattern.
+     * Random initialized with same seed will produce same results.
      *
      * @param random random to use for the generation.
      * @return generated string.
      */
     public String generate(Random random) {
-        GenerationVisitor gv = new GenerationVisitor(random);
+        GenerationVisitor gv = GenerationVisitor.builder()
+                                                .withRandom(random)
+                                                .get();
         aNode.visit(gv);
         return gv.getString();
+    }
+
+    /**
+     * Generate random string that does not match a pattern.
+     *
+     * @return not matching random string.
+     */
+    public String generateNotMatching() {
+        return generateNotMatching(new Random());
+    }
+
+    /**
+     * Generate random string that does not match a pattern.
+     * Random initialized with same seed will produce same results.
+     *
+     * @param random random to use for the generation.
+     * @return generated string.
+     */
+    public String generateNotMatching(Random random) {
+        GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
+                                                             .withRandom(random)
+                                                             .get();
+        aNode.visit(nmgv);
+        return nmgv.getString();
     }
 }
