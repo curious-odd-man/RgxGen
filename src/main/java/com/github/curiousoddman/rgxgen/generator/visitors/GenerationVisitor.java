@@ -77,16 +77,15 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        String value = node.getSubPattern()
-                           .pattern();
-        String result = Util.randomString(aRandom, value);
-        while (!node.getSubPattern()
-                    .matcher(value)
-                    .matches()) {
-            result = Util.randomString(aRandom, result);
-        }
-
-        aStringBuilder.append(result);
+//        String value = node.getPattern();
+//        String result = Util.randomString(aRandom, value);
+//        while (!node.getSubPattern()
+//                    .matcher(value)
+//                    .matches()) {
+//            result = Util.randomString(aRandom, result);
+//        }
+//
+//        aStringBuilder.append(result);
     }
 
     @Override

@@ -36,7 +36,7 @@ public class NotMatchingGenerationTests {
                 )},
                 {"foo(?!bar)", new Sequence("foo(?!bar)",
                                             new FinalSymbol("foo"),
-                                            new NotSymbol("bar")
+                                            new NotSymbol("bar", new FinalSymbol("bar"))
                 )}
         });
     }

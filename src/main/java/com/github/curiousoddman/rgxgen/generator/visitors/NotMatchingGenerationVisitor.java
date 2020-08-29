@@ -105,8 +105,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getSubPattern()
-                                                             .pattern());
+        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern());
         Node subNode = builder.get();
         GenerationVisitor generationVisitor = new GenerationVisitor(aRandom);
         subNode.visit(generationVisitor);
