@@ -29,7 +29,7 @@ Build status:
 
 ## Try it now!!!
 
-Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/1NCw)
+Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/2fPm)
 Enter your pattern and see the results.
 
 ## Usage
