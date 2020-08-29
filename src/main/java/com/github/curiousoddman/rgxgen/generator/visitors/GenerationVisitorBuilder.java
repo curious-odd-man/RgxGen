@@ -25,11 +25,6 @@ public class GenerationVisitorBuilder {
         return this;
     }
 
-    public GenerationVisitorBuilder withGroupsValues(Map<Integer, String> groupsValues) {
-        aGroupsValues = groupsValues;
-        return this;
-    }
-
     public GenerationVisitor get() {
         if (aRandom == null) {
             aRandom = new Random();
