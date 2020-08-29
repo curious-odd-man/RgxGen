@@ -306,7 +306,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             int startPos = aCharIterator.pos() - 1;
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
             String groupNumber = firstCharacter + digitsSubstring;
-            GroupRef groupRef = new GroupRef("\\" + groupNumber, Integer.parseInt(groupNumber));
+            GroupRef groupRef = new GroupRef('\\' + groupNumber, Integer.parseInt(groupNumber));
             aNodesStartPos.put(groupRef, startPos);
             nodes.add(groupRef);
         } else {
@@ -450,14 +450,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '{':
                 node = handleRepeatInCurvyBraces(startPos, repeatNode);
                 break;
+
+            default:
+                throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
         }
 
-        if (node != null) {
-            aNodesStartPos.put(node, startPos);
-            return node;
-        }
-
-        throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
+        aNodesStartPos.put(node, startPos);
+        return node;
     }
 
     /**
@@ -519,7 +518,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
             }
             handleRange(true, sb, symbolRanges);
-            rangeStarted = false;
         } else {
             StringBuilder tmpSb = new StringBuilder(0);
             handleEscapedCharacter(tmpSb, nodes, false);
@@ -540,7 +538,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        return rangeStarted;
+        return false;
     }
 
     /**

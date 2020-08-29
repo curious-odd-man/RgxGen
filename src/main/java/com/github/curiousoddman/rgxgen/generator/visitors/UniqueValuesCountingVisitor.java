@@ -98,7 +98,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         }
     }
 
-    private BigInteger countSeparately(Node parentNode, Node vnode) {
+    private static BigInteger countSeparately(Node parentNode, Node vnode) {
         UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode);
         vnode.visit(countingVisitor);
         return countingVisitor.aCount;
