@@ -7,12 +7,12 @@ This is a java library that, given a regex pattern, allows to:
 
 # Table of contents
 
-[Status](https://github.com/curious-odd-man/RgxGen#status)<br>
-[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now)<br>
-[Usage](https://github.com/curious-odd-man/RgxGen#usage)<br>
-[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax)<br>
-[Limitations](https://github.com/curious-odd-man/RgxGen#limitations)<br>
-[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better)<br>
+[Status](https://github.com/curious-odd-man/RgxGen#status) <br>
+[Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now) <br>
+[Usage](https://github.com/curious-odd-man/RgxGen#usage) <br>
+[Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax) <br>
+[Limitations](https://github.com/curious-odd-man/RgxGen#limitations) <br>
+[Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better) <br>
 [Support](https://github.com/curious-odd-man/RgxGen#support)
 
 ## Status
@@ -29,7 +29,7 @@ Build status:
 
 ## Try it now!!!
 
-Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/2fPm)
+Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/2fPm).
 Enter your pattern and see the results.
 
 ## Usage
