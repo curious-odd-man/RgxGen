@@ -64,9 +64,9 @@ public class CombinedTests extends CombinedTestTemplate {
         List<String> strings = rgxGen.stream()
                                      .limit(1000)
                                      .collect(Collectors.toList());
-        for (String string : strings) {
-            boolean result = isValidGenerated(string);
-            assertTrue("Text: '" + string + "'does not match pattern " + aTestPattern.aPattern, result);
+        for (String generated : strings) {
+            boolean result = isValidGenerated(generated);
+            assertTrue("Text: '" + generated + "'does not match pattern " + aTestPattern.aPattern, result);
 
         }
     }

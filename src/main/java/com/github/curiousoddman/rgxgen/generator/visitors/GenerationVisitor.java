@@ -17,23 +17,23 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 public class GenerationVisitor implements NodeVisitor {
-    protected final StringBuilder        aStringBuilder = new StringBuilder();
-    protected final Map<Integer, String> aGroupValues   = new HashMap<>();
-    protected final Random               aRandom;
 
-    public GenerationVisitor() {
-        this(new Random());
+    public static GenerationVisitorBuilder builder() {
+        return new GenerationVisitorBuilder(GenerationVisitor::new);
     }
 
-    public GenerationVisitor(Random random) {
+    protected final StringBuilder        aStringBuilder = new StringBuilder();
+    protected final Map<Integer, String> aGroupValues;
+    protected final Random               aRandom;
+
+    protected GenerationVisitor(Random random, Map<Integer, String> groupValues) {
         aRandom = random;
+        aGroupValues = groupValues;
     }
 
     @Override
@@ -77,15 +77,10 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-//        String value = node.getPattern();
-//        String result = Util.randomString(aRandom, value);
-//        while (!node.getSubPattern()
-//                    .matcher(value)
-//                    .matches()) {
-//            result = Util.randomString(aRandom, result);
-//        }
-//
-//        aStringBuilder.append(result);
+        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues);
+        node.getNode()
+            .visit(nmgv);
+        aStringBuilder.append(nmgv.aStringBuilder);
     }
 
     @Override

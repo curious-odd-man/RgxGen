@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -65,7 +66,9 @@ public class NotMatchingGenerationTests {
         // Verify that nodes are correct
         assertEquals(aNode.toString(), node.toString());
 
-        NotMatchingGenerationVisitor visitor = new NotMatchingGenerationVisitor(new Random(aSeed));
+        GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
+                                                                .withRandom(new Random(aSeed))
+                                                                .get();
         aNode.visit(visitor);
         boolean matches = Pattern.compile(aRegex)
                                  .matcher(visitor.getString())

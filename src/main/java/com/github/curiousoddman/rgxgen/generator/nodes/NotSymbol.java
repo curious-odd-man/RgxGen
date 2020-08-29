@@ -31,6 +31,10 @@ public class NotSymbol extends Node {
         visitor.visit(this);
     }
 
+    public Node getNode() {
+        return aNode;
+    }
+
     @Override
     public String toString() {
         return "NotSymbol{" + aNode + '}';

@@ -20,17 +20,20 @@ import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
+import java.util.Map;
 import java.util.Random;
 import java.util.regex.Pattern;
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
-    private static final String[] allSymbols = SymbolSet.getAllSymbols();
 
-    public NotMatchingGenerationVisitor() {
+    public static GenerationVisitorBuilder builder() {
+        return new GenerationVisitorBuilder(NotMatchingGenerationVisitor::new);
     }
 
-    public NotMatchingGenerationVisitor(Random random) {
-        super(random);
+    private static final String[] allSymbols = SymbolSet.getAllSymbols();
+
+    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues) {
+        super(random, groupValues);
     }
 
     @Override
@@ -107,7 +110,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     public void visit(NotSymbol node) {
         NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern());
         Node subNode = builder.get();
-        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom);
+        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues);
         subNode.visit(generationVisitor);
         aStringBuilder.append(generationVisitor.getString());
     }
