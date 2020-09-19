@@ -148,3 +148,5 @@ Though I found they have following issues:
 
 I plan to support this library, so you're welcome to open issues or reach me by e-mail in case of any questions.
 Any suggestions, feature requests or bug reports are welcome!
+
+Please vote up my answer on [StackOverflow](https://stackoverflow.com/a/58813696/4174003) to help others find this library.
