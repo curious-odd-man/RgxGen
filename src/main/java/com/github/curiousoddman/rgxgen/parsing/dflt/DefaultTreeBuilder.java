@@ -351,6 +351,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 sb.append((char) parseHexadecimal());
                 break;
 
+            case 'Q':
+                aCharIterator.nextUntil("\\E");
+                break;
+
+            case 'E':       // End of escape sequence can be ignored.
+                break;
+
             // Group reference number
             case '1':
             case '2':

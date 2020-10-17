@@ -20,6 +20,7 @@ import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -148,12 +149,21 @@ public class CharIterator implements Iterator<Character> {
      * @throws NoSuchElementException if no such character present after next character
      */
     public String nextUntil(char c) {
+        return nextUntil((str, fromIdx) -> str.indexOf(c, fromIdx), true);
+    }
+
+    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, boolean mustExist) {
         int startIndex = aCurrentIndex;
         while (true) {
             // Find ending character
-            aCurrentIndex = aValue.indexOf(c, aCurrentIndex);
+            aCurrentIndex = indexOf.apply(aValue, aCurrentIndex);
             if (aCurrentIndex == -1) {
-                throw new NoSuchElementException("Could not find character '" + c + "' in string: '" + aValue.substring(startIndex));
+                if (mustExist) {
+                    throw new NoSuchElementException("Could not find termination sequence/character in string: '" + aValue.substring(startIndex));
+                } else {
+                    aCurrentIndex = aValue.length() - 1;
+                    return aValue.substring(startIndex);
+                }
             }
             int cnt = 1;        // One, because we subtract it later from endIndex. Just to avoid extra subtraction
             // Count how much backslashes there are -
@@ -173,6 +183,18 @@ public class CharIterator implements Iterator<Character> {
         }
 
         return aValue.substring(startIndex, aCurrentIndex);
+    }
+
+    /**
+     * Returns substring from next character up to next  occurrence of {@code s}
+     * Cursor is advanced to a position of last character in {@code s}
+     *
+     * @param s string to search for
+     * @return substring from next character up to next not escaped occurrence of s.
+     * if string not found - returns all remaining characters
+     */
+    public String nextUntil(String s) {
+        return nextUntil((str, fromIdx) -> str.indexOf(s, fromIdx), false);
     }
 
     /**
