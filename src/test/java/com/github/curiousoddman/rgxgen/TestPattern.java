@@ -348,7 +348,23 @@ public enum TestPattern {
                                                                    new FinalSymbol("b"))
                                               )),
                                  BigInteger.valueOf(2),
-                                 Arrays.asList("aa", "ab"));
+                                 Arrays.asList("aa", "ab")),
+    SLASH_Q_AND_SLASH_E_BASIC("\\Qm\\E",
+                              new FinalSymbol("m"),
+                              BigInteger.valueOf(1),
+                              Collections.singletonList("m")),
+    SLASH_Q_WITHOUT_SLASH_E_BASIC("\\Qmas",
+                              new FinalSymbol("mas"),
+                              BigInteger.valueOf(1),
+                              Collections.singletonList("mas")),
+    SLASH_E_WITHOUT_SLASH_Q_BASIC("mas\\E",
+                                  new FinalSymbol("mas"),
+                                  BigInteger.valueOf(1),
+                                  Collections.singletonList("mas")),
+    SLASH_Q_AND_SLASH_E_IGNORE_SPECIALS("\\Q[a]\\1(a|c).*\\W\\E",
+                              new FinalSymbol("[a]\\1(a|c).*\\W\\"),
+                              BigInteger.valueOf(1),
+                              Collections.singletonList("[a]\\1(a|c).*\\W\\"));
 
     final String       aPattern;
     final Node         aResultNode;
