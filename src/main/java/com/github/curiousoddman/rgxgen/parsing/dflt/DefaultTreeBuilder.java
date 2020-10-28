@@ -284,7 +284,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (c == '{') {
             aCharIterator.skip();
             hexValue = aCharIterator.nextUntil('}');
-            aCharIterator.skip();
         } else {
             hexValue = aCharIterator.next(2);
         }
@@ -325,24 +324,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
-        SymbolSet symbolSet = null;
+        Node createdNode = null;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             // Hex character:
@@ -352,7 +351,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
 
             case 'Q':
-                aCharIterator.nextUntil("\\E");
+                sbToFinal(sb, nodes);
+                createdNode = new FinalSymbol(aCharIterator.nextUntil("\\E"));
                 break;
 
             case 'E':       // End of escape sequence can be ignored.
@@ -377,9 +377,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
         }
 
-        if (symbolSet != null) {
-            aNodesStartPos.put(symbolSet, aCharIterator.pos() - 1);
-            nodes.add(symbolSet);
+        if (createdNode != null) {
+            aNodesStartPos.put(createdNode, aCharIterator.pos() - 1);
+            nodes.add(createdNode);
         }
     }
 
@@ -614,7 +614,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (aCharIterator.last() == '$') {
-            aCharIterator.setBound(-1);
+            aCharIterator.modifyBound(-1);
         }
 
         aNode = parseGroup(aCharIterator.pos() + 1, GroupType.NON_CAPTURE_GROUP);

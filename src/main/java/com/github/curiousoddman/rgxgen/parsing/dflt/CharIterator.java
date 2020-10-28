@@ -142,30 +142,45 @@ public class CharIterator implements Iterator<Character> {
 
     /**
      * Returns substring from next character up to next not escaped character {@code c}
-     * Cursor is advanced to a position of character {@code c}
+     * Cursor is advanced to a position after character {@code c}
      *
      * @param c character to search for
      * @return substring from next character up to next not escaped character {@code c}
      * @throws NoSuchElementException if no such character present after next character
      */
     public String nextUntil(char c) {
-        return nextUntil((str, fromIdx) -> str.indexOf(c, fromIdx), true);
+        return nextUntil((str, fromIdx) -> str.indexOf(c, fromIdx), 1, true);
     }
 
-    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, boolean mustExist) {
+    /**
+     * Returns substring from next character up to next occurrence of {@code s}
+     * Cursor is advanced to a position after last character in {@code s}
+     *
+     * @param s string to search for
+     * @return substring from next character up to next not escaped occurrence of s.
+     * if string not found - returns all remaining characters
+     */
+    public String nextUntil(String s) {
+        return nextUntil((str, fromIdx) -> str.indexOf(s, fromIdx), s.length(), false);
+    }
+
+    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
         int startIndex = aCurrentIndex;
         while (true) {
             // Find ending character
             aCurrentIndex = indexOf.apply(aValue, aCurrentIndex);
-            if (aCurrentIndex == -1) {
+            if (aCurrentIndex >= aLastIndex) {
+                aCurrentIndex = aLastIndex;
+                return aValue.substring(startIndex, aCurrentIndex);
+            } else if (aCurrentIndex == -1) {
                 if (mustExist) {
                     throw new NoSuchElementException("Could not find termination sequence/character in string: '" + aValue.substring(startIndex));
                 } else {
-                    aCurrentIndex = aValue.length() - 1;
-                    return aValue.substring(startIndex);
+                    aCurrentIndex = aLastIndex;
+                    return aValue.substring(startIndex, aCurrentIndex);
                 }
             }
-            int cnt = 1;        // One, because we subtract it later from endIndex. Just to avoid extra subtraction
+            int cnt = 1;        // One, because we subtract it from aCurrentIndex. Just to avoid extra subtraction
             // Count how much backslashes there are -
             // Even number means that they all are escaped
             // Odd number means that the {@code c} is escaped
@@ -173,7 +188,7 @@ public class CharIterator implements Iterator<Character> {
                 ++cnt;
             }
 
-            // because count was 1, not 0 initially we do not equal comparison
+            // initially count was 1, not 0 - we do != comparison
             if (cnt % 2 != 0) {
                 break;
             }
@@ -182,19 +197,9 @@ public class CharIterator implements Iterator<Character> {
             ++aCurrentIndex;
         }
 
-        return aValue.substring(startIndex, aCurrentIndex);
-    }
-
-    /**
-     * Returns substring from next character up to next  occurrence of {@code s}
-     * Cursor is advanced to a position of last character in {@code s}
-     *
-     * @param s string to search for
-     * @return substring from next character up to next not escaped occurrence of s.
-     * if string not found - returns all remaining characters
-     */
-    public String nextUntil(String s) {
-        return nextUntil((str, fromIdx) -> str.indexOf(s, fromIdx), false);
+        int substringEnd = aCurrentIndex;
+        aCurrentIndex += len +1;
+        return aValue.substring(startIndex, substringEnd);
     }
 
     /**
@@ -230,7 +235,7 @@ public class CharIterator implements Iterator<Character> {
      *
      * @param offset offset in respect to current bound
      */
-    public void setBound(int offset) {
+    public void modifyBound(int offset) {
         aLastIndex += offset;
     }
 

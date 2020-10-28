@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class CharIteratorTests {
 
@@ -22,24 +23,28 @@ public class CharIteratorTests {
 
     @Test(expected = NoSuchElementException.class)
     public void nextUntilThrowsWhenNoSuchCharacter2Test() {
-        CharIterator iterator = new CharIterator("aaaaaxaaaaaaa");
-        assertEquals("aaaaa", iterator.nextUntil('x'));
-        iterator.next();    // Skip 'x' character
-        iterator.nextUntil('x');
+        CharIterator charIterator = new CharIterator("aaaaaxaaaaaaa");
+        assertEquals("aaaaa", charIterator.nextUntil('x'));
+        assertEquals(8, charIterator.remaining());
+        charIterator.next();    // Skip 'x' character
+        charIterator.nextUntil('x');
     }
 
     @Test
     public void substringToCurrPosTest() {
-        CharIterator iterator = new CharIterator("0123456789");
-        String s = iterator.substringToCurrPos(0);
+        CharIterator charIterator = new CharIterator("0123456789");
+        String s = charIterator.substringToCurrPos(0);
+        assertEquals(10, charIterator.remaining());
         assertEquals("", s);
-        iterator.next();
-        iterator.next();
-        iterator.next();
-        s = iterator.substringToCurrPos(0);
+        charIterator.next();
+        charIterator.next();
+        charIterator.next();
+        s = charIterator.substringToCurrPos(0);
+        assertEquals(7, charIterator.remaining());
         assertEquals("012", s);
-        iterator.next();
-        s = iterator.substringToCurrPos(0);
+        charIterator.next();
+        s = charIterator.substringToCurrPos(0);
+        assertEquals(6, charIterator.remaining());
         assertEquals("0123", s);
     }
 
@@ -81,17 +86,20 @@ public class CharIteratorTests {
     }
 
     @Test
-    public void nextUntilStringEscapedTest() {
+    public void nextUntilEscapedStringEscapedTest() {
         CharIterator charIterator = new CharIterator("m\\\\Ezxc");
         assertEquals("m\\\\Ezxc", charIterator.nextUntil("\\E"));
-        assertEquals(7, charIterator.pos());
+        assertEquals(0, charIterator.remaining());
+        assertFalse(charIterator.hasNext());
     }
 
     @Test
-    public void nextUntilStringEscaped2Test() {
+    public void nextUntilStringEscapedTest() {
         CharIterator charIterator = new CharIterator("m\\Ezxc");
         assertEquals("m\\Ezxc", charIterator.nextUntil("E"));
-        assertEquals(3, charIterator.pos());
+        assertEquals(5, charIterator.pos());
+        assertEquals(0, charIterator.remaining());
+        assertFalse(charIterator.hasNext());
     }
 
     @Test
@@ -106,13 +114,25 @@ public class CharIteratorTests {
         CharIterator charIterator = new CharIterator("masd");
         assertEquals("masd", charIterator.nextUntil("\\E"));
         assertEquals(3, charIterator.pos());
+        assertEquals(0, charIterator.remaining());
+        assertFalse(charIterator.hasNext());
     }
 
     @Test
     public void nextUntilStringBoundIsRespectedTest() {
         CharIterator charIterator = new CharIterator("masd$xxx");
-        charIterator.setBound(4);
+        charIterator.modifyBound(-4);
         assertEquals("masd", charIterator.nextUntil("E"));
         assertEquals(3, charIterator.pos());
+        assertEquals(0, charIterator.remaining());
+        assertFalse(charIterator.hasNext());
+    }
+
+    @Test
+    public void nextUntilStringSpecialCaseTest() {
+        CharIterator charIterator = new CharIterator("[a]\\1(a|c).*\\W\\Ezxc");
+        assertEquals("[a]\\1(a|c).*\\W", charIterator.nextUntil("\\E"));
+        assertEquals(16, charIterator.pos());
+        assertEquals(3, charIterator.remaining());
     }
 }
