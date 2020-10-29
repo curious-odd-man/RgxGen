@@ -351,8 +351,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
 
             case 'Q':
-                sbToFinal(sb, nodes);
-                createdNode = new FinalSymbol(aCharIterator.nextUntil("\\E"));
+                sb.append(aCharIterator.nextUntil("\\E"));
                 break;
 
             case 'E':       // End of escape sequence can be ignored.
