@@ -67,6 +67,6 @@ public class CharIteratorContextTests {
     public void verifyPos() {
         CharIterator iterator = new CharIterator(aInitialText);
         iterator.skip(aOffset);
-        assertEquals(aOffset - 1, iterator.pos());
+        assertEquals(aOffset - 1, iterator.prevPos());
     }
 }

@@ -5,6 +5,9 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import static org.junit.Assume.assumeNoException;
 
 @RunWith(Parameterized.class)
 public abstract class CombinedTestTemplate {
@@ -12,20 +15,26 @@ public abstract class CombinedTestTemplate {
     @Parameterized.Parameter
     public TestPattern aTestPattern;
 
-    protected Pattern aPattern;
+    protected Pattern   aCompiledPattern;
+    protected Exception aPatternCompileException;
 
     @Before
     public void setUp() {
-        aPattern = Pattern.compile(aTestPattern.aPattern);
+        try {
+            aCompiledPattern = Pattern.compile(aTestPattern.aPattern);
+        } catch (PatternSyntaxException e) {
+            aPatternCompileException = e;
+        }
     }
 
     protected boolean isValidGenerated(String value) {
+        assumeNoException(aPatternCompileException);
         if (aTestPattern.useFindForMatching()) {
-            return aPattern.matcher(value)
-                           .find();
+            return aCompiledPattern.matcher(value)
+                                   .find();
         } else {
-            return aPattern.matcher(value)
-                           .matches();
+            return aCompiledPattern.matcher(value)
+                                   .matches();
         }
     }
 }
