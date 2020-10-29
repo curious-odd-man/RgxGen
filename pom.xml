@@ -176,6 +176,16 @@
                                 <placement>m</placement>
                                 <head>API Note:</head>
                             </tag>
+                            <tag>
+                                <name>expectedType</name>
+                                <placement>f</placement>
+                                <head>Expected Type:</head>
+                            </tag>
+                            <tag>
+                                <name>defaultValue</name>
+                                <placement>f</placement>
+                                <head>Default:</head>
+                            </tag>
                         </tags>
                     </configuration>
                     <executions>

@@ -30,10 +30,12 @@ public class GenerationVisitor implements NodeVisitor {
     protected final StringBuilder        aStringBuilder = new StringBuilder();
     protected final Map<Integer, String> aGroupValues;
     protected final Random               aRandom;
+    protected final Integer              aRepeatLimit;
 
-    protected GenerationVisitor(Random random, Map<Integer, String> groupValues) {
+    protected GenerationVisitor(Random random, Map<Integer, String> groupValues, Integer repeatLimit) {
         aRandom = random;
         aGroupValues = groupValues;
+        aRepeatLimit = repeatLimit;
     }
 
     @Override
@@ -57,7 +59,7 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        int max = node.getMax() == -1 ? 100 : node.getMax();
+        int max = node.getMax() == -1 ? aRepeatLimit : node.getMax();
         int repeat = node.getMin() >= max ?
                      node.getMin() :
                      node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
@@ -77,7 +79,7 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues);
+        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues, aRepeatLimit);
         node.getNode()
             .visit(nmgv);
         aStringBuilder.append(nmgv.aStringBuilder);

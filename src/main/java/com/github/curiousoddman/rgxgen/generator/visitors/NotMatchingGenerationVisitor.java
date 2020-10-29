@@ -32,8 +32,8 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     private static final String[] allSymbols = SymbolSet.getAllSymbols();
 
-    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues) {
-        super(random, groupValues);
+    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, Integer repeatLimit) {
+        super(random, groupValues, repeatLimit);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     public void visit(NotSymbol node) {
         NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern());
         Node subNode = builder.get();
-        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues);
+        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues, aRepeatLimit);
         subNode.visit(generationVisitor);
         aStringBuilder.append(generationVisitor.getString());
     }

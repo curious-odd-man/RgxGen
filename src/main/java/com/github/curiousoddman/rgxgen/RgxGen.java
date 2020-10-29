@@ -16,6 +16,8 @@ package com.github.curiousoddman.rgxgen;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
@@ -33,7 +35,23 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
+    private static RgxGenProperties aGlobalProperties = null;
+
     private final Node aNode;
+
+    private RgxGenProperties aLocalProperties = aGlobalProperties;
+
+    /**
+     * Set default properties for RgxGen.
+     * Each new instance of RgxGen will use these properties as a backup, if property is not set per instance.
+     *
+     * @param properties configuration properties
+     * @apiNote Existing instances will not be affected. Only those, that will be created after this call.
+     * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
+     */
+    public static void setDefaultProperties(RgxGenProperties properties) {
+        aGlobalProperties = properties;
+    }
 
     /**
      * Parse pattern using DefaultTreeBuilder.
@@ -51,6 +69,22 @@ public class RgxGen {
      */
     public RgxGen(NodeTreeBuilder builder) {
         aNode = builder.get();
+    }
+
+    /**
+     * Set properties for the instance of RgxGen.
+     * These options will override default values set by either {@code setDefaultProperties} or default hardcoded.
+     *
+     * @param properties configuration properties.
+     * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
+     */
+    public void setProperties(RgxGenProperties properties) {
+        aLocalProperties = properties;
+        if (aLocalProperties == null) {
+            aLocalProperties = aGlobalProperties;
+        } else {
+            aLocalProperties.setDefaults(aGlobalProperties);
+        }
     }
 
     /**
@@ -106,6 +140,7 @@ public class RgxGen {
     public String generate(Random random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
+                                                .withInfiniteRepetitions(RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(aLocalProperties))
                                                 .get();
         aNode.visit(gv);
         return gv.getString();
