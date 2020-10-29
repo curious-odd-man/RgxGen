@@ -111,8 +111,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void sbToFinal(StringBuilder sb, List<Node> nodes) {
         if (sb.length() != 0) {
             FinalSymbol finalSymbol = new FinalSymbol(sb.toString());
-            aNodesStartPos.put(finalSymbol, aCharIterator.pos() - finalSymbol.getValue()
-                                                                             .length());
+            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue()
+                                                                                 .length());
             nodes.add(finalSymbol);
             sb.delete(0, Integer.MAX_VALUE);
         }
@@ -196,7 +196,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '(':
                     sbToFinal(sb, nodes);
-                    int intGroupStartPos = aCharIterator.pos();
+                    int intGroupStartPos = aCharIterator.prevPos();
                     GroupType groupType = processGroupType();
                     nodes.add(parseGroup(intGroupStartPos, groupType));
                     break;
@@ -236,7 +236,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void handleAnySymbolCharacter(List<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
         SymbolSet symbolSet = new SymbolSet();
-        aNodesStartPos.put(symbolSet, aCharIterator.pos());
+        aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
 
@@ -244,12 +244,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (sb.length() == 0 && nodes.isEmpty()) {
             // Special case when '(|a)' is used - like empty or something
             FinalSymbol finalSymbol = new FinalSymbol("");
-            aNodesStartPos.put(finalSymbol, aCharIterator.pos() + 1);
+            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() + 1);
             choices.add(finalSymbol);
         } else {
             sbToFinal(sb, nodes);
             choices.add(sequenceOrNot(choicesStartPos, nodes, choices, false, null));
-            choicesStartPos = aCharIterator.pos() + 1;
+            choicesStartPos = aCharIterator.prevPos() + 1;
             nodes.clear();
         }
         return choicesStartPos;
@@ -267,7 +267,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             sb.deleteCharAt(sb.length() - 1);
             sbToFinal(sb, nodes);
             repeatNode = new FinalSymbol(String.valueOf(charToRepeat));
-            aNodesStartPos.put(repeatNode, aCharIterator.pos() - 1);
+            aNodesStartPos.put(repeatNode, aCharIterator.prevPos() - 1);
         }
         nodes.add(handleRepeat(c, repeatNode));
     }
@@ -302,7 +302,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private void handleGroupReference(boolean groupRefAllowed, Collection<Node> nodes, char firstCharacter) {
         if (groupRefAllowed) {
-            int startPos = aCharIterator.pos() - 1;
+            int startPos = aCharIterator.prevPos() - 1;
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
             String groupNumber = firstCharacter + digitsSubstring;
             GroupRef groupRef = new GroupRef('\\' + groupNumber, Integer.parseInt(groupNumber));
@@ -378,7 +378,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (createdNode != null) {
-            aNodesStartPos.put(createdNode, aCharIterator.pos() - 1);
+            aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
             nodes.add(createdNode);
         }
     }
@@ -392,12 +392,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private Repeat handleRepeatInCurvyBraces(int startPos, Node repeatNode) {
         StringBuilder sb = new StringBuilder(10);
         int min = -1;
-        int contextIndex = aCharIterator.pos();
+        int contextIndex = aCharIterator.prevPos();
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ',': {
-                    int tmpContextIndex = aCharIterator.pos() - 1;
+                    int tmpContextIndex = aCharIterator.prevPos() - 1;
                     try {
                         min = Integer.parseInt(sb.toString());
                     } catch (NumberFormatException e) {
@@ -555,7 +555,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return Node that covers expression in square brackets
      */
     private Node handleCharacterVariations() {
-        int openSquareBraceIndex = aCharIterator.pos();
+        int openSquareBraceIndex = aCharIterator.prevPos();
         SymbolSet.TYPE symbolSetType = SymbolSet.TYPE.POSITIVE;
         if (aCharIterator.peek() == '^') {
             symbolSetType = SymbolSet.TYPE.NEGATIVE;
@@ -613,11 +613,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             aCharIterator.next();
         }
 
-        if (aCharIterator.last() == '$') {
+        if (aCharIterator.lastChar() == '$') {
             aCharIterator.modifyBound(-1);
         }
 
-        aNode = parseGroup(aCharIterator.pos() + 1, GroupType.NON_CAPTURE_GROUP);
+        aNode = parseGroup(aCharIterator.prevPos() + 1, GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
             throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());
         }

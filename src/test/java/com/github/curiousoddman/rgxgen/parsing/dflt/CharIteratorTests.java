@@ -1,5 +1,22 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
+
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -23,11 +40,11 @@ public class CharIteratorTests {
 
     @Test(expected = NoSuchElementException.class)
     public void nextUntilThrowsWhenNoSuchCharacter2Test() {
-        CharIterator charIterator = new CharIterator("aaaaaxaaaaaaa");
+        CharIterator charIterator = new CharIterator("aaaaaxbbbbbbb");
         assertEquals("aaaaa", charIterator.nextUntil('x'));
-        assertEquals(8, charIterator.remaining());
+        assertEquals(7, charIterator.remaining());
         charIterator.next();    // Skip 'x' character
-        charIterator.nextUntil('x');
+        assertEquals("bbbbbbb", charIterator.nextUntil('x'));
     }
 
     @Test
@@ -82,7 +99,7 @@ public class CharIteratorTests {
     public void nextUntilStringMinTest() {
         CharIterator charIterator = new CharIterator("m\\E");
         assertEquals("m", charIterator.nextUntil("\\E"));
-        assertEquals(3, charIterator.pos());
+        assertEquals(2, charIterator.prevPos());
     }
 
     @Test
@@ -97,7 +114,7 @@ public class CharIteratorTests {
     public void nextUntilStringEscapedTest() {
         CharIterator charIterator = new CharIterator("m\\Ezxc");
         assertEquals("m\\Ezxc", charIterator.nextUntil("E"));
-        assertEquals(5, charIterator.pos());
+        assertEquals(5, charIterator.prevPos());
         assertEquals(0, charIterator.remaining());
         assertFalse(charIterator.hasNext());
     }
@@ -106,14 +123,14 @@ public class CharIteratorTests {
     public void nextUntilStringWithSuffixTest() {
         CharIterator charIterator = new CharIterator("m\\Exa");
         assertEquals("m", charIterator.nextUntil("\\E"));
-        assertEquals(3, charIterator.pos());
+        assertEquals(2, charIterator.prevPos());
     }
 
     @Test
     public void nextUntilStringMissingTest() {
         CharIterator charIterator = new CharIterator("masd");
         assertEquals("masd", charIterator.nextUntil("\\E"));
-        assertEquals(3, charIterator.pos());
+        assertEquals(3, charIterator.prevPos());
         assertEquals(0, charIterator.remaining());
         assertFalse(charIterator.hasNext());
     }
@@ -123,7 +140,7 @@ public class CharIteratorTests {
         CharIterator charIterator = new CharIterator("masd$xxx");
         charIterator.modifyBound(-4);
         assertEquals("masd", charIterator.nextUntil("E"));
-        assertEquals(3, charIterator.pos());
+        assertEquals(3, charIterator.prevPos());
         assertEquals(0, charIterator.remaining());
         assertFalse(charIterator.hasNext());
     }
@@ -132,7 +149,15 @@ public class CharIteratorTests {
     public void nextUntilStringSpecialCaseTest() {
         CharIterator charIterator = new CharIterator("[a]\\1(a|c).*\\W\\Ezxc");
         assertEquals("[a]\\1(a|c).*\\W", charIterator.nextUntil("\\E"));
-        assertEquals(16, charIterator.pos());
+        assertEquals(15, charIterator.prevPos());
         assertEquals(3, charIterator.remaining());
+    }
+
+    @Test
+    public void nextUntilStringSpecialCase2Test() {
+        CharIterator charIterator = new CharIterator("[a]\\1(a|c).*\\W\\E");
+        assertEquals("[a]\\1(a|c).*\\W", charIterator.nextUntil("\\E"));
+        assertEquals(15, charIterator.prevPos());
+        assertEquals(0, charIterator.remaining());
     }
 }

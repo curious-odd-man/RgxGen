@@ -362,9 +362,9 @@ public enum TestPattern {
                                   BigInteger.valueOf(1),
                                   Collections.singletonList("mas")),
     SLASH_Q_AND_SLASH_E_IGNORE_SPECIALS("\\Q[a]\\1(a|c).*\\W\\E",
-                              new FinalSymbol("[a]\\1(a|c).*\\W\\"),
+                              new FinalSymbol("[a]\\1(a|c).*\\W"),
                               BigInteger.valueOf(1),
-                              Collections.singletonList("[a]\\1(a|c).*\\W\\"));
+                              Collections.singletonList("[a]\\1(a|c).*\\W"));
 
     final String       aPattern;
     final Node         aResultNode;
