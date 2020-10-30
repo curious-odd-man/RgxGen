@@ -90,12 +90,4 @@ public class PermutationsIterator extends StringIterator {
                      .map(StringIterator::current)
                      .reduce("", String::concat);
     }
-
-    @Override
-    public String toString() {
-        return "PermutationsIterator{" +
-                ", aIterators=" + Arrays.toString(aIterators) +
-                ", aGeneratedParts=" + Arrays.toString(aGeneratedParts) +
-                '}';
-    }
 }

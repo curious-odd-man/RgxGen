@@ -13,10 +13,10 @@ public class RegressionTests {
     @Test
     public void bug23_parseEscapeCharacterInSquareBrackets() {
         String pattern = "[A-Z0-9'\\-/\\.\\s]{0,2}";
-        final Pattern compile = Pattern.compile(pattern);
-        final RgxGen rgxGen = new RgxGen(pattern);
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
-        final StringIterator stringIterator = rgxGen.iterateUnique();
+        StringIterator stringIterator = rgxGen.iterateUnique();
         while (stringIterator.hasNext()) {
             assertTrue(compile.matcher(stringIterator.next())
                               .matches());
@@ -26,10 +26,10 @@ public class RegressionTests {
     @Test
     public void bug31_topLevelChoiceIsNotRecognized() {
         String pattern = "1|2";
-        final Pattern compile = Pattern.compile(pattern);
-        final RgxGen rgxGen = new RgxGen(pattern);
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
-        final StringIterator stringIterator = rgxGen.iterateUnique();
+        StringIterator stringIterator = rgxGen.iterateUnique();
         assertEquals(BigInteger.valueOf(2), rgxGen.numUnique());
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());

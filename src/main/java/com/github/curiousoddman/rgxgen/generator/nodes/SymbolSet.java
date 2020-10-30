@@ -82,14 +82,6 @@ public class SymbolSet extends Node {
         int getTo() {
             return aTo;
         }
-
-        @Override
-        public String toString() {
-            return "SymbolRange{" +
-                    aFrom +
-                    ':' + aTo +
-                    '}';
-        }
     }
 
     private final String[] aSymbols;
@@ -112,6 +104,7 @@ public class SymbolSet extends Node {
     /**
      * Create SymbolSet from ranges and symbols according to type
      *
+     * @param pattern      original pattern for the reference
      * @param symbolRanges ranges of symbols to include/exclude
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude

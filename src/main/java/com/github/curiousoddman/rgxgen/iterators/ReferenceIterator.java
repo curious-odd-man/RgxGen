@@ -47,12 +47,4 @@ public class ReferenceIterator extends StringIterator {
         return hasNext || !aOther.current()
                                  .equals(aLast);
     }
-
-    @Override
-    public String toString() {
-        return "ReferenceIterator[" +
-                aOther +
-                "]{" + aLast +
-                "} ";
-    }
 }

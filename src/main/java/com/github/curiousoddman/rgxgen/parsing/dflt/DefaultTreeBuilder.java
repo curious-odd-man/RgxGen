@@ -442,7 +442,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private Repeat handleRepeat(char c, Node repeatNode) {
         int startPos = aNodesStartPos.get(repeatNode);
-        Repeat node = null;
+        Repeat node;
         switch (c) {
             case '*':
                 node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 0);

@@ -25,7 +25,7 @@
         <!-- Plugins versions -->
         <compiler.plugin.version>3.8.1</compiler.plugin.version>
         <surefire.plugin.version>3.0.0-M3</surefire.plugin.version>
-        <sources.plugin.version>2.4</sources.plugin.version>
+        <sources.plugin.version>3.0.1</sources.plugin.version>
         <javadoc.plugin.version>3.1.1</javadoc.plugin.version>
         <gpg.plugin.version>1.5</gpg.plugin.version>
         <maven.enforcer.plugin.version>3.0.0-M2</maven.enforcer.plugin.version>
@@ -175,6 +175,11 @@
                                 <name>apiNote</name>
                                 <placement>m</placement>
                                 <head>API Note:</head>
+                            </tag>
+                            <tag>
+                                <name>defaultValue</name>
+                                <placement>f</placement>
+                                <head>Default Value:</head>
                             </tag>
                         </tags>
                     </configuration>

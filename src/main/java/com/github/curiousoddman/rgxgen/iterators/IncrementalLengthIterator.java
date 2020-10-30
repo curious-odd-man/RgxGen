@@ -131,15 +131,4 @@ public class IncrementalLengthIterator extends StringIterator {
                      .map(StringIterator::current)
                      .reduce("", String::concat);
     }
-
-    @Override
-    public String toString() {
-        return "IncrementalLengthIterator{" +
-                "aSupplier=" + aSupplier +
-                ", aMax=" + aMax +
-                ", aCurrentLength=" + aCurrentLength +
-                ", aCurrentIterators=" + Arrays.toString(aCurrentIterators) +
-                ", aGeneratedParts=" + Arrays.toString(aGeneratedParts) +
-                '}';
-    }
 }

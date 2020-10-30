@@ -16,6 +16,7 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -32,8 +33,8 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     private static final String[] allSymbols = SymbolSet.getAllSymbols();
 
-    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues) {
-        super(random, groupValues);
+    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+        super(random, groupValues, properties);
     }
 
     @Override
@@ -110,7 +111,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     public void visit(NotSymbol node) {
         NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern());
         Node subNode = builder.get();
-        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues);
+        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues, aProperties);
         subNode.visit(generationVisitor);
         aStringBuilder.append(generationVisitor.getString());
     }

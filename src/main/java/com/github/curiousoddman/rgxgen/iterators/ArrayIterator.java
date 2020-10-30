@@ -16,7 +16,6 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class ArrayIterator extends StringIterator {
@@ -53,11 +52,5 @@ public class ArrayIterator extends StringIterator {
     @Override
     public String current() {
         return aStrings[aIndex];
-    }
-
-    @Override
-    public String toString() {
-        return "ArrayIterator[" + aIndex + "]{" + Arrays.toString(aStrings) +
-                '}';
     }
 }
