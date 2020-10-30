@@ -399,7 +399,8 @@ public enum TestPattern {
     }
 
     public boolean hasEstimatedCound() {
-        return aEstimatedCount == null || !aEstimatedCount.equals(BigInteger.valueOf(-1));
+        return !BigInteger.valueOf(-1)
+                          .equals(aEstimatedCount);
     }
 
     public boolean hasAllUniqueValues() {

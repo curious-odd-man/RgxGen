@@ -67,7 +67,7 @@ public class PerformanceTests {
 
     @Benchmark
     public void generateUniqueTest() {
-        final StringIterator stringIterator = RGXGEN.iterateUnique();
+        StringIterator stringIterator = RGXGEN.iterateUnique();
         for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             stringIterator.next();
         }
