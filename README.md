@@ -147,6 +147,8 @@ Each property value will be looked up in this order:
 
 ### Create Configuration
 
+Use `new RgxGenProperties()` to create properties object.
+
 <details>
 <summary><b>Code</b></summary>
 
@@ -164,6 +166,8 @@ public class Main {
 </details>
 
 ### Set Global Configuration
+
+Set a global configuration using `RgxGen.setDefaultProperties(properties);`
 
 <details>
 <summary><b>Code</b></summary>
@@ -186,6 +190,8 @@ public class Main {
 </details>
 
 ### Set Local Configuration
+
+Set a local configuration using `rgxGen.setProperties(localProperties);` on existing RgxGen instance.
 
 <details>
 <summary><b>Code</b></summary>
