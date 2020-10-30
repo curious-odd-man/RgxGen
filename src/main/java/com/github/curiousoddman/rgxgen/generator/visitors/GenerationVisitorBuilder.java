@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.generator.visitors;
 
-import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 
 import java.util.HashMap;
@@ -11,14 +10,14 @@ public class GenerationVisitorBuilder {
 
     @FunctionalInterface
     public interface GenerationVisitorConstructor {
-        GenerationVisitor construct(Random random, Map<Integer, String> groupsValues, Integer repeatLimit);
+        GenerationVisitor construct(Random random, Map<Integer, String> groupsValues, RgxGenProperties properties);
     }
 
     private final GenerationVisitorConstructor aConstructor;
 
     private Random               aRandom;
     private Map<Integer, String> aGroupsValues;
-    private Integer              aRepeatLimit;
+    private RgxGenProperties     aProperties;
 
     public GenerationVisitorBuilder(GenerationVisitorConstructor constructor) {
         aConstructor = constructor;
@@ -38,15 +37,11 @@ public class GenerationVisitorBuilder {
             aGroupsValues = new HashMap<>();
         }
 
-        if (aRepeatLimit == null) {
-            aRepeatLimit = 100;
-        }
-
-        return aConstructor.construct(aRandom, aGroupsValues, aRepeatLimit);
+        return aConstructor.construct(aRandom, aGroupsValues, aProperties);
     }
 
-    public GenerationVisitorBuilder withInfiniteRepetitions(int repeatLimit) {
-        aRepeatLimit = repeatLimit;
+    public GenerationVisitorBuilder withProperties(RgxGenProperties properties) {
+        aProperties = properties;
         return this;
     }
 }

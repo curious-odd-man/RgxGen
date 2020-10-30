@@ -16,7 +16,6 @@ package com.github.curiousoddman.rgxgen;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
@@ -45,7 +44,7 @@ public class RgxGen {
      * Set default properties for RgxGen.
      * Each new instance of RgxGen will use these properties as a backup, if property is not set per instance.
      *
-     * @param properties configuration properties
+     * @param properties configuration properties. Set {@code null} to reset.
      * @apiNote Existing instances will not be affected. Only those, that will be created after this call.
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
@@ -75,7 +74,7 @@ public class RgxGen {
      * Set properties for the instance of RgxGen.
      * These options will override default values set by either {@code setDefaultProperties} or default hardcoded.
      *
-     * @param properties configuration properties.
+     * @param properties configuration properties. Set {@code null} to reset.
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
     public void setProperties(RgxGenProperties properties) {
@@ -140,7 +139,7 @@ public class RgxGen {
     public String generate(Random random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
-                                                .withInfiniteRepetitions(RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(aLocalProperties))
+                                                .withProperties(aLocalProperties)
                                                 .get();
         aNode.visit(gv);
         return gv.getString();

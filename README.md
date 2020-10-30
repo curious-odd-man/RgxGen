@@ -11,6 +11,7 @@ This is a java library that, given a regex pattern, allows to:
 [Try it now](https://github.com/curious-odd-man/RgxGen#try-it-now) <br>
 [Usage](https://github.com/curious-odd-man/RgxGen#usage) <br>
 [Supported Syntax](https://github.com/curious-odd-man/RgxGen#supported-syntax) <br>
+[Configuration](https://github.com/curious-odd-man/RgxGen#configuration) <br>
 [Limitations](https://github.com/curious-odd-man/RgxGen#limitations) <br>
 [Other similar libraries](https://github.com/curious-odd-man/RgxGen#other-tools-to-generate-values-by-regex-and-why-this-might-be-better) <br>
 [Support](https://github.com/curious-odd-man/RgxGen#support)
@@ -19,6 +20,7 @@ This is a java library that, given a regex pattern, allows to:
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=plastic)](https://opensource.org/licenses/Apache-2.0)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
+[![javadoc](https://javadoc.io/badge2/com.github.curious-odd-man/rgxgen/javadoc.svg?style=plastic)](https://javadoc.io/doc/com.github.curious-odd-man/rgxgen)
 
 Build status:
 
@@ -44,6 +46,32 @@ Enter your pattern and see the results.
     <version>1.2</version>
 </dependency>
 ```
+
+#### latest SNAPSHOT:
+```xml
+<project>
+    <repositories>
+        <repository>
+            <id>snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+    
+    <!--  .... -->
+    
+    <dependency>
+        <groupId>com.github.curious-odd-man</groupId>
+        <artifactId>rgxgen</artifactId>
+        <version>1.3-SNAPSHOT</version>
+    </dependency>
+</project>
+```
+
+Changes in snapshot:
+
+- Fixed: Added support for `\Q` and `\E` sequences [#43](https://github.com/curious-odd-man/RgxGen/issues/43)
+- Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
+
 ### Code: 
 ```java
 public class Main {
@@ -89,6 +117,7 @@ public class Main {
 | `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
 | `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
 | `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
+| `\Q` and `\E`  | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals.  |
 | `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
 | `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
 | `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |
@@ -102,6 +131,49 @@ public class Main {
 Any other characters are treated as simple characters and are generated as is, thought allowed to escape them.
 
 </details>
+
+## Configuration
+
+RgxGen can be configured on global or instance level.
+
+All configuration options along with their default values are specified in [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java) enum.
+
+Each property value will be looked up in this order:
+
+1. Local RgxGen instance config
+2. Global RgxGen config
+3. Default values
+
+```java
+public class Main {
+    public static void main(String[] args){
+        // HOW TO CREATE AND SET VALUES
+        // Create properties object (RgxGenProperties extends java.util.Properties)
+        RgxGenProperties properties = new RgxGenProperties();
+        // Set value "20" for INFINITE_PATTERN_REPETITION option in properties
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, "20");
+    
+        // HOW TO SET GLOBAL CONFIG   
+        RgxGen rgxGen_1 = new RgxGen("xxx");
+        // Set default properties. 
+        // NOTE! only instances created after setDefaultProperties are affected.
+        // e.g. rgxGen_1 will have default value of INFINITE_PATTERN_REPETITION option
+        // and rgxGen_2 will have value "20" for the property, unless local config specified.
+        RgxGen.setDefaultProperties(properties);
+        RgxGen rgxGen_2 = new RgxGen("xxx");
+    
+        // HOW TO SET LOCAL CONFIG
+        // Create properties object (RgxGenProperties extends java.util.Properties)
+        RgxGenProperties properties_3 = new RgxGenProperties();
+        // Set value "10" for INFINITE_PATTERN_REPETITION option in properties
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties_3, "10");
+        RgxGen rgxGen_3 = new RgxGen("xxx"); 
+        // Set local configuration for rgxGen_3
+        // Note, for options that are not defined in properties_3, will try find option inside properties, since these are set globally prior creation of rgxGen_3 instance creation 
+        rgxGen_3.setProperties(properties_3);
+    }
+}
+```
 
 ## Limitations
 
