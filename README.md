@@ -144,36 +144,68 @@ Each property value will be looked up in this order:
 2. Global RgxGen config
 3. Default values
 
+
+### Create Configuration
+
+<details>
+<summary><b>Code</b></summary>
+
 ```java
 public class Main {
     public static void main(String[] args){
-        // HOW TO CREATE AND SET VALUES
         // Create properties object (RgxGenProperties extends java.util.Properties)
         RgxGenProperties properties = new RgxGenProperties();
         // Set value "20" for INFINITE_PATTERN_REPETITION option in properties
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, "20");
+        // ... now properties can be passed to RgxGen
+    }
+}
+```
+</details>
+
+### Set Global Configuration
+
+<details>
+<summary><b>Code</b></summary>
+
+```java
+public class Main {
+    public static void main(String[] args){
+        RgxGenProperties properties = createAndConfigureProperitesObject();
     
-        // HOW TO SET GLOBAL CONFIG   
-        RgxGen rgxGen_1 = new RgxGen("xxx");
+        RgxGen rgxGen_1 = new RgxGen("xxx");        // Created for example purposes
         // Set default properties. 
         // NOTE! only instances created after setDefaultProperties are affected.
         // e.g. rgxGen_1 will have default value of INFINITE_PATTERN_REPETITION option
         // and rgxGen_2 will have value "20" for the property, unless local config specified.
         RgxGen.setDefaultProperties(properties);
         RgxGen rgxGen_2 = new RgxGen("xxx");
-    
-        // HOW TO SET LOCAL CONFIG
-        // Create properties object (RgxGenProperties extends java.util.Properties)
-        RgxGenProperties properties_3 = new RgxGenProperties();
-        // Set value "10" for INFINITE_PATTERN_REPETITION option in properties
-        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties_3, "10");
-        RgxGen rgxGen_3 = new RgxGen("xxx"); 
-        // Set local configuration for rgxGen_3
-        // Note, for options that are not defined in properties_3, will try find option inside properties, since these are set globally prior creation of rgxGen_3 instance creation 
-        rgxGen_3.setProperties(properties_3);
     }
 }
 ```
+</details>
+
+### Set Local Configuration
+
+<details>
+<summary><b>Code</b></summary>
+
+```java
+public class Main {
+    public static void main(String[] args){
+        RgxGenProperties properties = createAndConfigureProperitesObject();
+        RgxGen.setDefaultProperties(properties);
+    
+        // Create properties object (RgxGenProperties extends java.util.Properties)
+        RgxGenProperties localProperties = createAndConfigureLocalProperitesObject();
+        RgxGen rgxGen_3 = new RgxGen("xxx"); 
+        // Set local configuration for rgxGen_3
+        // Note, for options that are not defined in localProperties, will try find option inside properties, since these are set globally prior creation of rgxGen_3 instance creation 
+        rgxGen_3.setProperties(localProperties);
+    }
+}
+```
+</details>
 
 ## Limitations
 
