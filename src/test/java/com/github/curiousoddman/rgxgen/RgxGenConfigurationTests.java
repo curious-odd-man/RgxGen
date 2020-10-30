@@ -102,7 +102,30 @@ public class RgxGenConfigurationTests {
                      aOption.getFromProperties(localProperties));
     }
 
-    private RgxGenProperties getLocalProperties(RgxGen o) {
+    @Test
+    public void localResetToGlobalTest() {
+        RgxGenProperties globProp = new RgxGenProperties();
+        aOption.setInProperties(globProp, "20");
+        RgxGen.setDefaultProperties(globProp);
+        RgxGenProperties localProp = new RgxGenProperties();
+        RgxGen rgxGen = new RgxGen("xxx");
+        rgxGen.setProperties(localProp);
+        rgxGen.setProperties(null);
+        RgxGenProperties localProperties = getLocalProperties(rgxGen);
+        assertEquals("20", aOption.getFromProperties(localProperties));
+    }
+
+    @Test
+    public void localResetToDefaultTest() {
+        RgxGenProperties localProp = new RgxGenProperties();
+        RgxGen rgxGen = new RgxGen("xxx");
+        rgxGen.setProperties(localProp);
+        rgxGen.setProperties(null);
+        RgxGenProperties localProperties = getLocalProperties(rgxGen);
+        assertEquals(aOption.getDefault(), aOption.getFromProperties(localProperties));
+    }
+
+    private static RgxGenProperties getLocalProperties(RgxGen o) {
         try {
             Field localProperties = RgxGen.class.getDeclaredField("aLocalProperties");
             localProperties.setAccessible(true);

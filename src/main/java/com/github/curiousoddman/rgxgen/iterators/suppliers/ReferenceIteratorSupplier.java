@@ -48,13 +48,4 @@ public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
 
         return referenceIterator;
     }
-
-    @Override
-    public String toString() {
-        return "ReferenceIteratorSupplier{" +
-                "aReferenceIteratorMap=" + aReferenceIteratorMap +
-                ", aGroupIteratorsMap=" + aGroupIteratorsMap +
-                ", aIndex=" + aIndex +
-                '}';
-    }
 }

@@ -33,9 +33,4 @@ public class SingleValueIteratorSupplier implements Supplier<StringIterator> {
     public StringIterator get() {
         return new SingleValueIterator(aValue);
     }
-
-    @Override
-    public String toString() {
-        return "SingleValueIteratorSupplier{" + aValue + '}';
-    }
 }

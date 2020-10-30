@@ -38,7 +38,7 @@ Enter your pattern and see the results.
 
 ### Maven dependency
 
-#### latest RELEASE:
+#### The Latest RELEASE:
 ```xml
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
@@ -47,7 +47,7 @@ Enter your pattern and see the results.
 </dependency>
 ```
 
-#### latest SNAPSHOT:
+#### The Latest SNAPSHOT:
 ```xml
 <project>
     <repositories>
@@ -67,7 +67,7 @@ Enter your pattern and see the results.
 </project>
 ```
 
-Changes in snapshot:
+Changes in sd snapshot:
 
 - Fixed: Added support for `\Q` and `\E` sequences [#43](https://github.com/curious-odd-man/RgxGen/issues/43)
 - Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
@@ -128,7 +128,7 @@ public class Main {
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
-Any other characters are treated as simple characters and are generated as is, thought allowed to escape them.
+RgxGen treats any other characters as literals and are generated as is, thought allowed to escape them.
 
 </details>
 
@@ -136,7 +136,7 @@ Any other characters are treated as simple characters and are generated as is, t
 
 RgxGen can be configured on global or instance level.
 
-All configuration options along with their default values are specified in [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java) enum.
+Please refer to the following enum for all available properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
 
 Each property value will be looked up in this order:
 
@@ -190,10 +190,11 @@ For the similar reasons as with estimations - requested unique values iterator c
 ### Infinite patterns
 
 By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of characters should be matched.
-When generating data that would mean that values of infinite length might be generated.
-It is highly doubtful that anyone would require a string of infinite length, thus I've artificially limited repetitions in such patterns to 100 symbols, when generating random values.
+When generating data that would mean values of infinite length might be generated.
+It is highly doubtful anyone would require a string of infinite length, thus I've artificially limited repetitions in such patterns to 100 symbols, when generating random values.
+This value can be changed - please refer to [configuration](https://github.com/curious-odd-man/RgxGen#configuration) section.
 
-On the contrast, when generating **unique values** - the number of maximum repetitions is increased to Integer.MAX_VALUE.
+On the contrast, when generating **unique values** - the number of maximum repetitions is Integer.MAX_VALUE.
 
 Use `a{n,m}` if you require some specific number of repetitions.
 It is suggested to avoid using such infinite patterns to generate data based on regex.
@@ -203,7 +204,7 @@ It is suggested to avoid using such infinite patterns to generate data based on 
 The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though it is not always possible.
 For example pattern `.` - any symbol - would yield empty string as not matching string. 
 Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings would be only 1 or 2 symbols long.
-I chose these approaches because they seem predictible and easier to implement.
+I chose these approaches because they seem predictable and easier to implement.
 
 ## Other tools to generate values by regex and why this might be better
 
@@ -212,8 +213,8 @@ There are 2 more libraries available to achieve same goal:
 1. http://code.google.com/p/xeger
 
 Though I found they have following issues:
-1. All of them build graph which can easily produce OOM exception. For example pattern `a{60000}`, or [IPV6 regex pattern](https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses)
-1. For alternatives - only 2 alternatives gives equal probability of each alternative to appear in generated values. For example: `(a|b)` the probability of a and b is equal. For `(a|b|c)` it would be expected to have a or b or c with probability 33.(3)% each. Though really the probabilities are a=50%, and b=25% and c=25% each. For longer alternatives you might never get the last alternative.
+1. All of them build graph which can easily produce OOM exception. For example pattern `a{60000}`, or [IPV6 regex pattern](https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses).
+1. Alternatives - only 2 alternatives gives equal probability of each alternative to appear in generated values. For example: `(a|b)` the probability of a and b is equal. For `(a|b|c)` it would be expected to have a or b or c with probability 33.(3)% each. Though really the probabilities are a=50%, and b=25% and c=25% each. For longer alternatives you might never get the last alternative.
 1. They are quite slow
 
 ## Support

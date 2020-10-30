@@ -50,11 +50,4 @@ public class SingleValueIterator extends StringIterator {
     public String current() {
         return aValue;
     }
-
-    @Override
-    public String toString() {
-        return "SingleValueIterator{" +
-                "aValue='" + aValue + '\'' +
-                '}';
-    }
 }

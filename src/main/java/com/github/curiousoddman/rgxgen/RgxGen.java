@@ -34,7 +34,7 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-    private static RgxGenProperties aGlobalProperties = null;
+    private static RgxGenProperties aGlobalProperties;
 
     private final Node aNode;
 

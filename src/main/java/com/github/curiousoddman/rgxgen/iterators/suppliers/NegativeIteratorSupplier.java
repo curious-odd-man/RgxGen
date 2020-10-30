@@ -36,12 +36,4 @@ public class NegativeIteratorSupplier implements Supplier<StringIterator> {
     public StringIterator get() {
         return new NegativeStringIterator(aIteratorSupplier.get(), aPattern);
     }
-
-    @Override
-    public String toString() {
-        return "NegativeIteratorSupplier{" +
-                aPattern +
-                ',' + aIteratorSupplier +
-                '}';
-    }
 }

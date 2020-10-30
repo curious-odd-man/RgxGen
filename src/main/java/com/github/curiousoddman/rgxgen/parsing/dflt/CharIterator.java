@@ -177,7 +177,7 @@ public class CharIterator implements Iterator<Character> {
 
     private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
         int startIndex = aCurrentIndex;
-        int substringEnd = 0;
+        int substringEnd;
         while (true) {
             // Find ending character
             aCurrentIndex = indexOf.apply(aValue, aCurrentIndex);

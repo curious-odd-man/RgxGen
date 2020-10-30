@@ -66,7 +66,7 @@ public class GenerationVisitor implements NodeVisitor {
                      node.getMin() :
                      node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
 
-        for (long i = 0; i < repeat; ++i) {
+        for (int i = 0; i < repeat; ++i) {
             node.getNode()
                 .visit(this);
         }

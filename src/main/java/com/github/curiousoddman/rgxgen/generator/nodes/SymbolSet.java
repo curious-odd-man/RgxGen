@@ -82,14 +82,6 @@ public class SymbolSet extends Node {
         int getTo() {
             return aTo;
         }
-
-        @Override
-        public String toString() {
-            return "SymbolRange{" +
-                    aFrom +
-                    ':' + aTo +
-                    '}';
-        }
     }
 
     private final String[] aSymbols;

@@ -39,11 +39,4 @@ public class PermutationsIteratorSupplier implements Supplier<StringIterator> {
             return new PermutationsIterator(aSuppliers);
         }
     }
-
-    @Override
-    public String toString() {
-        return "PermutationsIteratorSupplier{" +
-                aSuppliers +
-                '}';
-    }
 }
