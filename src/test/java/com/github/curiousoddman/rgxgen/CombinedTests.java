@@ -1,9 +1,12 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.generator.nodes.Node;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.testutil.NodePatternVerifyingVisitor;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -26,10 +29,11 @@ public class CombinedTests extends CombinedTestTemplate {
 
     @Test
     public void parseTest() {
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.aPattern);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.getPattern());
         Node node = defaultTreeBuilder.get();
-        assertEquals(aTestPattern.aResultNode.toString(), node.toString());
-        NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(aTestPattern.aResultNode);
+        assertEquals(aTestPattern.getResultNode()
+                                 .toString(), node.toString());
+        NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(aTestPattern.getResultNode());
         node.visit(visitor);
         assertTrue(visitor.getErrors()
                           .toString(),
@@ -42,8 +46,9 @@ public class CombinedTests extends CombinedTestTemplate {
         assumeTrue(aTestPattern.hasEstimatedCount());
 
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
-        aTestPattern.aResultNode.visit(v);
-        assertEquals(aTestPattern.aEstimatedCount, v.getCount());
+        aTestPattern.getResultNode()
+                    .visit(v);
+        assertEquals(aTestPattern.getEstimatedCount(), v.getCount());
     }
 
     @Test
@@ -51,22 +56,23 @@ public class CombinedTests extends CombinedTestTemplate {
         assumeTrue(aTestPattern.hasAllUniqueValues());
 
         UniqueGenerationVisitor v = new UniqueGenerationVisitor();
-        aTestPattern.aResultNode.visit(v);
-        assertEquals(aTestPattern.aAllUniqueValues, TestingUtilities.iteratorToList(v.getUniqueStrings()));
+        aTestPattern.getResultNode()
+                    .visit(v);
+        assertEquals(aTestPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 
     @Test
     public void classRgxGenTest() {
-        RgxGen rgxGen = new RgxGen(aTestPattern.aPattern);
+        RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         if (aTestPattern.hasEstimatedCount()) {
-            assertEquals(aTestPattern.aEstimatedCount, rgxGen.numUnique());
+            assertEquals(aTestPattern.getEstimatedCount(), rgxGen.numUnique());
         }
         List<String> strings = rgxGen.stream()
                                      .limit(1000)
                                      .collect(Collectors.toList());
         for (String generated : strings) {
             boolean result = isValidGenerated(generated);
-            assertTrue("Text: '" + generated + "'does not match pattern " + aTestPattern.aPattern, result);
+            assertTrue("Text: '" + generated + "'does not match pattern " + aTestPattern.getPattern(), result);
 
         }
     }

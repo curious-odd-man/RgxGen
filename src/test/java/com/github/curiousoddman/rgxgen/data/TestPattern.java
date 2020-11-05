@@ -1,5 +1,6 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.generator.nodes.*;
 
 import java.math.BigInteger;
@@ -394,6 +395,22 @@ public enum TestPattern {
         aPattern = pattern;
         aResultNode = resultNode;
         aEstimatedCount = TestingUtilities.BIG_INTEGER_MINUS_ONE;
+    }
+
+    public String getPattern() {
+        return aPattern;
+    }
+
+    public Node getResultNode() {
+        return aResultNode;
+    }
+
+    public BigInteger getEstimatedCount() {
+        return aEstimatedCount;
+    }
+
+    public List<String> getAllUniqueValues() {
+        return aAllUniqueValues;
     }
 
     protected final void setInfinite() {

@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.testutil;
 
 
 import java.math.BigInteger;

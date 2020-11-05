@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
 import org.junit.Test;
@@ -32,9 +33,10 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
                                                                .withRandom(new Random(aSeed))
                                                                .get();
-        aTestPattern.aResultNode.visit(generationVisitor);
+        aTestPattern.getResultNode()
+                    .visit(generationVisitor);
         boolean result = isValidGenerated(generationVisitor.getString());
-        assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.aPattern, result);
+        assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.getPattern(), result);
     }
 
     @Test
@@ -42,8 +44,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
         Random rnd1 = new Random(aSeed);
         Random rnd2 = new Random(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
-        RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
+        RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
+        RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
         assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
     }
 
@@ -52,9 +54,10 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
         GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
                                                                           .withRandom(new Random(aSeed))
                                                                           .get();
-        aTestPattern.aResultNode.visit(generationVisitor);
+        aTestPattern.getResultNode()
+                    .visit(generationVisitor);
         boolean result = isValidGenerated(generationVisitor.getString());
-        assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.aPattern, result);
+        assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.getPattern(), result);
     }
 
     @Test(timeout = 5000)
@@ -62,8 +65,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate {
         Random rnd1 = new Random(aSeed);
         Random rnd2 = new Random(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(aTestPattern.aPattern);
-        RgxGen rgxGen_2 = new RgxGen(aTestPattern.aPattern);
+        RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
+        RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
         assertEquals(rgxGen_1.generateNotMatching(rnd1), rgxGen_2.generateNotMatching(rnd2));
     }
 }

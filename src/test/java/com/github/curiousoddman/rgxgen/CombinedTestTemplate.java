@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.data.TestPattern;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -21,7 +22,7 @@ public abstract class CombinedTestTemplate {
     @Before
     public void setUp() {
         try {
-            aCompiledPattern = Pattern.compile(aTestPattern.aPattern);
+            aCompiledPattern = Pattern.compile(aTestPattern.getPattern());
         } catch (PatternSyntaxException e) {
             aPatternCompileException = e;
         }
