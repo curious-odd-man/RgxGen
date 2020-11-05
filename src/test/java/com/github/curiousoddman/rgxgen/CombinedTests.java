@@ -39,7 +39,7 @@ public class CombinedTests extends CombinedTestTemplate {
 
     @Test
     public void countTest() {
-        assumeTrue(aTestPattern.hasEstimatedCound());
+        assumeTrue(aTestPattern.hasEstimatedCount());
 
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
         aTestPattern.aResultNode.visit(v);
@@ -58,7 +58,7 @@ public class CombinedTests extends CombinedTestTemplate {
     @Test
     public void classRgxGenTest() {
         RgxGen rgxGen = new RgxGen(aTestPattern.aPattern);
-        if (aTestPattern.hasEstimatedCound()) {
+        if (aTestPattern.hasEstimatedCount()) {
             assertEquals(aTestPattern.aEstimatedCount, rgxGen.numUnique());
         }
         List<String> strings = rgxGen.stream()

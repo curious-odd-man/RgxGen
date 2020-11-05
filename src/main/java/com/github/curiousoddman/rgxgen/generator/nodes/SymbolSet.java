@@ -27,14 +27,14 @@ import java.util.stream.IntStream;
  * Generate Any printable character.
  */
 public class SymbolSet extends Node {
-    private static final String[] ALL_SYMBOLS = new String[127 - 32];
+    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
+    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
+
+    private static final String[] ALL_SYMBOLS = new String[DEL_ASCII_CODE - SPACE_ASCII_CODE];
 
     public static String[] getAllSymbols() {
         return ALL_SYMBOLS.clone();
     }
-
-    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
-    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
     static {
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
