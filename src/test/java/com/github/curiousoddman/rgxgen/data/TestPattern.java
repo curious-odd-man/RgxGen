@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 // CAUTION! Double braced initialization is used.
 @SuppressWarnings("DoubleBraceInitialization")
-public enum TestPattern {
+public enum TestPattern implements DataInterface {
     SIMPLE_A("a",
              new FinalSymbol("a")) {{
         setAllUniqueValues("a");

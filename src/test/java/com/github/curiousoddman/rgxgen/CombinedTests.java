@@ -24,7 +24,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
-public class CombinedTests extends CombinedTestTemplate {
+public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object> data() {
         return Arrays.asList(TestPattern.values());
@@ -47,7 +47,6 @@ public class CombinedTests extends CombinedTestTemplate {
     @Test
     public void countTest() {
         assumeTrue(aTestPattern.hasEstimatedCount());
-
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
         aTestPattern.getResultNode()
                     .visit(v);
@@ -97,7 +96,6 @@ public class CombinedTests extends CombinedTestTemplate {
         for (String generated : strings) {
             boolean result = isValidGenerated(generated);
             assertTrue("Text: '" + generated + "' does not match pattern " + aTestPattern.getPattern(), result);
-
         }
     }
 }

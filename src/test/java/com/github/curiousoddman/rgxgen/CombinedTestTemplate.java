@@ -1,8 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
-import com.github.curiousoddman.rgxgen.data.TestPattern;
+import com.github.curiousoddman.rgxgen.data.DataInterface;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.regex.Pattern;
@@ -10,11 +9,10 @@ import java.util.regex.PatternSyntaxException;
 
 import static org.junit.Assume.assumeTrue;
 
-@RunWith(Parameterized.class)
-public abstract class CombinedTestTemplate {
+public abstract class CombinedTestTemplate<T extends DataInterface> {
 
     @Parameterized.Parameter
-    public TestPattern aTestPattern;
+    public T aTestPattern;
 
     protected Pattern aCompiledPattern;
 

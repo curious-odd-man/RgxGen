@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class CombinedRepeatableTests extends CombinedTestTemplate {
+public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @Parameterized.Parameters(name = "{1}: {0}")
     public static Collection<Object[]> data() {
         return Arrays.stream(TestPattern.values())
