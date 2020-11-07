@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,18 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public interface NodeVisitor {
-    void visit(SymbolSet node);
+public abstract class Node {
+    private final String aPattern;
 
-    void visit(Choice node);
+    protected Node(String pattern) {
+        aPattern = pattern;
+    }
 
-    void visit(FinalSymbol node);
+    public abstract void visit(NodeVisitor visitor);
 
-    void visit(Repeat node);
-
-    void visit(Sequence node);
-
-    void visit(NotSymbol node);
-
-    void visit(GroupRef node);
-
-    void visit(Group node);
+    public String getPattern() {
+        return aPattern;
+    }
 }

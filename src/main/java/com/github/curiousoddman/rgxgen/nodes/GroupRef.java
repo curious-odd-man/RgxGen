@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,14 +16,14 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class FinalSymbol extends Node {
-    private final String aValue;
+public class GroupRef extends Node {
+    private final int aIndex;
 
-    public FinalSymbol(String value) {
-        super(value);
-        aValue = value;
+    public GroupRef(String pattern, int index) {
+        super(pattern);
+        aIndex = index;
     }
 
     @Override
@@ -31,14 +31,12 @@ public class FinalSymbol extends Node {
         visitor.visit(this);
     }
 
-    public String getValue() {
-        return aValue;
+    public int getIndex() {
+        return aIndex;
     }
 
     @Override
     public String toString() {
-        return "FinalSymbol{" +
-                '\'' + aValue + '\'' +
-                '}';
+        return "GroupRef{" + aIndex + '}';
     }
 }

@@ -16,7 +16,7 @@ package com.github.curiousoddman.rgxgen.util;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 
 import java.util.Arrays;
 import java.util.Random;

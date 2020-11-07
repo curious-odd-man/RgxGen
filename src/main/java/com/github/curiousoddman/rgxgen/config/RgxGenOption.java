@@ -11,7 +11,14 @@ public enum RgxGenOption {
      *
      * @defaultValue 100
      */
-    INFINITE_PATTERN_REPETITION("generation.infinite.repeat", "100");
+    INFINITE_PATTERN_REPETITION("generation.infinite.repeat", "100"),
+
+    /**
+     * Flag to use case insensitive matching.
+     *
+     * @defaultValue false
+     */
+    CASE_INSENSITIVE("matching.case.insensitive", "false");
 
     private final String aKey;
     private final String aDefault;

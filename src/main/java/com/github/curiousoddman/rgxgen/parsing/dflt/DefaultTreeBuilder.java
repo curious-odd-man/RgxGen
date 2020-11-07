@@ -16,7 +16,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 

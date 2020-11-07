@@ -17,11 +17,11 @@ package com.github.curiousoddman.rgxgen;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;

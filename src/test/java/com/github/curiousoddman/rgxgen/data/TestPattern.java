@@ -1,7 +1,7 @@
 package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -367,6 +367,7 @@ public enum TestPattern {
     SLASH_E_WITHOUT_SLASH_Q_BASIC("mas\\E",
                                   new FinalSymbol("mas")) {{
         setAllUniqueValues("mas");
+        setCannotCompilePattern();
     }},
     SLASH_Q_AND_SLASH_E_IGNORE_SPECIALS("\\Q[a]\\1(a|c).*\\W\\E",
                                         new FinalSymbol("[a]\\1(a|c).*\\W")) {{
@@ -390,11 +391,13 @@ public enum TestPattern {
 
     BigInteger   aEstimatedCount;
     List<String> aAllUniqueValues;
+    boolean      aIsUsableWithJavaPattern;
 
     TestPattern(String pattern, Node resultNode) {
         aPattern = pattern;
         aResultNode = resultNode;
         aEstimatedCount = TestingUtilities.BIG_INTEGER_MINUS_ONE;
+        aIsUsableWithJavaPattern = true;
     }
 
     public String getPattern() {
@@ -426,6 +429,10 @@ public enum TestPattern {
         aEstimatedCount = BigInteger.valueOf(values.size());
     }
 
+    protected final void setCannotCompilePattern() {
+        aIsUsableWithJavaPattern = false;
+    }
+
     public boolean hasEstimatedCount() {
         return !TestingUtilities.BIG_INTEGER_MINUS_ONE.equals(aEstimatedCount);
     }
@@ -439,6 +446,10 @@ public enum TestPattern {
                 || this == NEGATIVE_LOOKAHEAD
                 || this == POSITIVE_LOOKBEHIND
                 || this == NEGATIVE_LOOKBEHIND;
+    }
+
+    public boolean isUsableWithJavaPattern() {
+        return aIsUsableWithJavaPattern;
     }
 
     @Override

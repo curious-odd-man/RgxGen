@@ -1,7 +1,7 @@
 package com.github.curiousoddman.rgxgen.testutil;
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.ArrayList;
 import java.util.List;

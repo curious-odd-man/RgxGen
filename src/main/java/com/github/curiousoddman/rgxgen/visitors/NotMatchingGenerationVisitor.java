@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -17,7 +17,7 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 

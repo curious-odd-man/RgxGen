@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 

@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,7 +16,7 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;

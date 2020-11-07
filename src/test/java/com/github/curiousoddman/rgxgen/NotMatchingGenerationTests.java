@@ -1,8 +1,8 @@
 package com.github.curiousoddman.rgxgen;
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.Test;

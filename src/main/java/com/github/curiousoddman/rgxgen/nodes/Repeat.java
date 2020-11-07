@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,14 +16,26 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class NotSymbol extends Node {
+public class Repeat extends Node {
     private final Node aNode;
+    private final int  aMin;
+    private final int  aMax;
 
-    public NotSymbol(String pattern, Node node) {
+    public static Repeat minimum(String pattern, Node node, int times) {
+        return new Repeat(pattern, node, times, -1);
+    }
+
+    public Repeat(String pattern, Node node, int times) {
+        this(pattern, node, times, times);
+    }
+
+    public Repeat(String pattern, Node node, int min, int max) {
         super(pattern);
         aNode = node;
+        aMin = min;
+        aMax = max;
     }
 
     @Override
@@ -35,8 +47,19 @@ public class NotSymbol extends Node {
         return aNode;
     }
 
+    public int getMin() {
+        return aMin;
+    }
+
+    public int getMax() {
+        return aMax;
+    }
+
     @Override
     public String toString() {
-        return "NotSymbol{" + aNode + '}';
+        return "Repeat{" + aNode +
+                ", aMin=" + aMin +
+                ", aMax=" + aMax +
+                '}';
     }
 }

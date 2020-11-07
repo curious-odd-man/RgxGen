@@ -8,7 +8,7 @@ import org.junit.runners.Parameterized;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import static org.junit.Assume.assumeNoException;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public abstract class CombinedTestTemplate {
@@ -16,20 +16,23 @@ public abstract class CombinedTestTemplate {
     @Parameterized.Parameter
     public TestPattern aTestPattern;
 
-    protected Pattern   aCompiledPattern;
-    protected Exception aPatternCompileException;
+    protected Pattern aCompiledPattern;
 
     @Before
     public void setUp() {
+        setCompiledPattern(0);
+    }
+
+    public void setCompiledPattern(int flags) {
         try {
-            aCompiledPattern = Pattern.compile(aTestPattern.getPattern());
+            aCompiledPattern = Pattern.compile(aTestPattern.getPattern(), flags);
         } catch (PatternSyntaxException e) {
-            aPatternCompileException = e;
+            aCompiledPattern = null;
         }
     }
 
     protected boolean isValidGenerated(String value) {
-        assumeNoException(aPatternCompileException);
+        assumeTrue(aTestPattern.isUsableWithJavaPattern());
         if (aTestPattern.useFindForMatching()) {
             return aCompiledPattern.matcher(value)
                                    .find();

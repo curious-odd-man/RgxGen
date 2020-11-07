@@ -1,8 +1,8 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.data.TestPattern;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

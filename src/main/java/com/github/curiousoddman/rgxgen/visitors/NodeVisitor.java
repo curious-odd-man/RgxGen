@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,27 +16,22 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.nodes.*;
 
-public class GroupRef extends Node {
-    private final int aIndex;
+public interface NodeVisitor {
+    void visit(SymbolSet node);
 
-    public GroupRef(String pattern, int index) {
-        super(pattern);
-        aIndex = index;
-    }
+    void visit(Choice node);
 
-    @Override
-    public void visit(NodeVisitor visitor) {
-        visitor.visit(this);
-    }
+    void visit(FinalSymbol node);
 
-    public int getIndex() {
-        return aIndex;
-    }
+    void visit(Repeat node);
 
-    @Override
-    public String toString() {
-        return "GroupRef{" + aIndex + '}';
-    }
+    void visit(Sequence node);
+
+    void visit(NotSymbol node);
+
+    void visit(GroupRef node);
+
+    void visit(Group node);
 }
