@@ -16,21 +16,16 @@ package com.github.curiousoddman.rgxgen.iterators.suppliers;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.iterators.SingleValueIterator;
+import com.github.curiousoddman.rgxgen.iterators.CaseVariationIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-import java.util.function.Supplier;
-
-public class SingleValueIteratorSupplier implements Supplier<StringIterator> {
-
-    protected final String aValue;
-
-    public SingleValueIteratorSupplier(String value) {
-        aValue = value;
+public class SingleCaseInsensitiveValueIteratorSupplier extends SingleValueIteratorSupplier {
+    public SingleCaseInsensitiveValueIteratorSupplier(String value) {
+        super(value);
     }
 
     @Override
     public StringIterator get() {
-        return new SingleValueIterator(aValue);
+        return new CaseVariationIterator(aValue);
     }
 }

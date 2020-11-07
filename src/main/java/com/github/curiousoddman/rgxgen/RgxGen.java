@@ -115,7 +115,7 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
-        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
         aNode.visit(ugv);
         return ugv.getUniqueStrings();
     }

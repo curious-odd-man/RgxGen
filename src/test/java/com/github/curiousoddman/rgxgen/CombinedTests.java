@@ -57,7 +57,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void generateUniqueTest() {
         assumeTrue(aTestPattern.hasAllUniqueValues());
 
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
         aTestPattern.getResultNode()
                     .visit(v);
         assertEquals(aTestPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(v.getUniqueStrings()));

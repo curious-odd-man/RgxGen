@@ -107,6 +107,26 @@ public final class Util {
         return BIG_INTEGER_TWO.pow(switchableCase);
     }
 
+    public static int indexOfNextCaseSensitiveCharacter(CharSequence text, int startIndex) {
+        for (int i = startIndex; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (Character.isLowerCase(c) || Character.isUpperCase(c)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    public static int indexOfLastCaseSensitiveCharacter(CharSequence text) {
+        for (int i = text.length() - 1; i >= 0; --i) {
+            char c = text.charAt(i);
+            if (Character.isLowerCase(c) || Character.isUpperCase(c)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     /**
      * Utility class can't be instantiated

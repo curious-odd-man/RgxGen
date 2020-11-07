@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
@@ -78,7 +79,7 @@ public class LimitedInfinitePatternsTests {
 
     @Test
     public void generateUniqueTest() {
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
         aNode.visit(v);
         assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
