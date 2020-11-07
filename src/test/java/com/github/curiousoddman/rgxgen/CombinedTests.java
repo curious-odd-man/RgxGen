@@ -47,7 +47,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @Test
     public void countTest() {
         assumeTrue(aTestPattern.hasEstimatedCount());
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
         aTestPattern.getResultNode()
                     .visit(v);
         assertEquals(aTestPattern.getEstimatedCount(), v.getCount());
@@ -85,11 +85,8 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
 
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
-        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, "true");
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        if (aTestPattern.hasEstimatedCount()) {
-            assertEquals(aTestPattern.getEstimatedCount(), rgxGen.numUnique());
-        }
         List<String> strings = rgxGen.stream()
                                      .limit(1000)
                                      .collect(Collectors.toList());

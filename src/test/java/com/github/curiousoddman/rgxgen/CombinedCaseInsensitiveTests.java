@@ -37,7 +37,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         assumeTrue(aTestPattern.hasEstimatedCount());
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
-        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, "true");
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
         assertEquals(aTestPattern.getEstimatedCount(), rgxGen.numUnique());
     }
@@ -47,7 +47,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         assumeTrue(aTestPattern.hasAllUniqueValues());
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
-        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, "true");
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
         assertEquals(aTestPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(rgxGen.iterateUnique()));
     }
@@ -56,7 +56,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
     public void classRgxGenCaseInsensitiveTest() {
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
-        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, "true");
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
         List<String> strings = rgxGen.stream()
                                      .limit(1000)

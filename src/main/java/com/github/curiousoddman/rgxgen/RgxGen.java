@@ -94,7 +94,7 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public BigInteger numUnique() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
         return v.getCount();
     }

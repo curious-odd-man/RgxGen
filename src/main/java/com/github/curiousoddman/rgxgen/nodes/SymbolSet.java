@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
+
 /**
  * Generate Any printable character.
  */
@@ -85,6 +87,7 @@ public class SymbolSet extends Node {
     }
 
     private final String[] aSymbols;
+    private       String[] aSymbolsCaseInsensitive = null;
 
     /**
      * Symbol set containing all symbols
@@ -98,7 +101,7 @@ public class SymbolSet extends Node {
     }
 
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, TYPE type) {
-        this(pattern, symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
+        this(pattern, symbolRanges, ZERO_LENGTH_STRING_ARRAY, type);
     }
 
     /**
@@ -111,9 +114,9 @@ public class SymbolSet extends Node {
      */
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
         super(pattern);
-        List<String> initial = type == TYPE.NEGATIVE
-                               ? new ArrayList<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
-                               : new ArrayList<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
+        Set<String> initial = type == TYPE.NEGATIVE
+                              ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
+                              : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
         filterOrPut(initial, Arrays.asList(symbols), type);
         filterOrPut(initial, symbolRanges.stream()
@@ -122,7 +125,7 @@ public class SymbolSet extends Node {
                                          .map(Object::toString)
                                          .collect(Collectors.toList()), type);
 
-        aSymbols = initial.toArray(Util.ZERO_LENGTH_STRING_ARRAY);
+        aSymbols = initial.toArray(ZERO_LENGTH_STRING_ARRAY);
     }
 
     /**
@@ -147,6 +150,23 @@ public class SymbolSet extends Node {
 
     public String[] getSymbols() {
         return aSymbols;
+    }
+
+    public String[] getSymbolsCaseInsensitive() {
+        if (aSymbolsCaseInsensitive == null) {
+            Set<String> set = new HashSet<>();
+            for (String s : aSymbols) {
+                char stringAsChar = s.charAt(0);
+                if (Character.isUpperCase(stringAsChar)) {
+                    set.add(s.toLowerCase());
+                } else if (Character.isLowerCase(stringAsChar)) {
+                    set.add(s.toUpperCase());
+                }
+                set.add(s);
+            }
+            aSymbolsCaseInsensitive = set.toArray(ZERO_LENGTH_STRING_ARRAY);
+        }
+        return aSymbolsCaseInsensitive;
     }
 
     @Override

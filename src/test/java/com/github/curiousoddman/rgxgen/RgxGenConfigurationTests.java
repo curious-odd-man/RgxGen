@@ -48,7 +48,7 @@ public class RgxGenConfigurationTests {
     @Test
     public void globalConfigOnlyTest() {
         RgxGenProperties properties = new RgxGenProperties();
-        aOption.setInProperties(properties, "20");
+        aOption.setInProperties(properties, 20);
         RgxGen.setDefaultProperties(properties);
         RgxGen rgxGen = new RgxGen("xxx");
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
@@ -58,7 +58,7 @@ public class RgxGenConfigurationTests {
     @Test
     public void localConfigOnlyTest() {
         RgxGenProperties properties = new RgxGenProperties();
-        aOption.setInProperties(properties, "20");
+        aOption.setInProperties(properties, 20);
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(properties);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
@@ -68,10 +68,10 @@ public class RgxGenConfigurationTests {
     @Test
     public void localOverridesGlobalTest() {
         RgxGenProperties globProp = new RgxGenProperties();
-        aOption.setInProperties(globProp, "20");
+        aOption.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
         RgxGenProperties localProp = new RgxGenProperties();
-        aOption.setInProperties(localProp, "10");
+        aOption.setInProperties(localProp, 10);
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(localProp);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
@@ -81,7 +81,7 @@ public class RgxGenConfigurationTests {
     @Test
     public void localMissingGlobalPresentTest() {
         RgxGenProperties globProp = new RgxGenProperties();
-        aOption.setInProperties(globProp, "20");
+        aOption.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
         RgxGenProperties localProp = new RgxGenProperties();
         RgxGen rgxGen = new RgxGen("xxx");
@@ -105,7 +105,7 @@ public class RgxGenConfigurationTests {
     @Test
     public void localResetToGlobalTest() {
         RgxGenProperties globProp = new RgxGenProperties();
-        aOption.setInProperties(globProp, "20");
+        aOption.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
         RgxGenProperties localProp = new RgxGenProperties();
         RgxGen rgxGen = new RgxGen("xxx");

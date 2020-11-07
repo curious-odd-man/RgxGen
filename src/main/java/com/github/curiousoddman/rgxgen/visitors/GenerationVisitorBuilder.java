@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen.visitors;
 
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 
 import java.util.HashMap;
@@ -7,20 +8,13 @@ import java.util.Map;
 import java.util.Random;
 
 public class GenerationVisitorBuilder {
-
-    @FunctionalInterface
-    public interface GenerationVisitorConstructor {
-        GenerationVisitor construct(Random random, Map<Integer, String> groupsValues, RgxGenProperties properties);
-    }
-
-    private final GenerationVisitorConstructor aConstructor;
-
     private Random               aRandom;
     private Map<Integer, String> aGroupsValues;
     private RgxGenProperties     aProperties;
+    private boolean              aGenerateMatching;
 
-    public GenerationVisitorBuilder(GenerationVisitorConstructor constructor) {
-        aConstructor = constructor;
+    public GenerationVisitorBuilder(boolean generateMatching) {
+        aGenerateMatching = generateMatching;
     }
 
     public GenerationVisitorBuilder withRandom(Random random) {
@@ -37,7 +31,19 @@ public class GenerationVisitorBuilder {
             aGroupsValues = new HashMap<>();
         }
 
-        return aConstructor.construct(aRandom, aGroupsValues, aProperties);
+        if (aGenerateMatching) {
+            if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+                return new GenerationVisitorCaseInsensitive(aRandom, aGroupsValues, aProperties);
+            } else {
+                return new GenerationVisitor(aRandom, aGroupsValues, aProperties);
+            }
+        } else {
+            if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+                return new NotMatchingCaseInsensitiveGenerationVisitor(aRandom, aGroupsValues, aProperties);
+            } else {
+                return new NotMatchingGenerationVisitor(aRandom, aGroupsValues, aProperties);
+            }
+        }
     }
 
     public GenerationVisitorBuilder withProperties(RgxGenProperties properties) {

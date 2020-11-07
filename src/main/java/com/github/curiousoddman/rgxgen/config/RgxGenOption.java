@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen.config;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -70,8 +71,9 @@ public enum RgxGenOption {
      * @param properties properties to add to
      * @param value      a value
      */
-    public void setInProperties(RgxGenProperties properties, String value) {
-        properties.setProperty(aKey, value);
+    public <T> void setInProperties(RgxGenProperties properties, T value) {
+        Objects.requireNonNull(value);
+        properties.setProperty(aKey, Objects.toString(value));
     }
 
     /**
@@ -82,6 +84,16 @@ public enum RgxGenOption {
      */
     public int getIntFromProperties(RgxGenProperties properties) {
         return Integer.parseInt(getFromProperties(properties));
+    }
+
+    /**
+     * Convenience method. Returns value of the property transformed to an integer
+     *
+     * @param properties properties to get value from
+     * @return boolean value associated with property, or default.
+     */
+    public boolean getBooleanFromProperties(RgxGenProperties properties) {
+        return Boolean.parseBoolean(getFromProperties(properties));
     }
 
     @Override

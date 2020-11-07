@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 
+import static com.github.curiousoddman.rgxgen.util.Util.BIG_INTEGER_TWO;
 import static org.junit.Assert.*;
 
 public class RegressionTests {
@@ -30,7 +31,7 @@ public class RegressionTests {
         RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
         StringIterator stringIterator = rgxGen.iterateUnique();
-        assertEquals(BigInteger.valueOf(2), rgxGen.numUnique());
+        assertEquals(BIG_INTEGER_TWO, rgxGen.numUnique());
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());
         assertFalse(stringIterator.hasNext());

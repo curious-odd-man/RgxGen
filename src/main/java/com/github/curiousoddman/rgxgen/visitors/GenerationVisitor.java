@@ -26,7 +26,7 @@ import java.util.Random;
 public class GenerationVisitor implements NodeVisitor {
 
     public static GenerationVisitorBuilder builder() {
-        return new GenerationVisitorBuilder(GenerationVisitor::new);
+        return new GenerationVisitorBuilder(true);
     }
 
     protected final StringBuilder        aStringBuilder = new StringBuilder();
