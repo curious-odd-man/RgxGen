@@ -18,9 +18,15 @@ public class CaseVariationIteratorTests {
     public static Collection<Object[]> parameters() {
         return Arrays.asList(new Object[][]{
                 {"A", Arrays.asList("a", "A")},
+                {"a", Arrays.asList("a", "A")},
                 {"1", Arrays.asList("1")},
                 {"1a", Arrays.asList("1a", "1A")},
                 {"1ab", Arrays.asList("1ab", "1Ab", "1aB", "1AB")},
+                {"a1b", Arrays.asList("a1b", "A1b", "a1B", "A1B")},
+                {"A1B", Arrays.asList("a1b", "A1b", "a1B", "A1B")},
+                {"abc", Arrays.asList("abc", "Abc", "aBc", "ABc", "abC", "AbC", "aBC", "ABC")},
+                {"AbC", Arrays.asList("abc", "Abc", "aBc", "ABc", "abC", "AbC", "aBC", "ABC")},
+                {"ABC", Arrays.asList("abc", "Abc", "aBc", "ABc", "abC", "AbC", "aBC", "ABC")}
                 });
     }
 

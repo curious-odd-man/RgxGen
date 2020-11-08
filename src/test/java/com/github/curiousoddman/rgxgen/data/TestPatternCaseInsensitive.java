@@ -20,27 +20,27 @@ public enum TestPatternCaseInsensitive implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B("[ab]") {{
-        setAllUniqueValues("a", "A", "b", "B");
+        setAllUniqueValues("A", "a", "B", "b");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_RANGE("a{2,3}") {{
-        setAllUniqueValues("aa", "Aa", "aA", "AA", "aaa", "Aaa", "aAa", "AAa", "aaA", "AaA", "aAA", "AAA");
+        setAllUniqueValues("aa", "aA", "Aa", "AA", "aaa", "aaA", "aAa", "aAA", "Aaa", "AaA", "AAa", "AAA");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B_REPEAT_CONST("(a|b){2}") {{
-        setAllUniqueValues("aa", "ab", "ba", "bb", "Aa", "Ab", "Ba", "Bb", "aA", "aB", "bA", "bB", "AA", "AB", "BA", "BB");
+        setAllUniqueValues("aa", "aA", "ab", "aB", "Aa", "AA", "Ab", "AB", "ba", "bA", "bb", "bB", "Ba", "BA", "Bb", "BB");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     CHOICE_CAPTURED("(a|b)\\1") {{
-        setAllUniqueValues("aa", "bb", "AA", "BB");
+        setAllUniqueValues("aa", "AA", "bb", "BB");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     CAPTURE_REF_REPEAT("(a|b)\\1{2,3}") {{
-        setAllUniqueValues("aaa", "aaaa", "bbb", "bbbb", "AAA", "AAAA", "BBB", "BBBB");
+        setAllUniqueValues("aaa", "aaaa", "AAA", "AAAA", "bbb", "bbbb", "BBB", "BBBB");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     GROUP_RESULT_USED_IN_CHOICES("(a)(\\1|b)") {{
-        setAllUniqueValues("aa", "ab", "AA", "Ab", "aB");
+        setAllUniqueValues("aa", "ab", "aB", "AA", "Ab", "AB");
     }};
 
     final String aPattern;

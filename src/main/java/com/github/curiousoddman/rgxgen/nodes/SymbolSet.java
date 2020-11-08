@@ -87,7 +87,7 @@ public class SymbolSet extends Node {
     }
 
     private final String[] aSymbols;
-    private       String[] aSymbolsCaseInsensitive = null;
+    private final String[] aSymbolsCaseInsensitive;
 
     /**
      * Symbol set containing all symbols
@@ -118,28 +118,48 @@ public class SymbolSet extends Node {
                               ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
                               : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
-        filterOrPut(initial, Arrays.asList(symbols), type);
-        filterOrPut(initial, symbolRanges.stream()
-                                         .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
-                                         .mapToObj(i -> (char) i)
-                                         .map(Object::toString)
-                                         .collect(Collectors.toList()), type);
+        Set<String> caseInsensitive = new HashSet<>(initial);
+        filterOrPut(initial, caseInsensitive, Arrays.asList(symbols), type);
+        filterOrPut(initial, caseInsensitive, symbolRanges.stream()
+                                                          .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
+                                                          .mapToObj(i -> (char) i)
+                                                          .map(Object::toString)
+                                                          .collect(Collectors.toList()), type);
 
+        aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_STRING_ARRAY);
         aSymbols = initial.toArray(ZERO_LENGTH_STRING_ARRAY);
     }
 
     /**
      * Depending on TYPE either add or remove characters
      *
-     * @param input   collection to modify
+     * @param initial collection to modify
      * @param symbols add or remove these symbols
      * @param type    add or remove
      */
-    private static void filterOrPut(Collection<String> input, List<String> symbols, TYPE type) {
+    private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, List<String> symbols, TYPE type) {
         if (type == TYPE.POSITIVE) {
-            input.addAll(symbols);
+            initial.addAll(symbols);
+            for (String s : symbols) {
+                char stringAsChar = s.charAt(0);
+                if (Character.isUpperCase(stringAsChar)) {
+                    caseInsensitive.add(s.toLowerCase());
+                } else if (Character.isLowerCase(stringAsChar)) {
+                    caseInsensitive.add(s.toUpperCase());
+                }
+                caseInsensitive.add(s);
+            }
         } else {
-            input.removeIf(symbols::contains);
+            initial.removeIf(symbols::contains);
+            for (String s : symbols) {
+                char stringAsChar = s.charAt(0);
+                if (Character.isUpperCase(stringAsChar)) {
+                    caseInsensitive.remove(s.toLowerCase());
+                } else if (Character.isLowerCase(stringAsChar)) {
+                    caseInsensitive.remove(s.toUpperCase());
+                }
+                caseInsensitive.remove(s);
+            }
         }
     }
 
@@ -153,19 +173,6 @@ public class SymbolSet extends Node {
     }
 
     public String[] getSymbolsCaseInsensitive() {
-        if (aSymbolsCaseInsensitive == null) {
-            Set<String> set = new HashSet<>();
-            for (String s : aSymbols) {
-                char stringAsChar = s.charAt(0);
-                if (Character.isUpperCase(stringAsChar)) {
-                    set.add(s.toLowerCase());
-                } else if (Character.isLowerCase(stringAsChar)) {
-                    set.add(s.toUpperCase());
-                }
-                set.add(s);
-            }
-            aSymbolsCaseInsensitive = set.toArray(ZERO_LENGTH_STRING_ARRAY);
-        }
         return aSymbolsCaseInsensitive;
     }
 

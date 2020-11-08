@@ -4,8 +4,7 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -323,7 +322,7 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
                                     new SymbolSet("['\\-/\\.\\s]", new String[]{"'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n"}, SymbolSet.TYPE.POSITIVE)) {{
-        setAllUniqueValues("'", "-", "/", ".", "\r", "\f", "\u000B", " ", "\t", "\n");
+        setAllUniqueValues("\t", "\n", "\u000B", "\f", "\r", " ", "'", "-", ".", "/");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",

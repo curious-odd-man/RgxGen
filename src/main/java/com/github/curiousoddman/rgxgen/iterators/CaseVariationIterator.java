@@ -18,28 +18,27 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.math.BigInteger;
-import java.util.BitSet;
 import java.util.NoSuchElementException;
+import java.util.TreeMap;
 
 public class CaseVariationIterator extends StringIterator {
-    private final String        aOriginalValue;
-    private final StringBuilder aValue;
-    private final int           aLastCaseSensitiveCharacter;
-    private final BitSet aBitSet;
+    private final String                    aOriginalValue;
+    private final StringBuilder             aValue;
+    private final TreeMap<Integer, Boolean> aSwitchableCharPositions;       // true - lower, false - upper case
 
     private int     aCurrentPos;
-    private int     aNextPos;
     private boolean hasNext;
-
 
 
     public CaseVariationIterator(String value) {
         aOriginalValue = value;
         aValue = new StringBuilder(value.toLowerCase());
-        aLastCaseSensitiveCharacter = Util.indexOfLastCaseSensitiveCharacter(aValue);
-        BigInteger bigInteger = Util.countCaseInsensitiveVariations(aValue);
-        aBitSet = new BitSet(bigInteger.intValueExact());
+        aSwitchableCharPositions = new TreeMap<>();
+        int currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, 0);
+        while (currentPos >= 0) {
+            aSwitchableCharPositions.put(currentPos, true);
+            currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, currentPos + 1);
+        }
         reset();
     }
 
@@ -47,31 +46,41 @@ public class CaseVariationIterator extends StringIterator {
     protected String nextImpl() {
         if (!hasNext) {
             throw new NoSuchElementException();
-        } else if (aLastCaseSensitiveCharacter < 0) {
+        } else if (aSwitchableCharPositions.isEmpty()) {        // Only one possible value. No variations...
             hasNext = false;
             return aOriginalValue;
-        } else {
+        } else if (aCurrentPos < 0) {       // First time return all lower-case value
+            aCurrentPos = aSwitchableCharPositions.firstKey();
+            return aValue.toString();
+        } else {        // All other
             char currentChar = aValue.charAt(aCurrentPos);
             if (Character.isLowerCase(currentChar)) {
                 aValue.setCharAt(aCurrentPos, Character.toUpperCase(currentChar));
-                aNextPos = Util.indexOfNextCaseSensitiveCharacter(aValue, aCurrentPos);
-                return aValue.toString();
+                aSwitchableCharPositions.put(aCurrentPos, false);
+
+                hasNext = aSwitchableCharPositions.values()
+                                                  .stream()
+                                                  .anyMatch(v -> v);
+
             } else {
-
-
-                aValue.setCharAt(aCurrentPos, Character.toLowerCase(currentChar));
+                while (Character.isUpperCase(aValue.charAt(aCurrentPos))) {
+                    aValue.setCharAt(aCurrentPos, Character.toLowerCase(aValue.charAt(aCurrentPos)));
+                    aSwitchableCharPositions.put(aCurrentPos, true);
+                    aCurrentPos = aSwitchableCharPositions.ceilingKey(aCurrentPos + 1);
+                }
+                aValue.setCharAt(aCurrentPos, Character.toUpperCase(aValue.charAt(aCurrentPos)));
+                aSwitchableCharPositions.put(aCurrentPos, false);
+                aCurrentPos = aSwitchableCharPositions.firstKey();
             }
+            return aValue.toString();
         }
-
-        return null;
     }
 
     @Override
     public void reset() {
         aValue.replace(0, aOriginalValue.length(), aOriginalValue.toLowerCase());
-        aBitSet.clear();
-        aCurrentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, 0);
         hasNext = true;
+        aCurrentPos = -1;
     }
 
     @Override  // FIXME: Can we return CharSequence here?? Can we in general move from String to CharSequence internally to allow using StringBuilder and String interchangingly??

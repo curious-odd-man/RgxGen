@@ -127,7 +127,6 @@ public final class Util {
         return -1;
     }
 
-
     /**
      * Utility class can't be instantiated
      */
