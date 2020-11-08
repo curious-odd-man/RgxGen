@@ -88,5 +88,21 @@ public class UtilTests {
         assertEquals(8, Util.countCaseInsensitiveVariations("abc")
                             .intValue());
     }
+
+    @Test
+    public void indexOfNextCaseSensitiveCharacterTest() {
+        assertEquals(0, Util.indexOfNextCaseSensitiveCharacter("a123", 0));
+        assertEquals(-1, Util.indexOfNextCaseSensitiveCharacter("a123", 1));
+        assertEquals(1, Util.indexOfNextCaseSensitiveCharacter("1a123", 0));
+        assertEquals(3, Util.indexOfNextCaseSensitiveCharacter("123a", 0));
+    }
+
+    @Test
+    public void indexOfLastCaseSensitiveCharacterTest() {
+        assertEquals(0, Util.indexOfLastCaseSensitiveCharacter("a123"));
+        assertEquals(-1, Util.indexOfLastCaseSensitiveCharacter("3123"));
+        assertEquals(1, Util.indexOfLastCaseSensitiveCharacter("1a123"));
+        assertEquals(3, Util.indexOfLastCaseSensitiveCharacter("123a"));
+    }
 }
 

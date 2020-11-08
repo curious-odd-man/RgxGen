@@ -100,7 +100,7 @@ public final class Util {
         return sb.toString();
     }
 
-    public static BigInteger countCaseInsensitiveVariations(String value) {
+    public static BigInteger countCaseInsensitiveVariations(CharSequence value) {
         int switchableCase = value.chars()
                                   .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
                                   .sum();
