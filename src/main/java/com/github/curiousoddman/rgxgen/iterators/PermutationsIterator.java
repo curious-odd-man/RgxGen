@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 
 public class PermutationsIterator extends StringIterator {
     private final StringIterator[] aIterators;
-    // FIXME: Generated parts are no longer used since StringIterator has current() method.
     private final String[]         aGeneratedParts;
 
     public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {

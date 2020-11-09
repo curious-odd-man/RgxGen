@@ -84,7 +84,7 @@ public class CaseVariationIterator extends StringIterator {
         aCurrentPos = -1;
     }
 
-    @Override  // FIXME: Can we return CharSequence here?? Can we in general move from String to CharSequence internally to allow using StringBuilder and String interchangingly??
+    @Override
     public String current() {
         return aValue.toString();
     }
