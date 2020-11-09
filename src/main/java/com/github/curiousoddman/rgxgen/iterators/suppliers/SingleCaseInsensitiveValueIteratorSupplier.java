@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,16 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.iterators.CaseVariationIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
-public interface NodeVisitor {
-    void visit(SymbolSet node);
+public class SingleCaseInsensitiveValueIteratorSupplier extends SingleValueIteratorSupplier {
+    public SingleCaseInsensitiveValueIteratorSupplier(String value) {
+        super(value);
+    }
 
-    void visit(Choice node);
-
-    void visit(FinalSymbol node);
-
-    void visit(Repeat node);
-
-    void visit(Sequence node);
-
-    void visit(NotSymbol node);
-
-    void visit(GroupRef node);
-
-    void visit(Group node);
+    @Override
+    public StringIterator get() {
+        return new CaseVariationIterator(aValue);
+    }
 }

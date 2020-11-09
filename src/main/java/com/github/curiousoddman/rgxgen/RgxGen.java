@@ -17,11 +17,11 @@ package com.github.curiousoddman.rgxgen;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -94,7 +94,7 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public BigInteger numUnique() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
         return v.getCount();
     }
@@ -115,7 +115,7 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
-        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
         aNode.visit(ugv);
         return ugv.getUniqueStrings();
     }

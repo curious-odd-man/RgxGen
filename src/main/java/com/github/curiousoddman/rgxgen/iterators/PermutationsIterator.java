@@ -24,7 +24,6 @@ import java.util.function.Supplier;
 
 public class PermutationsIterator extends StringIterator {
     private final StringIterator[] aIterators;
-    // FIXME: Generated parts are no longer used since StringIterator has current() method.
     private final String[]         aGeneratedParts;
 
     public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {
@@ -71,9 +70,7 @@ public class PermutationsIterator extends StringIterator {
             }
         }
 
-        return Arrays.stream(aIterators)
-                     .map(StringIterator::current)
-                     .reduce("", String::concat);
+        return current();
     }
 
     @Override

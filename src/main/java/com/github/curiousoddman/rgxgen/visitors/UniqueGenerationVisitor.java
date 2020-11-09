@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,7 +16,9 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
@@ -31,26 +33,32 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     private final List<Supplier<StringIterator>>        aIterators = new ArrayList<>();
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
     private final Map<Integer, StringIterator>          aGroupIterators;
+    private final RgxGenProperties                      aProperties;
 
-    public UniqueGenerationVisitor() {
-        this(new HashMap<>(), new HashMap<>());
+    public UniqueGenerationVisitor(RgxGenProperties properties) {
+        this(new HashMap<>(), new HashMap<>(), properties);
     }
 
-    public UniqueGenerationVisitor(Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIterators) {
+    public UniqueGenerationVisitor(Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIterators, RgxGenProperties properties) {
         aReferenceIteratorMap = referenceIteratorMap;
         aGroupIterators = groupIterators;
+        aProperties = properties;
     }
 
     @Override
     public void visit(SymbolSet node) {
-        aIterators.add(new ArrayIteratorSupplier(node.getSymbols()));
+        if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+            aIterators.add(new ArrayIteratorSupplier(node.getSymbolsCaseInsensitive()));
+        } else {
+            aIterators.add(new ArrayIteratorSupplier(node.getSymbols()));
+        }
     }
 
     @Override
     public void visit(Choice node) {
         List<List<Supplier<StringIterator>>> nodeIterators = new ArrayList<>(node.getNodes().length);
         for (Node n : node.getNodes()) {
-            UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators);
+            UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
             n.visit(v);
             nodeIterators.add(v.aIterators);
         }
@@ -60,13 +68,17 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        aIterators.add(new SingleValueIteratorSupplier(node.getValue()));
+        if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+            aIterators.add(new SingleCaseInsensitiveValueIteratorSupplier(node.getValue()));
+        } else {
+            aIterators.add(new SingleValueIteratorSupplier(node.getValue()));
+        }
     }
 
     @Override
     public void visit(Repeat node) {
         // Getting all possible sub node contents
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators);
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         node.getNode()
             .visit(v);
         aIterators.add(new IncrementalLengthIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), node.getMin(), node.getMax()));
@@ -91,7 +103,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Group node) {
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators);
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         node.getNode()
             .visit(v);
 

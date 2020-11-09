@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -17,18 +17,20 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.regex.Pattern;
+
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     public static GenerationVisitorBuilder builder() {
-        return new GenerationVisitorBuilder(NotMatchingGenerationVisitor::new);
+        return new GenerationVisitorBuilder(false);
     }
 
     private static final String[] allSymbols = SymbolSet.getAllSymbols();
@@ -39,9 +41,13 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
+        visitSymbolSet(node, SymbolSet::getSymbols);
+    }
+
+    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, String[]> getSymbols) {
         // There is only one way to generate not matching for any character - is to not generate anything
         String pattern = node.getPattern();
-        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), node.getSymbols(), SymbolSet.TYPE.NEGATIVE);
+        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), SymbolSet.TYPE.NEGATIVE);
         if (!symbolSet.isEmpty()) {
             super.visit(symbolSet);
         }
@@ -92,9 +98,13 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
                 nodeValue.chars()
                          .map(c -> allSymbols[aRandom.nextInt(allSymbols.length)].charAt(0))
                          .forEachOrdered(c -> builder.append((char) c));
-            } while (nodeValue.equals(builder.toString()));
+            } while (equalsFinalSymbolRandomString(nodeValue, builder.toString()));
             aStringBuilder.append(builder);
         }
+    }
+
+    protected boolean equalsFinalSymbolRandomString(String s1, String s2) {
+        return s1.equals(s2);
     }
 
     @Override

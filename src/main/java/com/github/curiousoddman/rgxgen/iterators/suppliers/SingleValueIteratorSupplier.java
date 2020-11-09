@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 
 public class SingleValueIteratorSupplier implements Supplier<StringIterator> {
 
-    private final String aValue;
+    protected final String aValue;
 
     public SingleValueIteratorSupplier(String value) {
         aValue = value;

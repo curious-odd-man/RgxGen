@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,15 +16,29 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-/**
- * Interface for the parser/nodes builder.
- */
-public interface NodeTreeBuilder {
+public class FinalSymbol extends Node {
+    private final String aValue;
 
-    /**
-     * @return Root node for the parsed pattern
-     */
-    Node get();
+    public FinalSymbol(String value) {
+        super(value);
+        aValue = value;
+    }
+
+    @Override
+    public void visit(NodeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    public String getValue() {
+        return aValue;
+    }
+
+    @Override
+    public String toString() {
+        return "FinalSymbol{" +
+                '\'' + aValue + '\'' +
+                '}';
+    }
 }

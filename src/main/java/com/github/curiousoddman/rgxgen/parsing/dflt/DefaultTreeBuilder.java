@@ -16,12 +16,14 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
 import java.util.stream.IntStream;
+
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
@@ -44,7 +46,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
     private static final int      HEX_RADIX                  = 16;
-    private static final String[] EMPTY_STRINGS_ARR          = new String[0];
     private static final Node[]   EMPTY_NODES_ARR            = new Node[0];
 
     private final CharIterator       aCharIterator;
@@ -597,7 +598,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         handleRange(rangeStarted, sb, symbolRanges);
         String[] strings;
         if (sb.length() == 0) {
-            strings = EMPTY_STRINGS_ARR;
+            strings = ZERO_LENGTH_STRING_ARRAY;
         } else {
             strings = Util.stringToCharsSubstrings(sb.toString());
         }

@@ -1,5 +1,22 @@
 package com.github.curiousoddman.rgxgen.config;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -11,7 +28,14 @@ public enum RgxGenOption {
      *
      * @defaultValue 100
      */
-    INFINITE_PATTERN_REPETITION("generation.infinite.repeat", "100");
+    INFINITE_PATTERN_REPETITION("generation.infinite.repeat", "100"),
+
+    /**
+     * Flag to use case insensitive matching.
+     *
+     * @defaultValue false
+     */
+    CASE_INSENSITIVE("matching.case.insensitive", "false");
 
     private final String aKey;
     private final String aDefault;
@@ -63,8 +87,9 @@ public enum RgxGenOption {
      * @param properties properties to add to
      * @param value      a value
      */
-    public void setInProperties(RgxGenProperties properties, String value) {
-        properties.setProperty(aKey, value);
+    public <T> void setInProperties(RgxGenProperties properties, T value) {
+        Objects.requireNonNull(value);
+        properties.setProperty(aKey, Objects.toString(value));
     }
 
     /**
@@ -75,6 +100,16 @@ public enum RgxGenOption {
      */
     public int getIntFromProperties(RgxGenProperties properties) {
         return Integer.parseInt(getFromProperties(properties));
+    }
+
+    /**
+     * Convenience method. Returns value of the property transformed to an integer
+     *
+     * @param properties properties to get value from
+     * @return boolean value associated with property, or default.
+     */
+    public boolean getBooleanFromProperties(RgxGenProperties properties) {
+        return Boolean.parseBoolean(getFromProperties(properties));
     }
 
     @Override

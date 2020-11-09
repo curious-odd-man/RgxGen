@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 
 import java.util.Map;
 import java.util.Random;
@@ -26,7 +26,7 @@ import java.util.Random;
 public class GenerationVisitor implements NodeVisitor {
 
     public static GenerationVisitorBuilder builder() {
-        return new GenerationVisitorBuilder(GenerationVisitor::new);
+        return new GenerationVisitorBuilder(true);
     }
 
     protected final StringBuilder        aStringBuilder = new StringBuilder();

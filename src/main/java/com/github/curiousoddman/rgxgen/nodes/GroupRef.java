@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,15 +16,27 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-/**
- * Interface for the parser/nodes builder.
- */
-public interface NodeTreeBuilder {
+public class GroupRef extends Node {
+    private final int aIndex;
 
-    /**
-     * @return Root node for the parsed pattern
-     */
-    Node get();
+    public GroupRef(String pattern, int index) {
+        super(pattern);
+        aIndex = index;
+    }
+
+    @Override
+    public void visit(NodeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    public int getIndex() {
+        return aIndex;
+    }
+
+    @Override
+    public String toString() {
+        return "GroupRef{" + aIndex + '}';
+    }
 }

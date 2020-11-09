@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.visitors;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -17,7 +17,10 @@ package com.github.curiousoddman.rgxgen.generator.visitors;
 /* **************************************************************************/
 
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.math.BigInteger;
 import java.util.function.Function;
@@ -25,14 +28,16 @@ import java.util.function.Function;
 public class UniqueValuesCountingVisitor implements NodeVisitor {
     private BigInteger aCount = BigInteger.ZERO;
 
-    private final Node aParentNode;
+    private final Node             aParentNode;
+    private final RgxGenProperties aProperties;
 
-    public UniqueValuesCountingVisitor() {
-        this(null);
+    public UniqueValuesCountingVisitor(RgxGenProperties properties) {
+        this(null, properties);
     }
 
-    public UniqueValuesCountingVisitor(Node parentNode) {
+    public UniqueValuesCountingVisitor(Node parentNode, RgxGenProperties properties) {
         aParentNode = parentNode;
+        aProperties = properties;
     }
 
     private void applyOrSkip(Function<BigInteger, BigInteger> func) {
@@ -43,13 +48,14 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        applyOrSkip(v -> v.add(BigInteger.valueOf(node.getSymbols().length)));
+        String[] symbols = RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties) ? node.getSymbolsCaseInsensitive() : node.getSymbols();
+        applyOrSkip(v -> v.add(BigInteger.valueOf(symbols.length)));
     }
 
     @Override
     public void visit(Choice node) {
         for (Node vnode : node.getNodes()) {
-            BigInteger count = countSeparately(node, vnode);
+            BigInteger count = countSeparately(node, vnode, aProperties);
             applyOrSkip(v -> {
                 if (count == null) {
                     return null;
@@ -62,12 +68,16 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        applyOrSkip(v -> v.add(BigInteger.ONE));
+        if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+            applyOrSkip(v -> v.add(Util.countCaseInsensitiveVariations(node.getValue())));
+        } else {
+            applyOrSkip(v -> v.add(BigInteger.ONE));
+        }
     }
 
     @Override
     public void visit(Repeat node) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node);
+        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node, aProperties);
         node.getNode()
             .visit(countingVisitor);
 
@@ -83,7 +93,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(Sequence node) {
         for (Node vnode : node.getNodes()) {
-            BigInteger count = countSeparately(node, vnode);
+            BigInteger count = countSeparately(node, vnode, aProperties);
             applyOrSkip(v -> {
                 if (count == null) {
                     return null;
@@ -98,8 +108,8 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         }
     }
 
-    private static BigInteger countSeparately(Node parentNode, Node vnode) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode);
+    private static BigInteger countSeparately(Node parentNode, Node vnode, RgxGenProperties properties) {
+        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode, properties);
         vnode.visit(countingVisitor);
         return countingVisitor.aCount;
     }

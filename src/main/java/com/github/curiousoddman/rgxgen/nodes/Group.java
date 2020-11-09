@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,18 +16,35 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public abstract class Node {
-    private final String aPattern;
+public class Group extends Node {
+    private final Node aNode;
+    private final int  aGroupIndex;
 
-    protected Node(String pattern) {
-        aPattern = pattern;
+    public Group(String pattern, int index, Node node) {
+        super(pattern);
+        aNode = node;
+        aGroupIndex = index;
     }
 
-    public abstract void visit(NodeVisitor visitor);
+    public int getIndex() {
+        return aGroupIndex;
+    }
 
-    public String getPattern() {
-        return aPattern;
+    @Override
+    public void visit(NodeVisitor visitor) {
+        visitor.visit(this);
+    }
+
+    public Node getNode() {
+        return aNode;
+    }
+
+    @Override
+    public String toString() {
+        return "Group[" + aGroupIndex +
+                "]{" + aNode +
+                '}';
     }
 }

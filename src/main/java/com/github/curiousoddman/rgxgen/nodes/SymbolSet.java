@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,25 +16,27 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
 
 /**
  * Generate Any printable character.
  */
 public class SymbolSet extends Node {
-    private static final String[] ALL_SYMBOLS = new String[127 - 32];
+    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
+    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
+
+    private static final String[] ALL_SYMBOLS = new String[DEL_ASCII_CODE - SPACE_ASCII_CODE];
 
     public static String[] getAllSymbols() {
         return ALL_SYMBOLS.clone();
     }
-
-    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
-    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
     static {
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
@@ -85,6 +87,7 @@ public class SymbolSet extends Node {
     }
 
     private final String[] aSymbols;
+    private final String[] aSymbolsCaseInsensitive;
 
     /**
      * Symbol set containing all symbols
@@ -98,7 +101,7 @@ public class SymbolSet extends Node {
     }
 
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, TYPE type) {
-        this(pattern, symbolRanges, Util.ZERO_LENGTH_STRING_ARRAY, type);
+        this(pattern, symbolRanges, ZERO_LENGTH_STRING_ARRAY, type);
     }
 
     /**
@@ -111,32 +114,49 @@ public class SymbolSet extends Node {
      */
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
         super(pattern);
-        List<String> initial = type == TYPE.NEGATIVE
-                               ? new ArrayList<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
-                               : new ArrayList<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
+        Set<String> initial = type == TYPE.NEGATIVE
+                              ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
+                              : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
-        filterOrPut(initial, Arrays.asList(symbols), type);
-        filterOrPut(initial, symbolRanges.stream()
-                                         .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
-                                         .mapToObj(i -> (char) i)
-                                         .map(Object::toString)
-                                         .collect(Collectors.toList()), type);
+        Set<String> caseInsensitive = new HashSet<>(initial);
+        filterOrPut(initial, caseInsensitive, Arrays.asList(symbols), type);
+        filterOrPut(initial, caseInsensitive, symbolRanges.stream()
+                                                          .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
+                                                          .mapToObj(i -> (char) i)
+                                                          .map(Object::toString)
+                                                          .collect(Collectors.toList()), type);
 
-        aSymbols = initial.toArray(Util.ZERO_LENGTH_STRING_ARRAY);
+        aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_STRING_ARRAY);
+        aSymbols = initial.toArray(ZERO_LENGTH_STRING_ARRAY);
     }
 
     /**
      * Depending on TYPE either add or remove characters
      *
-     * @param input   collection to modify
-     * @param symbols add or remove these symbols
-     * @param type    add or remove
+     * @param initial         modifiable collection
+     * @param caseInsensitive modifiable collection
+     * @param symbols         add or remove these symbols
+     * @param type            add or remove switch
      */
-    private static void filterOrPut(Collection<String> input, List<String> symbols, TYPE type) {
+    private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, List<String> symbols, TYPE type) {
         if (type == TYPE.POSITIVE) {
-            input.addAll(symbols);
+            initial.addAll(symbols);
+            handleCaseSensitiveCharacters(symbols, caseInsensitive::add);
         } else {
-            input.removeIf(symbols::contains);
+            initial.removeIf(symbols::contains);
+            handleCaseSensitiveCharacters(symbols, caseInsensitive::remove);
+        }
+    }
+
+    private static void handleCaseSensitiveCharacters(Collection<String> symbols, Consumer<String> consumer) {
+        for (String s : symbols) {
+            char stringAsChar = s.charAt(0);
+            if (Character.isUpperCase(stringAsChar)) {
+                consumer.accept(s.toLowerCase());
+            } else if (Character.isLowerCase(stringAsChar)) {
+                consumer.accept(s.toUpperCase());
+            }
+            consumer.accept(s);
         }
     }
 
@@ -147,6 +167,10 @@ public class SymbolSet extends Node {
 
     public String[] getSymbols() {
         return aSymbols;
+    }
+
+    public String[] getSymbolsCaseInsensitive() {
+        return aSymbolsCaseInsensitive;
     }
 
     @Override

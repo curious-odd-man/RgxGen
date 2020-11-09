@@ -71,6 +71,7 @@ Changes in sd snapshot:
 
 - Fixed: Added support for `\Q` and `\E` sequences [#43](https://github.com/curious-odd-man/RgxGen/issues/43)
 - Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
+- Feature: Case Insensitive generation support [#47](https://github.com/curious-odd-man/RgxGen/issues/47)
 
 ### Code: 
 ```java
@@ -158,7 +159,7 @@ public class Main {
         // Create properties object (RgxGenProperties extends java.util.Properties)
         RgxGenProperties properties = new RgxGenProperties();
         // Set value "20" for INFINITE_PATTERN_REPETITION option in properties
-        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, "20");
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, 20);
         // ... now properties can be passed to RgxGen
     }
 }

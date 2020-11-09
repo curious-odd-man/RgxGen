@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,26 +16,21 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class Repeat extends Node {
-    private final Node aNode;
-    private final int  aMin;
-    private final int  aMax;
+import java.util.Arrays;
 
-    public static Repeat minimum(String pattern, Node node, int times) {
-        return new Repeat(pattern, node, times, -1);
-    }
+public class Choice extends Node {
 
-    public Repeat(String pattern, Node node, int times) {
-        this(pattern, node, times, times);
-    }
+    private final Node[] aNodes;
 
-    public Repeat(String pattern, Node node, int min, int max) {
+    public Choice(String pattern, Node... nodes) {
         super(pattern);
-        aNode = node;
-        aMin = min;
-        aMax = max;
+        aNodes = nodes;
+    }
+
+    public Node[] getNodes() {
+        return aNodes;
     }
 
     @Override
@@ -43,23 +38,8 @@ public class Repeat extends Node {
         visitor.visit(this);
     }
 
-    public Node getNode() {
-        return aNode;
-    }
-
-    public int getMin() {
-        return aMin;
-    }
-
-    public int getMax() {
-        return aMax;
-    }
-
     @Override
     public String toString() {
-        return "Repeat{" + aNode +
-                ", aMin=" + aMin +
-                ", aMax=" + aMax +
-                '}';
+        return "Choice" + Arrays.toString(aNodes);
     }
 }
