@@ -17,9 +17,9 @@ package com.github.curiousoddman.rgxgen.nodes;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
-import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -133,33 +133,30 @@ public class SymbolSet extends Node {
     /**
      * Depending on TYPE either add or remove characters
      *
-     * @param initial collection to modify
-     * @param symbols add or remove these symbols
-     * @param type    add or remove
+     * @param initial         modifiable collection
+     * @param caseInsensitive modifiable collection
+     * @param symbols         add or remove these symbols
+     * @param type            add or remove switch
      */
     private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, List<String> symbols, TYPE type) {
         if (type == TYPE.POSITIVE) {
             initial.addAll(symbols);
-            for (String s : symbols) {
-                char stringAsChar = s.charAt(0);
-                if (Character.isUpperCase(stringAsChar)) {
-                    caseInsensitive.add(s.toLowerCase());
-                } else if (Character.isLowerCase(stringAsChar)) {
-                    caseInsensitive.add(s.toUpperCase());
-                }
-                caseInsensitive.add(s);
-            }
+            handleCaseSensitiveCharacters(symbols, caseInsensitive::add);
         } else {
             initial.removeIf(symbols::contains);
-            for (String s : symbols) {
-                char stringAsChar = s.charAt(0);
-                if (Character.isUpperCase(stringAsChar)) {
-                    caseInsensitive.remove(s.toLowerCase());
-                } else if (Character.isLowerCase(stringAsChar)) {
-                    caseInsensitive.remove(s.toUpperCase());
-                }
-                caseInsensitive.remove(s);
+            handleCaseSensitiveCharacters(symbols, caseInsensitive::remove);
+        }
+    }
+
+    private static void handleCaseSensitiveCharacters(Collection<String> symbols, Consumer<String> consumer) {
+        for (String s : symbols) {
+            char stringAsChar = s.charAt(0);
+            if (Character.isUpperCase(stringAsChar)) {
+                consumer.accept(s.toLowerCase());
+            } else if (Character.isLowerCase(stringAsChar)) {
+                consumer.accept(s.toUpperCase());
             }
+            consumer.accept(s);
         }
     }
 

@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.NoSuchElementException;
+import java.util.OptionalInt;
 import java.util.TreeMap;
 
 public class CaseVariationIterator extends StringIterator {
@@ -34,10 +35,10 @@ public class CaseVariationIterator extends StringIterator {
         aOriginalValue = value;
         aValue = new StringBuilder(value.toLowerCase());
         aSwitchableCharPositions = new TreeMap<>();
-        int currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, 0);
-        while (currentPos >= 0) {
-            aSwitchableCharPositions.put(currentPos, true);
-            currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, currentPos + 1);
+        OptionalInt currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, 0);
+        while (currentPos.isPresent()) {
+            aSwitchableCharPositions.put(currentPos.getAsInt(), true);
+            currentPos = Util.indexOfNextCaseSensitiveCharacter(aValue, currentPos.getAsInt() + 1);
         }
         reset();
     }

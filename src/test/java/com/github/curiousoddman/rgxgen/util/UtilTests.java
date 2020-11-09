@@ -91,18 +91,14 @@ public class UtilTests {
 
     @Test
     public void indexOfNextCaseSensitiveCharacterTest() {
-        assertEquals(0, Util.indexOfNextCaseSensitiveCharacter("a123", 0));
-        assertEquals(-1, Util.indexOfNextCaseSensitiveCharacter("a123", 1));
-        assertEquals(1, Util.indexOfNextCaseSensitiveCharacter("1a123", 0));
-        assertEquals(3, Util.indexOfNextCaseSensitiveCharacter("123a", 0));
-    }
-
-    @Test
-    public void indexOfLastCaseSensitiveCharacterTest() {
-        assertEquals(0, Util.indexOfLastCaseSensitiveCharacter("a123"));
-        assertEquals(-1, Util.indexOfLastCaseSensitiveCharacter("3123"));
-        assertEquals(1, Util.indexOfLastCaseSensitiveCharacter("1a123"));
-        assertEquals(3, Util.indexOfLastCaseSensitiveCharacter("123a"));
+        assertEquals(0, Util.indexOfNextCaseSensitiveCharacter("a123", 0)
+                            .getAsInt());
+        assertEquals(-142536, Util.indexOfNextCaseSensitiveCharacter("a123", 1)
+                             .orElse(-142536));
+        assertEquals(1, Util.indexOfNextCaseSensitiveCharacter("1a123", 0)
+                            .getAsInt());
+        assertEquals(3, Util.indexOfNextCaseSensitiveCharacter("123a", 0)
+                            .getAsInt());
     }
 }
 

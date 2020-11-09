@@ -1,10 +1,12 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
-import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -71,6 +73,26 @@ public class NotMatchingGenerationTests {
                                                                 .get();
         aNode.visit(visitor);
         boolean matches = Pattern.compile(aRegex)
+                                 .matcher(visitor.getString())
+                                 .matches();
+        assertFalse("Should not match " + aRegex + " got " + visitor.getString(), matches);
+    }
+
+    @Test
+    public void caseInsensitiveVisitingWorksTest() {
+        NodeTreeBuilder builder = new DefaultTreeBuilder(aRegex);
+        Node node = builder.get();
+        // Verify that nodes are correct
+        assertEquals(aNode.toString(), node.toString());
+
+        RgxGenProperties properties = new RgxGenProperties();
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
+        GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
+                                                                .withRandom(new Random(aSeed))
+                                                                .withProperties(properties)
+                                                                .get();
+        aNode.visit(visitor);
+        boolean matches = Pattern.compile(aRegex, Pattern.CASE_INSENSITIVE)
                                  .matcher(visitor.getString())
                                  .matches();
         assertFalse("Should not match " + aRegex + " got " + visitor.getString(), matches);

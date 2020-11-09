@@ -20,6 +20,7 @@ import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -100,6 +101,15 @@ public final class Util {
         return sb.toString();
     }
 
+    /**
+     * Count number of variation of words in case insensitive manner.
+     * For example for word "a" - there are 2 variation ("a" and "A").
+     * For word "1a" - there are also 2 variations ("1a" and "1A")
+     * For word "AB" - there are 4 variations: ("ab", "aB", "Ab", "BB")
+     *
+     * @param value word to calculate variations
+     * @return number of variations.
+     */
     public static BigInteger countCaseInsensitiveVariations(CharSequence value) {
         int switchableCase = value.chars()
                                   .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
@@ -107,24 +117,22 @@ public final class Util {
         return BIG_INTEGER_TWO.pow(switchableCase);
     }
 
-    public static int indexOfNextCaseSensitiveCharacter(CharSequence text, int startIndex) {
+    /**
+     * Finds next case sensitive character.
+     * Case sensitive character is either lower-case or upper-case character.
+     *
+     * @param text       text to be analyzed
+     * @param startIndex start search from index.
+     * @return index of next case sensitive character or {@code empty} if no such character present
+     */
+    public static OptionalInt indexOfNextCaseSensitiveCharacter(CharSequence text, int startIndex) {
         for (int i = startIndex; i < text.length(); i++) {
             char c = text.charAt(i);
             if (Character.isLowerCase(c) || Character.isUpperCase(c)) {
-                return i;
+                return OptionalInt.of(i);
             }
         }
-        return -1;
-    }
-
-    public static int indexOfLastCaseSensitiveCharacter(CharSequence text) {
-        for (int i = text.length() - 1; i >= 0; --i) {
-            char c = text.charAt(i);
-            if (Character.isLowerCase(c) || Character.isUpperCase(c)) {
-                return i;
-            }
-        }
-        return -1;
+        return OptionalInt.empty();
     }
 
     /**
