@@ -27,6 +27,7 @@ import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -92,11 +93,26 @@ public class RgxGen {
      * @return number of unique values or null, if infinite
      * @apiNote This might not be accurate! For example the pattern "(a{0,2}|b{0,2})" will estimate to 6,
      * though actual count is only 5, because right and left part of group can yield same value
+     * @deprecated use {@link #getUniqueEstimation()} instead
      */
     public BigInteger numUnique() {
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
-        return v.getCount();
+        return v.getEstimation()
+                .orElse(null);
+    }
+
+    /**
+     * Returns estimation of unique values that can be generated with the pattern.
+     *
+     * @return number of unique values or null, if infinite
+     * @apiNote This might not be accurate! For example the pattern "(a{0,2}|b{0,2})" will estimate to 6,
+     * though actual count is only 5, because right and left part of group can yield same value
+     */
+    public Optional<BigInteger> getUniqueEstimation() {
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
+        aNode.visit(v);
+        return v.getEstimation();
     }
 
     /**

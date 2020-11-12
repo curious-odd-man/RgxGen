@@ -23,10 +23,12 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class UniqueValuesCountingVisitor implements NodeVisitor {
-    private BigInteger aCount = BigInteger.ZERO;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This value is returned to user later
+    private Optional<BigInteger> aCount = Optional.of(BigInteger.ZERO);
 
     private final Node             aParentNode;
     private final RgxGenProperties aProperties;
@@ -40,83 +42,84 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         aProperties = properties;
     }
 
-    private void applyOrSkip(Function<BigInteger, BigInteger> func) {
-        if (aCount != null) {
-            aCount = func.apply(aCount);
-        }
+    private void applyOrSkip(Function<BigInteger, Optional<BigInteger>> func) {
+        aCount = aCount.flatMap(func);
     }
 
     @Override
     public void visit(SymbolSet node) {
-        String[] symbols = RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties) ? node.getSymbolsCaseInsensitive() : node.getSymbols();
-        applyOrSkip(v -> v.add(BigInteger.valueOf(symbols.length)));
+        applyOrSkip(v -> {
+            String[] symbols = RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties) ? node.getSymbolsCaseInsensitive() : node.getSymbols();
+            return Optional.of(v.add(BigInteger.valueOf(symbols.length)));
+        });
     }
 
     @Override
     public void visit(Choice node) {
-        for (Node vnode : node.getNodes()) {
-            BigInteger count = countSeparately(node, vnode, aProperties);
-            applyOrSkip(v -> {
-                if (count == null) {
-                    return null;
-                }
-
-                return v.add(count);
-            });
+        for (Node child_node : node.getNodes()) {
+            applyOrSkip(v -> countSeparately(node, child_node, aProperties).map(v::add));
         }
     }
 
     @Override
     public void visit(FinalSymbol node) {
         if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
-            applyOrSkip(v -> v.add(Util.countCaseInsensitiveVariations(node.getValue())));
+            applyOrSkip(v -> Optional.of(v.add(Util.countCaseInsensitiveVariations(node.getValue()))));
         } else {
-            applyOrSkip(v -> v.add(BigInteger.ONE));
+            applyOrSkip(v -> Optional.of(v.add(BigInteger.ONE)));
         }
     }
 
     @Override
     public void visit(Repeat node) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node, aProperties);
-        node.getNode()
-            .visit(countingVisitor);
+        if (aCount.isPresent()) {
+            UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node, aProperties);
+            node.getNode()
+                .visit(countingVisitor);
 
-        if (node.getMax() < 0 || countingVisitor.aCount == null) {
-            aCount = null;
-        } else if (aCount != null) {
-            for (int i = node.getMin(); i <= node.getMax(); i++) {
-                aCount = aCount.add(countingVisitor.aCount.pow(i));
+            if (node.getMax() < 0 || !countingVisitor.aCount.isPresent()) {
+                aCount = Optional.empty();
+            } else {
+                BigInteger currentValue = aCount.get();
+                BigInteger nodesValue = countingVisitor.aCount.get();
+                for (int i = node.getMin(); i <= node.getMax(); i++) {
+                    currentValue = currentValue.add(nodesValue.pow(i));
+                }
+                aCount = Optional.of(currentValue);
             }
         }
     }
 
     @Override
     public void visit(Sequence node) {
-        for (Node vnode : node.getNodes()) {
-            BigInteger count = countSeparately(node, vnode, aProperties);
-            applyOrSkip(v -> {
-                if (count == null) {
-                    return null;
-                }
+        if (aCount.isPresent()) {
+            for (Node child_node : node.getNodes()) {
+                Optional<BigInteger> count = countSeparately(node, child_node, aProperties);
+                applyOrSkip(v -> {
+                    if (!count.isPresent()) {
+                        return Optional.empty();
+                    }
 
-                if (v.equals(BigInteger.ZERO)) {
-                    return count;
-                }
+                    if (v.equals(BigInteger.ZERO)) {
+                        return count;
+                    }
 
-                return count.equals(BigInteger.ZERO) ? v : v.multiply(count);
-            });
+                    BigInteger subCount = count.get();
+                    return Optional.of(subCount.equals(BigInteger.ZERO) ? v : v.multiply(subCount));
+                });
+            }
         }
     }
 
-    private static BigInteger countSeparately(Node parentNode, Node vnode, RgxGenProperties properties) {
+    private static Optional<BigInteger> countSeparately(Node parentNode, Node node, RgxGenProperties properties) {
         UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode, properties);
-        vnode.visit(countingVisitor);
+        node.visit(countingVisitor);
         return countingVisitor.aCount;
     }
 
     @Override
     public void visit(NotSymbol node) {
-        aCount = null;
+        aCount = Optional.empty();
     }
 
     @Override
@@ -126,7 +129,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         ) {
             // When repeated multiple times - it adds as much unique values as it is repeated. So we should add 1 (it will be used in Repeat for calculation).
             // E.g. (a|b)\1{2,3} - captured value of group is repeated either 2 or 3 times - it gives 2 unique values.
-            aCount = aCount.add(BigInteger.ONE);
+            aCount = aCount.map(v -> v.add(BigInteger.ONE));
         }
         //else
         // Do nothing. It does not add new unique values apart from above mentioned cases
@@ -139,11 +142,11 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     }
 
     /**
-     * Count of unique values that can be generated with this regex. {@code null} if infinite
+     * Provides an estimation of number of unique values that can be generated using pattern.
      *
-     * @return unique values estimation or null, if infinite
+     * @return unique values estimation or empty, if infinite
      */
-    public BigInteger getCount() {
+    public Optional<BigInteger> getEstimation() {
         return aCount;
     }
 }

@@ -50,7 +50,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
         aTestPattern.getResultNode()
                     .visit(v);
-        assertEquals(aTestPattern.getEstimatedCount(), v.getCount());
+        assertEquals(aTestPattern.getEstimatedCount(), v.getEstimation().orElse(null));
     }
 
     @Test
