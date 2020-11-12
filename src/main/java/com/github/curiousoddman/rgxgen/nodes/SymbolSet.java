@@ -148,7 +148,7 @@ public class SymbolSet extends Node {
         }
     }
 
-    private static void handleCaseSensitiveCharacters(Collection<String> symbols, Consumer<String> consumer) {
+    private static void handleCaseSensitiveCharacters(Iterable<String> symbols, Consumer<String> consumer) {
         for (String s : symbols) {
             char stringAsChar = s.charAt(0);
             if (Character.isUpperCase(stringAsChar)) {

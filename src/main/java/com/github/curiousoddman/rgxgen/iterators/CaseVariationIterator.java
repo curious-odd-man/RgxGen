@@ -46,7 +46,7 @@ public class CaseVariationIterator extends StringIterator {
     @Override
     protected String nextImpl() {
         if (!hasNext) {
-            throw new NoSuchElementException();
+            throw new NoSuchElementException("No more variations");
         } else if (aSwitchableCharPositions.isEmpty()) {        // Only one possible value. No variations...
             hasNext = false;
             return aOriginalValue;

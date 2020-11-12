@@ -95,6 +95,7 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      * @deprecated use {@link #getUniqueEstimation()} instead
      */
+    @Deprecated
     public BigInteger numUnique() {
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);

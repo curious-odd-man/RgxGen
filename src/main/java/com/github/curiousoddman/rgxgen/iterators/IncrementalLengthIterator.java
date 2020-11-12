@@ -28,7 +28,7 @@ public class IncrementalLengthIterator extends StringIterator {
 
     private int              aCurrentLength;
     private StringIterator[] aCurrentIterators;
-    private boolean          aInitialized;
+    private boolean          aInit = true;
 
 
     // (a|b){1} -> "a", "b" --> "a", "b"
@@ -72,7 +72,7 @@ public class IncrementalLengthIterator extends StringIterator {
         }
         tmp[aCurrentLength - 1] = aSupplier.get();
         aCurrentIterators = tmp;
-        aInitialized = true;
+        aInit = false;
         for (int i = 0; i < aCurrentLength; i++) {
             aCurrentIterators[i].next();
         }
@@ -83,7 +83,7 @@ public class IncrementalLengthIterator extends StringIterator {
         if (aCurrentLength == 0) {
             ++aCurrentLength;
             return "";
-        } else if (!aInitialized) {
+        } else if (aInit) {
             extendIterators();
             return current();
         } else {
@@ -113,7 +113,7 @@ public class IncrementalLengthIterator extends StringIterator {
     @Override
     public final void reset() {
         aCurrentLength = aMin;
-        aInitialized = false;
+        aInit = true;
         aCurrentIterators = new StringIterator[aCurrentLength];
         for (int i = 0; i < aCurrentLength; i++) {
             aCurrentIterators[i] = aSupplier.get();
