@@ -600,7 +600,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (sb.length() == 0) {
             strings = ZERO_LENGTH_STRING_ARRAY;
         } else {
-            strings = Util.stringToCharsSubstrings(sb.toString());
+            strings = Util.stringToCharsSubstrings(sb);
         }
 
         SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);

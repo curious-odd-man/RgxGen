@@ -41,25 +41,8 @@ public final class Util {
      * @param str string to split
      * @return array of single-character strings
      */
-    public static String[] stringToCharsSubstrings(String str) {
+    public static String[] stringToCharsSubstrings(CharSequence str) {
         return EMPTY.split(str);
-    }
-
-    /**
-     * Creates random string up to 10 symbols long
-     *
-     * @param rnd   random to be used
-     * @param value seed used to select length
-     * @return random string up to 10 symbols long
-     */
-    public static String randomString(Random rnd, String value) {
-        int count = Math.abs(value.hashCode() % 10);
-        StringBuilder builder = new StringBuilder(count);
-        while (count >= 0) {
-            builder.append(SYMBOLS.charAt(rnd.nextInt(SYMBOLS.length())));
-            --count;
-        }
-        return builder.toString();
     }
 
     /**
@@ -69,11 +52,10 @@ public final class Util {
      * @param times number of times. Values less or equal to zero will result in empty string
      * @return text repeated multiple times
      */
-    public static String multiplicate(char c, int times) {
+    public static String repeat_char(char c, int times) {
         if (times < 0) {
             return "";
         }
-
         char[] result = new char[times];
         Arrays.fill(result, c);
 
@@ -87,7 +69,7 @@ public final class Util {
      * @param input input string to randomize
      * @return string with random characters changed case.
      */
-    public static String randomlyChangeCase(Random rnd, String input) {
+    public static String randomlyChangeCase(Random rnd, CharSequence input) {
         StringBuilder sb = new StringBuilder(input);
         for (int i = 0; i < sb.length(); i++) {
             char currentChar = sb.charAt(i);

@@ -17,14 +17,14 @@ package com.github.curiousoddman.rgxgen;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
-import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
-import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
 import java.math.BigInteger;
 import java.util.Random;
@@ -57,8 +57,8 @@ public class RgxGen {
      *
      * @param pattern regex pattern for values generation
      */
-    public RgxGen(String pattern) {
-        this(new DefaultTreeBuilder(pattern));
+    public RgxGen(CharSequence pattern) {
+        this(new DefaultTreeBuilder(pattern.toString()));
     }
 
     /**
