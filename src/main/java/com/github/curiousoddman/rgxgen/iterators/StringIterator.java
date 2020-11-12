@@ -17,6 +17,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 /* **************************************************************************/
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public abstract class StringIterator implements Iterator<String> {
     @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
@@ -30,6 +31,7 @@ public abstract class StringIterator implements Iterator<String> {
      * For other iterators 2 steps are required - next() and then current().
      *
      * @return next String.
+     * @throws NoSuchElementException if the iteration has no more elements
      */
     protected abstract String nextImpl();
 
