@@ -28,7 +28,7 @@ public class IncrementalLengthIterator extends StringIterator {
 
     private int              aCurrentLength;
     private StringIterator[] aCurrentIterators;
-    private String[]         aGeneratedParts;
+    private boolean          aInitialized;
 
 
     // (a|b){1} -> "a", "b" --> "a", "b"
@@ -72,9 +72,9 @@ public class IncrementalLengthIterator extends StringIterator {
         }
         tmp[aCurrentLength - 1] = aSupplier.get();
         aCurrentIterators = tmp;
-        aGeneratedParts = new String[aCurrentLength];
+        aInitialized = true;
         for (int i = 0; i < aCurrentLength; i++) {
-            aGeneratedParts[i] = aCurrentIterators[i].next();
+            aCurrentIterators[i].next();
         }
     }
 
@@ -83,38 +83,37 @@ public class IncrementalLengthIterator extends StringIterator {
         if (aCurrentLength == 0) {
             ++aCurrentLength;
             return "";
+        } else if (!aInitialized) {
+            extendIterators();
+            return current();
         } else {
-            if (aGeneratedParts == null) {
-                extendIterators();
-            } else {
-                // Advance one of iterators
-                for (int i = aGeneratedParts.length - 1; i >= 0; --i) {
-                    if (aCurrentIterators[i].hasNext()) {
-                        aGeneratedParts[i] = aCurrentIterators[i].next();
-                        break;
-                    } else if (i == 0) {
-                        if (aCurrentLength < aMax || aMax < 0) {
-                            ++aCurrentLength;
-                            extendIterators();
-                        } else {
-                            // We can only increase length up to max
-                            throw new NoSuchElementException("No more unique values");
-                        }
+            // Advance one of iterators
+            for (int i = aCurrentLength - 1; i >= 0; --i) {
+                if (aCurrentIterators[i].hasNext()) {
+                    aCurrentIterators[i].next();
+                    break;
+                } else if (i == 0) {
+                    if (aCurrentLength < aMax || aMax < 0) {
+                        ++aCurrentLength;
+                        extendIterators();
                     } else {
-                        aCurrentIterators[i].reset();
-                        aGeneratedParts[i] = aCurrentIterators[i].next();
+                        // We can only increase length up to max
+                        throw new NoSuchElementException("No more unique values");
                     }
+                } else {
+                    aCurrentIterators[i].reset();
+                    aCurrentIterators[i].next();
                 }
             }
-
-            return current();
         }
+
+        return current();
     }
 
     @Override
     public final void reset() {
         aCurrentLength = aMin;
-        aGeneratedParts = null;
+        aInitialized = false;
         aCurrentIterators = new StringIterator[aCurrentLength];
         for (int i = 0; i < aCurrentLength; i++) {
             aCurrentIterators[i] = aSupplier.get();
