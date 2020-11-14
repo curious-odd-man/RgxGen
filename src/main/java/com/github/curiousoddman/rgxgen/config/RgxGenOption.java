@@ -43,12 +43,12 @@ public enum RgxGenOption {
     /**
      * Create an option with specific key and default value
      *
-     * @param key  unique identifier of the option
-     * @param dflt default value
+     * @param key           unique identifier of the option
+     * @param default_value default value
      */
-    RgxGenOption(String key, String dflt) {
+    RgxGenOption(String key, String default_value) {
         aKey = key;
-        aDefault = dflt;
+        aDefault = default_value;
     }
 
     /**
@@ -86,6 +86,7 @@ public enum RgxGenOption {
      *
      * @param properties properties to add to
      * @param value      a value
+     * @param <T>        type of value
      */
     public <T> void setInProperties(RgxGenProperties properties, T value) {
         Objects.requireNonNull(value);

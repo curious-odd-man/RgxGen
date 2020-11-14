@@ -24,12 +24,11 @@ import java.util.function.Supplier;
 
 public class PermutationsIterator extends StringIterator {
     private final StringIterator[] aIterators;
-    private final String[]         aGeneratedParts;
+
+    private boolean aInitialized;
 
     public PermutationsIterator(List<Supplier<StringIterator>> iteratorsSuppliers) {
         aIterators = new StringIterator[iteratorsSuppliers.size()];
-
-        aGeneratedParts = new String[aIterators.length];
 
         for (int i = 0; i < aIterators.length; i++) {
             StringIterator iterator = iteratorsSuppliers.get(i)
@@ -38,36 +37,37 @@ public class PermutationsIterator extends StringIterator {
         }
 
         // Make sure it is null, because it's used for check later
-        aGeneratedParts[0] = null;
+        aInitialized = false;
     }
 
     @Override
     public boolean hasNext() {
-        return aGeneratedParts[0] == null || Arrays.stream(aIterators)
-                                                   .anyMatch(Iterator::hasNext);
+        return !aInitialized || Arrays.stream(aIterators)
+                                      .anyMatch(Iterator::hasNext);
     }
 
     @Override
     public String nextImpl() {
         // Initialize all value
-        if (aGeneratedParts[0] == null) {
-            for (int i = 0; i < aGeneratedParts.length; i++) {
-                aGeneratedParts[i] = aIterators[i].next();
-            }
-        } else {
+        if (aInitialized) {
             // Advance one of iterators
-            for (int i = aGeneratedParts.length - 1; i >= 0; --i) {
+            for (int i = aIterators.length - 1; i >= 0; --i) {
                 if (aIterators[i].hasNext()) {
-                    aGeneratedParts[i] = aIterators[i].next();
+                    aIterators[i].next();
                     break;
                 } else if (i == 0) {
                     // We can only reset other iterators. Head iterator should use all it's values only once
                     throw new NoSuchElementException("No more unique values");
                 } else {
                     aIterators[i].reset();
-                    aGeneratedParts[i] = aIterators[i].next();
+                    aIterators[i].next();
                 }
             }
+        } else {
+            for (StringIterator iterator : aIterators) {
+                iterator.next();
+            }
+            aInitialized = true;
         }
 
         return current();
@@ -75,7 +75,7 @@ public class PermutationsIterator extends StringIterator {
 
     @Override
     public void reset() {
-        aGeneratedParts[0] = null;
+        aInitialized = false;
         for (StringIterator iterator : aIterators) {
             iterator.reset();
         }

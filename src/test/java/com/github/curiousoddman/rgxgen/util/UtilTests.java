@@ -16,16 +16,9 @@ public class UtilTests {
 
     @Test
     public void multiplicateTest() {
-        assertEquals("", Util.multiplicate(' ', -1));
-        assertEquals("   ", Util.multiplicate(' ', 3));
-        assertEquals("XX", Util.multiplicate('X', 2));
-    }
-
-    @Test
-    public void randomStringTest() {
-        Random rnd1 = new Random(10);
-        Random rnd2 = new Random(10);
-        assertEquals(Util.randomString(rnd1, "asdf"), Util.randomString(rnd2, "asdf"));
+        assertEquals("", Util.repeat_char(' ', -1));
+        assertEquals("   ", Util.repeat_char(' ', 3));
+        assertEquals("XX", Util.repeat_char('X', 2));
     }
 
     @Test

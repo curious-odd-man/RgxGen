@@ -149,6 +149,7 @@ Each property value will be looked up in this order:
 ### Create Configuration
 
 Use `new RgxGenProperties()` to create properties object.
+`RgxGenProperties` extends `java.util.Properties` and can be used in all the same ways.
 
 <details>
 <summary><b>Code</b></summary>

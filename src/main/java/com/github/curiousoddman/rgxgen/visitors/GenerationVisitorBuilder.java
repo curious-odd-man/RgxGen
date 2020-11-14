@@ -24,10 +24,12 @@ import java.util.Map;
 import java.util.Random;
 
 public class GenerationVisitorBuilder {
+    private final boolean aGenerateMatching;
+
     private Random               aRandom;
     private Map<Integer, String> aGroupsValues;
     private RgxGenProperties     aProperties;
-    private boolean              aGenerateMatching;
+
 
     public GenerationVisitorBuilder(boolean generateMatching) {
         aGenerateMatching = generateMatching;

@@ -109,7 +109,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    StringBuilder, that is read and emptied
      * @param nodes nodes collection to add created node to.
      */
-    private void sbToFinal(StringBuilder sb, List<Node> nodes) {
+    private void sbToFinal(StringBuilder sb, Collection<Node> nodes) {
         if (sb.length() != 0) {
             FinalSymbol finalSymbol = new FinalSymbol(sb.toString());
             aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue()
@@ -234,7 +234,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return handleGroupEndCharacter(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex, currentGroupType);
     }
 
-    private void handleAnySymbolCharacter(List<Node> nodes, StringBuilder sb) {
+    private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
         SymbolSet symbolSet = new SymbolSet();
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
@@ -323,7 +323,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    string builder containing all previous characters before the escape
      * @param nodes previously created nodes; new node will be appended here
      */
-    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
+    private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
         Node createdNode = null;
         switch (c) {
@@ -504,7 +504,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static void handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+    private static void handleRange(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
         if (rangeStarted) {
             char lastChar = sb.charAt(sb.length() - 1);
             char firstChar = sb.charAt(sb.length() - 2);
@@ -513,7 +513,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private boolean handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+    private void handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
         // Skip backslash and add next symbol to characters
         List<Node> nodes = new LinkedList<>();
 
@@ -544,8 +544,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 }
             }
         }
-
-        return false;
     }
 
     /**
@@ -581,7 +579,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    rangeStarted = handleBackslashCharacter(rangeStarted, sb, symbolRanges);
+                    handleBackslashCharacter(rangeStarted, sb, symbolRanges);
+                    rangeStarted = false;
                     break;
 
                 default:
@@ -600,7 +599,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (sb.length() == 0) {
             strings = ZERO_LENGTH_STRING_ARRAY;
         } else {
-            strings = Util.stringToCharsSubstrings(sb.toString());
+            strings = Util.stringToCharsSubstrings(sb);
         }
 
         SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);
