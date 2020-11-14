@@ -45,12 +45,21 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @Test
-    public void countTest() {
+    public void countUniqueUsingVisitorTest() {
         assumeTrue(aTestPattern.hasEstimatedCount());
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
         aTestPattern.getResultNode()
                     .visit(v);
-        assertEquals(aTestPattern.getEstimatedCount(), v.getEstimation().orElse(null));
+        assertEquals(aTestPattern.getEstimatedCount(), v.getEstimation()
+                                                        .orElse(null));
+    }
+
+
+    @Test
+    public void countUniqueTest() {
+        assumeTrue(aTestPattern.hasEstimatedCount());
+        RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
+        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
     @Test
