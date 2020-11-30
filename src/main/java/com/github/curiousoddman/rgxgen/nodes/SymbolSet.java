@@ -119,12 +119,13 @@ public class SymbolSet extends Node {
                               : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
         Set<String> caseInsensitive = new HashSet<>(initial);
-        filterOrPut(initial, caseInsensitive, Arrays.asList(symbols), type);
+        Set<String> symbolsSet = new HashSet<>(Arrays.asList(symbols));
+        filterOrPut(initial, caseInsensitive, symbolsSet, type);
         filterOrPut(initial, caseInsensitive, symbolRanges.stream()
                                                           .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
                                                           .mapToObj(i -> (char) i)
                                                           .map(Object::toString)
-                                                          .collect(Collectors.toList()), type);
+                                                          .collect(Collectors.toSet()), type);
 
         aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_STRING_ARRAY);
         aSymbols = initial.toArray(ZERO_LENGTH_STRING_ARRAY);
@@ -138,7 +139,7 @@ public class SymbolSet extends Node {
      * @param symbols         add or remove these symbols
      * @param type            add or remove switch
      */
-    private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, List<String> symbols, TYPE type) {
+    private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, Set<String> symbols, TYPE type) {
         if (type == TYPE.POSITIVE) {
             initial.addAll(symbols);
             handleCaseSensitiveCharacters(symbols, caseInsensitive::add);
