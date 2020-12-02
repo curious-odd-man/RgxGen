@@ -2,8 +2,10 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.data.DataInterface;
 import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.NodePatternVerifyingVisitor;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
@@ -15,9 +17,8 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +33,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
 
     @Test
     public void parseTest() {
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.getPattern());
+        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.getPattern());
         Node node = defaultTreeBuilder.get();
         assertEquals(aTestPattern.getResultNode()
                                  .toString(), node.toString());
@@ -59,7 +60,8 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void countUniqueTest() {
         assumeTrue(aTestPattern.hasEstimatedCount());
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
-        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
+        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
+                                                             .orElse(null));
     }
 
     @Test
@@ -76,15 +78,16 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void classRgxGenTest() {
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         if (aTestPattern.hasEstimatedCount()) {
-            assertEquals(aTestPattern.getEstimatedCount(), rgxGen.numUnique());
+            assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
+                                                                 .orElse(null));
         }
-        List<String> strings = rgxGen.stream()
-                                     .limit(1000)
-                                     .collect(Collectors.toList());
-        for (String generated : strings) {
-            boolean result = isValidGenerated(generated);
-            assertTrue("Text: '" + generated + "' does not match pattern " + aTestPattern.getPattern(), result);
-
+        for (int i = 0; i < 100; i++) {
+            Random rand = new Random(i);
+            for (int j = 0; j < 10; j++) {
+                String generated = rgxGen.generate(rand);
+                boolean result = isValidGenerated(generated);
+                assertTrue(createMessage(generated, aTestPattern, i, j), result);
+            }
         }
     }
 
@@ -96,12 +99,18 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        List<String> strings = rgxGen.stream()
-                                     .limit(1000)
-                                     .collect(Collectors.toList());
-        for (String generated : strings) {
-            boolean result = isValidGenerated(generated);
-            assertTrue("Text: '" + generated + "' does not match pattern " + aTestPattern.getPattern(), result);
+
+        for (int i = 0; i < 100; i++) {
+            Random random = new Random(i);
+            for (int j = 0; j < 10; j++) {
+                String generated = rgxGen.generate(random);
+                boolean result = isValidGenerated(generated);
+                assertTrue(createMessage(generated, aTestPattern, i, j), result);
+            }
         }
+    }
+
+    private static String createMessage(String generated, DataInterface pattern, int i, int j) {
+        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + "," + j;
     }
 }
