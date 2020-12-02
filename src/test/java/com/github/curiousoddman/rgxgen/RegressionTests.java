@@ -3,7 +3,7 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 
-import java.math.BigInteger;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.util.Util.BIG_INTEGER_TWO;
@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 public class RegressionTests {
 
     @Test
-    public void bug23_parseEscapeCharacterInSquareBrackets() {
+    public void bug23_parseEscapeCharacterInSquareBracketsTest() {
         String pattern = "[A-Z0-9'\\-/\\.\\s]{0,2}";
         Pattern compile = Pattern.compile(pattern);
         RgxGen rgxGen = new RgxGen(pattern);
@@ -25,7 +25,7 @@ public class RegressionTests {
     }
 
     @Test
-    public void bug31_topLevelChoiceIsNotRecognized() {
+    public void bug31_topLevelChoiceIsNotRecognizedTest() {
         String pattern = "1|2";
         Pattern compile = Pattern.compile(pattern);
         RgxGen rgxGen = new RgxGen(pattern);
