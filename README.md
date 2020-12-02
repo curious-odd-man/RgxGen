@@ -31,7 +31,7 @@ Build status:
 
 ## Try it now!!!
 
-Follow the link to Online IDE with already created simple project: [JDoodle](https://www.jdoodle.com/a/2fPm).
+Follow the link to Online IDE with created project: [JDoodle](https://www.jdoodle.com/a/2fPm).
 Enter your pattern and see the results.
 
 ## Usage
@@ -67,11 +67,12 @@ Enter your pattern and see the results.
 </project>
 ```
 
-Changes in sd snapshot:
+Changes in snapshot:
 
 - Fixed: Added support for `\Q` and `\E` sequences [#43](https://github.com/curious-odd-man/RgxGen/issues/43)
 - Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
 - Feature: Case Insensitive generation support [#47](https://github.com/curious-odd-man/RgxGen/issues/47)
+- Feature: Support for `\b` and `\B` escape sequences and `tab`, `carriage return` and `line feed` characters. [#51](https://github.com/curious-odd-man/RgxGen/issues/51)
 
 ### Code: 
 ```java
@@ -111,6 +112,9 @@ public class Main {
 | `?`  | One or zero occurrences |
 | `+`  | One or more occurrences |
 | `*`  | Zero or more occurrences |
+| `\r`  | Carriage return `CR` character |
+| `\t`  | Tab `	` character |
+| `\n`  | Line feed `LF` character. |
 | `\d`  | A digit. Equivalent to `[0-9]` |
 | `\D`  | Not a digit. Equivalent to `[^0-9]` |
 | `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
@@ -119,6 +123,7 @@ public class Main {
 | `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
 | `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
 | `\Q` and `\E`  | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals.  |
+| `\b` and `\B`  | These characters are ignored. No validation is performed!  |
 | `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
 | `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
 | `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |
@@ -129,7 +134,7 @@ public class Main {
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
-RgxGen treats any other characters as literals and are generated as is, thought allowed to escape them.
+RgxGen treats any other characters as literals and those are generated as is.
 
 </details>
 

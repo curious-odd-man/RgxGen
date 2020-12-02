@@ -358,6 +358,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'E':       // End of escape sequence can be ignored.
                 break;
 
+            case 'b':      // These both cannot only be used at start/end of the pattern.
+            case 'B':      // Later I could add validation that these are not used in the middle of pattern.
+                break;
+
             // Group reference number
             case '1':
             case '2':
@@ -370,6 +374,18 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '9':
                 sbToFinal(sb, nodes);
                 handleGroupReference(groupRefAllowed, nodes, c);
+                break;
+
+            case 't':
+                sb.append('\t');
+                break;
+
+            case 'r':
+                sb.append('\r');
+                break;
+
+            case 'n':
+                sb.append('\n');
                 break;
 
             default:
