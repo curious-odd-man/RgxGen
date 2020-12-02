@@ -55,11 +55,30 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(Choice node) {
-        Node[] nodes = node.getNodes();
-        int pos = aStringBuilder.length();
-        // We need to add existing group values, so that we could later use it in matching pattern
         StringBuilder groupsBuilder = new StringBuilder();
         StringBuilder valuePrefixBuilder = new StringBuilder();
+        buildGroupsStringAndValuePrefix(groupsBuilder, valuePrefixBuilder);
+
+        // Add groups values to pattern - in case there are group refs used inside the node.getPattern()
+        Pattern pattern = Pattern.compile(groupsBuilder + node.getPattern());
+        int pos = aStringBuilder.length();
+        Node[] nodes = node.getNodes();
+        do {
+            aStringBuilder.delete(pos, Integer.MAX_VALUE);
+            int i = aRandom.nextInt(nodes.length);
+            nodes[i].visit(this);
+            // To match group values along with generated values - we need to prepend groups values before the generated
+        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos))
+                        .matches());
+    }
+
+    /**
+     * We need to add existing group values, so that we could later use it in matching pattern
+     *
+     * @param groupsBuilder
+     * @param valuePrefixBuilder
+     */
+    private void buildGroupsStringAndValuePrefix(StringBuilder groupsBuilder, StringBuilder valuePrefixBuilder) {
         int groupValuesUsed = 0;
         for (int i = 1; groupValuesUsed < aGroupValues.size(); i++) {
             String s = aGroupValues.get(i);
@@ -69,21 +88,10 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
             if (s != null) {
                 groupsBuilder.append(Pattern.quote(s));
                 ++groupValuesUsed;
+                valuePrefixBuilder.append(s);
             }
             groupsBuilder.append(')');
-            valuePrefixBuilder.append(s);
         }
-
-        // Add groups values to pattern - in case there are group refs used inside the node.getPattern()
-        Pattern pattern = Pattern.compile(groupsBuilder + node.getPattern());
-
-        do {
-            aStringBuilder.delete(pos, Integer.MAX_VALUE);
-            int i = aRandom.nextInt(nodes.length);
-            nodes[i].visit(this);
-            // To match group values along with generated values - we need to prepend groups values before the generated
-        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos))
-                        .matches());
     }
 
     @Override
