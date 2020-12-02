@@ -8,6 +8,7 @@ import java.util.Random;
 public class StrangeBehaviourTests {
 
     @Test
+    @Ignore
     public void randomIsNotSoRandomTest() {
         // Note! This works only when LIMIT_VALUE is a power of 2!
         final int LIMIT_VALUE = 32;
