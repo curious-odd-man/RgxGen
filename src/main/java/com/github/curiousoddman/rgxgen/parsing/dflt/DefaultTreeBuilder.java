@@ -19,9 +19,9 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
+import com.sun.istack.internal.Nullable;
 
 import java.util.*;
-import java.util.stream.IntStream;
 
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
 
@@ -30,62 +30,12 @@ import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-
-    private enum GroupType {
-        POSITIVE_LOOKAHEAD,
-        NEGATIVE_LOOKAHEAD,
-        POSITIVE_LOOKBEHIND,
-        NEGATIVE_LOOKBEHIND,
-        CAPTURE_GROUP,
-        NON_CAPTURE_GROUP;
-
-        public boolean isNegative() {
-            return this == NEGATIVE_LOOKAHEAD || this == NEGATIVE_LOOKBEHIND;
-        }
-    }
-
     private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
     private static final int      HEX_RADIX                  = 16;
     private static final Node[]   EMPTY_NODES_ARR            = new Node[0];
 
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
-
-    /**
-     * Helper class for lazy initialization and reuse of some constants that are re-used.
-     * Use with caution - don't modify values inside those!!!
-     */
-    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private static class ConstantsProvider {
-        private String[]                    aDigits;
-        private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
-        private List<SymbolSet.SymbolRange> aWordCharRanges;
-
-        String[] getDigits() {
-            if (aDigits == null) {
-                aDigits = IntStream.rangeClosed(0, 9)
-                                   .mapToObj(Integer::toString)
-                                   .toArray(String[]::new);
-            }
-
-            return aDigits;
-        }
-
-        String[] getWhitespaces() {
-            if (aWhiteSpaces == null) {
-                aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
-            }
-            return aWhiteSpaces;
-        }
-
-        List<SymbolSet.SymbolRange> getWordCharRanges() {
-            if (aWordCharRanges == null) {
-                aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS));
-            }
-
-            return aWordCharRanges;
-        }
-    }
 
     private static final ConstantsProvider CONST_PROVIDER = new ConstantsProvider();
 
@@ -176,14 +126,20 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
-        Integer captureGroupIndex = null;
+    @Nullable
+    private Integer getGroupIndexIfCapture(GroupType currentGroupType) {
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
-            captureGroupIndex = aNextGroupIndex++;
+            return aNextGroupIndex++;
         }
-        List<Node> choices = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>();
-        StringBuilder sb = new StringBuilder(aCharIterator.remaining());
+        return null;
+    }
+
+    private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
+        Integer captureGroupIndex = getGroupIndexIfCapture(currentGroupType);
+        int remainingLength = aCharIterator.remaining();
+        List<Node> choices = new ArrayList<>(remainingLength);
+        List<Node> nodes = new ArrayList<>(remainingLength);
+        StringBuilder sb = new StringBuilder(remainingLength);
         boolean isChoice = false;
         int choicesStartPos = groupStartPos;
 
