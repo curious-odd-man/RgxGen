@@ -16,7 +16,7 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
+import com.github.curiousoddman.rgxgen.nodes.Node;
 
 /**
  * Interface for the parser/nodes builder.

@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.config;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,34 +16,17 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Properties;
 
-public class FinalSymbol implements Node {
+/**
+ * Configuration object for RgxGen.
+ *
+ * @see com.github.curiousoddman.rgxgen.config.RgxGenOption for available options
+ */
+public class RgxGenProperties extends Properties {
+    private static final long serialVersionUID = 3352045589564244181L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FinalSymbol.class);
-
-    private final String aValue;
-
-    public FinalSymbol(String value) {
-        LOGGER.trace("Creating '{}'", value);
-        aValue = value;
-    }
-
-    @Override
-    public void visit(NodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    public String getValue() {
-        return aValue;
-    }
-
-    @Override
-    public String toString() {
-        return "FinalSymbol{" +
-                '\'' + aValue + '\'' +
-                '}';
+    public void setDefaults(Properties properties) {
+        defaults = properties;
     }
 }

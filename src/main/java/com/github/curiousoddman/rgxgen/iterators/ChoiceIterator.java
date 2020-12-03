@@ -16,7 +16,6 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class ChoiceIterator extends StringIterator {
@@ -56,13 +55,5 @@ public class ChoiceIterator extends StringIterator {
         for (StringIterator iterator : aIterators) {
             iterator.reset();
         }
-    }
-
-    @Override
-    public String toString() {
-        return "ChoiceIterator{" +
-                "aIterators=" + Arrays.toString(aIterators) +
-                ", aCurrentIteratorIndex=" + aCurrentIteratorIndex +
-                '}';
     }
 }

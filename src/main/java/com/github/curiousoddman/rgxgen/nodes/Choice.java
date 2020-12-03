@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,16 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.Arrays;
 
-public class Sequence implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Sequence.class);
+public class Choice extends Node {
 
     private final Node[] aNodes;
 
-    public Sequence(Node... nodes) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating from {} ", Arrays.asList(nodes));
-        }
+    public Choice(String pattern, Node... nodes) {
+        super(pattern);
         aNodes = nodes;
     }
 
@@ -46,6 +40,6 @@ public class Sequence implements Node {
 
     @Override
     public String toString() {
-        return "Sequence" + Arrays.toString(aNodes);
+        return "Choice" + Arrays.toString(aNodes);
     }
 }

@@ -38,12 +38,4 @@ public class IncrementalLengthIteratorSupplier implements Supplier<StringIterato
     public StringIterator get() {
         return new IncrementalLengthIterator(aIteratorSupplier, aMin, aMax);
     }
-
-    @Override
-    public String toString() {
-        return "IncrementalLengthIteratorSupplier[" + aMin +
-                ':' + aMax +
-                "]{" + aIteratorSupplier +
-                '}';
-    }
 }

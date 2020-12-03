@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.visitors;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,32 +16,24 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 
-public class GroupRef implements Node {
+import java.util.Map;
+import java.util.Random;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GroupRef.class);
-
-    private final int aIndex;
-
-    public GroupRef(int index) {
-        LOGGER.trace("Crating idx = '{}'", index);
-        aIndex = index;
+public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGenerationVisitor {
+    public NotMatchingCaseInsensitiveGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+        super(random, groupValues, properties);
     }
 
     @Override
-    public void visit(NodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    public int getIndex() {
-        return aIndex;
+    public void visit(SymbolSet node) {
+        visitSymbolSet(node, SymbolSet::getSymbolsCaseInsensitive);
     }
 
     @Override
-    public String toString() {
-        return "GroupRef{" + aIndex + '}';
+    protected boolean equalsFinalSymbolRandomString(String s1, String s2) {
+        return s1.equalsIgnoreCase(s2);
     }
 }

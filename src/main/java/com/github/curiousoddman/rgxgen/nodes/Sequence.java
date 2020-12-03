@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,24 +16,20 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class Group implements Node {
-    private static final Logger LOGGER = LoggerFactory.getLogger(Group.class);
+import java.util.Arrays;
 
-    private final Node aNode;
-    private final int  aGroupIndex;
+public class Sequence extends Node {
+    private final Node[] aNodes;
 
-    public Group(int index, Node node) {
-        LOGGER.trace("Crating idx = '{}' from '{}'", index, node);
-        aNode = node;
-        aGroupIndex = index;
+    public Sequence(String pattern, Node... nodes) {
+        super(pattern);
+        aNodes = nodes;
     }
 
-    public int getIndex() {
-        return aGroupIndex;
+    public Node[] getNodes() {
+        return aNodes;
     }
 
     @Override
@@ -41,14 +37,8 @@ public class Group implements Node {
         visitor.visit(this);
     }
 
-    public Node getNode() {
-        return aNode;
-    }
-
     @Override
     public String toString() {
-        return "Group[" + aGroupIndex +
-                "]{" + aNode +
-                '}';
+        return "Sequence" + Arrays.toString(aNodes);
     }
 }

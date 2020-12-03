@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,27 +16,20 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-import java.util.Arrays;
+public class Group extends Node {
+    private final Node aNode;
+    private final int  aGroupIndex;
 
-public class Choice implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Choice.class);
-
-    private final Node[] aNodes;
-
-    public Choice(Node... nodes) {
-        if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("Creating from {} ", Arrays.asList(nodes));
-        }
-        aNodes = nodes;
+    public Group(String pattern, int index, Node node) {
+        super(pattern);
+        aNode = node;
+        aGroupIndex = index;
     }
 
-    public Node[] getNodes() {
-        return aNodes;
+    public int getIndex() {
+        return aGroupIndex;
     }
 
     @Override
@@ -44,8 +37,14 @@ public class Choice implements Node {
         visitor.visit(this);
     }
 
+    public Node getNode() {
+        return aNode;
+    }
+
     @Override
     public String toString() {
-        return "Choice" + Arrays.toString(aNodes);
+        return "Group[" + aGroupIndex +
+                "]{" + aNode +
+                '}';
     }
 }

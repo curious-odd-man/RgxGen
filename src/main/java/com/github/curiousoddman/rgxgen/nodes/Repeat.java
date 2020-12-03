@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,21 +16,26 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-import java.util.regex.Pattern;
+public class Repeat extends Node {
+    private final Node aNode;
+    private final int  aMin;
+    private final int  aMax;
 
-public class NotSymbol implements Node {
+    public static Repeat minimum(String pattern, Node node, int times) {
+        return new Repeat(pattern, node, times, -1);
+    }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotSymbol.class);
+    public Repeat(String pattern, Node node, int times) {
+        this(pattern, node, times, times);
+    }
 
-    private final Pattern aSubPattern;
-
-    public NotSymbol(String pattern) {
-        LOGGER.trace("Crating '{}'", pattern);
-        aSubPattern = Pattern.compile(pattern);
+    public Repeat(String pattern, Node node, int min, int max) {
+        super(pattern);
+        aNode = node;
+        aMin = min;
+        aMax = max;
     }
 
     @Override
@@ -38,12 +43,23 @@ public class NotSymbol implements Node {
         visitor.visit(this);
     }
 
-    public Pattern getSubPattern() {
-        return aSubPattern;
+    public Node getNode() {
+        return aNode;
+    }
+
+    public int getMin() {
+        return aMin;
+    }
+
+    public int getMax() {
+        return aMax;
     }
 
     @Override
     public String toString() {
-        return "NotSymbol{" + aSubPattern.pattern() + '}';
+        return "Repeat{" + aNode +
+                ", aMin=" + aMin +
+                ", aMax=" + aMax +
+                '}';
     }
 }

@@ -1,8 +1,10 @@
 package com.github.curiousoddman.rgxgen;
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -25,7 +27,7 @@ public class LimitedInfinitePatternsTests {
         return Arrays.asList(new Object[][]{
                 {
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Repeat(new FinalSymbol("a"), 0, 10),
+                        new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
                                  .limit(11)
                                  .mapToObj(v -> Stream.generate(() -> "a")
@@ -34,7 +36,7 @@ public class LimitedInfinitePatternsTests {
                 },
                 {
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new FinalSymbol("a"), 1, 10)),
+                        new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
                                  .limit(10)
                                  .mapToObj(v -> 'a' + Stream.generate(() -> "a")
@@ -44,7 +46,7 @@ public class LimitedInfinitePatternsTests {
                 },
                 {
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence(new FinalSymbol("a"), new Repeat(new SymbolSet(), 0, 2)),
+                        new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", new SymbolSet(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
                                                                    Arrays.stream(SymbolSet.getAllSymbols())
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
@@ -67,7 +69,8 @@ public class LimitedInfinitePatternsTests {
         Pattern p = Pattern.compile(aRegex);
 
         for (int i = 0; i < 100; i++) {
-            GenerationVisitor generationVisitor = new GenerationVisitor();
+            GenerationVisitor generationVisitor = GenerationVisitor.builder()
+                                                                   .get();
             aNode.visit(generationVisitor);
             assertTrue(p.matcher(generationVisitor.getString())
                         .matches());
@@ -76,7 +79,7 @@ public class LimitedInfinitePatternsTests {
 
     @Test
     public void generateUniqueTest() {
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
         aNode.visit(v);
         assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }

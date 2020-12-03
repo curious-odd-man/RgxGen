@@ -52,12 +52,4 @@ public class NegativeStringIterator extends StringIterator {
     public boolean hasNext() {
         return true;
     }
-
-    @Override
-    public String toString() {
-        return "NegativeStringIterator[" + aValue +
-                '\'' + aPattern +
-                "']{" + aIterator +
-                "} ";
-    }
 }

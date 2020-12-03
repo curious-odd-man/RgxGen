@@ -16,6 +16,8 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
+import java.util.NoSuchElementException;
+
 public class SingleValueIterator extends StringIterator {
     private final String aValue;
 
@@ -37,6 +39,9 @@ public class SingleValueIterator extends StringIterator {
 
     @Override
     public String nextImpl() {
+        if (!hasNext) {
+            throw new NoSuchElementException("Cannot return a value second time.");
+        }
         hasNext = false;
         return aValue;
     }
@@ -49,12 +54,5 @@ public class SingleValueIterator extends StringIterator {
     @Override
     public String current() {
         return aValue;
-    }
-
-    @Override
-    public String toString() {
-        return "SingleValueIterator{" +
-                "aValue='" + aValue + '\'' +
-                '}';
     }
 }

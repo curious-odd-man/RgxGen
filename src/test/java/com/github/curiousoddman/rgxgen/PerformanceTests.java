@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -13,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PerformanceTests {
 
+    @Ignore
     @Test
     public void launchBenchmark() throws Exception {
         Options opt = new OptionsBuilder()
@@ -24,8 +26,8 @@ public class PerformanceTests {
                 .mode(Mode.AverageTime)
                 .timeUnit(TimeUnit.MICROSECONDS)
                 // .warmupTime(TimeValue.seconds(1))
-                .warmupIterations(5)
-                .measurementIterations(5)
+                .warmupIterations(3)
+                .measurementIterations(3)
                 .threads(1)
                 .forks(1)
                 .shouldFailOnError(true)
@@ -65,8 +67,8 @@ public class PerformanceTests {
 
     @Benchmark
     public void generateUniqueTest() {
-        final StringIterator stringIterator = RGXGEN.iterateUnique();
-        for (int i = 0; i < 100000 && stringIterator.hasNext(); i++) {
+        StringIterator stringIterator = RGXGEN.iterateUnique();
+        for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             stringIterator.next();
         }
     }

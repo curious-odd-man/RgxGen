@@ -16,20 +16,14 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public abstract class StringIterator implements Iterator<String> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StringIterator.class);
-
     @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
     @Override
     public String next() {
-        String current = nextImpl();
-        LOGGER.trace("Produced value: '{}' using '{}'", current, this);
-        return current;
+        return nextImpl();
     }
 
     /**
@@ -37,6 +31,7 @@ public abstract class StringIterator implements Iterator<String> {
      * For other iterators 2 steps are required - next() and then current().
      *
      * @return next String.
+     * @throws NoSuchElementException if the iteration has no more elements
      */
     protected abstract String nextImpl();
 

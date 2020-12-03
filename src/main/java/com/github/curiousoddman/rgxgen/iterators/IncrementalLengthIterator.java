@@ -28,8 +28,7 @@ public class IncrementalLengthIterator extends StringIterator {
 
     private int              aCurrentLength;
     private StringIterator[] aCurrentIterators;
-    // FIXME: Generated parts are no longer used since StringIterator has current() method.
-    private String[]         aGeneratedParts;
+    private boolean          aInit = true;
 
 
     // (a|b){1} -> "a", "b" --> "a", "b"
@@ -73,9 +72,9 @@ public class IncrementalLengthIterator extends StringIterator {
         }
         tmp[aCurrentLength - 1] = aSupplier.get();
         aCurrentIterators = tmp;
-        aGeneratedParts = new String[aCurrentLength];
+        aInit = false;
         for (int i = 0; i < aCurrentLength; i++) {
-            aGeneratedParts[i] = aCurrentIterators[i].next();
+            aCurrentIterators[i].next();
         }
     }
 
@@ -84,41 +83,37 @@ public class IncrementalLengthIterator extends StringIterator {
         if (aCurrentLength == 0) {
             ++aCurrentLength;
             return "";
+        } else if (aInit) {
+            extendIterators();
+            return current();
         } else {
-            if (aGeneratedParts == null) {
-                extendIterators();
-            } else {
-                // Advance one of iterators
-                for (int i = aGeneratedParts.length - 1; i >= 0; --i) {
-                    if (aCurrentIterators[i].hasNext()) {
-                        aGeneratedParts[i] = aCurrentIterators[i].next();
-                        break;
-                    } else if (i == 0) {
-                        if (aCurrentLength < aMax || aMax < 0) {
-                            ++aCurrentLength;
-                            extendIterators();
-                        } else {
-                            // We can only increase length up to max
-                            throw new NoSuchElementException("No more unique values");
-                        }
+            // Advance one of iterators
+            for (int i = aCurrentLength - 1; i >= 0; --i) {
+                if (aCurrentIterators[i].hasNext()) {
+                    aCurrentIterators[i].next();
+                    break;
+                } else if (i == 0) {
+                    if (aCurrentLength < aMax || aMax < 0) {
+                        ++aCurrentLength;
+                        extendIterators();
                     } else {
-                        aCurrentIterators[i].reset();
-                        aGeneratedParts[i] = aCurrentIterators[i].next();
+                        // We can only increase length up to max
+                        throw new NoSuchElementException("No more unique values");
                     }
+                } else {
+                    aCurrentIterators[i].reset();
+                    aCurrentIterators[i].next();
                 }
             }
-
-            // FIXME: A place for optimization. Doing it here and in current() does not make much sense
-            return Arrays.stream(aCurrentIterators)
-                         .map(StringIterator::current)
-                         .reduce("", String::concat);
         }
+
+        return current();
     }
 
     @Override
     public final void reset() {
         aCurrentLength = aMin;
-        aGeneratedParts = null;
+        aInit = true;
         aCurrentIterators = new StringIterator[aCurrentLength];
         for (int i = 0; i < aCurrentLength; i++) {
             aCurrentIterators[i] = aSupplier.get();
@@ -130,16 +125,5 @@ public class IncrementalLengthIterator extends StringIterator {
         return Arrays.stream(aCurrentIterators)
                      .map(StringIterator::current)
                      .reduce("", String::concat);
-    }
-
-    @Override
-    public String toString() {
-        return "IncrementalLengthIterator{" +
-                "aSupplier=" + aSupplier +
-                ", aMax=" + aMax +
-                ", aCurrentLength=" + aCurrentLength +
-                ", aCurrentIterators=" + Arrays.toString(aCurrentIterators) +
-                ", aGeneratedParts=" + Arrays.toString(aGeneratedParts) +
-                '}';
     }
 }

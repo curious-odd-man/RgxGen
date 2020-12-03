@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.generator.nodes;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,31 +16,14 @@ package com.github.curiousoddman.rgxgen.generator.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.visitors.NodeVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class Repeat implements Node {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(Repeat.class);
-
+public class NotSymbol extends Node {
     private final Node aNode;
-    private final int  aMin;
-    private final int  aMax;
 
-    public static Repeat minimum(Node node, int times) {
-        return new Repeat(node, times, -1);
-    }
-
-    public Repeat(Node node, int times) {
-        this(node, times, times);
-    }
-
-    public Repeat(Node node, int min, int max) {
-        LOGGER.trace("Crating ({} to {}) '{}'", min, max, node);
+    public NotSymbol(String pattern, Node node) {
+        super(pattern);
         aNode = node;
-        aMin = min;
-        aMax = max;
     }
 
     @Override
@@ -52,19 +35,8 @@ public class Repeat implements Node {
         return aNode;
     }
 
-    public int getMin() {
-        return aMin;
-    }
-
-    public int getMax() {
-        return aMax;
-    }
-
     @Override
     public String toString() {
-        return "Repeat{" + aNode +
-                ", aMin=" + aMin +
-                ", aMax=" + aMax +
-                '}';
+        return "NotSymbol{" + aNode + '}';
     }
 }
