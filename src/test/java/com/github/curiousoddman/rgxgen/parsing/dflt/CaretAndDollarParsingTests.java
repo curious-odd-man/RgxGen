@@ -156,7 +156,13 @@ public class CaretAndDollarParsingTests {
                              new TestCase("(a^|c)\nx", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
                                                                                                         "'(a^|c)\n" +
                                                                                                         "'\n" +
-                                                                                                        "   ^"))// Same as previous
+                                                                                                        "   ^")),// Same as previous
+                             new TestCase("(a)^x", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                    "'(a)^x'\n" +
+                                                                                                    "    ^")),
+                             new TestCase("x$(a)", new PatternDoesNotMatchAnythingException("After dollar only new line is allowed!\n" +
+                                                                                                    "'x$(a)'\n" +
+                                                                                                    "  ^"))
         );
     }
 
