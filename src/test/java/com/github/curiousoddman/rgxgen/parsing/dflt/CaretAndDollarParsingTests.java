@@ -55,60 +55,108 @@ public class CaretAndDollarParsingTests {
         return Arrays.asList(new TestCase("^a$", new FinalSymbol("a")),
                              new TestCase("^a", new FinalSymbol("a")),
                              new TestCase("a$", new FinalSymbol("a")),
-                             new TestCase("(^a$)", new FinalSymbol("a")),
-                             new TestCase("(^a|^b|^c)", new Choice("(^a|^b|^c)",
-                                                                   new FinalSymbol("a"),
-                                                                   new FinalSymbol("b"),
-                                                                   new FinalSymbol("c"))),
-                             new TestCase("(a$|b$|c$)", new Choice("(a$|b$|c$)",
-                                                                   new FinalSymbol("a"),
-                                                                   new FinalSymbol("b"),
-                                                                   new FinalSymbol("c"))),
-                             new TestCase("((^a|^b)xyz)", new Sequence("((^a|^b)xyz)",
-                                                                       new Choice("(^a|^b)",
-                                                                                  new FinalSymbol("a"),
-                                                                                  new FinalSymbol("b")),
-                                                                       new FinalSymbol("xyz"))),
-                             new TestCase("(xyz(a$|b$))", new Sequence("((^a|^b)xyz)",
-                                                                       new FinalSymbol("xyz"),
-                                                                       new Choice("(^a|^b)",
-                                                                                  new FinalSymbol("a"),
-                                                                                  new FinalSymbol("b")))),
-                             new TestCase("(^a)+", Repeat.minimum("(^a)+", new FinalSymbol("a"), 1)), // Correctly matches first a in string "aaaa"
-                             new TestCase("(b$)+", Repeat.minimum("(b$)+", new FinalSymbol("b"), 1)), // Correctly matches last b letter in "bbbb"
-                             new TestCase("a$\\n^b", new FinalSymbol("a\\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
-                             new TestCase("a\\n^b", new FinalSymbol("a\\nb")),
-                             new TestCase("a$\\nb", new FinalSymbol("a\\nb")),
-                             new TestCase("(a\\n^|c)", new Choice("(a\\n^|c)",
-                                                                  new FinalSymbol("a\\b"), new FinalSymbol("c"))), // This pattern is good to go, since both parts may produce valid result
-                             new TestCase("(a$|c)\\nx", new Sequence("(a$|c)\\nx",
-                                                                     new Choice("(a$|c)",
-                                                                                new FinalSymbol("a"),
-                                                                                new FinalSymbol("c")),
-                                                                     new FinalSymbol("\nx"))), // This pattern successfully matches "a\nx" and "c\nx"
+                             new TestCase("(^a$)", new Group("(^a$)", 1, new FinalSymbol("a"))),
+                             new TestCase("(^a|^b|^c)", new Group("(^a|^b|^c)", 1, new Choice("(^a|^b|^c)",
+                                                                                              new FinalSymbol("a"),
+                                                                                              new FinalSymbol("b"),
+                                                                                              new FinalSymbol("c")))),
+                             new TestCase("(a$|b$|c$)", new Group("(a$|b$|c$)", 1,
+                                                                  new Choice("(a$|b$|c$)",
+                                                                             new FinalSymbol("a"),
+                                                                             new FinalSymbol("b"),
+                                                                             new FinalSymbol("c")))),
+                             new TestCase("((^a|^b)xyz)", new Group("((^a|^b)xyz)", 1,
+                                                                    new Sequence("((^a|^b)xyz)",
+                                                                                 new Group("(^a|^b)", 2,
+                                                                                           new Choice("(^a|^b)",
+                                                                                                      new FinalSymbol("a"),
+                                                                                                      new FinalSymbol("b"))),
+                                                                                 new FinalSymbol("xyz")))),
+                             new TestCase("(xyz(a$|b$))", new Group("(xyz(a$|b$))", 1,
+                                                                    new Sequence("((^a|^b)xyz)",
+                                                                                 new FinalSymbol("xyz"),
+                                                                                 new Group("(^a|^b)", 2,
+                                                                                           new Choice("(^a|^b)",
+                                                                                                      new FinalSymbol("a"),
+                                                                                                      new FinalSymbol("b")))))),
+                             new TestCase("(^a)+", Repeat.minimum("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1)), // Correctly matches first a in string "aaaa"
+                             new TestCase("(b$)+", Repeat.minimum("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1)), // Correctly matches last b letter in "bbbb"
+                             new TestCase("a$\n^b", new FinalSymbol("a\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
+                             new TestCase("a\n^b", new FinalSymbol("a\nb")),
+                             new TestCase("a$\nb", new FinalSymbol("a\nb")),
+                             new TestCase("(a\n^|c)", new Group("(a\n^|c)", 1,
+                                                                new Choice("(a\n^|c)",
+                                                                           new FinalSymbol("a\n"), new FinalSymbol("c")))), // This pattern is good to go, since both parts may produce valid result
+                             new TestCase("(a$|c)\nx", new Sequence("(a$|c)\nx",
+                                                                    new Group("(a$|c)", 1,
+                                                                              new Choice("(a$|c)",
+                                                                                         new FinalSymbol("a"),
+                                                                                         new FinalSymbol("c"))),
+                                                                    new FinalSymbol("\nx"))), // This pattern successfully matches "a\nx" and "c\nx"
 
                              // Error TokenNotQuanitfiable for any repetition
-                             new TestCase("^+", new TokenNotQuantifiableException("")),
-                             new TestCase("^*", new TokenNotQuantifiableException("")),
-                             new TestCase("^{1,2}", new TokenNotQuantifiableException("")),
-                             new TestCase("^?", new TokenNotQuantifiableException("")),
-                             new TestCase("$+", new TokenNotQuantifiableException("")),
-                             new TestCase("$*", new TokenNotQuantifiableException("")),
-                             new TestCase("${1,2}", new TokenNotQuantifiableException("")),
-                             new TestCase("$?", new TokenNotQuantifiableException("")),
+                             new TestCase("^+", new TokenNotQuantifiableException("^ at \n" +
+                                                                                          "'^+'\n" +
+                                                                                          "  ^")),
+                             new TestCase("^*", new TokenNotQuantifiableException("^ at \n" +
+                                                                                          "'^*'\n" +
+                                                                                          "  ^")),
+                             new TestCase("^{1,2}", new TokenNotQuantifiableException("^ at \n" +
+                                                                                              "'^{1,2}'\n" +
+                                                                                              "  ^")),
+                             new TestCase("^?", new TokenNotQuantifiableException("^ at \n" +
+                                                                                          "'^?'\n" +
+                                                                                          "  ^")),
+                             new TestCase("$+", new TokenNotQuantifiableException("$ at \n" +
+                                                                                          "'$+'\n" +
+                                                                                          "  ^")),
+                             new TestCase("$*", new TokenNotQuantifiableException("$ at \n" +
+                                                                                          "'$*'\n" +
+                                                                                          "  ^")),
+                             new TestCase("${1,2}", new TokenNotQuantifiableException("$ at \n" +
+                                                                                              "'${1,2}'\n" +
+                                                                                              "  ^")),
+                             new TestCase("$?", new TokenNotQuantifiableException("$ at \n" +
+                                                                                          "'$?'\n" +
+                                                                                          "  ^")),
 
                              // Error PatternDoesNotMatchAnything
-                             new TestCase("a$^b", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("a$b", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("a^b", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("a^", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("$b", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("$^", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("^^", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("(a^)", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("(a^|c^)", new PatternDoesNotMatchAnythingException("")),
-                             new TestCase("(a^|c)", new PatternDoesNotMatchAnythingException("")),      // Although this pattern will match 'c' letter - throw an exception, because from generation perspective a^ part is not valid.
-                             new TestCase("(a^|c)\\nx", new PatternDoesNotMatchAnythingException(""))// Same as previous
+                             new TestCase("a$^b", new PatternDoesNotMatchAnythingException("Start and end of line markers cannot be put together.\n" +
+                                                                                                   "'a$^b'\n" +
+                                                                                                   "  ^")),
+                             new TestCase("$^", new PatternDoesNotMatchAnythingException("Start and end of line markers cannot be put together.\n" +
+                                                                                                 "'$^'\n" +
+                                                                                                 " ^")),
+                             new TestCase("^^", new PatternDoesNotMatchAnythingException("Start and end of line markers cannot be put together.\n" +
+                                                                                                 "'^^'\n" +
+                                                                                                 "  ^")),
+
+                             new TestCase("a$b", new PatternDoesNotMatchAnythingException("After dollar only new line is allowed!\n" +
+                                                                                                  "'a$b'\n" +
+                                                                                                  "  ^")),
+                             new TestCase("a^b", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                  "'a^b'\n" +
+                                                                                                  "  ^")),
+                             new TestCase("a^", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                 "'a^'\n" +
+                                                                                                 "  ^")),
+                             new TestCase("$b", new PatternDoesNotMatchAnythingException("After dollar only new line is allowed!\n" +
+                                                                                                 "'$b'\n" +
+                                                                                                 " ^")),
+                             new TestCase("(a^)", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                   "'(a^)'\n" +
+                                                                                                   "   ^")),
+
+                             new TestCase("(a^|c^)", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                      "'(a^|c^)'\n" +
+                                                                                                      "   ^")),
+                             new TestCase("(a^|c)", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                     "'(a^|c)'\n" +
+                                                                                                     "   ^")),      // Although this pattern will match 'c' letter - throw an exception, because from generation perspective a^ part is not valid.
+                             new TestCase("(a^|c)\nx", new PatternDoesNotMatchAnythingException("Before caret only new line is allowed!\n" +
+                                                                                                        "'(a^|c)\n" +
+                                                                                                        "'\n" +
+                                                                                                        "   ^"))// Same as previous
         );
     }
 

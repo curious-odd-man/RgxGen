@@ -30,14 +30,13 @@ import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
-    private static final int      HEX_RADIX                  = 16;
-    private static final Node[]   EMPTY_NODES_ARR            = new Node[0];
+    private static final String[]          SINGLETON_UNDERSCORE_ARRAY = {"_"};
+    private static final int               HEX_RADIX                  = 16;
+    private static final Node[]            EMPTY_NODES_ARR            = new Node[0];
+    private static final ConstantsProvider CONST_PROVIDER             = new ConstantsProvider();
 
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
-
-    private static final ConstantsProvider CONST_PROVIDER = new ConstantsProvider();
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -134,6 +133,68 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return null;
     }
 
+    private static void assertCorrectCharacter(char currentChar) {
+        if (currentChar != '^' && currentChar != '$') {
+            throw new RuntimeException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
+        }
+    }
+
+    /**
+     * There is limited numbed of characters that can precede ^ or follow $.
+     * This method verifies that the pattern is syntactically correct.
+     *
+     * @param currentChar character at current position
+     *                    NOTE! Must be either caret or dollar sign
+     */
+    private void verifyStartEndMarkerConsistency(char currentChar) {
+        assertCorrectCharacter(currentChar);
+        char charAtPos = aCharIterator.peek(currentChar == '^' ? -2 : 0);
+        String errorText = null;
+        switch (charAtPos) {
+            // These characters are allowed.
+            // Repetition will be handled later only if it follows these characters.
+            case '+':
+            case '*':
+            case '{':
+            case '?':
+            case 0x00:
+            case '\n':
+            case '\r':
+            case '|':
+                return;
+
+            case '^':
+            case '$':
+                errorText = "Start and end of line markers cannot be put together.";
+                break;
+
+            case '(':
+                if (currentChar == '$') {
+                    errorText = "After dollar only new line is allowed!";
+                } else {
+                    return;
+                }
+                break;
+
+            case ')':
+                if (currentChar == '^') {
+                    errorText = "Before caret only new line is allowed!";
+                } else {
+                    return;
+                }
+                break;
+
+            default:
+                errorText = currentChar == '^'
+                            ? "Before caret only new line is allowed!"
+                            : "After dollar only new line is allowed!";
+                break;
+
+        }
+
+        throw new PatternDoesNotMatchAnythingException(errorText + aCharIterator.context());
+    }
+
     private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
         Integer captureGroupIndex = getGroupIndexIfCapture(currentGroupType);
         int remainingLength = aCharIterator.remaining();
@@ -146,6 +207,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
+                case '^':
+                case '$':
+                    verifyStartEndMarkerConsistency(c);
+                    break;
+
                 case '[':
                     sbToFinal(sb, nodes);
                     nodes.add(handleCharacterVariations());
@@ -217,7 +283,16 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         Node repeatNode;
         if (sb.length() == 0) {
             // Repetition for the last node
-            repeatNode = nodes.remove(nodes.size() - 1);
+            if (nodes.isEmpty()) {
+                char previousChar = aCharIterator.peek(-2);
+                if (previousChar == '^' || previousChar == '$') {
+                    throw new TokenNotQuantifiableException(previousChar + " at " + aCharIterator.context());
+                } else {
+                    throw new RgxGenParseException("Cannot repeat nothing at" + aCharIterator.context());
+                }
+            } else {
+                repeatNode = nodes.remove(nodes.size() - 1);
+            }
         } else {
             // Repetition for the last character
             char charToRepeat = sb.charAt(sb.length() - 1);
@@ -330,18 +405,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '9':
                 sbToFinal(sb, nodes);
                 handleGroupReference(groupRefAllowed, nodes, c);
-                break;
-
-            case 't':
-                sb.append('\t');
-                break;
-
-            case 'r':
-                sb.append('\r');
-                break;
-
-            case 'n':
-                sb.append('\n');
                 break;
 
             default:
@@ -580,14 +643,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     public void build() {
-        if (aCharIterator.peek() == '^') {
-            aCharIterator.next();
-        }
-
-        if (aCharIterator.lastChar() == '$') {
-            aCharIterator.modifyBound(-1);
-        }
-
         aNode = parseGroup(aCharIterator.prevPos() + 1, GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
             throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());

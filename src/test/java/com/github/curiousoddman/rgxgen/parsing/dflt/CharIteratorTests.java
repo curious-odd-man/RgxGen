@@ -160,4 +160,15 @@ public class CharIteratorTests {
         assertEquals(15, charIterator.prevPos());
         assertEquals(0, charIterator.remaining());
     }
+
+    @Test
+    public void peekReturnsNullByteWhenOutOfRangeTest() {
+        String text = "012345";
+        CharIterator charIterator = new CharIterator(text);
+        char[] expectedChars = {0x00, '0', '1', '2', '3', '4', '5', 0x00};
+        charIterator.skip(3);
+        for (int i = 0; i < text.length() + 2; i++) {
+            assertEquals(expectedChars[i], charIterator.peek(i - 4));
+        }
+    }
 }

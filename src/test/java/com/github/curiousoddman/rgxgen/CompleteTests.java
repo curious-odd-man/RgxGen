@@ -63,7 +63,7 @@ public class CompleteTests {
                 {"Periodic Table Elements", "\\b(?:A[cglmr-u]|B[aehikr]?|C[adefl-orsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[dgont]|N[abdeiop]?|Os?|P[abdmortu]?|R[abe-hnu]|S[bcegimnr]?|T[abcehilm]|U(?:u[opst])?|V|W|Xe|Yb?|Z[nr])\\b"},
                 {"2-5letter palindromes", "\\b(\\w)?(\\w)\\w?\\2\\1"},
                 {"Russia Phone Number", "^((\\+7|7|8)+([0-9]){10})$|\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b"},
-                {"Brainfuck code", "^[+-<>.,\\[\\] \\t\\n\\r]+$"},
+                {"Brainfuck code", "^[+-<>.,\\[\\] \t\n\r]+$"},
 
                 // FIXME:
                 // {"Unix Path", "/|((?=/)|\\.|\\.\\.|~|~(?=/))(/(?=[^/])[^/]+)*/?"},  // For this need to use find() instead of matches()
