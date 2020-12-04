@@ -73,6 +73,7 @@ Changes in snapshot:
 - Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
 - Feature: Case Insensitive generation support [#47](https://github.com/curious-odd-man/RgxGen/issues/47)
 - Feature: Support for `\b` and `\B` escape sequences and `tab`, `carriage return` and `line feed` characters. [#51](https://github.com/curious-odd-man/RgxGen/issues/51)
+- Fixed: Caret `^` and dollar `$` markers can be used anywhere in pattern [#32](https://github.com/curious-odd-man/RgxGen/issues/32)
 
 ### Code: 
 ```java
