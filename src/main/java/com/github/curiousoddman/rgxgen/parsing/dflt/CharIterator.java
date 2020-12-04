@@ -77,7 +77,11 @@ public class CharIterator implements Iterator<Character> {
      * @return character by offset from next
      */
     public char peek(int offset) {
-        return aValue.charAt(aCurrentIndex + offset);
+        int pos = aCurrentIndex + offset;
+        if (pos < 0 || pos >= aBoundIndex) {
+            return 0x00;
+        }
+        return aValue.charAt(pos);
     }
 
     /**

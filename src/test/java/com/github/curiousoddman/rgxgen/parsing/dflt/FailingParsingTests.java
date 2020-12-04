@@ -126,4 +126,14 @@ public class FailingParsingTests {
 
         RgxGen gem = new RgxGen("a{\\");
     }
+
+    @Test
+    public void nothingToRepeatTest() {
+        expectedEx.expect(RgxGenParseException.class);
+        expectedEx.expectMessage("Cannot repeat nothing at\n" +
+                                         "'+asdf'\n" +
+                                         " ^");
+
+        RgxGen gem = new RgxGen("+asdfqwer");
+    }
 }

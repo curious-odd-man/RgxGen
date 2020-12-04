@@ -3,7 +3,7 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.Test;
 
-import java.util.Random;
+import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.util.Util.BIG_INTEGER_TWO;
@@ -34,6 +34,19 @@ public class RegressionTests {
         assertEquals(BIG_INTEGER_TWO, rgxGen.numUnique());
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());
+        assertFalse(stringIterator.hasNext());
+    }
+
+    @Test
+    public void bug32_capAndDollarInTheMiddleAreNotHandled() {
+        String pattern = "(^x|y$)";
+        final Pattern compile = Pattern.compile(pattern);
+        final RgxGen rgxGen = new RgxGen(pattern);
+        assertNotNull(rgxGen); // Not throwing an exception is a success
+        final StringIterator stringIterator = rgxGen.iterateUnique();
+        assertEquals(BigInteger.valueOf(2), rgxGen.numUnique());
+        assertEquals("x", stringIterator.next());
+        assertEquals("y", stringIterator.next());
         assertFalse(stringIterator.hasNext());
     }
 }
