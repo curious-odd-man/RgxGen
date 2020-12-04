@@ -28,21 +28,13 @@ import java.util.regex.Pattern;
  * Utility methods collection
  */
 public final class Util {
-    private static final String SYMBOLS = Arrays.stream(SymbolSet.getAllSymbols())
-                                                .reduce("", String::concat);
+    public static final Character[] ZERO_LENGTH_CHARACTER_ARRAY = new Character[0];
+    public static final BigInteger  BIG_INTEGER_TWO             = BigInteger.valueOf(2);
 
-    private static final Pattern    EMPTY                    = Pattern.compile("");
-    public static final  String[]   ZERO_LENGTH_STRING_ARRAY = new String[0];
-    public static final  BigInteger BIG_INTEGER_TWO          = BigInteger.valueOf(2);
-
-    /**
-     * Splits string into array of single-character strings
-     *
-     * @param str string to split
-     * @return array of single-character strings
-     */
-    public static String[] stringToCharsSubstrings(CharSequence str) {
-        return EMPTY.split(str);
+    public static Character[] stringToChars(CharSequence str) {
+        return str.chars()
+                  .mapToObj(i -> (char) i)
+                  .toArray(Character[]::new);
     }
 
     /**

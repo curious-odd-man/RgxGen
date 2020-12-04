@@ -7,13 +7,6 @@ import java.util.Random;
 import static org.junit.Assert.*;
 
 public class UtilTests {
-
-    @Test
-    public void splitTest() {
-        String[] abcs = Util.stringToCharsSubstrings("abc");
-        assertArrayEquals(new String[]{"a", "b", "c"}, abcs);
-    }
-
     @Test
     public void multiplicateTest() {
         assertEquals("", Util.repeat_char(' ', -1));
@@ -87,7 +80,7 @@ public class UtilTests {
         assertEquals(0, Util.indexOfNextCaseSensitiveCharacter("a123", 0)
                             .getAsInt());
         assertEquals(-142536, Util.indexOfNextCaseSensitiveCharacter("a123", 1)
-                             .orElse(-142536));
+                                  .orElse(-142536));
         assertEquals(1, Util.indexOfNextCaseSensitiveCharacter("1a123", 0)
                             .getAsInt());
         assertEquals(3, Util.indexOfNextCaseSensitiveCharacter("123a", 0)

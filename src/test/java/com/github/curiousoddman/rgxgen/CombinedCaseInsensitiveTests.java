@@ -39,7 +39,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.numUnique());
+        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
     @Test

@@ -42,7 +42,7 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        String[] allSymbols = node.getSymbols();
+        Character[] allSymbols = node.getSymbols();
         int idx = aRandom.nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);
     }

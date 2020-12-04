@@ -23,14 +23,14 @@ import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 
-import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private static final String[]          SINGLETON_UNDERSCORE_ARRAY = {"_"};
+    private static final Character[]       SINGLETON_UNDERSCORE_ARRAY = {'_'};
     private static final int               HEX_RADIX                  = 16;
     private static final Node[]            EMPTY_NODES_ARR            = new Node[0];
     private static final ConstantsProvider CONST_PROVIDER             = new ConstantsProvider();
@@ -571,7 +571,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
             } else {
                 if (nodes.get(0) instanceof SymbolSet) {
-                    for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
+                    for (Character symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
                         sb.append(symbol);
                     }
                 } else {
@@ -630,11 +630,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private SymbolSet handleEndCharacterVariationsCharacter(int openSquareBraceIndex, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges, boolean rangeStarted) {
         handleRange(rangeStarted, sb, symbolRanges);
-        String[] strings;
+        Character[] strings;
         if (sb.length() == 0) {
-            strings = ZERO_LENGTH_STRING_ARRAY;
+            strings = ZERO_LENGTH_CHARACTER_ARRAY;
         } else {
-            strings = Util.stringToCharsSubstrings(sb);
+            strings = Util.stringToChars(sb);
         }
 
         SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);

@@ -13,23 +13,23 @@ import java.util.stream.IntStream;
  */
 @SuppressWarnings("InstanceVariableMayNotBeInitialized")
 class ConstantsProvider {
-    private String[]                    aDigits;
-    private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
+    private Character[]                 aDigits;
+    private Character[]                 aWhiteSpaces;     // "\u000B" - is a vertical tab
     private List<SymbolSet.SymbolRange> aWordCharRanges;
 
-    String[] getDigits() {
+    Character[] getDigits() {
         if (aDigits == null) {
-            aDigits = IntStream.rangeClosed(0, 9)
-                               .mapToObj(Integer::toString)
-                               .toArray(String[]::new);
+            aDigits = IntStream.rangeClosed('0', '9')
+                               .mapToObj(i -> (char) i)
+                               .toArray(Character[]::new);
         }
 
         return aDigits;
     }
 
-    String[] getWhitespaces() {
+    Character[] getWhitespaces() {
         if (aWhiteSpaces == null) {
-            aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
+            aWhiteSpaces = new Character[]{'\r', '\f', '\u000B', ' ', '\t', '\n'};
         }
         return aWhiteSpaces;
     }

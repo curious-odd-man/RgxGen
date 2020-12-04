@@ -31,7 +31,8 @@ public class RegressionTests {
         RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
         StringIterator stringIterator = rgxGen.iterateUnique();
-        assertEquals(BIG_INTEGER_TWO, rgxGen.numUnique());
+        assertEquals(BIG_INTEGER_TWO, rgxGen.getUniqueEstimation()
+                                            .orElse(null));
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());
         assertFalse(stringIterator.hasNext());
@@ -44,7 +45,8 @@ public class RegressionTests {
         final RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
         final StringIterator stringIterator = rgxGen.iterateUnique();
-        assertEquals(BigInteger.valueOf(2), rgxGen.numUnique());
+        assertEquals(BigInteger.valueOf(2), rgxGen.getUniqueEstimation()
+                                                  .orElse(null));
         assertEquals("x", stringIterator.next());
         assertEquals("y", stringIterator.next());
         assertFalse(stringIterator.hasNext());

@@ -50,8 +50,8 @@ public class LimitedInfinitePatternsTests {
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
                                                                    Arrays.stream(SymbolSet.getAllSymbols())
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
-                                                                                                  .map(v -> symbol + v))))
-                              .map(v -> 'a' + v)
+                                                                                                  .map(v -> "" + symbol + v))))
+                              .map(v -> "" + 'a' + v)
                                 .collect(Collectors.toList())
                 }
         });

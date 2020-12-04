@@ -16,7 +16,7 @@ public class IteratorsLimitTests {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"ArrayIterator", new ArrayIterator(new String[]{"a"})},
+                {"ArrayIterator", new ArrayIterator(new Character[]{'a'})},
                 {"CaseVariationIterator", new CaseVariationIterator("a")},
                 {"ChoiceIterator", new ChoiceIterator(new StringIterator[]{new SingleValueIterator("a"), new SingleValueIterator("a")})},
                 {"IncrementalLength", new IncrementalLengthIterator(() -> new SingleValueIterator("a"), 0, 1)},

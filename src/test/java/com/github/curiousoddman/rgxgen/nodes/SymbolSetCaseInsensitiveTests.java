@@ -12,12 +12,12 @@ import static org.junit.Assert.assertArrayEquals;
 
 @RunWith(Parameterized.class)
 public class SymbolSetCaseInsensitiveTests {
-    public static String[] excluding(String chars) {
-        String[] allSymbols = SymbolSet.getAllSymbols();
-        String[] result = new String[allSymbols.length - chars.length()];
+    public static Character[] excluding(String chars) {
+        Character[] allSymbols = SymbolSet.getAllSymbols();
+        Character[] result = new Character[allSymbols.length - chars.length()];
         int target = 0;
-        for (String sym : allSymbols) {
-            if (!chars.contains(sym)) {
+        for (Character sym : allSymbols) {
+            if (chars.indexOf(sym) == -1) {
                 result[target] = sym;
                 ++target;
             }
@@ -46,19 +46,19 @@ public class SymbolSetCaseInsensitiveTests {
 
     @Test
     public void positiveSetTest() {
-        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToCharsSubstrings(aOriginalString), SymbolSet.TYPE.POSITIVE);
-        String[] actual = symbolSet.getSymbolsCaseInsensitive();
-        String[] expected = Util.stringToCharsSubstrings(aExpectedCaseInsensitive);
-        assertArrayEquals("\n" + Arrays.asList(expected) + "\nvs\n" + Arrays.asList(actual) + "\n",
+        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), SymbolSet.TYPE.POSITIVE);
+        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
+        Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
+        assertArrayEquals("\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n",
                           expected, actual);
     }
 
     @Test
     public void negativeSetTest() {
-        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToCharsSubstrings(aOriginalString), SymbolSet.TYPE.NEGATIVE);
-        String[] actual = symbolSet.getSymbolsCaseInsensitive();
-        String[] expected = excluding(aExpectedCaseInsensitive);
-        assertArrayEquals("\n" + Arrays.asList(expected) + "\nvs\n" + Arrays.asList(actual) + "\n",
+        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), SymbolSet.TYPE.NEGATIVE);
+        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
+        Character[] expected = excluding(aExpectedCaseInsensitive);
+        assertArrayEquals("\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n",
                           expected, actual);
 
     }

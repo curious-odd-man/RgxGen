@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_STRING_ARRAY;
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Generate Any printable character.
@@ -32,16 +32,15 @@ public class SymbolSet extends Node {
     private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
     private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
-    private static final String[] ALL_SYMBOLS = new String[DEL_ASCII_CODE - SPACE_ASCII_CODE];
+    private static final Character[] ALL_SYMBOLS = new Character[DEL_ASCII_CODE - SPACE_ASCII_CODE];
 
-    public static String[] getAllSymbols() {
+    public static Character[] getAllSymbols() {
         return ALL_SYMBOLS.clone();
     }
 
     static {
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
-            Character character = (char) i;
-            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = character.toString();
+            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = (char) i;
         }
     }
 
@@ -86,8 +85,8 @@ public class SymbolSet extends Node {
         }
     }
 
-    private final String[] aSymbols;
-    private final String[] aSymbolsCaseInsensitive;
+    private final Character[] aSymbols;
+    private final Character[] aSymbolsCaseInsensitive;
 
     /**
      * Symbol set containing all symbols
@@ -96,12 +95,12 @@ public class SymbolSet extends Node {
         this(".", ALL_SYMBOLS.clone(), TYPE.POSITIVE);
     }
 
-    public SymbolSet(String pattern, String[] symbols, TYPE type) {
+    public SymbolSet(String pattern, Character[] symbols, TYPE type) {
         this(pattern, Collections.emptyList(), symbols, type);
     }
 
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, TYPE type) {
-        this(pattern, symbolRanges, ZERO_LENGTH_STRING_ARRAY, type);
+        this(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type);
     }
 
     /**
@@ -112,23 +111,22 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, String[] symbols, TYPE type) {
+    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, TYPE type) {
         super(pattern);
-        Set<String> initial = type == TYPE.NEGATIVE
-                              ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
-                              : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
+        Set<Character> initial = type == TYPE.NEGATIVE
+                                 ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
+                                 : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
-        Set<String> caseInsensitive = new HashSet<>(initial);
-        Set<String> symbolsSet = new HashSet<>(Arrays.asList(symbols));
+        Set<Character> caseInsensitive = new HashSet<>(initial);
+        Set<Character> symbolsSet = new HashSet<>(Arrays.asList(symbols));
         filterOrPut(initial, caseInsensitive, symbolsSet, type);
         filterOrPut(initial, caseInsensitive, symbolRanges.stream()
                                                           .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
                                                           .mapToObj(i -> (char) i)
-                                                          .map(Object::toString)
                                                           .collect(Collectors.toSet()), type);
 
-        aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_STRING_ARRAY);
-        aSymbols = initial.toArray(ZERO_LENGTH_STRING_ARRAY);
+        aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
+        aSymbols = initial.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
     }
 
     /**
@@ -139,7 +137,7 @@ public class SymbolSet extends Node {
      * @param symbols         add or remove these symbols
      * @param type            add or remove switch
      */
-    private static void filterOrPut(Collection<String> initial, Collection<String> caseInsensitive, Set<String> symbols, TYPE type) {
+    private static void filterOrPut(Collection<Character> initial, Collection<Character> caseInsensitive, Set<Character> symbols, TYPE type) {
         if (type == TYPE.POSITIVE) {
             initial.addAll(symbols);
             handleCaseSensitiveCharacters(symbols, caseInsensitive::add);
@@ -149,15 +147,14 @@ public class SymbolSet extends Node {
         }
     }
 
-    private static void handleCaseSensitiveCharacters(Iterable<String> symbols, Consumer<String> consumer) {
-        for (String s : symbols) {
-            char stringAsChar = s.charAt(0);
-            if (Character.isUpperCase(stringAsChar)) {
-                consumer.accept(s.toLowerCase());
-            } else if (Character.isLowerCase(stringAsChar)) {
-                consumer.accept(s.toUpperCase());
+    private static void handleCaseSensitiveCharacters(Iterable<Character> symbols, Consumer<Character> consumer) {
+        for (Character c : symbols) {
+            if (Character.isUpperCase(c)) {
+                consumer.accept(Character.toLowerCase(c));
+            } else if (Character.isLowerCase(c)) {
+                consumer.accept(Character.toUpperCase(c));
             }
-            consumer.accept(s);
+            consumer.accept(c);
         }
     }
 
@@ -166,11 +163,11 @@ public class SymbolSet extends Node {
         visitor.visit(this);
     }
 
-    public String[] getSymbols() {
+    public Character[] getSymbols() {
         return aSymbols;
     }
 
-    public String[] getSymbolsCaseInsensitive() {
+    public Character[] getSymbolsCaseInsensitive() {
         return aSymbolsCaseInsensitive;
     }
 

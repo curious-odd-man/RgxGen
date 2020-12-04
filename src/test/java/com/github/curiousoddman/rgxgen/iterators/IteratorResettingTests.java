@@ -106,9 +106,9 @@ public class IteratorResettingTests {
     @Parameterized.Parameters(name = "{0}:{2}/{3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 1, Arrays.asList("a", "a", "a", "a")},
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 3, Arrays.asList("a", "b", null)},
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 2, Arrays.asList("a", "b", "a", "b")},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 1, Arrays.asList("a", "a", "a", "a")},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 3, Arrays.asList("a", "b", null)},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 2, Arrays.asList("a", "b", "a", "b")},
 
                 {"Single", new SingleValueIterator(), 1, Arrays.asList("", "")},
                 {"Single", new SingleValueIterator(), 2, Arrays.asList("", null)},
