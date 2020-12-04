@@ -19,7 +19,6 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
-import com.sun.istack.internal.Nullable;
 
 import java.util.*;
 
@@ -125,7 +124,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    @Nullable
     private Integer getGroupIndexIfCapture(GroupType currentGroupType) {
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
             return aNextGroupIndex++;
