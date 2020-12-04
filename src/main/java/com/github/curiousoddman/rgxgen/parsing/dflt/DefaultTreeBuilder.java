@@ -149,7 +149,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void verifyStartEndMarkerConsistency(char currentChar) {
         assertCorrectCharacter(currentChar);
         char charAtPos = aCharIterator.peek(currentChar == '^' ? -2 : 0);
-        String errorText = null;
+        String errorText;
         switch (charAtPos) {
             // These characters are allowed.
             // Repetition will be handled later only if it follows these characters.

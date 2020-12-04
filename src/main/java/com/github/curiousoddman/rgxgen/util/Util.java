@@ -16,13 +16,10 @@ package com.github.curiousoddman.rgxgen.util;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.OptionalInt;
 import java.util.Random;
-import java.util.regex.Pattern;
 
 /**
  * Utility methods collection
