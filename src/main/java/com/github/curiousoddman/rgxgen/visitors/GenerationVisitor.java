@@ -89,7 +89,7 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(GroupRef node) {
-        aStringBuilder.append(aGroupValues.get(node.getIndex()));
+        aStringBuilder.append(aGroupValues.getOrDefault(node.getIndex(), ""));
     }
 
     @Override

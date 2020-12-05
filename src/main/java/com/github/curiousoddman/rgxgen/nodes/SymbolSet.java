@@ -85,8 +85,12 @@ public class SymbolSet extends Node {
         }
     }
 
-    private final Character[] aSymbols;
-    private final Character[] aSymbolsCaseInsensitive;
+    private final Set<Character> aInitial;
+    private final Set<Character> aModification;
+    private final TYPE           aType;
+
+    private Character[] aSymbols;
+    private Character[] aSymbolsCaseInsensitive;
 
     /**
      * Symbol set containing all symbols
@@ -113,38 +117,41 @@ public class SymbolSet extends Node {
      */
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, TYPE type) {
         super(pattern);
-        Set<Character> initial = type == TYPE.NEGATIVE
-                                 ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
-                                 : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
+        aInitial = type == TYPE.NEGATIVE
+                   ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
+                   : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
 
-        Set<Character> caseInsensitive = new HashSet<>(initial);
-        Set<Character> symbolsSet = new HashSet<>(Arrays.asList(symbols));
-        filterOrPut(initial, caseInsensitive, symbolsSet, type);
-        filterOrPut(initial, caseInsensitive, symbolRanges.stream()
-                                                          .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
-                                                          .mapToObj(i -> (char) i)
-                                                          .collect(Collectors.toSet()), type);
-
-        aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
-        aSymbols = initial.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
+        aModification = new HashSet<>(Arrays.asList(symbols));
+        aType = type;
+        symbolRanges.stream()
+                    .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
+                    .mapToObj(i -> (char) i)
+                    .collect(Collectors.toCollection(() -> aModification));
     }
 
-    /**
-     * Depending on TYPE either add or remove characters
-     *
-     * @param initial         modifiable collection
-     * @param caseInsensitive modifiable collection
-     * @param symbols         add or remove these symbols
-     * @param type            add or remove switch
-     */
-    private static void filterOrPut(Collection<Character> initial, Collection<Character> caseInsensitive, Set<Character> symbols, TYPE type) {
-        if (type == TYPE.POSITIVE) {
-            initial.addAll(symbols);
-            handleCaseSensitiveCharacters(symbols, caseInsensitive::add);
-        } else {
-            initial.removeIf(symbols::contains);
-            handleCaseSensitiveCharacters(symbols, caseInsensitive::remove);
+    private Character[] getOrInitSymbols() {
+        if (aSymbols == null) {
+            if (aType == TYPE.POSITIVE) {
+                aInitial.addAll(aModification);
+            } else {
+                aInitial.removeIf(aModification::contains);
+            }
+            aSymbols = aInitial.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
         }
+        return aSymbols;
+    }
+
+    private Character[] getOrInitCaseInsensitiveSymbols() {
+        if (aSymbolsCaseInsensitive == null) {
+            Set<Character> caseInsensitive = new HashSet<>(aInitial);
+            if (aType == TYPE.POSITIVE) {
+                handleCaseSensitiveCharacters(aModification, caseInsensitive::add);
+            } else {
+                handleCaseSensitiveCharacters(aModification, caseInsensitive::remove);
+            }
+            aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
+        }
+        return aSymbolsCaseInsensitive;
     }
 
     private static void handleCaseSensitiveCharacters(Iterable<Character> symbols, Consumer<Character> consumer) {
@@ -164,19 +171,19 @@ public class SymbolSet extends Node {
     }
 
     public Character[] getSymbols() {
-        return aSymbols;
+        return getOrInitSymbols();
     }
 
     public Character[] getSymbolsCaseInsensitive() {
-        return aSymbolsCaseInsensitive;
+        return getOrInitCaseInsensitiveSymbols();
     }
 
     @Override
     public String toString() {
-        return "SymbolSet{" + Arrays.toString(aSymbols) + '}';
+        return "SymbolSet{" + Arrays.toString(getOrInitSymbols()) + '}';
     }
 
     public boolean isEmpty() {
-        return aSymbols.length == 0;
+        return getOrInitSymbols().length == 0;
     }
 }

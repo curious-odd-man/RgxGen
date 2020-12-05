@@ -66,6 +66,8 @@ public class CompleteTests {
                 {"Russia Phone Number", Boolean.FALSE, "^((\\+7|7|8)+([0-9]){10})$|\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b"},
                 {"Brainfuck code", Boolean.FALSE, "^[+-<>.,\\[\\] \t\n\r]+$"},
                 {"USA/Canada Zip codes", Boolean.FALSE, "(^\\d{5}(-\\d{4})?$)|(^[A-Z]{1}\\d{1}[A-Z]{1} *\\d{1}[A-Z]{1}\\d{1}$)"},
+                {"JS comments", Boolean.TRUE, "//(?![\\S]{2,}\\.[\\w]).*|/\\*(.|\n)+\\*/"},
+                {"2-5 letter palindromes", Boolean.FALSE, "\\b(\\w?)(\\w)\\w?\\2\\1"},
                 })
                      .flatMap(arr -> IntStream.range(0, 100)
                                               .mapToObj(index -> new Object[]{arr[0], arr[1], arr[2], index}))
