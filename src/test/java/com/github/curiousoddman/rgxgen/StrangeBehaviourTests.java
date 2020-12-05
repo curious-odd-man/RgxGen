@@ -11,6 +11,7 @@ public class StrangeBehaviourTests {
     @Ignore
     public void randomIsNotSoRandomTest() {
         // Note! This works only when LIMIT_VALUE is a power of 2!
+        // To overcome this issue in tests use TestingUtilities::newRandom
         final int LIMIT_VALUE = 32;
         for (int seed = 0; seed < 10; seed++) {
             // Each time have different seed!!!!

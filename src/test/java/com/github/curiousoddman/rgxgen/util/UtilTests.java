@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen.util;
 
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.Test;
 
 import java.util.Random;
@@ -19,7 +20,7 @@ public class UtilTests {
         boolean lower = false;
         boolean upper = false;
         for (int i = 0; i < 100; i++) {
-            char result = Util.randomlyChangeCase(new Random(), "a")
+            char result = Util.randomlyChangeCase(TestingUtilities.newRandom(i), "a")
                               .charAt(0);
             if (Character.isLowerCase(result)) {
                 lower = true;
@@ -40,7 +41,7 @@ public class UtilTests {
         boolean lower = false;
         boolean upper = false;
         for (int i = 0; i < 100; i++) {
-            char result = Util.randomlyChangeCase(new Random(), "1")
+            char result = Util.randomlyChangeCase(TestingUtilities.newRandom(i), "1")
                               .charAt(0);
             assertEquals('1', result);
             if (Character.isLowerCase(result)) {

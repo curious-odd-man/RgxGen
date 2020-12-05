@@ -5,6 +5,7 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import org.junit.Test;
@@ -69,7 +70,7 @@ public class NotMatchingGenerationTests {
         assertEquals(aNode.toString(), node.toString());
 
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(new Random(aSeed))
+                                                                .withRandom(TestingUtilities.newRandom(aSeed))
                                                                 .get();
         aNode.visit(visitor);
         boolean matches = Pattern.compile(aRegex)
@@ -88,7 +89,7 @@ public class NotMatchingGenerationTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(new Random(aSeed))
+                                                                .withRandom(TestingUtilities.newRandom(aSeed))
                                                                 .withProperties(properties)
                                                                 .get();
         aNode.visit(visitor);

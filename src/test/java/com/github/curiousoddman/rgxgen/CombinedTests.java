@@ -82,7 +82,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
                                                                  .orElse(null));
         }
         for (int i = 0; i < 100; i++) {
-            Random rand = new Random(i);
+            Random rand = TestingUtilities.newRandom(i);
             for (int j = 0; j < 10; j++) {
                 String generated = rgxGen.generate(rand);
                 boolean result = isValidGenerated(generated);
@@ -101,7 +101,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         rgxGen.setProperties(properties);
 
         for (int i = 0; i < 100; i++) {
-            Random random = new Random(i);
+            Random random = TestingUtilities.newRandom(i);
             for (int j = 0; j < 10; j++) {
                 String generated = rgxGen.generate(random);
                 boolean result = isValidGenerated(generated);

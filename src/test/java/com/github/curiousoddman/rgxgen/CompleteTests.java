@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -62,20 +63,10 @@ public class CompleteTests {
                 {"UK Postal code", Boolean.FALSE, "^(([gG][iI][rR] {0,}0[aA]{2})|(([aA][sS][cC][nN]|[sS][tT][hH][lL]|[tT][dD][cC][uU]|[bB][bB][nN][dD]|[bB][iI][qQ][qQ]|[fF][iI][qQ][qQ]|[pP][cC][rR][nN]|[sS][iI][qQ][qQ]|[iT][kK][cC][aA]) {0,}1[zZ]{2})|((([a-pr-uwyzA-PR-UWYZ][a-hk-yxA-HK-XY]?[0-9][0-9]?)|(([a-pr-uwyzA-PR-UWYZ][0-9][a-hjkstuwA-HJKSTUW])|([a-pr-uwyzA-PR-UWYZ][a-hk-yA-HK-Y][0-9][abehmnprv-yABEHMNPRV-Y]))) {0,}[0-9][abd-hjlnp-uw-zABD-HJLNP-UW-Z]{2}))$"},
                 {"Semver", Boolean.FALSE, "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-((?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9][0-9]*|[0-9]*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"},
                 {"Periodic Table Elements", Boolean.FALSE, "\\b(?:A[cglmr-u]|B[aehikr]?|C[adefl-orsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[dgont]|N[abdeiop]?|Os?|P[abdmortu]?|R[abe-hnu]|S[bcegimnr]?|T[abcehilm]|U(?:u[opst])?|V|W|Xe|Yb?|Z[nr])\\b"},
-                {"2-5letter palindromes", Boolean.FALSE, "\\b(\\w)?(\\w)\\w?\\2\\1"},
                 {"Russia Phone Number", Boolean.FALSE, "^((\\+7|7|8)+([0-9]){10})$|\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b"},
                 {"Brainfuck code", Boolean.FALSE, "^[+-<>.,\\[\\] \t\n\r]+$"},
                 {"USA/Canada Zip codes", Boolean.FALSE, "(^\\d{5}(-\\d{4})?$)|(^[A-Z]{1}\\d{1}[A-Z]{1} *\\d{1}[A-Z]{1}\\d{1}$)"},
-                // FIXME:
-                // {"JS comments", Boolean.TRUE, "//(?![\\S]{2,}\\.[\\w]).*|/\\*(.|\n)+?\\*/"},  // Fails to match, though pattern seems correct
-                // {"Morse code", Boolean.TRUE, "^[.-]{1,5}(?:[ \t]+[.-]{1,5})*(?:[ \t]+[.-]{1,5}(?:[ \t]+[.-]{1,5})*)*$"},       // Very slow not matching generation. + java.regex fails to parse..
-                // {"Domain name", Boolean.TRUE, "(?!w{1,}\\.)(\\w+\\.?)([a-zA-Z]+)(\\.\\w+)"}, // Fails infrequently...
-                // {"ISO-8601 Date", Boolean.TRUE, "^(?![+-]?\\d{4,5}-?(?:\\d{2}|W\\d{2})T)(?:|(\\d{4}|[+-]\\d{5})-?(?:|(0\\d|1[0-2])(?:|-?([0-2]\\d|3[0-1]))|([0-2]\\d{2}|3[0-5]\\d|36[0-6])|W([0-4]\\d|5[0-3])(?:|-?([1-7])))(?:(?!\\d)|T(?=\\d)))(?:|([01]\\d|2[0-4])(?:|:?([0-5]\\d)(?:|:?([0-5]\\d)(?:|\\.(\\d{3})))(?:|[zZ]|([+-](?:[01]\\d|2[0-4]))(?:|:?([0-5]\\d)))))$"}, // Something totally wrong
-                // {"Unix Path", Boolean.TRUE, "/|((?=/)|\\.|\\.\\.|~|~(?=/))(/(?=[^/])[^/]+)*/?"},  // Not matching generation fails
-                // {"Hashtags", Boolean.TRUE, "\\B#([a-z0-9]{2,})(?![~!@#$%^&*()=+_`\\-\\|\\/'\\[\\]\\{\\}]|[?.,]*\\w)"}, // This partially fails
-                // {"HTML Tags", Boolean.FALSE, "(<script(\\s|\\S)*?</script>)|(<style(\\s|\\S)*?</style>)|(<!--(\\s|\\S)*?-->)|(</?(\\s|\\S)*?>)"}, // This hangs
-                // {"JWT", Boolean.TRUE,"^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"},       // Parsing failure in handleRange()!!
-        })
+                })
                      .flatMap(arr -> IntStream.range(0, 100)
                                               .mapToObj(index -> new Object[]{arr[0], arr[1], arr[2], index}))
                      .collect(Collectors.toList());
@@ -96,15 +87,14 @@ public class CompleteTests {
     @Test
     public void generateTest() {
         RgxGen rgxGen = new RgxGen(aRegex);
-        String s = rgxGen.generate(new Random(aSeed));
-
+        String s = rgxGen.generate(TestingUtilities.newRandom(aSeed));
         assertTrue("Text: '" + s + "'does not match pattern " + aRegex, matches(s));
     }
 
     @Test
     public void generateNotMatchingTest() {
         RgxGen rgxGen = new RgxGen(aRegex);
-        String s = rgxGen.generateNotMatching(new Random(aSeed));
+        String s = rgxGen.generateNotMatching(TestingUtilities.newRandom(aSeed));
         assertFalse("Text: '" + s + "'does not match pattern " + aRegex, matches(s));
     }
 

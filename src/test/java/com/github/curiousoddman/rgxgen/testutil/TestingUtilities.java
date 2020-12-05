@@ -5,6 +5,7 @@ import java.math.BigInteger;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
 public final class TestingUtilities {
@@ -25,5 +26,17 @@ public final class TestingUtilities {
         return IntStream.rangeClosed('0', '9')
                         .mapToObj(i -> (char) i)
                         .toArray(Character[]::new);
+    }
+
+    /**
+     * This method helps to overcome the issue that is described here: StrangeBehaviourTests::randomIsNotSoRandomTest
+     *
+     * @param seed seed value
+     * @return new Random()
+     */
+    public static Random newRandom(int seed) {
+        Random random = new Random(seed);
+        random.nextInt();
+        return random;
     }
 }

@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.data.TestPattern;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import org.junit.Test;
@@ -31,7 +32,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @Test
     public void generateTest() {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
-                                                               .withRandom(new Random(aSeed))
+                                                               .withRandom(TestingUtilities.newRandom(aSeed))
                                                                .get();
         aTestPattern.getResultNode()
                     .visit(generationVisitor);
@@ -41,8 +42,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
 
     @Test
     public void repeatableGenerationTest() {
-        Random rnd1 = new Random(aSeed);
-        Random rnd2 = new Random(aSeed);
+        Random rnd1 = TestingUtilities.newRandom(aSeed);
+        Random rnd2 = TestingUtilities.newRandom(aSeed);
 
         RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
         RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
@@ -52,7 +53,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @Test(timeout = 5000)
     public void generateNotMatchingTest() {
         GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
-                                                                          .withRandom(new Random(aSeed))
+                                                                          .withRandom(TestingUtilities.newRandom(aSeed))
                                                                           .get();
         aTestPattern.getResultNode()
                     .visit(generationVisitor);
@@ -62,8 +63,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
 
     @Test(timeout = 5000)
     public void repeatableNotMatchingGenerationTest() {
-        Random rnd1 = new Random(aSeed);
-        Random rnd2 = new Random(aSeed);
+        Random rnd1 = TestingUtilities.newRandom(aSeed);
+        Random rnd2 = TestingUtilities.newRandom(aSeed);
 
         RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
         RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
