@@ -537,32 +537,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static void handleRange(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
-        if (rangeStarted) {
-            char lastChar = sb.charAt(sb.length() - 1);
-            char firstChar = sb.charAt(sb.length() - 2);
-            sb.delete(sb.length() - 2, sb.length());
-            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
-        }
-    }
-
-    private void handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
+    private void handleBackslashCharacter(StringBuilder sb) {
         // Skip backslash and add next symbol to characters
         List<Node> nodes = new LinkedList<>();
 
-        // When range started - we use 2 last characters to find out bounds of the range
-        // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
-        if (rangeStarted) {
-            handleEscapedCharacter(sb, nodes, false);
-            if (!nodes.isEmpty()) {
-                throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
-            }
-            handleRange(true, sb, symbolRanges);
-        } else {
-            StringBuilder tmpSb = new StringBuilder(0);
-            handleEscapedCharacter(tmpSb, nodes, false);
-            sb.append(tmpSb);
-        }
+        StringBuilder tmpSb = new StringBuilder(0);
+        handleEscapedCharacter(tmpSb, nodes, false);
+        sb.append(tmpSb);
 
         if (!nodes.isEmpty()) {
             if (nodes.size() > 1) {
@@ -595,47 +576,67 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         StringBuilder sb = new StringBuilder(aCharIterator.remaining());
         List<SymbolSet.SymbolRange> symbolRanges = new LinkedList<>();
-        boolean rangeStarted = false;
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ']':
-                    return handleEndCharacterVariationsCharacter(openSquareBraceIndex, symbolSetType, sb, symbolRanges, rangeStarted);
-
-                case '-':
-                    if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
-                        sb.append(c);
-                    } else {
-                        rangeStarted = true;
-                    }
-                    break;
+                    return handleEndCharacterVariationsCharacter(openSquareBraceIndex, symbolSetType, sb, symbolRanges);
 
                 case '\\':
-                    handleBackslashCharacter(rangeStarted, sb, symbolRanges);
-                    rangeStarted = false;
+                    handleBackslashCharacter(sb);
                     break;
 
                 default:
-                    sb.append(c);
-                    handleRange(rangeStarted, sb, symbolRanges);
-                    rangeStarted = false;
+                    if (aCharIterator.peek() == '-') {
+                        handleRange(c, sb, symbolRanges);
+                    } else {
+                        sb.append(c);
+                    }
+                    break;
             }
         }
 
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private SymbolSet handleEndCharacterVariationsCharacter(int openSquareBraceIndex, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges, boolean rangeStarted) {
-        handleRange(rangeStarted, sb, symbolRanges);
-        Character[] strings;
-        if (sb.length() == 0) {
-            strings = ZERO_LENGTH_CHARACTER_ARRAY;
-        } else {
-            strings = Util.stringToChars(sb);
+    private void handleRange(char firstChar, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
+        char lastChar = aCharIterator.peek(1);
+        if (lastChar == 0x00) {
+            aCharIterator.skip(2);
+            throw new RgxGenParseException("Unexpected escape character after dash symbol." + aCharIterator.context());
         }
 
-        SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);
+        if (lastChar == '\\') {
+            if (aCharIterator.peek(2) == 'x') {
+                aCharIterator.skip(2);
+                lastChar = (char) parseHexadecimal();
+            } else {
+                aCharIterator.skip(2);
+                throw new RgxGenParseException("Unexpected escape character after dash symbol." + aCharIterator.context());
+            }
+        } else if (lastChar == ']') {
+            sb.append(firstChar);
+            return;
+        } else {
+            aCharIterator.skip(2);
+        }
+
+        if (firstChar > lastChar) {
+            throw new RgxGenParseException("In character range start char cannot be less than end char." + aCharIterator.context());
+        }
+        symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+    }
+
+    private SymbolSet handleEndCharacterVariationsCharacter(int openSquareBraceIndex, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
+        Character[] characters;
+        if (sb.length() == 0) {
+            characters = ZERO_LENGTH_CHARACTER_ARRAY;
+        } else {
+            characters = Util.stringToChars(sb);
+        }
+
+        SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, characters, symbolSetType);
         aNodesStartPos.put(symbolSet, openSquareBraceIndex);
         return symbolSet;
     }

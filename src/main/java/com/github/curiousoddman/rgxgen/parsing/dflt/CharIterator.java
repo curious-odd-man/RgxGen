@@ -67,7 +67,7 @@ public class CharIterator implements Iterator<Character> {
      * @return next character
      */
     public char peek() {
-        return aValue.charAt(aCurrentIndex);
+        return peek(0);
     }
 
     /**
