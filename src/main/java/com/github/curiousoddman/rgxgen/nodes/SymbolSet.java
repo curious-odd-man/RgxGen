@@ -20,8 +20,6 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
@@ -85,9 +83,9 @@ public class SymbolSet extends Node {
         }
     }
 
-    private final Set<Character> aInitial;
-    private final Set<Character> aModification;
-    private final TYPE           aType;
+    private final Collection<Character> aInitial;
+    private final Collection<Character> aModification;
+    private final TYPE                  aType;
 
     private Character[] aSymbols;
     private Character[] aSymbolsCaseInsensitive;
@@ -117,16 +115,27 @@ public class SymbolSet extends Node {
      */
     public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, TYPE type) {
         super(pattern);
-        aInitial = type == TYPE.NEGATIVE
-                   ? new HashSet<>(Arrays.asList(ALL_SYMBOLS))   // First we need to add all, later we remove unnecessary
-                   : new HashSet<>(ALL_SYMBOLS.length);          // Most probably it will be enough.
-
-        aModification = new HashSet<>(Arrays.asList(symbols));
         aType = type;
+        if (aType == TYPE.POSITIVE) {
+            aInitial = new HashSet<>(ALL_SYMBOLS.length);
+            aModification = new ArrayList<>(Arrays.asList(symbols));
+        } else {
+            aInitial = new HashSet<>(Arrays.asList(ALL_SYMBOLS));
+            aModification = new HashSet<>(Arrays.asList(symbols));
+        }
+
         symbolRanges.stream()
-                    .flatMapToInt(r -> IntStream.rangeClosed(r.getFrom(), r.getTo()))
-                    .mapToObj(i -> (char) i)
-                    .collect(Collectors.toCollection(() -> aModification));
+                    .map(SymbolSet::rangeToList)
+                    .forEach(aModification::addAll);
+    }
+
+    private static Collection<Character> rangeToList(SymbolRange range) {
+        List<Character> chars = new ArrayList<>(range.aTo - range.aFrom + 1);
+        for (int i = range.aFrom; i <= range.aTo; i++) {
+            chars.add((char) i);
+        }
+
+        return chars;
     }
 
     private Character[] getOrInitSymbols() {
