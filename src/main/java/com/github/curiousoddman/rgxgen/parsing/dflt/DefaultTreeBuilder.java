@@ -74,31 +74,42 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return type of the group (@see GroupType enum)
      */
     private GroupType processGroupType() {
-        // FIXME: Can we replace it with areNext() or some function?
-        switch (aCharIterator.next(2)) {
-            case "?=":      // Positive Lookahead does not affect generation.
-                return GroupType.POSITIVE_LOOKAHEAD;
-
-            case "?:":      // Non-capture group does not affect generation.
-                return GroupType.NON_CAPTURE_GROUP;
-
-            case "?!":
-                return GroupType.NEGATIVE_LOOKAHEAD;
-
-            case "?<":
-                GroupType res = GroupType.POSITIVE_LOOKBEHIND;
-                char next = aCharIterator.next();
-                if (next == '!') {
-                    res = GroupType.NEGATIVE_LOOKBEHIND;
-                } else if (next != '=') {   // Positive Lookbehind does not affect generation.
+        GroupType groupType;
+        int skip = 2;
+        if (aCharIterator.peek() == '?') {
+            char pos2char = aCharIterator.peek(1);
+            switch (pos2char) {
+                case '<':
+                    skip = 3;
+                    char pos3char = aCharIterator.peek(2);
+                    if (pos3char == '!') {
+                        groupType = GroupType.NEGATIVE_LOOKBEHIND;
+                    } else if (pos3char == '=') {
+                        groupType = GroupType.POSITIVE_LOOKBEHIND;
+                    } else {
+                        aCharIterator.skip(skip);
+                        throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
+                    }
+                    break;
+                case '=':
+                    groupType = GroupType.POSITIVE_LOOKAHEAD;
+                    break;
+                case ':':
+                    groupType = GroupType.NON_CAPTURE_GROUP;
+                    break;
+                case '!':
+                    groupType = GroupType.NEGATIVE_LOOKAHEAD;
+                    break;
+                default:
+                    aCharIterator.skip(skip);
                     throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
-                }
-                return res;
-
-            default:
-                aCharIterator.skip(-2);
-                return GroupType.CAPTURE_GROUP;
+            }
+        } else {
+            return GroupType.CAPTURE_GROUP;
         }
+
+        aCharIterator.skip(skip);
+        return groupType;
     }
 
     private Node handleGroupEndCharacter(int startPos, StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex, GroupType groupType) {
