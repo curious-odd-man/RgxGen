@@ -32,6 +32,18 @@ public class FailingParsingTests {
     }
 
     @Test
+    public void lookaheadIncorrectPatternTest() {
+        expectedEx.expect(RgxGenParseException.class);
+        expectedEx.expectMessage("Unexpected symbol in pattern: \n" +
+                                         "'(?xxx)'\n" +
+                                         "   ^");
+
+        String pattern = "(?xxx)";
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
+        defaultTreeBuilder.build();
+    }
+
+    @Test
     public void disallowedGroupReferenceTest() {
         expectedEx.expect(RgxGenParseException.class);
         expectedEx.expectMessage("Group ref is not expected here. \n" +

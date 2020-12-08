@@ -74,30 +74,42 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return type of the group (@see GroupType enum)
      */
     private GroupType processGroupType() {
-        switch (aCharIterator.next(2)) {
-            case "?=":      // Positive Lookahead does not affect generation.
-                return GroupType.POSITIVE_LOOKAHEAD;
-
-            case "?:":      // Non-capture group does not affect generation.
-                return GroupType.NON_CAPTURE_GROUP;
-
-            case "?!":
-                return GroupType.NEGATIVE_LOOKAHEAD;
-
-            case "?<":
-                GroupType res = GroupType.POSITIVE_LOOKBEHIND;
-                char next = aCharIterator.next();
-                if (next == '!') {
-                    res = GroupType.NEGATIVE_LOOKBEHIND;
-                } else if (next != '=') {   // Positive Lookbehind does not affect generation.
+        GroupType groupType;
+        int skip = 2;
+        if (aCharIterator.peek() == '?') {
+            char pos2char = aCharIterator.peek(1);
+            switch (pos2char) {
+                case '<':
+                    skip = 3;
+                    char pos3char = aCharIterator.peek(2);
+                    if (pos3char == '!') {
+                        groupType = GroupType.NEGATIVE_LOOKBEHIND;
+                    } else if (pos3char == '=') {
+                        groupType = GroupType.POSITIVE_LOOKBEHIND;
+                    } else {
+                        aCharIterator.skip(skip);
+                        throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
+                    }
+                    break;
+                case '=':
+                    groupType = GroupType.POSITIVE_LOOKAHEAD;
+                    break;
+                case ':':
+                    groupType = GroupType.NON_CAPTURE_GROUP;
+                    break;
+                case '!':
+                    groupType = GroupType.NEGATIVE_LOOKAHEAD;
+                    break;
+                default:
+                    aCharIterator.skip(skip);
                     throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
-                }
-                return res;
-
-            default:
-                aCharIterator.skip(-2);
-                return GroupType.CAPTURE_GROUP;
+            }
+        } else {
+            return GroupType.CAPTURE_GROUP;
         }
+
+        aCharIterator.skip(skip);
+        return groupType;
     }
 
     private Node handleGroupEndCharacter(int startPos, StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex, GroupType groupType) {
@@ -133,7 +145,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private static void assertCorrectCharacter(char currentChar) {
         if (currentChar != '^' && currentChar != '$') {
-            throw new RuntimeException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
+            throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
         }
     }
 
@@ -212,7 +224,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
                 case '[':
                     sbToFinal(sb, nodes);
-                    nodes.add(handleCharacterVariations());
+                    nodes.add(handleSquareBrackets());
                     break;
 
                 case '(':
@@ -516,12 +528,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             if (isChoice) {
                 if (choices.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(EMPTY_NODES_ARR));
             } else {
                 if (nodes.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(EMPTY_NODES_ARR));
             }
@@ -537,107 +549,115 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static void handleRange(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
-        if (rangeStarted) {
-            char lastChar = sb.charAt(sb.length() - 1);
-            char firstChar = sb.charAt(sb.length() - 2);
-            sb.delete(sb.length() - 2, sb.length());
-            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
-        }
-    }
-
-    private void handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, Collection<SymbolSet.SymbolRange> symbolRanges) {
-        // Skip backslash and add next symbol to characters
-        List<Node> nodes = new LinkedList<>();
-
-        // When range started - we use 2 last characters to find out bounds of the range
-        // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
-        if (rangeStarted) {
-            handleEscapedCharacter(sb, nodes, false);
-            if (!nodes.isEmpty()) {
-                throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
-            }
-            handleRange(true, sb, symbolRanges);
-        } else {
-            StringBuilder tmpSb = new StringBuilder(0);
-            handleEscapedCharacter(tmpSb, nodes, false);
-            sb.append(tmpSb);
-        }
-
-        if (!nodes.isEmpty()) {
-            if (nodes.size() > 1) {
-                throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-            } else {
-                if (nodes.get(0) instanceof SymbolSet) {
-                    for (Character symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
-                        sb.append(symbol);
-                    }
-                } else {
-                    throw new RgxGenParseException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-                }
-            }
-        }
-    }
-
     /**
-     * This function parses expression in square brackets [...]
-     * It should be called when aCurrentIndex has index of first character after opening bracket - [
+     * It should be called when aCharIterator is on first character after opening bracket - [
      *
-     * @return Node that covers expression in square brackets
+     * @return Node representing expression in square brackets
      */
-    private Node handleCharacterVariations() {
+    private Node handleSquareBrackets() {
         int openSquareBraceIndex = aCharIterator.prevPos();
-        SymbolSet.TYPE symbolSetType = SymbolSet.TYPE.POSITIVE;
-        if (aCharIterator.peek() == '^') {
-            symbolSetType = SymbolSet.TYPE.NEGATIVE;
-            aCharIterator.next();
-        }
-
-        StringBuilder sb = new StringBuilder(aCharIterator.remaining());
-        List<SymbolSet.SymbolRange> symbolRanges = new LinkedList<>();
+        SymbolSet.TYPE symbolSetType = determineSymbolSetType(aCharIterator);
+        StringBuilder characters = new StringBuilder(aCharIterator.remaining());
+        List<SymbolSet.SymbolRange> symbolRanges = new ArrayList<>();
+        List<SymbolSet> symbolSets = new ArrayList<>();
         boolean rangeStarted = false;
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ']':
-                    return handleEndCharacterVariationsCharacter(openSquareBraceIndex, symbolSetType, sb, symbolRanges, rangeStarted);
+                    String pattern = aCharIterator.substringToCurrPos(openSquareBraceIndex);
+                    SymbolSet finalSymbolSet = createSymbolSetFromSquareBrackets(pattern, symbolSetType, characters, symbolRanges, symbolSets);
+                    aNodesStartPos.put(finalSymbolSet, openSquareBraceIndex);
+                    return finalSymbolSet;
 
                 case '-':
                     if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
-                        sb.append(c);
+                        characters.append('-');
                     } else {
                         rangeStarted = true;
                     }
                     break;
 
                 case '\\':
-                    handleBackslashCharacter(rangeStarted, sb, symbolRanges);
+                    Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
+
+                    if (rangeStarted) {
+                        if (symbolSet.isPresent()) {
+                            throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
+                        }
+                        handleSymbolRange(characters, symbolRanges);
+                    } else {
+                        symbolSet.ifPresent(symbolSets::add);
+                    }
                     rangeStarted = false;
                     break;
 
                 default:
-                    sb.append(c);
-                    handleRange(rangeStarted, sb, symbolRanges);
-                    rangeStarted = false;
+                    characters.append(c);
+                    if (rangeStarted) {
+                        handleSymbolRange(characters, symbolRanges);
+                        rangeStarted = false;
+                    }
+                    break;
             }
         }
 
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private SymbolSet handleEndCharacterVariationsCharacter(int openSquareBraceIndex, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges, boolean rangeStarted) {
-        handleRange(rangeStarted, sb, symbolRanges);
-        Character[] strings;
-        if (sb.length() == 0) {
-            strings = ZERO_LENGTH_CHARACTER_ARRAY;
+    private static SymbolSet.TYPE determineSymbolSetType(CharIterator charIterator) {
+        if (charIterator.peek() == '^') {
+            charIterator.skip();
+            return SymbolSet.TYPE.NEGATIVE;
         } else {
-            strings = Util.stringToChars(sb);
+            return SymbolSet.TYPE.POSITIVE;
+        }
+    }
+
+    private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
+        // Skip backslash and add next symbol to characters
+        List<Node> nodes = new ArrayList<>(5);
+
+        StringBuilder sb = new StringBuilder(0);
+        handleEscapedCharacter(sb, nodes, false);
+        characters.append(sb);
+
+        if (nodes.isEmpty()) {
+            return Optional.empty();
         }
 
-        SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);
-        aNodesStartPos.put(symbolSet, openSquareBraceIndex);
-        return symbolSet;
+        if (nodes.size() > 1) {
+            throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+        } else {
+            return Optional.of((SymbolSet) nodes.get(0));
+        }
+    }
+
+    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolSet.SymbolRange> symbolRanges) {
+        // If we're here, then previous character was '-'.
+        // But dash can be used in such way: [a-c-]. In this case last dash is only a character, not a range start.
+        if (characters.length() < 2) {
+            characters.append('-');
+        } else {
+            char lastChar = characters.charAt(characters.length() - 1);
+            char firstChar = characters.charAt(characters.length() - 2);
+            characters.delete(characters.length() - 2, characters.length());
+            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+        }
+    }
+
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+        List<Character> characters = new ArrayList<>();
+        if (sb.length() > 0) {
+            characters.addAll(Arrays.asList(Util.stringToChars(sb)));
+        }
+
+        for (SymbolSet symbolSet : symbolSets) {
+            characters.addAll(Arrays.asList(symbolSet.getSymbols()));
+        }
+
+        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
     }
 
     public void build() {

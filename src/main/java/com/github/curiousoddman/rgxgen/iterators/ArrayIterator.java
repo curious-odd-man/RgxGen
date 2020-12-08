@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 
 public class ArrayIterator extends StringIterator {
 
-    private final int      aMaxIndex;
+    private final int         aMaxIndex;
     private final Character[] aStrings;
 
     private int aIndex = -1;
@@ -37,10 +37,11 @@ public class ArrayIterator extends StringIterator {
 
     @Override
     public String nextImpl() {
-        try {
-            return aStrings[++aIndex].toString();
-        } catch (ArrayIndexOutOfBoundsException ignore) {
+        ++aIndex;
+        if (aIndex >= aStrings.length) {
             throw new NoSuchElementException("Not enough elements in arrays");
+        } else {
+            return aStrings[aIndex].toString();
         }
     }
 

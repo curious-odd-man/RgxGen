@@ -27,7 +27,6 @@ public class RegressionTests {
     @Test
     public void bug31_topLevelChoiceIsNotRecognizedTest() {
         String pattern = "1|2";
-        Pattern compile = Pattern.compile(pattern);
         RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
         StringIterator stringIterator = rgxGen.iterateUnique();
@@ -39,9 +38,8 @@ public class RegressionTests {
     }
 
     @Test
-    public void bug32_capAndDollarInTheMiddleAreNotHandled() {
+    public void bug32_capAndDollarInTheMiddleAreNotHandledTest() {
         String pattern = "(^x|y$)";
-        final Pattern compile = Pattern.compile(pattern);
         final RgxGen rgxGen = new RgxGen(pattern);
         assertNotNull(rgxGen); // Not throwing an exception is a success
         final StringIterator stringIterator = rgxGen.iterateUnique();
@@ -50,5 +48,31 @@ public class RegressionTests {
         assertEquals("x", stringIterator.next());
         assertEquals("y", stringIterator.next());
         assertFalse(stringIterator.hasNext());
+    }
+
+    @Test
+    public void bug53_incorrectHandlingOfDashInSquareBracketsTest() {
+        String pattern = "^[a-zA-Z0-9-._:]*$";
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
+        assertNotNull(rgxGen); // Not throwing an exception is a success
+        for (int i = 0; i < 100; i++) {
+            String generated = rgxGen.generate();
+            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
+                                                                                   .matches());
+        }
+    }
+
+    @Test
+    public void bug53_incorrectHandlingOfDashInSquareBracketsVariation1Test() {
+        String pattern = "[\\s-a]";
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
+        assertNotNull(rgxGen); // Not throwing an exception is a success
+        for (int i = 0; i < 100; i++) {
+            String generated = rgxGen.generate();
+            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
+                                                                                   .matches());
+        }
     }
 }
