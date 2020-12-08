@@ -74,6 +74,7 @@ Changes in snapshot:
 - Feature: Case Insensitive generation support [#47](https://github.com/curious-odd-man/RgxGen/issues/47)
 - Feature: Support for `\b` and `\B` escape sequences and `tab`, `carriage return` and `line feed` characters. [#51](https://github.com/curious-odd-man/RgxGen/issues/51)
 - Fixed: Caret `^` and dollar `$` markers can be used anywhere in pattern [#32](https://github.com/curious-odd-man/RgxGen/issues/32)
+- Fixed: Unable to parse pattern `[a-c-]`. [#53](https://github.com/curious-odd-man/RgxGen/issues/53)
 
 ### Code: 
 ```java
