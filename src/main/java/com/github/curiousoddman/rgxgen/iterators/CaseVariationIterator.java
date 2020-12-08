@@ -47,7 +47,9 @@ public class CaseVariationIterator extends StringIterator {
     protected String nextImpl() {
         if (!hasNext) {
             throw new NoSuchElementException("No more variations");
-        } else if (aSwitchableCharPositions.isEmpty()) {        // Only one possible value. No variations...
+        }
+
+        if (aSwitchableCharPositions.isEmpty()) {        // Only one possible value. No variations...
             hasNext = false;
             return aOriginalValue;
         } else if (aCurrentPos < 0) {       // First time return all lower-case value

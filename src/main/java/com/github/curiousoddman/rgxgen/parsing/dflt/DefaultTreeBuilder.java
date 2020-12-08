@@ -145,7 +145,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private static void assertCorrectCharacter(char currentChar) {
         if (currentChar != '^' && currentChar != '$') {
-            throw new RuntimeException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
+            throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
         }
     }
 
@@ -528,12 +528,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             if (isChoice) {
                 if (choices.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(EMPTY_NODES_ARR));
             } else {
                 if (nodes.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(EMPTY_NODES_ARR));
             }
@@ -653,7 +653,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges, List<SymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
         List<Character> characters = new ArrayList<>();
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));

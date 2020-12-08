@@ -130,7 +130,7 @@ public class SymbolSet extends Node {
     }
 
     private static Collection<Character> rangeToList(SymbolRange range) {
-        List<Character> chars = new ArrayList<>(range.aTo - range.aFrom + 1);
+        Collection<Character> chars = new ArrayList<>(range.aTo - range.aFrom + 1);
         for (int i = range.aFrom; i <= range.aTo; i++) {
             chars.add((char) i);
         }
