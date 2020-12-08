@@ -18,6 +18,7 @@ package com.github.curiousoddman.rgxgen.util;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalInt;
 import java.util.Random;
 

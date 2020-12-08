@@ -34,8 +34,9 @@ public class FailingParsingTests {
     @Test
     public void disallowedGroupReferenceTest() {
         expectedEx.expect(RgxGenParseException.class);
-        String expectedMessage = "Unexpected escape character after dash symbol.\n'd)[a-\\1]'\n      ^";
-        expectedEx.expectMessage(expectedMessage);
+        expectedEx.expectMessage("Group ref is not expected here. \n" +
+                                         "')[a-\\1]'\n" +
+                                         "      ^");
 
         String pattern = "(asd)[a-\\1]";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
