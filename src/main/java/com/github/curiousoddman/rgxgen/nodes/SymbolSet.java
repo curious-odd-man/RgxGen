@@ -73,14 +73,6 @@ public class SymbolSet extends Node {
             aFrom = from;
             aTo = to;
         }
-
-        int getFrom() {
-            return aFrom;
-        }
-
-        int getTo() {
-            return aTo;
-        }
     }
 
     private final Collection<Character> aInitial;

@@ -582,8 +582,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '\\':
                     Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
 
-                    // When range started - we use 2 last characters to find out bounds of the range
-                    // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
                     if (rangeStarted) {
                         if (symbolSet.isPresent()) {
                             throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
@@ -619,7 +617,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
         // Skip backslash and add next symbol to characters
-        List<Node> nodes = new ArrayList<>();
+        List<Node> nodes = new ArrayList<>(5);
 
         StringBuilder sb = new StringBuilder(0);
         handleEscapedCharacter(sb, nodes, false);
@@ -632,11 +630,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (nodes.size() > 1) {
             throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
         } else {
-            if (nodes.get(0) instanceof SymbolSet) {
-                return Optional.of((SymbolSet) nodes.get(0));
-            } else {
-                throw new RgxGenParseException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-            }
+            return Optional.of((SymbolSet) nodes.get(0));
         }
     }
 
