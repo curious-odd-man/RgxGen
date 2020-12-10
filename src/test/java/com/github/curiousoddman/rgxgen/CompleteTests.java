@@ -6,8 +6,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Random;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,7 +18,7 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class CompleteTests {
     @Parameterized.Parameters(name = "{3}: {0}")
-    public static Collection<Object[]> data() {
+    public static List<Object[]> data() {
         return Arrays.stream(new Object[][]{
                 {"Card number", Boolean.FALSE, "[a-zA-Z]{2}[0-9]{2}[a-zA-Z0-9]{4}[0-9]{7}([a-zA-Z0-9]?){0,16}"},
                 {"IP v4", Boolean.FALSE, "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9])"},
