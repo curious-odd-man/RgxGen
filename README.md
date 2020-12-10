@@ -43,39 +43,9 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.2</version>
+    <version>1.3</version>
 </dependency>
 ```
-
-#### The Latest SNAPSHOT:
-```xml
-<project>
-    <repositories>
-        <repository>
-            <id>snapshots-repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-    
-    <!--  .... -->
-    
-    <dependency>
-        <groupId>com.github.curious-odd-man</groupId>
-        <artifactId>rgxgen</artifactId>
-        <version>1.3-SNAPSHOT</version>
-    </dependency>
-</project>
-```
-
-Changes in snapshot:
-
-- Fixed: Added support for `\Q` and `\E` sequences [#43](https://github.com/curious-odd-man/RgxGen/issues/43)
-- Feature: Implemented controllable number of repetitions for infinite patterns [#45](https://github.com/curious-odd-man/RgxGen/issues/45)
-- Feature: Case Insensitive generation support [#47](https://github.com/curious-odd-man/RgxGen/issues/47)
-- Feature: Support for `\b` and `\B` escape sequences and `tab`, `carriage return` and `line feed` characters. [#51](https://github.com/curious-odd-man/RgxGen/issues/51)
-- Fixed: Caret `^` and dollar `$` markers can be used anywhere in pattern [#32](https://github.com/curious-odd-man/RgxGen/issues/32)
-- Fixed: Unable to parse pattern `[a-c-]`. [#53](https://github.com/curious-odd-man/RgxGen/issues/53)
-
 ### Code: 
 ```java
 public class Main {
