@@ -16,77 +16,26 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
-import java.util.stream.IntStream;
+
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-
-    private enum GroupType {
-        POSITIVE_LOOKAHEAD,
-        NEGATIVE_LOOKAHEAD,
-        POSITIVE_LOOKBEHIND,
-        NEGATIVE_LOOKBEHIND,
-        CAPTURE_GROUP,
-        NON_CAPTURE_GROUP;
-
-        public boolean isNegative() {
-            return this == NEGATIVE_LOOKAHEAD || this == NEGATIVE_LOOKBEHIND;
-        }
-    }
-
-    private static final String[] SINGLETON_UNDERSCORE_ARRAY = {"_"};
-    private static final int      HEX_RADIX                  = 16;
-    private static final String[] EMPTY_STRINGS_ARR          = new String[0];
-    private static final Node[]   EMPTY_NODES_ARR            = new Node[0];
+    private static final Character[]       SINGLETON_UNDERSCORE_ARRAY = {'_'};
+    private static final int               HEX_RADIX                  = 16;
+    private static final Node[]            EMPTY_NODES_ARR            = new Node[0];
+    private static final ConstantsProvider CONST_PROVIDER             = new ConstantsProvider();
 
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
-
-    /**
-     * Helper class for lazy initialization and reuse of some constants that are re-used.
-     * Use with caution - don't modify values inside those!!!
-     */
-    @SuppressWarnings("InstanceVariableMayNotBeInitialized")
-    private static class ConstantsProvider {
-        private String[]                    aDigits;
-        private String[]                    aWhiteSpaces;     // "\u000B" - is a vertical tab
-        private List<SymbolSet.SymbolRange> aWordCharRanges;
-
-        String[] getDigits() {
-            if (aDigits == null) {
-                aDigits = IntStream.rangeClosed(0, 9)
-                                   .mapToObj(Integer::toString)
-                                   .toArray(String[]::new);
-            }
-
-            return aDigits;
-        }
-
-        String[] getWhitespaces() {
-            if (aWhiteSpaces == null) {
-                aWhiteSpaces = new String[]{"\r", "\f", "\u000B", " ", "\t", "\n"};
-            }
-            return aWhiteSpaces;
-        }
-
-        List<SymbolSet.SymbolRange> getWordCharRanges() {
-            if (aWordCharRanges == null) {
-                aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS));
-            }
-
-            return aWordCharRanges;
-        }
-    }
-
-    private static final ConstantsProvider CONST_PROVIDER = new ConstantsProvider();
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -108,11 +57,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    StringBuilder, that is read and emptied
      * @param nodes nodes collection to add created node to.
      */
-    private void sbToFinal(StringBuilder sb, List<Node> nodes) {
+    private void sbToFinal(StringBuilder sb, Collection<Node> nodes) {
         if (sb.length() != 0) {
             FinalSymbol finalSymbol = new FinalSymbol(sb.toString());
-            aNodesStartPos.put(finalSymbol, aCharIterator.pos() - finalSymbol.getValue()
-                                                                             .length());
+            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue()
+                                                                                 .length());
             nodes.add(finalSymbol);
             sb.delete(0, Integer.MAX_VALUE);
         }
@@ -125,30 +74,42 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @return type of the group (@see GroupType enum)
      */
     private GroupType processGroupType() {
-        switch (aCharIterator.next(2)) {
-            case "?=":      // Positive Lookahead does not affect generation.
-                return GroupType.POSITIVE_LOOKAHEAD;
-
-            case "?:":      // Non-capture group does not affect generation.
-                return GroupType.NON_CAPTURE_GROUP;
-
-            case "?!":
-                return GroupType.NEGATIVE_LOOKAHEAD;
-
-            case "?<":
-                GroupType res = GroupType.POSITIVE_LOOKBEHIND;
-                char next = aCharIterator.next();
-                if (next == '!') {
-                    res = GroupType.NEGATIVE_LOOKBEHIND;
-                } else if (next != '=') {   // Positive Lookbehind does not affect generation.
+        GroupType groupType;
+        int skip = 2;
+        if (aCharIterator.peek() == '?') {
+            char pos2char = aCharIterator.peek(1);
+            switch (pos2char) {
+                case '<':
+                    skip = 3;
+                    char pos3char = aCharIterator.peek(2);
+                    if (pos3char == '!') {
+                        groupType = GroupType.NEGATIVE_LOOKBEHIND;
+                    } else if (pos3char == '=') {
+                        groupType = GroupType.POSITIVE_LOOKBEHIND;
+                    } else {
+                        aCharIterator.skip(skip);
+                        throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
+                    }
+                    break;
+                case '=':
+                    groupType = GroupType.POSITIVE_LOOKAHEAD;
+                    break;
+                case ':':
+                    groupType = GroupType.NON_CAPTURE_GROUP;
+                    break;
+                case '!':
+                    groupType = GroupType.NEGATIVE_LOOKAHEAD;
+                    break;
+                default:
+                    aCharIterator.skip(skip);
                     throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
-                }
-                return res;
-
-            default:
-                aCharIterator.skip(-2);
-                return GroupType.CAPTURE_GROUP;
+            }
+        } else {
+            return GroupType.CAPTURE_GROUP;
         }
+
+        aCharIterator.skip(skip);
+        return groupType;
     }
 
     private Node handleGroupEndCharacter(int startPos, StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex, GroupType groupType) {
@@ -175,28 +136,100 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
-        Integer captureGroupIndex = null;
+    private Integer getGroupIndexIfCapture(GroupType currentGroupType) {
         if (currentGroupType == GroupType.CAPTURE_GROUP) {
-            captureGroupIndex = aNextGroupIndex++;
+            return aNextGroupIndex++;
         }
-        List<Node> choices = new ArrayList<>();
-        List<Node> nodes = new ArrayList<>();
-        StringBuilder sb = new StringBuilder(aCharIterator.remaining());
+        return null;
+    }
+
+    private static void assertCorrectCharacter(char currentChar) {
+        if (currentChar != '^' && currentChar != '$') {
+            throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
+        }
+    }
+
+    /**
+     * There is limited numbed of characters that can precede ^ or follow $.
+     * This method verifies that the pattern is syntactically correct.
+     *
+     * @param currentChar character at current position
+     *                    NOTE! Must be either caret or dollar sign
+     */
+    private void verifyStartEndMarkerConsistency(char currentChar) {
+        assertCorrectCharacter(currentChar);
+        char charAtPos = aCharIterator.peek(currentChar == '^' ? -2 : 0);
+        String errorText;
+        switch (charAtPos) {
+            // These characters are allowed.
+            // Repetition will be handled later only if it follows these characters.
+            case '+':
+            case '*':
+            case '{':
+            case '?':
+            case 0x00:
+            case '\n':
+            case '\r':
+            case '|':
+                return;
+
+            case '^':
+            case '$':
+                errorText = "Start and end of line markers cannot be put together.";
+                break;
+
+            case '(':
+                if (currentChar == '$') {
+                    errorText = "After dollar only new line is allowed!";
+                } else {
+                    return;
+                }
+                break;
+
+            case ')':
+                if (currentChar == '^') {
+                    errorText = "Before caret only new line is allowed!";
+                } else {
+                    return;
+                }
+                break;
+
+            default:
+                errorText = currentChar == '^'
+                            ? "Before caret only new line is allowed!"
+                            : "After dollar only new line is allowed!";
+                break;
+
+        }
+
+        throw new PatternDoesNotMatchAnythingException(errorText + aCharIterator.context());
+    }
+
+    private Node parseGroup(int groupStartPos, GroupType currentGroupType) {
+        Integer captureGroupIndex = getGroupIndexIfCapture(currentGroupType);
+        int remainingLength = aCharIterator.remaining();
+        List<Node> choices = new ArrayList<>(remainingLength);
+        List<Node> nodes = new ArrayList<>(remainingLength);
+        StringBuilder sb = new StringBuilder(remainingLength);
         boolean isChoice = false;
         int choicesStartPos = groupStartPos;
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
+                case '^':
+                case '$':
+                    verifyStartEndMarkerConsistency(c);
+                    break;
+
                 case '[':
                     sbToFinal(sb, nodes);
-                    nodes.add(handleCharacterVariations());
+                    nodes.add(handleSquareBrackets());
                     break;
 
                 case '(':
                     sbToFinal(sb, nodes);
-                    int intGroupStartPos = aCharIterator.pos();
+                    int intGroupStartPos = aCharIterator.prevPos();
                     GroupType groupType = processGroupType();
                     nodes.add(parseGroup(intGroupStartPos, groupType));
                     break;
@@ -233,10 +266,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return handleGroupEndCharacter(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex, currentGroupType);
     }
 
-    private void handleAnySymbolCharacter(List<Node> nodes, StringBuilder sb) {
+    private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
         SymbolSet symbolSet = new SymbolSet();
-        aNodesStartPos.put(symbolSet, aCharIterator.pos());
+        aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
 
@@ -244,12 +277,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (sb.length() == 0 && nodes.isEmpty()) {
             // Special case when '(|a)' is used - like empty or something
             FinalSymbol finalSymbol = new FinalSymbol("");
-            aNodesStartPos.put(finalSymbol, aCharIterator.pos() + 1);
+            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() + 1);
             choices.add(finalSymbol);
         } else {
             sbToFinal(sb, nodes);
             choices.add(sequenceOrNot(choicesStartPos, nodes, choices, false, null));
-            choicesStartPos = aCharIterator.pos() + 1;
+            choicesStartPos = aCharIterator.prevPos() + 1;
             nodes.clear();
         }
         return choicesStartPos;
@@ -260,14 +293,23 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         Node repeatNode;
         if (sb.length() == 0) {
             // Repetition for the last node
-            repeatNode = nodes.remove(nodes.size() - 1);
+            if (nodes.isEmpty()) {
+                char previousChar = aCharIterator.peek(-2);
+                if (previousChar == '^' || previousChar == '$') {
+                    throw new TokenNotQuantifiableException(previousChar + " at " + aCharIterator.context());
+                } else {
+                    throw new RgxGenParseException("Cannot repeat nothing at" + aCharIterator.context());
+                }
+            } else {
+                repeatNode = nodes.remove(nodes.size() - 1);
+            }
         } else {
             // Repetition for the last character
             char charToRepeat = sb.charAt(sb.length() - 1);
             sb.deleteCharAt(sb.length() - 1);
             sbToFinal(sb, nodes);
             repeatNode = new FinalSymbol(String.valueOf(charToRepeat));
-            aNodesStartPos.put(repeatNode, aCharIterator.pos() - 1);
+            aNodesStartPos.put(repeatNode, aCharIterator.prevPos() - 1);
         }
         nodes.add(handleRepeat(c, repeatNode));
     }
@@ -284,7 +326,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (c == '{') {
             aCharIterator.skip();
             hexValue = aCharIterator.nextUntil('}');
-            aCharIterator.skip();
         } else {
             hexValue = aCharIterator.next(2);
         }
@@ -303,7 +344,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private void handleGroupReference(boolean groupRefAllowed, Collection<Node> nodes, char firstCharacter) {
         if (groupRefAllowed) {
-            int startPos = aCharIterator.pos() - 1;
+            int startPos = aCharIterator.prevPos() - 1;
             String digitsSubstring = aCharIterator.takeWhile(Character::isDigit);
             String groupNumber = firstCharacter + digitsSubstring;
             GroupRef groupRef = new GroupRef('\\' + groupNumber, Integer.parseInt(groupNumber));
@@ -323,32 +364,43 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    string builder containing all previous characters before the escape
      * @param nodes previously created nodes; new node will be appended here
      */
-    private void handleEscapedCharacter(StringBuilder sb, List<Node> nodes, boolean groupRefAllowed) {
+    private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
-        SymbolSet symbolSet = null;
+        Node createdNode = null;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                symbolSet = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             // Hex character:
             //   \xNN or \x{NNNN}
             case 'x':
                 sb.append((char) parseHexadecimal());
+                break;
+
+            case 'Q':
+                sb.append(aCharIterator.nextUntil("\\E"));
+                break;
+
+            case 'E':       // End of escape sequence can be ignored.
+                break;
+
+            case 'b':      // These both cannot only be used at start/end of the pattern.
+            case 'B':      // Later I could add validation that these are not used in the middle of pattern.
                 break;
 
             // Group reference number
@@ -370,9 +422,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 break;
         }
 
-        if (symbolSet != null) {
-            aNodesStartPos.put(symbolSet, aCharIterator.pos() - 1);
-            nodes.add(symbolSet);
+        if (createdNode != null) {
+            aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
+            nodes.add(createdNode);
         }
     }
 
@@ -385,12 +437,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private Repeat handleRepeatInCurvyBraces(int startPos, Node repeatNode) {
         StringBuilder sb = new StringBuilder(10);
         int min = -1;
-        int contextIndex = aCharIterator.pos();
+        int contextIndex = aCharIterator.prevPos();
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ',': {
-                    int tmpContextIndex = aCharIterator.pos() - 1;
+                    int tmpContextIndex = aCharIterator.prevPos() - 1;
                     try {
                         min = Integer.parseInt(sb.toString());
                     } catch (NumberFormatException e) {
@@ -436,7 +488,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private Repeat handleRepeat(char c, Node repeatNode) {
         int startPos = aNodesStartPos.get(repeatNode);
-        Repeat node = null;
+        Repeat node;
         switch (c) {
             case '*':
                 node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 0);
@@ -476,12 +528,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             if (isChoice) {
                 if (choices.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(EMPTY_NODES_ARR));
             } else {
                 if (nodes.isEmpty()) {
-                    throw new RuntimeException("Empty nodes");
+                    throw new RgxGenParseException("Empty nodes");
                 }
                 resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(EMPTY_NODES_ARR));
             }
@@ -497,120 +549,119 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static void handleRange(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
-        if (rangeStarted) {
-            char lastChar = sb.charAt(sb.length() - 1);
-            char firstChar = sb.charAt(sb.length() - 2);
-            sb.delete(sb.length() - 2, sb.length());
-            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
-        }
-    }
-
-    private boolean handleBackslashCharacter(boolean rangeStarted, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges) {
-        // Skip backslash and add next symbol to characters
-        List<Node> nodes = new LinkedList<>();
-
-        // When range started - we use 2 last characters to find out bounds of the range
-        // When range not started - we give empty StringBuilder inside, to avoid creation of FinalSymbol node, when parsing Meta Sequence
-        if (rangeStarted) {
-            handleEscapedCharacter(sb, nodes, false);
-            if (!nodes.isEmpty()) {
-                throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
-            }
-            handleRange(true, sb, symbolRanges);
-        } else {
-            StringBuilder tmpSb = new StringBuilder(0);
-            handleEscapedCharacter(tmpSb, nodes, false);
-            sb.append(tmpSb);
-        }
-
-        if (!nodes.isEmpty()) {
-            if (nodes.size() > 1) {
-                throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-            } else {
-                if (nodes.get(0) instanceof SymbolSet) {
-                    for (String symbol : ((SymbolSet) nodes.get(0)).getSymbols()) {
-                        sb.append(symbol);
-                    }
-                } else {
-                    throw new RgxGenParseException("Unexpected node found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
-                }
-            }
-        }
-
-        return false;
-    }
-
     /**
-     * This function parses expression in square brackets [...]
-     * It should be called when aCurrentIndex has index of first character after opening bracket - [
+     * It should be called when aCharIterator is on first character after opening bracket - [
      *
-     * @return Node that covers expression in square brackets
+     * @return Node representing expression in square brackets
      */
-    private Node handleCharacterVariations() {
-        int openSquareBraceIndex = aCharIterator.pos();
-        SymbolSet.TYPE symbolSetType = SymbolSet.TYPE.POSITIVE;
-        if (aCharIterator.peek() == '^') {
-            symbolSetType = SymbolSet.TYPE.NEGATIVE;
-            aCharIterator.next();
-        }
-
-        StringBuilder sb = new StringBuilder(aCharIterator.remaining());
-        List<SymbolSet.SymbolRange> symbolRanges = new LinkedList<>();
+    private Node handleSquareBrackets() {
+        int openSquareBraceIndex = aCharIterator.prevPos();
+        SymbolSet.TYPE symbolSetType = determineSymbolSetType(aCharIterator);
+        StringBuilder characters = new StringBuilder(aCharIterator.remaining());
+        List<SymbolSet.SymbolRange> symbolRanges = new ArrayList<>();
+        List<SymbolSet> symbolSets = new ArrayList<>();
         boolean rangeStarted = false;
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case ']':
-                    return handleEndCharacterVariationsCharacter(openSquareBraceIndex, symbolSetType, sb, symbolRanges, rangeStarted);
+                    String pattern = aCharIterator.substringToCurrPos(openSquareBraceIndex);
+                    SymbolSet finalSymbolSet = createSymbolSetFromSquareBrackets(pattern, symbolSetType, characters, symbolRanges, symbolSets);
+                    aNodesStartPos.put(finalSymbolSet, openSquareBraceIndex);
+                    return finalSymbolSet;
 
                 case '-':
                     if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
-                        sb.append(c);
+                        characters.append('-');
                     } else {
                         rangeStarted = true;
                     }
                     break;
 
                 case '\\':
-                    rangeStarted = handleBackslashCharacter(rangeStarted, sb, symbolRanges);
+                    Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
+
+                    if (rangeStarted) {
+                        if (symbolSet.isPresent()) {
+                            throw new RgxGenParseException("Cannot make range with a shorthand escape sequences before '" + aCharIterator.context() + '\'');
+                        }
+                        handleSymbolRange(characters, symbolRanges);
+                    } else {
+                        symbolSet.ifPresent(symbolSets::add);
+                    }
+                    rangeStarted = false;
                     break;
 
                 default:
-                    sb.append(c);
-                    handleRange(rangeStarted, sb, symbolRanges);
-                    rangeStarted = false;
+                    characters.append(c);
+                    if (rangeStarted) {
+                        handleSymbolRange(characters, symbolRanges);
+                        rangeStarted = false;
+                    }
+                    break;
             }
         }
 
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private SymbolSet handleEndCharacterVariationsCharacter(int openSquareBraceIndex, SymbolSet.TYPE symbolSetType, StringBuilder sb, List<SymbolSet.SymbolRange> symbolRanges, boolean rangeStarted) {
-        handleRange(rangeStarted, sb, symbolRanges);
-        String[] strings;
-        if (sb.length() == 0) {
-            strings = EMPTY_STRINGS_ARR;
+    private static SymbolSet.TYPE determineSymbolSetType(CharIterator charIterator) {
+        if (charIterator.peek() == '^') {
+            charIterator.skip();
+            return SymbolSet.TYPE.NEGATIVE;
         } else {
-            strings = Util.stringToCharsSubstrings(sb.toString());
+            return SymbolSet.TYPE.POSITIVE;
+        }
+    }
+
+    private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
+        // Skip backslash and add next symbol to characters
+        List<Node> nodes = new ArrayList<>(5);
+
+        StringBuilder sb = new StringBuilder(0);
+        handleEscapedCharacter(sb, nodes, false);
+        characters.append(sb);
+
+        if (nodes.isEmpty()) {
+            return Optional.empty();
         }
 
-        SymbolSet symbolSet = new SymbolSet(aCharIterator.substringToCurrPos(openSquareBraceIndex), symbolRanges, strings, symbolSetType);
-        aNodesStartPos.put(symbolSet, openSquareBraceIndex);
-        return symbolSet;
+        if (nodes.size() > 1) {
+            throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
+        } else {
+            return Optional.of((SymbolSet) nodes.get(0));
+        }
+    }
+
+    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolSet.SymbolRange> symbolRanges) {
+        // If we're here, then previous character was '-'.
+        // But dash can be used in such way: [a-c-]. In this case last dash is only a character, not a range start.
+        if (characters.length() < 2) {
+            characters.append('-');
+        } else {
+            char lastChar = characters.charAt(characters.length() - 1);
+            char firstChar = characters.charAt(characters.length() - 2);
+            characters.delete(characters.length() - 2, characters.length());
+            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+        }
+    }
+
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+        List<Character> characters = new ArrayList<>();
+        if (sb.length() > 0) {
+            characters.addAll(Arrays.asList(Util.stringToChars(sb)));
+        }
+
+        for (SymbolSet symbolSet : symbolSets) {
+            characters.addAll(Arrays.asList(symbolSet.getSymbols()));
+        }
+
+        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
     }
 
     public void build() {
-        if (aCharIterator.peek() == '^') {
-            aCharIterator.next();
-        }
-
-        if (aCharIterator.last() == '$') {
-            aCharIterator.setBound(-1);
-        }
-
-        aNode = parseGroup(aCharIterator.pos() + 1, GroupType.NON_CAPTURE_GROUP);
+        aNode = parseGroup(aCharIterator.prevPos() + 1, GroupType.NON_CAPTURE_GROUP);
         if (aCharIterator.hasNext()) {
             throw new RgxGenParseException("Expression was not fully parsed: " + aCharIterator.context());
         }

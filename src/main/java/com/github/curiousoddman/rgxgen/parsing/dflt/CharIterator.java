@@ -20,6 +20,7 @@ import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 /**
@@ -29,17 +30,18 @@ public class CharIterator implements Iterator<Character> {
 
     private final String aValue;
 
-    private int aLastIndex;
+    private int aBoundIndex;
     private int aCurrentIndex;
 
     public CharIterator(String value) {
         aValue = value;
-        aLastIndex = aValue.length();
+        aBoundIndex = aValue.length();
+        aCurrentIndex = 0;
     }
 
     @Override
     public boolean hasNext() {
-        return aCurrentIndex < aLastIndex;
+        return aCurrentIndex < aBoundIndex;
     }
 
     /**
@@ -65,7 +67,7 @@ public class CharIterator implements Iterator<Character> {
      * @return next character
      */
     public char peek() {
-        return aValue.charAt(aCurrentIndex);
+        return peek(0);
     }
 
     /**
@@ -75,7 +77,11 @@ public class CharIterator implements Iterator<Character> {
      * @return character by offset from next
      */
     public char peek(int offset) {
-        return aValue.charAt(aCurrentIndex + offset);
+        int pos = aCurrentIndex + offset;
+        if (pos < 0 || pos >= aBoundIndex) {
+            return 0x00;
+        }
+        return aValue.charAt(pos);
     }
 
     /**
@@ -99,8 +105,12 @@ public class CharIterator implements Iterator<Character> {
      * @return substring start from next of {@code length} characters
      */
     public String next(int length) {
-        String substring = aValue.substring(aCurrentIndex, aCurrentIndex + length);
-        aCurrentIndex += length;
+        int upTo = aCurrentIndex + length;
+        if (upTo > aBoundIndex) {
+            upTo = aBoundIndex;
+        }
+        String substring = aValue.substring(aCurrentIndex, upTo);
+        aCurrentIndex = upTo;
         return substring;
     }
 
@@ -123,11 +133,11 @@ public class CharIterator implements Iterator<Character> {
      */
     public String context(int index) {
         int start = Math.max(0, index - 5);
-        int end = Math.min(aLastIndex, index + 5);
+        int end = Math.min(aBoundIndex, index + 5);
         int offsetOfPointer = start == 0
                               ? index
                               : 5;
-        return "\n'" + aValue.substring(start, end) + "'\n" + Util.multiplicate(' ', 1 + offsetOfPointer) + '^';
+        return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeat_char(' ', 1 + offsetOfPointer) + '^';
     }
 
     /**
@@ -136,26 +146,61 @@ public class CharIterator implements Iterator<Character> {
      * @return num of characters
      */
     public int remaining() {
-        return aLastIndex - aCurrentIndex;
+        return aBoundIndex - aCurrentIndex;
     }
 
     /**
-     * Returns substring from next character up to next not escaped character {@code c}
-     * Cursor is advanced to a position of character {@code c}
+     * Returns substring from 'next' character UP TO first not escaped character {@code c}
+     * Cursor is advanced to a position after character {@code c}
+     * <p>
+     * Example:
+     * For text {@code '0123456789'}, {@code nextUntil('8')} will return {@code '01234567'} and put cursor before {@code '9'}
      *
      * @param c character to search for
      * @return substring from next character up to next not escaped character {@code c}
      * @throws NoSuchElementException if no such character present after next character
      */
     public String nextUntil(char c) {
+        return nextUntil((str, fromIdx) -> str.indexOf(c, fromIdx), 1, true);
+    }
+
+    /**
+     * Returns substring from next character up to next occurrence of {@code s}
+     * Cursor is advanced to a position after last character in {@code s}
+     * <p>
+     * Example:
+     * For text {@code '0123456789'}, {@code nextUntil("456")} will return {@code '0123'} and put cursor before {@code '7'}
+     *
+     * @param s string to search for
+     * @return substring from next character up to next not escaped occurrence of s.
+     * if string not found - returns all remaining characters
+     */
+    public String nextUntil(String s) {
+        return nextUntil((str, fromIdx) -> str.indexOf(s, fromIdx), s.length(), false);
+    }
+
+    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
         int startIndex = aCurrentIndex;
+        int substringEnd;
         while (true) {
             // Find ending character
-            aCurrentIndex = aValue.indexOf(c, aCurrentIndex);
-            if (aCurrentIndex == -1) {
-                throw new NoSuchElementException("Could not find character '" + c + "' in string: '" + aValue.substring(startIndex));
+            aCurrentIndex = indexOf.apply(aValue, aCurrentIndex);
+            // Found, but outside of the bounds...
+            if (aCurrentIndex + len > aBoundIndex) {
+                aCurrentIndex = aBoundIndex;
+                substringEnd = aCurrentIndex;
+                break;
+            } else if (aCurrentIndex == -1) {
+                // Not present in text
+                if (mustExist) {
+                    throw new NoSuchElementException("Could not find termination sequence/character in string: '" + aValue.substring(startIndex));
+                } else {
+                    aCurrentIndex = aBoundIndex;
+                    substringEnd = aCurrentIndex;
+                    break;
+                }
             }
-            int cnt = 1;        // One, because we subtract it later from endIndex. Just to avoid extra subtraction
+            int cnt = 1;        // One, because we subtract it from aCurrentIndex. Just to avoid extra subtraction
             // Count how much backslashes there are -
             // Even number means that they all are escaped
             // Odd number means that the {@code c} is escaped
@@ -163,8 +208,10 @@ public class CharIterator implements Iterator<Character> {
                 ++cnt;
             }
 
-            // because count was 1, not 0 initially we do not equal comparison
+            // initially count was 1, not 0 - we do != comparison
             if (cnt % 2 != 0) {
+                substringEnd = aCurrentIndex;
+                aCurrentIndex += len;
                 break;
             }
 
@@ -172,7 +219,7 @@ public class CharIterator implements Iterator<Character> {
             ++aCurrentIndex;
         }
 
-        return aValue.substring(startIndex, aCurrentIndex);
+        return aValue.substring(startIndex, substringEnd);
     }
 
     /**
@@ -199,8 +246,8 @@ public class CharIterator implements Iterator<Character> {
      *
      * @return last character that would be iterated over
      */
-    public char last() {
-        return aValue.charAt(aLastIndex - 1);
+    public char lastChar() {
+        return aValue.charAt(aBoundIndex - 1);
     }
 
     /**
@@ -208,8 +255,8 @@ public class CharIterator implements Iterator<Character> {
      *
      * @param offset offset in respect to current bound
      */
-    public void setBound(int offset) {
-        aLastIndex += offset;
+    public void modifyBound(int offset) {
+        aBoundIndex += offset;
     }
 
     /**
@@ -217,7 +264,7 @@ public class CharIterator implements Iterator<Character> {
      *
      * @return index
      */
-    public int pos() {
+    public int prevPos() {
         return aCurrentIndex - 1;
     }
 

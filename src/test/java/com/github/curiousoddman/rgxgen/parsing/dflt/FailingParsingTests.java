@@ -1,8 +1,8 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
-import com.github.curiousoddman.rgxgen.generator.nodes.FinalSymbol;
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
+import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
+import com.github.curiousoddman.rgxgen.nodes.Node;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,6 +27,18 @@ public class FailingParsingTests {
                                          "    ^");
 
         String pattern = "(?<xxx)";
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
+        defaultTreeBuilder.build();
+    }
+
+    @Test
+    public void lookaheadIncorrectPatternTest() {
+        expectedEx.expect(RgxGenParseException.class);
+        expectedEx.expectMessage("Unexpected symbol in pattern: \n" +
+                                         "'(?xxx)'\n" +
+                                         "   ^");
+
+        String pattern = "(?xxx)";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
         defaultTreeBuilder.build();
     }
@@ -125,5 +137,15 @@ public class FailingParsingTests {
                                          "   ^");
 
         RgxGen gem = new RgxGen("a{\\");
+    }
+
+    @Test
+    public void nothingToRepeatTest() {
+        expectedEx.expect(RgxGenParseException.class);
+        expectedEx.expectMessage("Cannot repeat nothing at\n" +
+                                         "'+asdf'\n" +
+                                         " ^");
+
+        RgxGen gem = new RgxGen("+asdfqwer");
     }
 }

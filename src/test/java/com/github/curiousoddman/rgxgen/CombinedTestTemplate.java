@@ -1,31 +1,42 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.data.DataInterface;
 import org.junit.Before;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
-@RunWith(Parameterized.class)
-public abstract class CombinedTestTemplate {
+import static org.junit.Assume.assumeTrue;
+
+public abstract class CombinedTestTemplate<T extends DataInterface> {
 
     @Parameterized.Parameter
-    public TestPattern aTestPattern;
+    public T aTestPattern;
 
-    protected Pattern aPattern;
+    protected Pattern aCompiledPattern;
 
     @Before
     public void setUp() {
-        aPattern = Pattern.compile(aTestPattern.aPattern);
+        setCompiledPattern(0);
+    }
+
+    public void setCompiledPattern(int flags) {
+        try {
+            aCompiledPattern = Pattern.compile(aTestPattern.getPattern(), flags);
+        } catch (PatternSyntaxException e) {
+            aCompiledPattern = null;
+        }
     }
 
     protected boolean isValidGenerated(String value) {
+        assumeTrue(aTestPattern.isUsableWithJavaPattern());
         if (aTestPattern.useFindForMatching()) {
-            return aPattern.matcher(value)
-                           .find();
+            return aCompiledPattern.matcher(value)
+                                   .find();
         } else {
-            return aPattern.matcher(value)
-                           .matches();
+            return aCompiledPattern.matcher(value)
+                                   .matches();
         }
     }
 }

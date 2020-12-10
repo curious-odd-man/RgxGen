@@ -16,17 +16,16 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 
 public class ArrayIterator extends StringIterator {
 
-    private final int      aMaxIndex;
-    private final String[] aStrings;
+    private final int         aMaxIndex;
+    private final Character[] aStrings;
 
     private int aIndex = -1;
 
-    public ArrayIterator(String[] strings) {
+    public ArrayIterator(Character[] strings) {
         aStrings = strings;
         aMaxIndex = aStrings.length - 1;        // Because of prefix increment in nextImpl()
     }
@@ -38,10 +37,11 @@ public class ArrayIterator extends StringIterator {
 
     @Override
     public String nextImpl() {
-        try {
-            return aStrings[++aIndex];
-        } catch (ArrayIndexOutOfBoundsException ignore) {
+        ++aIndex;
+        if (aIndex >= aStrings.length) {
             throw new NoSuchElementException("Not enough elements in arrays");
+        } else {
+            return aStrings[aIndex].toString();
         }
     }
 
@@ -52,12 +52,6 @@ public class ArrayIterator extends StringIterator {
 
     @Override
     public String current() {
-        return aStrings[aIndex];
-    }
-
-    @Override
-    public String toString() {
-        return "ArrayIterator[" + aIndex + "]{" + Arrays.toString(aStrings) +
-                '}';
+        return aStrings[aIndex].toString();
     }
 }

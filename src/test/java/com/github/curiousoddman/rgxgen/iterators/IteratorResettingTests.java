@@ -106,32 +106,37 @@ public class IteratorResettingTests {
     @Parameterized.Parameters(name = "{0}:{2}/{3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 1, 4, Arrays.asList("a", "a", "a", "a")},
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 3, 3, Arrays.asList("a", "b", null)},
-                {"Arr", new ArrayIterator(new String[]{"a", "b"}), 2, 4, Arrays.asList("a", "b", "a", "b")},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 1, Arrays.asList("a", "a", "a", "a")},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 3, Arrays.asList("a", "b", null)},
+                {"Arr", new ArrayIterator(new Character[]{'a', 'b'}), 2, Arrays.asList("a", "b", "a", "b")},
 
-                {"Single", new SingleValueIterator(), 1, 2, Arrays.asList("", "")},
-                {"Single", new SingleValueIterator(), 2, 2, Arrays.asList("", null)},
-                {"Single", new SingleValueIterator("s"), 1, 2, Arrays.asList("s", "s")},
-                {"Single", new SingleValueIterator("s"), 2, 3, Arrays.asList("s", null, "s")},
+                {"Single", new SingleValueIterator(), 1, Arrays.asList("", "")},
+                {"Single", new SingleValueIterator(), 2, Arrays.asList("", null)},
+                {"Single", new SingleValueIterator("s"), 1, Arrays.asList("s", "s")},
+                {"Single", new SingleValueIterator("s"), 2, Arrays.asList("s", null, "s")},
 
-                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 1, 3, Arrays.asList("a", "a", "a")},
-                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 2, 3, Arrays.asList("a", "aa", "a")},
-                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 3, 3, Arrays.asList("a", "aa", null)},
+                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 1, Arrays.asList("a", "a", "a")},
+                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 2, Arrays.asList("a", "aa", "a")},
+                {"IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 3, Arrays.asList("a", "aa", null)},
 
-                {"IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 3, 4, Arrays.asList("x", "y", "xx", "x")},
-                {"IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 10, 7, Arrays.asList("x", "y", "xx", "xy", "yx", "yy", null)},
+                {"IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 3, Arrays.asList("x", "y", "xx", "x")},
+                {"IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 10, Arrays.asList("x", "y", "xx", "xy", "yx", "yy", null)},
 
-                {"Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 1, 3, Arrays.asList("ab", "ab", "ab")},
-                {"Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 2, 3, Arrays.asList("ab", null, "ab")},
-                {"Perm", new PermutationsIterator(Arrays.asList(TestBiIterator::new, TestBiIterator::new)), 5, 6, Arrays.asList("xx", "xy", "yx", "yy", null, "xx")},
+                {"Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 1, Arrays.asList("ab", "ab", "ab")},
+                {"Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 2, Arrays.asList("ab", null, "ab")},
+                {"Perm", new PermutationsIterator(Arrays.asList(TestBiIterator::new, TestBiIterator::new)), 5, Arrays.asList("xx", "xy", "yx", "yy", null, "xx")},
 
-                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 1, 3, Arrays.asList("a", "a", "a")},
-                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 2, 3, Arrays.asList("a", "x", "a")},
-                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 3, 3, Arrays.asList("a", "x", "y")},
-                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, 4, Arrays.asList("a", "x", "y", null)},
-                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, 5, Arrays.asList("a", "x", "y", null, "a")},
-                });
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 1, Arrays.asList("a", "a", "a")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 2, Arrays.asList("a", "x", "a")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 3, Arrays.asList("a", "x", "y")},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null)},
+                {"Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null, "a")},
+
+                {"Case Variations", new CaseVariationIterator("a"), 1, Arrays.asList("a", "a", "a", "a")},
+                {"Case Variations", new CaseVariationIterator("a"), 2, Arrays.asList("a", "A", "a", "A")},
+                {"Case Variations", new CaseVariationIterator("a"), 3, Arrays.asList("a", "A", null, "a")},
+                {"Case Variations", new CaseVariationIterator("ab"), 3, Arrays.asList("ab", "Ab", "aB", "ab")},
+        });
     }
 
     @Parameterized.Parameter(0)
@@ -144,15 +149,12 @@ public class IteratorResettingTests {
     public int aResetAfter;
 
     @Parameterized.Parameter(3)
-    public int aNumIterations;
-
-    @Parameterized.Parameter(4)
     public List<String> aExpectedValues;
 
 
     @Test
     public void test() {
-        for (int i = 1; i <= aNumIterations; i++) {
+        for (int i = 1; i <= aExpectedValues.size(); i++) {
             String next;
             if (aIterator.hasNext()) {
                 next = aIterator.next();

@@ -1,8 +1,10 @@
 package com.github.curiousoddman.rgxgen;
 
-import com.github.curiousoddman.rgxgen.generator.nodes.*;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -48,8 +50,8 @@ public class LimitedInfinitePatternsTests {
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
                                                                    Arrays.stream(SymbolSet.getAllSymbols())
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
-                                                                                                  .map(v -> symbol + v))))
-                              .map(v -> 'a' + v)
+                                                                                                  .map(v -> "" + symbol + v))))
+                              .map(v -> "" + 'a' + v)
                                 .collect(Collectors.toList())
                 }
         });
@@ -77,7 +79,7 @@ public class LimitedInfinitePatternsTests {
 
     @Test
     public void generateUniqueTest() {
-        UniqueGenerationVisitor v = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
         aNode.visit(v);
         assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }

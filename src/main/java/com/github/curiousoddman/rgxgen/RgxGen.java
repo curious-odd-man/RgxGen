@@ -16,16 +16,18 @@ package com.github.curiousoddman.rgxgen;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.generator.nodes.Node;
-import com.github.curiousoddman.rgxgen.generator.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.NotMatchingGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.generator.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
+import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
 
@@ -33,15 +35,31 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
+    private static RgxGenProperties aGlobalProperties;
+
     private final Node aNode;
+
+    private RgxGenProperties aLocalProperties = aGlobalProperties;
+
+    /**
+     * Set default properties for RgxGen.
+     * Each new instance of RgxGen will use these properties as a backup, if property is not set per instance.
+     *
+     * @param properties configuration properties. Set {@code null} to reset.
+     * @apiNote Existing instances will not be affected. Only those, that will be created after this call.
+     * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
+     */
+    public static void setDefaultProperties(RgxGenProperties properties) {
+        aGlobalProperties = properties;
+    }
 
     /**
      * Parse pattern using DefaultTreeBuilder.
      *
      * @param pattern regex pattern for values generation
      */
-    public RgxGen(String pattern) {
-        this(new DefaultTreeBuilder(pattern));
+    public RgxGen(CharSequence pattern) {
+        this(new DefaultTreeBuilder(pattern.toString()));
     }
 
     /**
@@ -54,16 +72,48 @@ public class RgxGen {
     }
 
     /**
+     * Set properties for the instance of RgxGen.
+     * These options will override default values set by either {@code setDefaultProperties} or default hardcoded.
+     *
+     * @param properties configuration properties. Set {@code null} to reset.
+     * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
+     */
+    public void setProperties(RgxGenProperties properties) {
+        aLocalProperties = properties;
+        if (aLocalProperties == null) {
+            aLocalProperties = aGlobalProperties;
+        } else {
+            aLocalProperties.setDefaults(aGlobalProperties);
+        }
+    }
+
+    /**
+     * Returns estimation of unique values that can be generated with the pattern.
+     *
+     * @return number of unique values or null, if infinite
+     * @apiNote This might not be accurate! For example the pattern "(a{0,2}|b{0,2})" will estimate to 6,
+     * though actual count is only 5, because right and left part of group can yield same value
+     * @deprecated use {@link #getUniqueEstimation()} instead
+     */
+    @Deprecated
+    public BigInteger numUnique() {
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
+        aNode.visit(v);
+        return v.getEstimation()
+                .orElse(null);
+    }
+
+    /**
      * Returns estimation of unique values that can be generated with the pattern.
      *
      * @return number of unique values or null, if infinite
      * @apiNote This might not be accurate! For example the pattern "(a{0,2}|b{0,2})" will estimate to 6,
      * though actual count is only 5, because right and left part of group can yield same value
      */
-    public BigInteger numUnique() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor();
+    public Optional<BigInteger> getUniqueEstimation() {
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
-        return v.getCount();
+        return v.getEstimation();
     }
 
     /**
@@ -82,7 +132,7 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
-        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor();
+        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
         aNode.visit(ugv);
         return ugv.getUniqueStrings();
     }
@@ -106,6 +156,7 @@ public class RgxGen {
     public String generate(Random random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
+                                                .withProperties(aLocalProperties)
                                                 .get();
         aNode.visit(gv);
         return gv.getString();

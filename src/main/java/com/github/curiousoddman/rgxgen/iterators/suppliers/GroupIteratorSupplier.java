@@ -47,14 +47,4 @@ public class GroupIteratorSupplier implements Supplier<StringIterator> {
         }
         return stringIterator;
     }
-
-    @Override
-    public String toString() {
-        return "GroupIteratorSupplier{" +
-                "aIteratorSupplier=" + aIteratorSupplier +
-                ", aReferenceIteratorMap=" + aReferenceIteratorMap +
-                ", aGroupIterators=" + aGroupIteratorsMap +
-                ", aIndex=" + aIndex +
-                '}';
-    }
 }
