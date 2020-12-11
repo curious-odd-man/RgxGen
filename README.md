@@ -22,6 +22,7 @@ This is a java library that, given a regex pattern, allows to:
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
 [![javadoc](https://javadoc.io/badge2/com.github.curious-odd-man/rgxgen/javadoc.svg?style=plastic)](https://javadoc.io/doc/com.github.curious-odd-man/rgxgen)
 
+
 Build status:
 
 | Latest Release   | Latest snapshot  |
