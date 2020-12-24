@@ -21,7 +21,7 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-public class IncrementalLengthIterator extends StringIterator {
+public class IncrementalLengthIterator implements StringIterator {
     private final Supplier<StringIterator> aSupplier;
     private final int                      aMin;
     private final int                      aMax;
@@ -79,7 +79,7 @@ public class IncrementalLengthIterator extends StringIterator {
     }
 
     @Override
-    public String nextImpl() {
+    public String next() {
         if (aCurrentLength == 0) {
             ++aCurrentLength;
             return "";

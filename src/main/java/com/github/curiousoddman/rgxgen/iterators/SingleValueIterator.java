@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.NoSuchElementException;
 
-public class SingleValueIterator extends StringIterator {
+public class SingleValueIterator implements StringIterator {
     private final String aValue;
 
     private boolean hasNext;
@@ -38,7 +38,7 @@ public class SingleValueIterator extends StringIterator {
     }
 
     @Override
-    public String nextImpl() {
+    public String next() {
         if (!hasNext) {
             throw new NoSuchElementException("Cannot return a value second time.");
         }

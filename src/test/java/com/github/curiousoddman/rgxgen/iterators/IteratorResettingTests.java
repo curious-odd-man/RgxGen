@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
 public class IteratorResettingTests {
-    private static class TestIterator extends StringIterator {
+    private static class TestIterator implements StringIterator {
         private boolean ok = true;
 
         private String aValue = "a";
@@ -27,7 +27,7 @@ public class IteratorResettingTests {
         }
 
         @Override
-        protected String nextImpl() {
+        public String next() {
             if (ok) {
                 ok = false;
                 return aValue;
@@ -57,14 +57,14 @@ public class IteratorResettingTests {
         }
     }
 
-    private static class TestBiIterator extends StringIterator {
+    private static class TestBiIterator implements StringIterator {
 
         private String aCurrent;
 
         private int ok;
 
         @Override
-        protected String nextImpl() {
+        public String next() {
             if (hasNext()) {
                 ++ok;
                 if (ok == 1) {

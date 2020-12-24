@@ -16,7 +16,9 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-public class ReferenceIterator extends StringIterator {
+import java.util.NoSuchElementException;
+
+public class ReferenceIterator implements StringIterator {
     private StringIterator aOther;
     private boolean        hasNext = true;
     private String         aLast;
@@ -26,7 +28,10 @@ public class ReferenceIterator extends StringIterator {
     }
 
     @Override
-    protected String nextImpl() {
+    public String next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException("Cannot return value second time");
+        }
         hasNext = false;
         return aOther.current();
     }
