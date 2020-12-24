@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.NoSuchElementException;
 
-public class ArrayIterator extends StringIterator {
+public class ArrayIterator implements StringIterator {
 
     private final int         aMaxIndex;
     private final Character[] aStrings;
@@ -36,7 +36,7 @@ public class ArrayIterator extends StringIterator {
     }
 
     @Override
-    public String nextImpl() {
+    public String next() {
         ++aIndex;
         if (aIndex >= aStrings.length) {
             throw new NoSuchElementException("Not enough elements in arrays");

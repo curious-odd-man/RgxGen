@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.NoSuchElementException;
 
-public class ChoiceIterator extends StringIterator {
+public class ChoiceIterator implements StringIterator {
     private final StringIterator[] aIterators;
 
     private int aCurrentIteratorIndex;
@@ -33,7 +33,7 @@ public class ChoiceIterator extends StringIterator {
     }
 
     @Override
-    public String nextImpl() {
+    public String next() {
         if (!aIterators[aCurrentIteratorIndex].hasNext()) {
             ++aCurrentIteratorIndex;
             if (aCurrentIteratorIndex >= aIterators.length) {

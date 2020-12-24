@@ -22,7 +22,7 @@ import java.util.NoSuchElementException;
 import java.util.OptionalInt;
 import java.util.TreeMap;
 
-public class CaseVariationIterator extends StringIterator {
+public class CaseVariationIterator implements StringIterator {
     private final String                    aOriginalValue;
     private final StringBuilder             aValue;
     private final TreeMap<Integer, Boolean> aSwitchableCharPositions;       // true - lower, false - upper case
@@ -44,7 +44,7 @@ public class CaseVariationIterator extends StringIterator {
     }
 
     @Override
-    protected String nextImpl() {
+    public String next() {
         if (!hasNext) {
             throw new NoSuchElementException("No more variations");
         }

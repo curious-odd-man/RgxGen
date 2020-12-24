@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
-public class PermutationsIterator extends StringIterator {
+public class PermutationsIterator implements StringIterator {
     private final StringIterator[] aIterators;
 
     private boolean aInitialized;
@@ -47,7 +47,7 @@ public class PermutationsIterator extends StringIterator {
     }
 
     @Override
-    public String nextImpl() {
+    public String next() {
         // Initialize all value
         if (aInitialized) {
             // Advance one of iterators

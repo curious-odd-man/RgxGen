@@ -17,25 +17,21 @@ package com.github.curiousoddman.rgxgen.iterators;
 /* **************************************************************************/
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
 
-public abstract class StringIterator implements Iterator<String> {
-    @SuppressWarnings("IteratorNextCanNotThrowNoSuchElementException")
-    @Override
-    public String next() {
-        return nextImpl();
-    }
+public interface StringIterator extends Iterator<String> {
+    /**
+     * Reset the iterator to the initial position.
+     * After reset it will start iterating from the first value.
+     * <p>
+     * Can be used to restart iterator that returns {@code false} when {@code hasNext()} is called.
+     */
+    void reset();
 
     /**
-     * This method returns correct value only on top level iterator.
-     * For other iterators 2 steps are required - next() and then current().
+     * Return same value as last call to {@code next()}.
+     * Behavior is not defined if method is called before {@code next()}
      *
-     * @return next String.
-     * @throws NoSuchElementException if the iteration has no more elements
+     * @return Value returned by last call to {@code next()}.
      */
-    protected abstract String nextImpl();
-
-    public abstract void reset();
-
-    public abstract String current();
+    String current();
 }
