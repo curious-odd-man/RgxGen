@@ -75,14 +75,4 @@ public class RegressionTests {
                                                                                    .matches());
         }
     }
-
-    public static String PATTERN = "[ab]";
-    public static String PATTERN1 = "(a|b)";
-
-    @Test
-    public void main() {
-        RgxGen rgxGen = new RgxGen(PATTERN1);
-        StringIterator uniqueStrings = rgxGen.iterateUnique();
-        System.out.println(uniqueStrings.next());
-    }
 }
