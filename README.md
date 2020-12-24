@@ -107,7 +107,7 @@ public class Main {
 | <code>(a&#124;b)</code> |  Alternatives  |
 | \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
 
-RgxGen treats any other characters as literals and those are generated as is.
+RgxGen treats any other characters as literals - those are generated as is.
 
 </details>
 
@@ -208,7 +208,7 @@ For the similar reasons as with estimations - requested unique values iterator c
 ### Infinite patterns
 
 By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of characters should be matched.
-When generating data that would mean values of infinite length might be generated.
+When generating data, that would mean values of infinite length might be generated.
 It is highly doubtful anyone would require a string of infinite length, thus I've artificially limited repetitions in such patterns to 100 symbols, when generating random values.
 This value can be changed - please refer to [configuration](https://github.com/curious-odd-man/RgxGen#configuration) section.
 
