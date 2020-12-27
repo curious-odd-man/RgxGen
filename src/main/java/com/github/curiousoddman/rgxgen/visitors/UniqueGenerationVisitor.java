@@ -113,9 +113,6 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     public StringIterator getUniqueStrings() {
-        if (aIterators.size() != 1) {
-            throw new RuntimeException("Ahhh that is not expected!!!!");
-        }
         return aIterators.get(0)
                          .get();
     }
