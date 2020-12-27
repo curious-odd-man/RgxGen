@@ -18,10 +18,10 @@ package com.github.curiousoddman.rgxgen.visitors;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
+import com.github.curiousoddman.rgxgen.nodes.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -86,9 +86,11 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Sequence node) {
+        UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         for (Node n : node.getNodes()) {
-            n.visit(this);
+            n.visit(v);
         }
+        aIterators.add(new PermutationsIteratorSupplier(v.aIterators));
     }
 
     @Override
@@ -111,6 +113,10 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     public StringIterator getUniqueStrings() {
-        return new PermutationsIteratorSupplier(aIterators).get();
+        if (aIterators.size() != 1) {
+            throw new RuntimeException("Ahhh that is not expected!!!!");
+        }
+        return aIterators.get(0)
+                         .get();
     }
 }
