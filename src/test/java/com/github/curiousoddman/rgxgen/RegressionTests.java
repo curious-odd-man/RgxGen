@@ -75,4 +75,21 @@ public class RegressionTests {
                                                                                    .matches());
         }
     }
+
+    @Test
+    public void bug61_iterateUniqueProducesIncorrectPatternTest() {
+        RgxGen rgxGen = new RgxGen("a?b|c");
+        StringIterator noGroupIterator = rgxGen.iterateUnique();
+        RgxGen rgxGen1 = new RgxGen("(a?b)|c");
+        StringIterator withGroupIterator = rgxGen1.iterateUnique();
+        while (noGroupIterator.hasNext()) {
+            assertTrue(withGroupIterator.hasNext());
+            String next = noGroupIterator.next();
+            String next1 = withGroupIterator.next();
+            System.out.println("'" + next + "' : '" + next1 + "'");
+            assertEquals(next, next1);
+        }
+
+        assertFalse(withGroupIterator.hasNext());
+    }
 }

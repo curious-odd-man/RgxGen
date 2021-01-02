@@ -47,13 +47,39 @@ Enter your pattern and see the results.
     <version>1.3</version>
 </dependency>
 ```
+
+#### The Latest SNAPSHOT:
+```xml
+<project>
+    <repositories>
+        <repository>
+            <id>snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+    
+    <!--  .... -->
+    
+    <dependency>
+        <groupId>com.github.curious-odd-man</groupId>
+        <artifactId>rgxgen</artifactId>
+        <version>1.4-SNAPSHOT</version>
+    </dependency>
+</project>
+```
+
+Changes in snapshot:
+
+- Docs: Improved javadoc for [StringIterator](src/main/java/com/github/curiousoddman/rgxgen/iterators/StringIterator.java) class. [#59](https://github.com/curious-odd-man/RgxGen/issues/59)
+- Fixed: Incorrect unique values generation for pattern `a?b|c` [#61](https://github.com/curious-odd-man/RgxGen/issues/61)
+
 ### Code: 
 ```java
 public class Main {
     public static void main(String[] args){
         RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
         String s = rgxGen.generate();                                        // Generate new random value
-        BigInteger estimation = rgxGen.numUnique();                          // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
+        Optional<BigInteger> estimation = rgxGen.getUniqueEstimation();      // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
         StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
         String notMatching = rgxGen.generateNotMatching();                   // Generate not matching string
     }
@@ -196,7 +222,7 @@ public class Main {
 ## Limitations
 
 ### Estimation
-`rgxGen.numUnique()` - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
+`rgxGen.getUniqueEstimation()` - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
 For example: `"(a{0,2}|b{0,2})"`  will be estimated as 6, though actual number of unique values is 5. 
 That is because left and right alternative can produce same value.
 At the same time `"(|(a{1,2}|b{1,2}))"` will be correctly estimated to 5, though it will generate same values.
