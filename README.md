@@ -221,6 +221,11 @@ public class Main {
 
 ## Limitations
 
+### Lookahead and Lookbehind 
+
+Currently these two have very limited support. Please refer to [#63](https://github.com/curious-odd-man/RgxGen/issues/63).
+I'm currently working on the solution, but I cannot say when I come up with something.
+
 ### Estimation
 `rgxGen.getUniqueEstimation()` - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
 For example: `"(a{0,2}|b{0,2})"`  will be estimated as 6, though actual number of unique values is 5. 
