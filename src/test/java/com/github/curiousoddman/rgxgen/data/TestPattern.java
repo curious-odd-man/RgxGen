@@ -6,7 +6,6 @@ import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
@@ -214,26 +213,56 @@ public enum TestPattern implements DataInterface {
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    POSITIVE_LOOKAHEAD("foo(?=bar)",
-                       new Sequence("foo(?=bar)",
-                                    new FinalSymbol("foo"), new FinalSymbol("bar"))
-    ),
-    //-----------------------------------------------------------------------------------------------------------------------------------------
-    NEGATIVE_LOOKAHEAD("foo(?!bar)",
-                       new Sequence("foo(?!bar)",
-                                    new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
-        setInfinite();
+    POSITIVE_LOOKAHEAD_AFTER("foo(?=bar)",
+                             new Sequence("foo(?=bar)",
+                                          new FinalSymbol("foo"), new FinalSymbol("bar"))
+    ) {{
+        setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    POSITIVE_LOOKBEHIND("(?<=foo)bar",
-                        new Sequence("(?<=foo)bar",
-                                     new FinalSymbol("foo"), new FinalSymbol("bar"))
-    ),
+    // FIXME: Same as "bar.*"
+    POSITIVE_LOOKAHEAD_BEFORE("(?=bar).*", new FinalSymbol("NOT IMPLEMENTED")) {{
+        setUseFindForMatching();
+    }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    NEGATIVE_LOOKBEHIND("(?<!not)foo",
-                        new Sequence("(?<!not)foo",
-                                     new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+    NEGATIVE_LOOKAHEAD_AFTER("foo(?!bar)",
+                             new Sequence("foo(?!bar)",
+                                          new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
         setInfinite();
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Same as "A".
+    NEGATIVE_LOOKAHEAD_BEFORE("(?!B)[AB]",
+                              new FinalSymbol("NOT IMPLEMENTED")) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Same as "foo"
+    POSITIVE_LOOKBEHIND_AFTER("fo[od](?<=foo)",
+                              new FinalSymbol("NOT IMPLEMENTED")) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    POSITIVE_LOOKBEHIND_BEFORE("(?<!not)foo",
+                               new Sequence("(?<!not)foo",
+                                            new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+        setInfinite();
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Same as .*foo
+    NEGATIVE_LOOKBEHIND_AFTER(".*(?<=foo)",
+                              new FinalSymbol("NOT IMPLEMENTED")
+    ) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    NEGATIVE_LOOKBEHIND_BEFORE("(?<!not)foo",
+                               new Sequence("(?<!not)foo",
+                                            new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+        setInfinite();
+        setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     CHOICE_CAPTURED("(a|b)\\1",
@@ -387,12 +416,14 @@ public enum TestPattern implements DataInterface {
     BigInteger   aEstimatedCount;
     List<String> aAllUniqueValues;
     boolean      aIsUsableWithJavaPattern;
+    boolean      aUseFindForMatching;
 
     TestPattern(String pattern, Node resultNode) {
         aPattern = pattern;
         aResultNode = resultNode;
         aEstimatedCount = TestingUtilities.BIG_INTEGER_MINUS_ONE;
         aIsUsableWithJavaPattern = true;
+        aUseFindForMatching = false;
     }
 
     public String getPattern() {
@@ -437,14 +468,15 @@ public enum TestPattern implements DataInterface {
     }
 
     public boolean useFindForMatching() {
-        return this == POSITIVE_LOOKAHEAD
-                || this == NEGATIVE_LOOKAHEAD
-                || this == POSITIVE_LOOKBEHIND
-                || this == NEGATIVE_LOOKBEHIND;
+        return aUseFindForMatching;
     }
 
     public boolean isUsableWithJavaPattern() {
         return aIsUsableWithJavaPattern;
+    }
+
+    protected final void setUseFindForMatching() {
+        aUseFindForMatching = true;
     }
 
     @Override

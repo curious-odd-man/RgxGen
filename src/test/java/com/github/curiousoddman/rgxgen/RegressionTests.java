@@ -92,4 +92,31 @@ public class RegressionTests {
 
         assertFalse(withGroupIterator.hasNext());
     }
+
+    @Test
+    public void bug63_negativeLookaheadErrorTest() {
+        String pattern = "^((?!(BG|GB|KN|NK|NT|TN|ZZ)|(D|F|I|Q|U|V)[A-Z]|A-Z)[A-Z]{2})[0-9]{6}[A-D]?$";
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
+
+        for (int i = 0; i < 100; i++) {
+            String generated = rgxGen.generate();
+            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
+                                                                                   .find());
+        }
+    }
+
+    @Test
+    public void bug63_negativeLookaheadMinimalErrorTest() {
+        String pattern = "^(?!B)[AB]$";
+        Pattern compile = Pattern.compile(pattern);
+        RgxGen rgxGen = new RgxGen(pattern);
+
+        for (int i = 0; i < 100; i++) {
+            String generated = rgxGen.generate();
+            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
+                                                                                   .find());
+            System.out.print('.');
+        }
+    }
 }
