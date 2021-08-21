@@ -18,15 +18,18 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.iterators.ValidatedIterator;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.validation.Validator;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
@@ -37,7 +40,8 @@ import java.util.stream.Stream;
 public class RgxGen {
     private static RgxGenProperties aGlobalProperties;
 
-    private final Node aNode;
+    private final Node            aNode;
+    private final List<Validator> aValidators;
 
     private RgxGenProperties aLocalProperties = aGlobalProperties;
 
@@ -69,6 +73,7 @@ public class RgxGen {
      */
     public RgxGen(NodeTreeBuilder builder) {
         aNode = builder.get();
+        aValidators = builder.getValidators();
     }
 
     /**
@@ -97,6 +102,9 @@ public class RgxGen {
      */
     @Deprecated
     public BigInteger numUnique() {
+        if (!aValidators.isEmpty()) {
+            return null;
+        }
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
         return v.getEstimation()
@@ -111,6 +119,10 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public Optional<BigInteger> getUniqueEstimation() {
+        if (!aValidators.isEmpty()) {
+            return Optional.empty();
+        }
+
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
         aNode.visit(v);
         return v.getEstimation();
@@ -134,7 +146,11 @@ public class RgxGen {
     public StringIterator iterateUnique() {
         UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
         aNode.visit(ugv);
-        return ugv.getUniqueStrings();
+        if (aValidators.isEmpty()) {
+            return ugv.getUniqueStrings();
+        } else {
+            return new ValidatedIterator(aValidators, ugv.getUniqueStrings());
+        }
     }
 
     /**
@@ -154,12 +170,18 @@ public class RgxGen {
      * @return generated string.
      */
     public String generate(Random random) {
-        GenerationVisitor gv = GenerationVisitor.builder()
-                                                .withRandom(random)
-                                                .withProperties(aLocalProperties)
-                                                .get();
-        aNode.visit(gv);
-        return gv.getString();
+        String[] value = new String[1];
+        do {
+            GenerationVisitor gv = GenerationVisitor.builder()
+                                                    .withRandom(random)
+                                                    .withProperties(aLocalProperties)
+                                                    .get();
+            aNode.visit(gv);
+            value[0] = gv.getString();
+        } while (!aValidators.stream()
+                             .allMatch(validator -> validator.validate(value[0])));
+
+        return value[0];
     }
 
     /**

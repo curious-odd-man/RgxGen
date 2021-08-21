@@ -17,6 +17,9 @@ package com.github.curiousoddman.rgxgen.parsing;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.validation.Validator;
+
+import java.util.List;
 
 /**
  * Interface for the parser/nodes builder.
@@ -27,4 +30,10 @@ public interface NodeTreeBuilder {
      * @return Root node for the parsed pattern
      */
     Node get();
+
+    /**
+     *
+     * @return list of validators that should be applied to determine if the generated text satisfies them all.
+     */
+    List<Validator> getValidators();
 }

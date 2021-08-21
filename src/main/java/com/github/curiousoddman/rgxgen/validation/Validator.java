@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.iterators;
+package com.github.curiousoddman.rgxgen.validation;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,17 @@ package com.github.curiousoddman.rgxgen.iterators;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Iterator;
-
-public interface StringIterator extends Iterator<String> {
-    /**
-     * Reset the iterator to the initial position.
-     * After reset, it will start iterating from the first value.
-     * <p>
-     * Can be used to restart iterator that returns {@code false} when {@code hasNext()} is called.
-     */
-    void reset();
+/**
+ * Validators are introduced to tackle lookaround generation.
+ * They check if the text (or part of it) matches lookahead or lookbehind patterns.
+ */
+public interface Validator {
 
     /**
-     * Return same value as last call to {@code next()}.
-     * Behavior is not defined if method is called before {@code next()}
+     * Checks if {@code text} is valid
      *
-     * @return Value returned by last call to {@code next()}.
+     * @param text text to check
+     * @return true if text is valid, false otherwise
      */
-    String current();
+    boolean validate(String text);
 }

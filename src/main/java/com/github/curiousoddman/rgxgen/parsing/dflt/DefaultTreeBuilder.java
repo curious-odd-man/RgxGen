@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.validation.Validator;
 
 import java.util.*;
 
@@ -36,6 +37,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
+    private final List<Validator>    aValidators    = new ArrayList<>();
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -673,5 +675,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             build();
         }
         return aNode;
+    }
+
+    @Override
+    public List<Validator> getValidators() {
+        return aValidators;
     }
 }

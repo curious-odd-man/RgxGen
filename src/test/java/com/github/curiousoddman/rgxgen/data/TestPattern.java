@@ -238,6 +238,11 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
+    NEGATIVE_LOOKAHEAD_BEFORE_SPANS_TWO_NODES("(?!BB)[AB][AB]",
+                              new FinalSymbol("NOT IMPLEMENTED")) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
     // FIXME: Same as "foo"
     POSITIVE_LOOKBEHIND_AFTER("fo[od](?<=foo)",
                               new FinalSymbol("NOT IMPLEMENTED")) {{

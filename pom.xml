@@ -35,6 +35,7 @@
         <maven.versions.plugin.version>2.7</maven.versions.plugin.version>
 
         <jacoco.maven.plugin.version>0.8.5</jacoco.maven.plugin.version>
+        <mockito-core.version>3.12.1</mockito-core.version>
     </properties>
 
     <licenses>
@@ -284,6 +285,12 @@
             <groupId>org.openjdk.jmh</groupId>
             <artifactId>jmh-generator-annprocess</artifactId>
             <version>${jmh.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
