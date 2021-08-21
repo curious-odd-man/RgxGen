@@ -29,10 +29,11 @@ import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Stream;
+
+import static com.github.curiousoddman.rgxgen.config.RgxGenOption.MAX_LOOKAROUND_MATCH_RETRIES;
 
 /**
  * String values generator based on regular expression pattern
@@ -40,8 +41,9 @@ import java.util.stream.Stream;
 public class RgxGen {
     private static RgxGenProperties aGlobalProperties;
 
-    private final Node            aNode;
-    private final List<Validator> aValidators;
+    private final Node                aNode;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private final Optional<Validator> aValidator;
 
     private RgxGenProperties aLocalProperties = aGlobalProperties;
 
@@ -73,7 +75,7 @@ public class RgxGen {
      */
     public RgxGen(NodeTreeBuilder builder) {
         aNode = builder.get();
-        aValidators = builder.getValidators();
+        aValidator = builder.getValidator();
     }
 
     /**
@@ -102,7 +104,7 @@ public class RgxGen {
      */
     @Deprecated
     public BigInteger numUnique() {
-        if (!aValidators.isEmpty()) {
+        if (aValidator.isPresent()) {
             return null;
         }
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
@@ -119,7 +121,7 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public Optional<BigInteger> getUniqueEstimation() {
-        if (!aValidators.isEmpty()) {
+        if (aValidator.isPresent()) {
             return Optional.empty();
         }
 
@@ -146,10 +148,10 @@ public class RgxGen {
     public StringIterator iterateUnique() {
         UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
         aNode.visit(ugv);
-        if (aValidators.isEmpty()) {
-            return ugv.getUniqueStrings();
+        if (aValidator.isPresent()) {
+            return new ValidatedIterator(aValidator.get(), ugv.getUniqueStrings());
         } else {
-            return new ValidatedIterator(aValidators, ugv.getUniqueStrings());
+            return ugv.getUniqueStrings();
         }
     }
 
@@ -170,18 +172,32 @@ public class RgxGen {
      * @return generated string.
      */
     public String generate(Random random) {
-        String[] value = new String[1];
-        do {
-            GenerationVisitor gv = GenerationVisitor.builder()
-                                                    .withRandom(random)
-                                                    .withProperties(aLocalProperties)
-                                                    .get();
-            aNode.visit(gv);
-            value[0] = gv.getString();
-        } while (!aValidators.stream()
-                             .allMatch(validator -> validator.validate(value[0])));
+        if (aValidator.isPresent()) {
+            int maxRetries = MAX_LOOKAROUND_MATCH_RETRIES.getIntFromProperties(aLocalProperties);
+            boolean limitRetries = maxRetries > 0;
+            int currentRetry = 0;
+            Validator validator = aValidator.get();
+            String value;
+            do {
+                if (limitRetries && ++currentRetry > maxRetries) {
+                    throw new RuntimeException("Pattern generation takes too much tries.");
+                }
+                value = generateImpl(random);
+            } while (!validator.isValid(value));
 
-        return value[0];
+            return value;
+        } else {
+            return generateImpl(random);
+        }
+    }
+
+    private String generateImpl(Random random) {
+        GenerationVisitor gv = GenerationVisitor.builder()
+                                                .withRandom(random)
+                                                .withProperties(aLocalProperties)
+                                                .get();
+        aNode.visit(gv);
+        return gv.getString();
     }
 
     /**

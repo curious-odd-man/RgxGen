@@ -239,7 +239,7 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKAHEAD_BEFORE_SPANS_TWO_NODES("(?!BB)[AB][AB]",
-                              new FinalSymbol("NOT IMPLEMENTED")) {{
+                                              new FinalSymbol("NOT IMPLEMENTED")) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------

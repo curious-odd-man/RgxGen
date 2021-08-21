@@ -28,5 +28,5 @@ public interface Validator {
      * @param text text to check
      * @return true if text is valid, false otherwise
      */
-    boolean validate(String text);
+    boolean isValid(String text);
 }
