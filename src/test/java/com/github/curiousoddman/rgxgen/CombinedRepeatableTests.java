@@ -35,7 +35,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         String text = rgxGen.generate(TestingUtilities.newRandom(aSeed));
 
         boolean result = isValidGenerated(text);
-        assertTrue("Text: '" + text + "'does not match pattern " + aTestPattern.getPattern(), result);
+        assertTrue(aTestPattern.getLocation() + "\nText: '" + text + "'does not match pattern " + aTestPattern.getPattern(), result);
     }
 
     @Test

@@ -296,11 +296,11 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKBEHIND_AFTER_1(".*(?<=foo)",
-                              new Sequence(
-                                      ".*(?<=foo)",
-                                      Repeat.minimum(".*", new SymbolSet(), 0),
-                                      new FinalSymbol("foo")
-                              )
+                                new Sequence(
+                                        ".*(?<=foo)",
+                                        Repeat.minimum(".*", new SymbolSet(), 0),
+                                        new FinalSymbol("foo")
+                                )
     ) {{
         setUseFindForMatching();
     }},
@@ -466,6 +466,7 @@ public enum TestPattern implements DataInterface {
     boolean      aIsUsableWithJavaPattern;
     boolean      aUseFindForMatching;
     Validator    aValidator;
+    String       aEnumLocationInFile;
 
     TestPattern(String pattern, Node resultNode) {
         aPattern = pattern;
@@ -473,7 +474,17 @@ public enum TestPattern implements DataInterface {
         aEstimatedCount = TestingUtilities.BIG_INTEGER_MINUS_ONE;
         aIsUsableWithJavaPattern = true;
         aUseFindForMatching = false;
+        aEnumLocationInFile = name() + " at ." + formatLocation();
     }
+
+    private final String formatLocation() {
+        StackTraceElement stackTraceElement = Thread.currentThread()
+                                                    .getStackTrace()[4];
+
+        return '(' + stackTraceElement.getFileName() + ':' + stackTraceElement.getLineNumber() + ')';
+
+    }
+
 
     public String getPattern() {
         return aPattern;
@@ -555,5 +566,9 @@ public enum TestPattern implements DataInterface {
     @Override
     public String toString() {
         return aPattern;
+    }
+
+    public String getLocation() {
+        return aEnumLocationInFile;
     }
 }

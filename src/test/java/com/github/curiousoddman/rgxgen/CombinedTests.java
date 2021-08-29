@@ -35,8 +35,10 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void parseTest() {
         NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(aTestPattern.getPattern());
         Node node = defaultTreeBuilder.get();
-        assertEquals(aTestPattern.getResultNode()
-                                 .toString(), node.toString());
+        assertEquals(
+                aTestPattern.getLocation(),
+                aTestPattern.getResultNode()
+                            .toString(), node.toString());
         NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(aTestPattern.getResultNode());
         node.visit(visitor);
         assertTrue(visitor.getErrors()
@@ -47,21 +49,21 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
 
     @Test
     public void countUniqueUsingVisitorTest() {
-        assumeTrue(aTestPattern.hasEstimatedCount());
+        assumeTrue(aTestPattern.getLocation(), aTestPattern.hasEstimatedCount());
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
         aTestPattern.getResultNode()
                     .visit(v);
-        assertEquals(aTestPattern.getEstimatedCount(), v.getEstimation()
-                                                        .orElse(null));
+        assertEquals(aTestPattern.getLocation(), aTestPattern.getEstimatedCount(), v.getEstimation()
+                                                                                    .orElse(null));
     }
 
 
     @Test
     public void countUniqueTest() {
-        assumeTrue(aTestPattern.hasEstimatedCount());
+        assumeTrue(aTestPattern.getLocation(), aTestPattern.hasEstimatedCount());
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
-        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
-                                                             .orElse(null));
+        assertEquals(aTestPattern.getLocation(), aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
+                                                                                         .orElse(null));
     }
 
     @Test
@@ -78,8 +80,8 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void classRgxGenTest() {
         RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
         if (aTestPattern.hasEstimatedCount()) {
-            assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
-                                                                 .orElse(null));
+            assertEquals(aTestPattern.getLocation(), aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
+                                                                                             .orElse(null));
         }
         for (int i = 0; i < 100; i++) {
             Random rand = TestingUtilities.newRandom(i);
@@ -105,7 +107,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
             for (int j = 0; j < 10; j++) {
                 String generated = rgxGen.generate(random);
                 boolean result = isValidGenerated(generated);
-                assertTrue(createMessage(generated, aTestPattern, i, j), result);
+                assertTrue(aTestPattern.getLocation() + createMessage(generated, aTestPattern, i, j), result);
             }
         }
     }
