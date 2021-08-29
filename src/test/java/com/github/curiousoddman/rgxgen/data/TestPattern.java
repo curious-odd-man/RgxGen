@@ -1,7 +1,11 @@
 package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
+import com.github.curiousoddman.rgxgen.validation.FullPatternValidator;
+import com.github.curiousoddman.rgxgen.validation.Validator;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -227,7 +231,7 @@ public enum TestPattern implements DataInterface {
     POSITIVE_LOOKAHEAD_BEFORE_NOT_INFINITE("(?=bar).*car",
                                            new Sequence("(?=bar).*car",
                                                         new FinalSymbol("bar"),
-                                                        new Repeat(".*", new SymbolSet(), 0),
+                                                        Repeat.minimum(".*", new SymbolSet(), 0),
                                                         new FinalSymbol("car"))) {{
         setUseFindForMatching();
     }},
@@ -243,6 +247,7 @@ public enum TestPattern implements DataInterface {
     NEGATIVE_LOOKAHEAD_BEFORE("(?!B)[AB]",
                               new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
         setUseFindForMatching();
+        setValidated();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKAHEAD_BEFORE_SPANS_TWO_NODES("(?!BB)[AB][AB]",
@@ -253,6 +258,7 @@ public enum TestPattern implements DataInterface {
                                               )
     ) {{
         setUseFindForMatching();
+        setValidated();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKBEHIND_AFTER("fo[od](?<=foo)",
@@ -442,6 +448,7 @@ public enum TestPattern implements DataInterface {
     List<String> aAllUniqueValues;
     boolean      aIsUsableWithJavaPattern;
     boolean      aUseFindForMatching;
+    Validator    aValidator;
 
     TestPattern(String pattern, Node resultNode) {
         aPattern = pattern;
@@ -502,6 +509,30 @@ public enum TestPattern implements DataInterface {
 
     protected final void setUseFindForMatching() {
         aUseFindForMatching = true;
+    }
+
+    protected final void setValidated() {
+        setValidator(new FullPatternValidator(aPattern));
+    }
+
+    protected final void setValidator(Validator validator) {
+        aValidator = validator;
+    }
+
+    public RgxGen getRgxGen() {
+        return new RgxGen(
+                new NodeTreeBuilder() {
+                    @Override
+                    public Node get() {
+                        return aResultNode;
+                    }
+
+                    @Override
+                    public Optional<Validator> getValidator() {
+                        return Optional.ofNullable(aValidator);
+                    }
+                }
+        );
     }
 
     @Override
