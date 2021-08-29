@@ -220,8 +220,15 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    // FIXME: Same as "bar.*"
-    POSITIVE_LOOKAHEAD_BEFORE("(?=bar).*", new FinalSymbol("NOT IMPLEMENTED")) {{
+    POSITIVE_LOOKAHEAD_BEFORE("(?=bar).*",
+                              new Sequence("(?=bar).*", new FinalSymbol("bar"), Repeat.minimum(".*", new SymbolSet(), 0))) {{
+        setUseFindForMatching();
+    }},
+    POSITIVE_LOOKAHEAD_BEFORE_NOT_INFINITE("(?=bar).*car",
+                                           new Sequence("(?=bar).*car",
+                                                        new FinalSymbol("bar"),
+                                                        new Repeat(".*", new SymbolSet(), 0),
+                                                        new FinalSymbol("car"))) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -232,20 +239,29 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    // FIXME: Same as "A".
+    // FIXME: Handle as special case
     NEGATIVE_LOOKAHEAD_BEFORE("(?!B)[AB]",
-                              new FinalSymbol("NOT IMPLEMENTED")) {{
+                              new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKAHEAD_BEFORE_SPANS_TWO_NODES("(?!BB)[AB][AB]",
-                                              new FinalSymbol("NOT IMPLEMENTED")) {{
+                                              new Sequence(
+                                                      "(?!BB)[AB][AB]",
+                                                      new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE),
+                                                      new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)
+                                              )
+    ) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    // FIXME: Same as "foo"
     POSITIVE_LOOKBEHIND_AFTER("fo[od](?<=foo)",
-                              new FinalSymbol("NOT IMPLEMENTED")) {{
+                              new Sequence("fo[od](?<=foo)",
+                                           new FinalSymbol("fo"),
+                                           new SymbolSet("[od]", new Character[]{'o', 'd'}, SymbolSet.TYPE.POSITIVE),
+                                           new FinalSymbol("foo")
+                              )
+    ) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -256,13 +272,17 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    // FIXME: Same as .*foo
     NEGATIVE_LOOKBEHIND_AFTER(".*(?<=foo)",
-                              new FinalSymbol("NOT IMPLEMENTED")
+                              new Sequence(
+                                      ".*(?<=foo)",
+                                      Repeat.minimum(".*", new SymbolSet(), 0),
+                                      new FinalSymbol("foo")
+                              )
     ) {{
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: special case..
     NEGATIVE_LOOKBEHIND_BEFORE("(?<!not)foo",
                                new Sequence("(?<!not)foo",
                                             new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
