@@ -224,10 +224,19 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Special case
+    POSITIVE_LOOKAHEAD_HAS_SPECIFIC_SYMBOLS("(?=.*[XCV]).*",
+                                            new Sequence("foo(?=bar)",
+                                                         new FinalSymbol("foo"), new FinalSymbol("bar"))
+    ) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKAHEAD_BEFORE("(?=bar).*",
                               new Sequence("(?=bar).*", new FinalSymbol("bar"), Repeat.minimum(".*", new SymbolSet(), 0))) {{
         setUseFindForMatching();
     }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKAHEAD_BEFORE_NOT_INFINITE("(?=bar).*car",
                                            new Sequence("(?=bar).*car",
                                                         new FinalSymbol("bar"),
@@ -236,6 +245,7 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Special case
     NEGATIVE_LOOKAHEAD_AFTER("foo(?!bar)",
                              new Sequence("foo(?!bar)",
                                           new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
@@ -245,6 +255,13 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     // FIXME: Handle as special case
     NEGATIVE_LOOKAHEAD_BEFORE("(?!B)[AB]",
+                              new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
+        setUseFindForMatching();
+        setValidated();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Handle as special case
+    NEGATIVE_LOOKAHEAD_NOT_IN("(?!.*(AB|AC)).*",
                               new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
         setUseFindForMatching();
         setValidated();
@@ -271,14 +288,14 @@ public enum TestPattern implements DataInterface {
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    POSITIVE_LOOKBEHIND_BEFORE("(?<!not)foo",
-                               new Sequence("(?<!not)foo",
-                                            new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+    POSITIVE_LOOKBEHIND_BEFORE("(?<=not)foo",
+                               new Sequence("(?<=not)foo",
+                                            new FinalSymbol("not"), new FinalSymbol("foo"))) {{
         setInfinite();
         setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    NEGATIVE_LOOKBEHIND_AFTER(".*(?<=foo)",
+    POSITIVE_LOOKBEHIND_AFTER_1(".*(?<=foo)",
                               new Sequence(
                                       ".*(?<=foo)",
                                       Repeat.minimum(".*", new SymbolSet(), 0),
