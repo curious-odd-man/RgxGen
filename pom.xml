@@ -21,8 +21,8 @@
         <min.maven.version>3.6.1</min.maven.version>
 
         <!-- Dependencies versions -->
-        <junit.version>4.13.1</junit.version>
-        <jmh.version>1.26</jmh.version>
+        <junit.version>4.13.2</junit.version>
+        <jmh.version>1.35</jmh.version>
 
         <!-- Plugins versions -->
         <maven.compiler.plugin.version>3.8.1</maven.compiler.plugin.version>
