@@ -379,6 +379,10 @@ public enum TestPattern implements DataInterface {
                                                             new FinalSymbol("]"), 1, 2),
                                                  new FinalSymbol("zxc"))) {{
         setAllUniqueValues("123mass[]zxc", "123mass[]]zxc");
+    }},
+    UNICODE("\\u0041", new FinalSymbol("A"))
+    {{
+        setAllUniqueValues("A");
     }};
 
     final String aPattern;

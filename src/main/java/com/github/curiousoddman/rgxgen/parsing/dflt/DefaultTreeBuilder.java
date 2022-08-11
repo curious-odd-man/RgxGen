@@ -333,6 +333,17 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     /**
+     * Parse unicode hexadecimal string into a integer value.
+     * Format: NNNN
+     *
+     * @return integer value
+     */
+    private int parseUnicode() {
+        String hexValue = aCharIterator.next(4);
+        return Integer.parseInt(hexValue, HEX_RADIX);
+    }
+
+    /**
      * Create group reference node.
      * It starts after escape character AND first digit of group index.
      * aCharIterator after execution is on position right after group index digits.
@@ -390,6 +401,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             //   \xNN or \x{NNNN}
             case 'x':
                 sb.append((char) parseHexadecimal());
+                break;
+
+            case 'u':
+                sb.append((char) parseUnicode());
                 break;
 
             case 'Q':
