@@ -6,7 +6,7 @@
 
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.4</version>
 
     <packaging>jar</packaging>
 

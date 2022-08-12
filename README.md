@@ -44,7 +44,7 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.3</version>
+    <version>1.4</version>
 </dependency>
 ```
 
@@ -63,16 +63,16 @@ Enter your pattern and see the results.
     <dependency>
         <groupId>com.github.curious-odd-man</groupId>
         <artifactId>rgxgen</artifactId>
-        <version>1.4-SNAPSHOT</version>
+        <version>1.5-SNAPSHOT</version>
     </dependency>
 </project>
 ```
 
 Changes in snapshot:
 
-- Docs: Improved javadoc for [StringIterator](src/main/java/com/github/curiousoddman/rgxgen/iterators/StringIterator.java) class. [#59](https://github.com/curious-odd-man/RgxGen/issues/59)
-- Fixed: Incorrect unique values generation for pattern `a?b|c` [#61](https://github.com/curious-odd-man/RgxGen/issues/61)
+None at the moment.
 
+---
 ### Code: 
 ```java
 public class Main {
@@ -105,33 +105,34 @@ public class Main {
 <details>
 <summary><b>Supported syntax</b></summary>
 
-| Pattern   | Description  |
-| ---------: |-------------|
-| `.`  | Any symbol |
-| `?`  | One or zero occurrences |
-| `+`  | One or more occurrences |
-| `*`  | Zero or more occurrences |
-| `\r`  | Carriage return `CR` character |
-| `\t`  | Tab `	` character |
-| `\n`  | Line feed `LF` character. |
-| `\d`  | A digit. Equivalent to `[0-9]` |
-| `\D`  | Not a digit. Equivalent to `[^0-9]` |
-| `\s`  | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
-| `\S`  | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed |
-| `\w`  | Any word character. Equivalent to `[a-zA-Z0-9_]` |
-| `\W`  | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]` |
-| `\i`  | Places same value as capture group with index `i`. `i` is any integer number.  |
-| `\Q` and `\E`  | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals.  |
-| `\b` and `\B`  | These characters are ignored. No validation is performed!  |
-| `\xXX` and `\x{XXXX}`  | Hexadecimal value of unicode characters 2 or 4 digits |
-| `{a}` and `{a,b}`  | Repeat a; or min a max b times. Use {n,} to repeat at least n times. |
-| `[...]`  | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported |
-| `[^...]`  | Single character except the ones in brackets. `[^a]` - any symbol except 'a' |
-| `()`  | To group multiple characters for the repetitions |
-| `foo(?=bar)` and `(?<=foo)bar`  | Positive lookahead and lookbehind. These are equivalent to `foobar` |
-| `foo(?!bar)` and `(?<!foo)bar`  | Negative lookahead and lookbehind. |
-| <code>(a&#124;b)</code> |  Alternatives  |
-| \\  | Escape character (use \\\\ (double backslash) to generate single \ character) |
+|                        Pattern | Description                                                                                  |
+|-------------------------------:|----------------------------------------------------------------------------------------------|
+|                            `.` | Any symbol                                                                                   |
+|                            `?` | One or zero occurrences                                                                      |
+|                            `+` | One or more occurrences                                                                      |
+|                            `*` | Zero or more occurrences                                                                     |
+|                           `\r` | Carriage return `CR` character                                                               |
+|                           `\t` | Tab `	` character                                                                            |
+|                           `\n` | Line feed `LF` character.                                                                    |
+|                           `\d` | A digit. Equivalent to `[0-9]`                                                               |
+|                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                          |
+|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                |
+|                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                  |
+|                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                             |
+|                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                 |
+|                           `\i` | Places same value as capture group with index `i`. `i` is any integer number.                |
+|                  `\Q` and `\E` | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals. |
+|                  `\b` and `\B` | These characters are ignored. No validation is performed!                                    |
+|          `\xXX` and `\x{XXXX}` | Hexadecimal value of unicode characters 2 or 4 hexadecimal digits                            |
+|        `\uXXXX` | Hexadecimal value of unicode characters 4 hexadecimal digits                                 |
+|              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                         |
+|                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported        |
+|                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                 |
+|                           `()` | To group multiple characters for the repetitions                                             |
+| `foo(?=bar)` and `(?<=foo)bar` | Positive lookahead and lookbehind. These are equivalent to `foobar`                          |
+| `foo(?!bar)` and `(?<!foo)bar` | Negative lookahead and lookbehind.                                                           |
+|        <code>(a&#124;b)</code> | Alternatives                                                                                 |
+|                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                |
 
 RgxGen treats any other characters as literals - those are generated as is.
 
@@ -223,7 +224,7 @@ public class Main {
 
 ### Lookahead and Lookbehind 
 
-Currently these two have very limited support. Please refer to [#63](https://github.com/curious-odd-man/RgxGen/issues/63).
+Currently, these two have very limited support. Please refer to [#63](https://github.com/curious-odd-man/RgxGen/issues/63).
 I'm currently working on the solution, but I cannot say when I come up with something.
 
 ### Estimation
@@ -265,6 +266,7 @@ Though I found they have following issues:
 1. All of them build graph which can easily produce OOM exception. For example pattern `a{60000}`, or [IPV6 regex pattern](https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses).
 1. Alternatives - only 2 alternatives gives equal probability of each alternative to appear in generated values. For example: `(a|b)` the probability of a and b is equal. For `(a|b|c)` it would be expected to have a or b or c with probability 33.(3)% each. Though really the probabilities are a=50%, and b=25% and c=25% each. For longer alternatives you might never get the last alternative.
 1. They are quite slow
+1. Lightweight. This library does not have any dependencies.
 
 ## Support
 
