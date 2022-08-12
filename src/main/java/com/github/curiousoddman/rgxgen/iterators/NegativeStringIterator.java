@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.regex.Pattern;
 
-public class NegativeStringIterator extends StringIterator {
+public class NegativeStringIterator implements StringIterator {
     private final StringIterator aIterator;
     private final Pattern        aPattern;
 
@@ -30,7 +30,7 @@ public class NegativeStringIterator extends StringIterator {
     }
 
     @Override
-    protected String nextImpl() {
+    public String next() {
         do {
             aValue = aIterator.next();
         } while (aPattern.matcher(aValue)
