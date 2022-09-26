@@ -19,6 +19,8 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.validation.FullPatternValidator;
+import com.github.curiousoddman.rgxgen.validation.Validator;
 
 import java.util.*;
 
@@ -35,19 +37,22 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private static final ConstantsProvider CONST_PROVIDER             = new ConstantsProvider();
 
     private final CharIterator       aCharIterator;
+    private       String             aPattern;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
 
-    private Node aNode;
-    private int  aNextGroupIndex = 1;
+    private boolean aNeedValidation = false;
+    private Node    aNode;
+    private int     aNextGroupIndex = 1;
 
     /**
      * Default implementation of parser and NodeTreeBuilder.
      * It reads expression and creates a hierarchy of {@code com.github.curiousoddman.rgxgen.generator.nodes.Node}.
      *
-     * @param expr expression to parse
+     * @param pattern expression to parse
      */
-    public DefaultTreeBuilder(String expr) {
-        aCharIterator = new CharIterator(expr);
+    public DefaultTreeBuilder(String pattern) {
+        aCharIterator = new CharIterator(pattern);
+        aPattern = pattern;
     }
 
     /**
@@ -231,7 +236,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     sbToFinal(sb, nodes);
                     int intGroupStartPos = aCharIterator.prevPos();
                     GroupType groupType = processGroupType();
-                    nodes.add(parseGroup(intGroupStartPos, groupType));
+                    handleGroupType(nodes, intGroupStartPos, groupType);
                     break;
 
                 case '|':
@@ -264,6 +269,39 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         return handleGroupEndCharacter(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex, currentGroupType);
+    }
+
+    private void handleGroupType(List<Node> nodes, int intGroupStartPos, GroupType groupType) {
+        Node newNode;
+        switch (groupType) {
+            case NEGATIVE_LOOKAHEAD:
+                newNode = parseGroup(intGroupStartPos, groupType);
+                if (aCharIterator.hasNext()) {
+                    // If we have more nodes - we need to validate all generated texts and do not include lookahead node
+                    aNeedValidation = true;
+                } else {
+                    // If there are no more nodes - means we can just generate something that does not match the pattern.
+                    nodes.add(newNode);
+                }
+                break;
+
+            case NEGATIVE_LOOKBEHIND:
+                newNode = parseGroup(intGroupStartPos, groupType);
+                if (aCharIterator.prevPos() == 3) {
+                    // There is nothing to validate before this node. So we can just generate not matching text.
+                    nodes.add(newNode);
+                } else {
+                    aNeedValidation = true;
+                }
+                break;
+
+            case POSITIVE_LOOKBEHIND:
+            case POSITIVE_LOOKAHEAD:
+            case CAPTURE_GROUP:
+            case NON_CAPTURE_GROUP:
+                nodes.add(parseGroup(intGroupStartPos, groupType));
+                break;
+        }
     }
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
@@ -688,5 +726,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             build();
         }
         return aNode;
+    }
+
+    @Override
+    public Optional<Validator> getValidator() {
+        return aNeedValidation ? Optional.of(new FullPatternValidator(aPattern)) : Optional.empty();
     }
 }

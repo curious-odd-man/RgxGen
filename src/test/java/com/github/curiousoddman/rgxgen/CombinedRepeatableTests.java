@@ -31,13 +31,11 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
 
     @Test
     public void generateTest() {
-        GenerationVisitor generationVisitor = GenerationVisitor.builder()
-                                                               .withRandom(TestingUtilities.newRandom(aSeed))
-                                                               .get();
-        aTestPattern.getResultNode()
-                    .visit(generationVisitor);
-        boolean result = isValidGenerated(generationVisitor.getString());
-        assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.getPattern(), result);
+        RgxGen rgxGen = aTestPattern.getRgxGen();
+        String text = rgxGen.generate(TestingUtilities.newRandom(aSeed));
+
+        boolean result = isValidGenerated(text);
+        assertTrue(aTestPattern.getLocation() + "\nText: '" + text + "'does not match pattern " + aTestPattern.getPattern(), result);
     }
 
     @Test

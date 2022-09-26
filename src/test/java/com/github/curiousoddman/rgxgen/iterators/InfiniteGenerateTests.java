@@ -69,7 +69,7 @@ public class InfiniteGenerateTests {
 
         for (int i = 0; i < ITERATIONS; i++) {
             String next = stringIterator.next();
-            assertTrue(stringIterator.hasNext());
+            assertTrue(aRegex, stringIterator.hasNext());
             if (aUseFind) {
                 assertTrue(next, p.matcher(next)
                                   .find());

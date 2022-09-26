@@ -21,7 +21,7 @@ import java.util.Iterator;
 public interface StringIterator extends Iterator<String> {
     /**
      * Reset the iterator to the initial position.
-     * After reset it will start iterating from the first value.
+     * After reset, it will start iterating from the first value.
      * <p>
      * Can be used to restart iterator that returns {@code false} when {@code hasNext()} is called.
      */

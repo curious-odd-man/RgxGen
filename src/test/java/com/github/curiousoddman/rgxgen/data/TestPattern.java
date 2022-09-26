@@ -1,12 +1,15 @@
 package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
+import com.github.curiousoddman.rgxgen.validation.FullPatternValidator;
+import com.github.curiousoddman.rgxgen.validation.Validator;
 
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
@@ -214,26 +217,100 @@ public enum TestPattern implements DataInterface {
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    POSITIVE_LOOKAHEAD("foo(?=bar)",
-                       new Sequence("foo(?=bar)",
-                                    new FinalSymbol("foo"), new FinalSymbol("bar"))
-    ),
-    //-----------------------------------------------------------------------------------------------------------------------------------------
-    NEGATIVE_LOOKAHEAD("foo(?!bar)",
-                       new Sequence("foo(?!bar)",
-                                    new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
-        setInfinite();
+    POSITIVE_LOOKAHEAD_AFTER("foo(?=bar)",
+                             new Sequence("foo(?=bar)",
+                                          new FinalSymbol("foo"), new FinalSymbol("bar"))
+    ) {{
+        setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    POSITIVE_LOOKBEHIND("(?<=foo)bar",
-                        new Sequence("(?<=foo)bar",
-                                     new FinalSymbol("foo"), new FinalSymbol("bar"))
-    ),
+    // FIXME: Special case
+    POSITIVE_LOOKAHEAD_HAS_SPECIFIC_SYMBOLS("(?=.*[XCV]).*",
+                                            new Sequence("foo(?=bar)",
+                                                         new FinalSymbol("foo"), new FinalSymbol("bar"))
+    ) {{
+        setUseFindForMatching();
+    }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    NEGATIVE_LOOKBEHIND("(?<!not)foo",
-                        new Sequence("(?<!not)foo",
-                                     new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+    POSITIVE_LOOKAHEAD_BEFORE("(?=bar).*",
+                              new Sequence("(?=bar).*", new FinalSymbol("bar"), Repeat.minimum(".*", new SymbolSet(), 0))) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    POSITIVE_LOOKAHEAD_BEFORE_NOT_INFINITE("(?=bar).*car",
+                                           new Sequence("(?=bar).*car",
+                                                        new FinalSymbol("bar"),
+                                                        Repeat.minimum(".*", new SymbolSet(), 0),
+                                                        new FinalSymbol("car"))) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Special case
+    NEGATIVE_LOOKAHEAD_AFTER("foo(?!bar)",
+                             new Sequence("foo(?!bar)",
+                                          new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
         setInfinite();
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Handle as special case
+    NEGATIVE_LOOKAHEAD_BEFORE("(?!B)[AB]",
+                              new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
+        setUseFindForMatching();
+        setValidated();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: Handle as special case
+    NEGATIVE_LOOKAHEAD_NOT_IN("(?!.*(AB|AC)).*",
+                              new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)) {{
+        setUseFindForMatching();
+        setValidated();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    NEGATIVE_LOOKAHEAD_BEFORE_SPANS_TWO_NODES("(?!BB)[AB][AB]",
+                                              new Sequence(
+                                                      "(?!BB)[AB][AB]",
+                                                      new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE),
+                                                      new SymbolSet("[AB]", new Character[]{'A', 'B'}, SymbolSet.TYPE.POSITIVE)
+                                              )
+    ) {{
+        setUseFindForMatching();
+        setValidated();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    POSITIVE_LOOKBEHIND_AFTER("fo[od](?<=foo)",
+                              new Sequence("fo[od](?<=foo)",
+                                           new FinalSymbol("fo"),
+                                           new SymbolSet("[od]", new Character[]{'o', 'd'}, SymbolSet.TYPE.POSITIVE),
+                                           new FinalSymbol("foo")
+                              )
+    ) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    POSITIVE_LOOKBEHIND_BEFORE("(?<=not)foo",
+                               new Sequence("(?<=not)foo",
+                                            new FinalSymbol("not"), new FinalSymbol("foo"))) {{
+        setInfinite();
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    POSITIVE_LOOKBEHIND_AFTER_1(".*(?<=foo)",
+                                new Sequence(
+                                        ".*(?<=foo)",
+                                        Repeat.minimum(".*", new SymbolSet(), 0),
+                                        new FinalSymbol("foo")
+                                )
+    ) {{
+        setUseFindForMatching();
+    }},
+    //-----------------------------------------------------------------------------------------------------------------------------------------
+    // FIXME: special case..
+    NEGATIVE_LOOKBEHIND_BEFORE("(?<!not)foo",
+                               new Sequence("(?<!not)foo",
+                                            new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+        setInfinite();
+        setUseFindForMatching();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     CHOICE_CAPTURED("(a|b)\\1",
@@ -391,13 +468,27 @@ public enum TestPattern implements DataInterface {
     BigInteger   aEstimatedCount;
     List<String> aAllUniqueValues;
     boolean      aIsUsableWithJavaPattern;
+    boolean      aUseFindForMatching;
+    Validator    aValidator;
+    String       aEnumLocationInFile;
 
     TestPattern(String pattern, Node resultNode) {
         aPattern = pattern;
         aResultNode = resultNode;
         aEstimatedCount = TestingUtilities.BIG_INTEGER_MINUS_ONE;
         aIsUsableWithJavaPattern = true;
+        aUseFindForMatching = false;
+        aEnumLocationInFile = name() + " at ." + formatLocation();
     }
+
+    private final String formatLocation() {
+        StackTraceElement stackTraceElement = Thread.currentThread()
+                                                    .getStackTrace()[4];
+
+        return '(' + stackTraceElement.getFileName() + ':' + stackTraceElement.getLineNumber() + ')';
+
+    }
+
 
     public String getPattern() {
         return aPattern;
@@ -441,18 +532,47 @@ public enum TestPattern implements DataInterface {
     }
 
     public boolean useFindForMatching() {
-        return this == POSITIVE_LOOKAHEAD
-                || this == NEGATIVE_LOOKAHEAD
-                || this == POSITIVE_LOOKBEHIND
-                || this == NEGATIVE_LOOKBEHIND;
+        return aUseFindForMatching;
     }
 
     public boolean isUsableWithJavaPattern() {
         return aIsUsableWithJavaPattern;
     }
 
+    protected final void setUseFindForMatching() {
+        aUseFindForMatching = true;
+    }
+
+    protected final void setValidated() {
+        setValidator(new FullPatternValidator(aPattern));
+    }
+
+    protected final void setValidator(Validator validator) {
+        aValidator = validator;
+    }
+
+    public RgxGen getRgxGen() {
+        return new RgxGen(
+                new NodeTreeBuilder() {
+                    @Override
+                    public Node get() {
+                        return aResultNode;
+                    }
+
+                    @Override
+                    public Optional<Validator> getValidator() {
+                        return Optional.ofNullable(aValidator);
+                    }
+                }
+        );
+    }
+
     @Override
     public String toString() {
         return aPattern;
+    }
+
+    public String getLocation() {
+        return aEnumLocationInFile;
     }
 }

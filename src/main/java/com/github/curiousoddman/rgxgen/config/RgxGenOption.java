@@ -35,7 +35,16 @@ public enum RgxGenOption {
      *
      * @defaultValue false
      */
-    CASE_INSENSITIVE("matching.case.insensitive", "false");
+    CASE_INSENSITIVE("matching.case.insensitive", "false"),
+
+    /**
+     * Maximum number to re-try generate value when lookaround patterns are used.
+     * When this number of retries is exceeded - the exception is thrown.
+     * Negative value means infinite retries. (WARNING! This might lead to infinite loop)
+     *
+     * @defaultValue 1000
+     */
+    MAX_LOOKAROUND_MATCH_RETRIES("max.lookaround.retries", "1000");
 
     private final String aKey;
     private final String aDefault;

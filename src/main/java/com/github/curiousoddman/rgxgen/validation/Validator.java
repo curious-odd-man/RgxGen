@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.validation;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,23 +16,17 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.validation.Validator;
-
-import java.util.Optional;
-
 /**
- * Interface for the parser/nodes builder.
+ * Validators are introduced to tackle lookaround generation.
+ * They check if the text (or part of it) matches lookahead or lookbehind patterns.
  */
-public interface NodeTreeBuilder {
+public interface Validator {
 
     /**
-     * @return Root node for the parsed pattern
+     * Checks if {@code text} is valid
+     *
+     * @param text text to check
+     * @return true if text is valid, false otherwise
      */
-    Node get();
-
-    /**
-     * @return list of validators that should be applied to determine if the generated text satisfies them all.
-     */
-    Optional<Validator> getValidator();
+    boolean isValid(String text);
 }

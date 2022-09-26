@@ -1,3 +1,9 @@
+#BUG solution approaches overview:
+
+1. Make lookaround Node apply restrictions on surrounding nodes. The implication here is that it might not be known how much nodes it should apply restrictions to.
+1. The visitor that collects generated value might verify that inserted value is compliant with restrictions from lookaround nodes, though not clear how to re-generate values with lookbehind pattern. 
+
+
 # Regex: generate matching and non-matching strings
 
 This is a java library that, given a regex pattern, allows to:

@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.parsing;
+package com.github.curiousoddman.rgxgen.validation;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,23 +16,18 @@ package com.github.curiousoddman.rgxgen.parsing;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.validation.Validator;
+import java.util.regex.Pattern;
 
-import java.util.Optional;
+public class FullPatternValidator implements Validator {
+    private final Pattern aPattern;
 
-/**
- * Interface for the parser/nodes builder.
- */
-public interface NodeTreeBuilder {
+    public FullPatternValidator(String pattern) {
+        aPattern = Pattern.compile(pattern);
+    }
 
-    /**
-     * @return Root node for the parsed pattern
-     */
-    Node get();
-
-    /**
-     * @return list of validators that should be applied to determine if the generated text satisfies them all.
-     */
-    Optional<Validator> getValidator();
+    @Override
+    public boolean isValid(String text) {
+        return aPattern.matcher(text)
+                       .find();
+    }
 }
