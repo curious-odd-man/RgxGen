@@ -301,7 +301,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     throw new RgxGenParseException("Cannot repeat nothing at" + aCharIterator.context());
                 }
             } else {
-                repeatNode = nodes.remove(nodes.size() - 1);
+                int lastNodeIndex = nodes.size() - 1;
+                Node node = nodes.get(lastNodeIndex);
+                if (node instanceof Repeat) {
+                    throw new TokenNotQuantifiableException(node.getPattern() + " at " + aCharIterator.context());
+                }
+                repeatNode = nodes.remove(lastNodeIndex);
             }
         } else {
             // Repetition for the last character
@@ -556,7 +561,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         aNodesStartPos.put(resultNode, startPos);
         if (captureGroupIndex == null) {
-            return resultNode;
+            NonCaptureGroup nonCaptureGroup = new NonCaptureGroup(aCharIterator.substringToCurrPos(startPos), resultNode);
+            aNodesStartPos.put(nonCaptureGroup, startPos);
+            return nonCaptureGroup;
         } else {
             Group group = new Group(aCharIterator.substringToCurrPos(startPos), captureGroupIndex, resultNode);
             aNodesStartPos.put(group, startPos);

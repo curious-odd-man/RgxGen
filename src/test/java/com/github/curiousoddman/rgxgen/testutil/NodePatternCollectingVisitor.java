@@ -59,6 +59,12 @@ public class NodePatternCollectingVisitor implements NodeVisitor {
             .visit(this);
     }
 
+    @Override
+    public void visit(NonCaptureGroup nonCaptureGroup) {
+        nonCaptureGroup.getNode()
+                       .visit(this);
+    }
+
     public List<String> getPatterns() {
         return aPatterns;
     }

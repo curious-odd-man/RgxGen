@@ -112,6 +112,12 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
+    @Override
+    public void visit(NonCaptureGroup nonCaptureGroup) {
+        nonCaptureGroup.getNode()
+                       .visit(this);
+    }
+
     public StringIterator getUniqueStrings() {
         return aIterators.get(0)
                          .get();
