@@ -50,6 +50,7 @@ public class LookaroundTests {
         StringIterator stringIterator = rgxGen.iterateUnique();
         for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             String s = stringIterator.next();
+            System.out.println(".");
             assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
                                                                                    .matcher(s)
                                                                                    .find());
