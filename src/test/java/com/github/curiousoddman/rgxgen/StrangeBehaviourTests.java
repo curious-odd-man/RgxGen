@@ -1,14 +1,15 @@
 package com.github.curiousoddman.rgxgen;
 
-import org.junit.Ignore;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.Random;
 
 public class StrangeBehaviourTests {
 
     @Test
-    @Ignore
+    @Disabled("Manual test")
     public void randomIsNotSoRandomTest() {
         // Note! This works only when LIMIT_VALUE is a power of 2!
         // To overcome this issue in tests use TestingUtilities::newRandom

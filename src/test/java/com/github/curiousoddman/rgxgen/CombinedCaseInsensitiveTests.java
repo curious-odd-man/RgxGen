@@ -4,20 +4,12 @@ import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.data.TestPatternCaseInsensitive;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatternCaseInsensitive> {

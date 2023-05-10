@@ -1,13 +1,13 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.util.Util.BIG_INTEGER_TWO;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class RegressionTests {
 
@@ -58,8 +58,8 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
-            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
-                                                                                   .matches());
+            assertTrue(compile.matcher(generated)
+                              .matches(), "'" + generated + "' for pattern '" + pattern + "'");
         }
     }
 
@@ -71,8 +71,8 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
-            assertTrue("'" + generated + "' for pattern '" + pattern + "'", compile.matcher(generated)
-                                                                                   .matches());
+            assertTrue(compile.matcher(generated)
+                              .matches(), "'" + generated + "' for pattern '" + pattern + "'");
         }
     }
 

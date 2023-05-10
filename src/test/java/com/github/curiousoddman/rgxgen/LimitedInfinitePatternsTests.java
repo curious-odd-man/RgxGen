@@ -2,39 +2,38 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
+
 public class LimitedInfinitePatternsTests {
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {
+    public static Stream<Arguments> getTestData() {
+        return Stream.of(
+                Arguments.of(
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
                                  .limit(11)
                                  .mapToObj(v -> Stream.generate(() -> "a")
                                                       .limit(v)
-                                                      .reduce("", String::concat)).collect(Collectors.toList())
-                },
-                {
+                                                      .reduce("", String::concat))
+                                 .collect(Collectors.toList())
+                ),
+                Arguments.of(
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
@@ -42,9 +41,9 @@ public class LimitedInfinitePatternsTests {
                                  .mapToObj(v -> 'a' + Stream.generate(() -> "a")
                                                             .limit(v)
                                                             .reduce("", String::concat))
-                                .collect(Collectors.toList())
-                },
-                {
+                                 .collect(Collectors.toList())
+                ),
+                Arguments.of(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", new SymbolSet(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(SymbolSet.getAllSymbols()),
@@ -52,20 +51,14 @@ public class LimitedInfinitePatternsTests {
                                                                          .flatMap(symbol -> Arrays.stream(SymbolSet.getAllSymbols())
                                                                                                   .map(v -> "" + symbol + v))))
                               .map(v -> "" + 'a' + v)
-                                .collect(Collectors.toList())
-                }
-        });
+                              .collect(Collectors.toList())
+                )
+        );
     }
 
-    @Parameterized.Parameter
-    public String       aRegex;
-    @Parameterized.Parameter(1)
-    public Node         aNode;
-    @Parameterized.Parameter(2)
-    public List<String> aExpectedUnique;
-
-    @Test
-    public void generateTest() {
+    @ParameterizedTest
+    @MethodSource("getTestData")
+    public void generateTest(String aRegex, Node aNode, List<String> aExpectedUnique) {
         Pattern p = Pattern.compile(aRegex);
 
         for (int i = 0; i < 100; i++) {
@@ -77,8 +70,9 @@ public class LimitedInfinitePatternsTests {
         }
     }
 
-    @Test
-    public void generateUniqueTest() {
+    @ParameterizedTest
+    @MethodSource("getTestData")
+    public void generateUniqueTest(String aRegex, Node aNode, List<String> aExpectedUnique) {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
         aNode.visit(v);
         assertEquals(aExpectedUnique, TestingUtilities.iteratorToList(v.getUniqueStrings()));
