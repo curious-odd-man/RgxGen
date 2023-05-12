@@ -34,4 +34,6 @@ public interface NodeVisitor {
     void visit(GroupRef node);
 
     void visit(Group node);
+
+    void visit(NonCaptureGroup nonCaptureGroup);
 }

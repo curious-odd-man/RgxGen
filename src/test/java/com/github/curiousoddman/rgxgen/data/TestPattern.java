@@ -380,9 +380,14 @@ public enum TestPattern implements DataInterface {
                                                  new FinalSymbol("zxc"))) {{
         setAllUniqueValues("123mass[]zxc", "123mass[]]zxc");
     }},
-    UNICODE("\\u0041", new FinalSymbol("A"))
-    {{
+    UNICODE("\\u0041", new FinalSymbol("A")) {{
         setAllUniqueValues("A");
+    }},
+
+    REPETITION_OF_REPEATED_NODE("(x+)+", Repeat.minimum("(x+)+",
+                                                        new Group("x+", 1, Repeat.minimum("x+", new FinalSymbol("x"), 1)),
+                                                        1)) {{
+        setInfinite();
     }};
 
     final String aPattern;

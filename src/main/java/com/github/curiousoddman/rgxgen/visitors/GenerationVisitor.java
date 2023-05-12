@@ -100,6 +100,12 @@ public class GenerationVisitor implements NodeVisitor {
         aGroupValues.put(node.getIndex(), aStringBuilder.substring(start));
     }
 
+    @Override
+    public void visit(NonCaptureGroup nonCaptureGroup) {
+        nonCaptureGroup.getNode()
+                       .visit(this);
+    }
+
     public String getString() {
         return aStringBuilder.toString();
     }

@@ -141,6 +141,12 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
              .visit(this);
     }
 
+    @Override
+    public void visit(NonCaptureGroup nonCaptureGroup) {
+        nonCaptureGroup.getNode()
+                       .visit(this);
+    }
+
     /**
      * Provides an estimation of number of unique values that can be generated using pattern.
      *

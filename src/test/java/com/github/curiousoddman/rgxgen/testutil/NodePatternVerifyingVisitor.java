@@ -60,6 +60,11 @@ public class NodePatternVerifyingVisitor implements NodeVisitor {
         compareAndReport(node);
     }
 
+    @Override
+    public void visit(NonCaptureGroup nonCaptureGroup) {
+        compareAndReport(nonCaptureGroup);
+    }
+
     private void compareAndReport(Node node) {
         if (!node.getPattern()
                  .equals(aPatterns.get(++aCurrentIndex))) {

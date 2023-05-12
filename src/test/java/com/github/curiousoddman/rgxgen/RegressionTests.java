@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.TokenNotQuantifiableException;
 import org.junit.Test;
 
 import java.math.BigInteger;
@@ -91,5 +92,12 @@ public class RegressionTests {
         }
 
         assertFalse(withGroupIterator.hasNext());
+    }
+
+    @Test(expected = TokenNotQuantifiableException.class)
+    public void bug70_heapOverflowError() {
+        byte[] bytes = {40, -37, -91, 41, 42, 48, 58, 43, 43, 43, 47, 42, -17, 1, 0, 0, 43, -3, 46};
+        String pattern = new String(bytes);
+        new RgxGen(pattern);
     }
 }

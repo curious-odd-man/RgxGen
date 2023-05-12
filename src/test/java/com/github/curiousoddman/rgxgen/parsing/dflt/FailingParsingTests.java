@@ -10,6 +10,8 @@ import org.junit.rules.ExpectedException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.fail;
@@ -147,5 +149,36 @@ public class FailingParsingTests {
                                          " ^");
 
         RgxGen gem = new RgxGen("+asdfqwer");
+    }
+
+    @Test
+    public void cannotRepeatRepetitionTest() {
+        List<String> repeatTokens = Arrays.asList(
+                "+",
+                "*",
+                "?",
+                "{1,3}"
+        );
+
+        String pattern = "x";
+        for (String firstToken : repeatTokens) {
+            for (String secondToken : repeatTokens) {
+                pattern += firstToken + secondToken;
+
+                try {
+                    DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern);
+                    builder.build();
+                    fail("Expected an exception!");
+                } catch (TokenNotQuantifiableException e) {
+
+                }
+            }
+        }
+    }
+
+    @Test
+    public void test() {
+        DefaultTreeBuilder builder = new DefaultTreeBuilder("(?:[0-9A-Fa-f]{2}){3,4}");
+        builder.build();
     }
 }
