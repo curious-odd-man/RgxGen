@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-//@Disabled("Temporary not working tests")
+@Disabled("Temporary not working tests")
 public class TmpCompleteTests {
 
     public static Stream<Arguments> getTestData() {

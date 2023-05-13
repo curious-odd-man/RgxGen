@@ -1,11 +1,9 @@
 package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UtilTests {
     @Test
@@ -33,7 +31,7 @@ public class UtilTests {
             }
         }
 
-        assertTrue("Generated both - upper and lower case letter", lower && upper);
+        assertTrue(lower && upper, "Generated both - upper and lower case letter");
     }
 
     @Test
@@ -55,7 +53,7 @@ public class UtilTests {
             }
         }
 
-        assertFalse("Digit case did not change.", lower || upper);
+        assertFalse(lower || upper, "Digit case did not change.");
     }
 
     @Test

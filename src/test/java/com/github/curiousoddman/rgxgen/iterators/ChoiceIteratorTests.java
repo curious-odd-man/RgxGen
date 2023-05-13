@@ -1,34 +1,33 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
+
 public class ChoiceIteratorTests {
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {
+    public static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of(
                         "(A|B)",
                         (Supplier<StringIterator[]>) () -> new StringIterator[]{
                                 new SingleValueIterator("A"),
                                 new SingleValueIterator("B")
                         },
                         Arrays.asList("A", "B")
-                },
-                {
+                ),
+                Arguments.of(
                         "(A|B|C|D|E|F)",
                         (Supplier<StringIterator[]>) () -> new StringIterator[]{
                                 new SingleValueIterator("A"),
@@ -38,19 +37,16 @@ public class ChoiceIteratorTests {
                                 new SingleValueIterator("E"),
                                 new SingleValueIterator("F")},
                         Arrays.asList("A", "B", "C", "D", "E", "F")
-                }
-        });
+                )
+        );
     }
 
-    @Parameterized.Parameter
-    public String                     aExpression;
-    @Parameterized.Parameter(1)
-    public Supplier<StringIterator[]> aIterators;
-    @Parameterized.Parameter(2)
-    public List<String>               aExpectedValues;
 
-    @Test
-    public void countTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void countTest(String aExpression,
+                          Supplier<StringIterator[]> aIterators,
+                          List<String> aExpectedValues) {
         StringIterator stringIterator = new ChoiceIterator(aIterators.get());
         Iterable<String> i = () -> stringIterator;
 
@@ -58,8 +54,11 @@ public class ChoiceIteratorTests {
         assertEquals(aExpectedValues.size(), stream.count());
     }
 
-    @Test
-    public void valuesTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void valuesTest(String aExpression,
+                           Supplier<StringIterator[]> aIterators,
+                           List<String> aExpectedValues) {
         StringIterator stringIterator = new ChoiceIterator(aIterators.get());
         Iterable<String> i = () -> stringIterator;
         Stream<String> stream = StreamSupport.stream(i.spliterator(), false);

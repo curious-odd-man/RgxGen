@@ -1,68 +1,58 @@
 package com.github.curiousoddman.rgxgen.iterators;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@RunWith(Parameterized.class)
 public class InfiniteGenerateTests {
     private static final int ITERATIONS = 100;
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"a*", false},
-                {"aa+", false},
-                {"a.*", false},
-                {"a+", false},
-                {"za*", false},
-                {"za+", false},
-                {"foo(?!bar)", true},
-                {"(?<!not)foo", true}
-        });
+    public static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("a*", false),
+                Arguments.of("aa+", false),
+                Arguments.of("a.*", false),
+                Arguments.of("a+", false),
+                Arguments.of("za*", false),
+                Arguments.of("za+", false),
+                Arguments.of("foo(?!bar)", true),
+                Arguments.of("(?<!not)foo", true)
+        );
     }
 
-    @Parameterized.Parameter
-    public String aRegex;
 
-    @Parameterized.Parameter(1)
-    public boolean aUseFind;
-
-    private Pattern p;
-
-    @Before
-    public void setUp() {
-        p = Pattern.compile(aRegex);
-    }
-
-    @Test
-    public void generateTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void generateTest(String aRegex,
+                             boolean aUseFind) {
+        Pattern p = Pattern.compile(aRegex);
         RgxGen rgxGen = new RgxGen(aRegex);
         for (int i = 0; i < ITERATIONS; i++) {
             String s = rgxGen.generate();
             if (aUseFind) {
-                assertTrue(s, p.matcher(s)
-                               .find());
+                assertTrue(p.matcher(s)
+                            .find(), s);
             } else {
-                assertTrue(s, p.matcher(s)
-                               .matches());
+                assertTrue(p.matcher(s)
+                            .matches(), s);
             }
         }
     }
 
-    @Test
-    public void aLotOfValuesAvailableTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void aLotOfValuesAvailableTest(String aRegex,
+                                          boolean aUseFind) {
+        Pattern p = Pattern.compile(aRegex);
         RgxGen rgxGen = new RgxGen(aRegex);
         StringIterator stringIterator = rgxGen.iterateUnique();
         Set<String> set = new HashSet<>();
@@ -71,13 +61,13 @@ public class InfiniteGenerateTests {
             String next = stringIterator.next();
             assertTrue(stringIterator.hasNext());
             if (aUseFind) {
-                assertTrue(next, p.matcher(next)
-                                  .find());
+                assertTrue(p.matcher(next)
+                            .find(), next);
             } else {
-                assertTrue(next, p.matcher(next)
-                                  .matches());
+                assertTrue(p.matcher(next)
+                            .matches(), next);
             }
-            assertFalse("Duplicate value: " + next, set.contains(next));
+            assertFalse(set.contains(next), "Duplicate value: " + next);
             set.add(next);
         }
     }

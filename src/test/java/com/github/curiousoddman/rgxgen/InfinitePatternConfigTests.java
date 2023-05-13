@@ -3,16 +3,14 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
-import java.util.Random;
-
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InfinitePatternConfigTests {
 
-    @After
+    @AfterEach
     public void afterEach() {
         RgxGen.setDefaultProperties(null);
     }
@@ -25,8 +23,12 @@ public class InfinitePatternConfigTests {
         rgxGen_3.setProperties(properties_3);
         for (int i = 0; i < 100000; i++) {
             String value = rgxGen_3.generate(TestingUtilities.newRandom(i));
-            assertTrue("Expected to have either empty, or 'x' or 'xx' string. But got " + value, value != null && value.isEmpty()
-                    || "x".equals(value) || "xx".equals(value));
+            assertTrue(isCorrect(value), "Expected to have either empty, or 'x' or 'xx' string. But got " + value);
         }
+    }
+
+    private static boolean isCorrect(String value) {
+        return value != null && value.isEmpty()
+                || "x".equals(value) || "xx".equals(value);
     }
 }
