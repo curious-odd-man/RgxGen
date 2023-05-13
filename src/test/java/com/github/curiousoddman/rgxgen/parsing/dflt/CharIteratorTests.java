@@ -17,33 +17,36 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 /* **************************************************************************/
 
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class CharIteratorTests {
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void nextThrowsWhenNoMoreCharsTest() {
-        new CharIterator("").next();
+        CharIterator charIterator = new CharIterator("");
+        assertThrows(NoSuchElementException.class, charIterator::next);
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void nextUntilThrowsWhenNoSuchCharacterTest() {
-        new CharIterator("aaaaaaaaaaaaa").nextUntil('x');
+        CharIterator charIterator = new CharIterator("aaaaaaaaaaaaa");
+        assertThrows(NoSuchElementException.class, () -> charIterator.nextUntil('x'));
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void nextUntilThrowsWhenNoSuchCharacter2Test() {
         CharIterator charIterator = new CharIterator("aaaaaxbbbbbbb");
         assertEquals("aaaaa", charIterator.nextUntil('x'));
         assertEquals(7, charIterator.remaining());
         charIterator.next();    // Skip 'x' character
-        assertEquals("bbbbbbb", charIterator.nextUntil('x'));
+        assertThrows(NoSuchElementException.class, () -> charIterator.nextUntil('x'));
     }
 
     @Test
@@ -76,7 +79,7 @@ public class CharIteratorTests {
         for (Object[] datum : data) {
             CharIterator charIterator = new CharIterator(datum[0].toString());
             charIterator.next((int) datum[1]);
-            assertEquals(Arrays.toString(datum), datum[3], charIterator.nextUntil((char) datum[2]));
+            assertEquals(datum[3], charIterator.nextUntil((char) datum[2]), Arrays.toString(datum));
         }
     }
 
@@ -90,7 +93,7 @@ public class CharIteratorTests {
         for (Object[] datum : data) {
             CharIterator charIterator = new CharIterator(datum[0].toString());
             charIterator.next((int) datum[1]);
-            assertEquals(Arrays.toString(datum), datum[2], charIterator.takeWhile(Character::isDigit));
+            assertEquals(datum[2], charIterator.takeWhile(Character::isDigit), Arrays.toString(datum));
         }
     }
 

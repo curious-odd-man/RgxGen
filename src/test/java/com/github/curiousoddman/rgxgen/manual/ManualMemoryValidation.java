@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.manual;
 import com.github.curiousoddman.rgxgen.CompleteTests;
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.Iterator;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 public class ManualMemoryValidation {
     public static void main(String[] args) {
@@ -30,9 +32,11 @@ public class ManualMemoryValidation {
         System.out.println("Test 1: Verify that memory does not grow during this step. Press enter when ready");
         scanner.nextLine();
 
-        List<Object[]> data = CompleteTests.data();
+        List<Arguments> data = CompleteTests.getData()
+                                            .collect(Collectors.toList());
         Future<?> submit = executorService.submit(() -> {
-            RgxGen rgxGen = new RgxGen(data.get(2)[2].toString());
+            RgxGen rgxGen = new RgxGen(data.get(2)
+                                           .toString());
             while (!Thread.currentThread()
                           .isInterrupted()) {
                 rgxGen.generate();
@@ -63,14 +67,15 @@ public class ManualMemoryValidation {
         scanner.nextLine();
 
         submit = executorService.submit(() -> {
-            Iterator<Object[]> iterator = data.iterator();
+            Iterator<Arguments> iterator = data.iterator();
             while (!Thread.currentThread()
                           .isInterrupted()) {
                 String pattern;
                 if (!iterator.hasNext()) {
                     iterator = data.iterator();
                 }
-                pattern = iterator.next()[2].toString();
+                pattern = iterator.next()
+                                  .toString();
                 RgxGen rgxGen = new RgxGen(pattern);
             }
             System.out.println("Test 3 ended;");
