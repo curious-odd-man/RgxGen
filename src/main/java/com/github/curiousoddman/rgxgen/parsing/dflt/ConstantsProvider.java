@@ -1,13 +1,13 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.util.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
-import static com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet.*;
+import static com.github.curiousoddman.rgxgen.nodes.SymbolSet.*;
 
 /**
  * Helper class for lazy initialization and reuse of some constants that are re-used.
@@ -15,7 +15,7 @@ import static com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet.*;
  */
 @SuppressWarnings("InstanceVariableMayNotBeInitialized")
 class ConstantsProvider {
-    private Character[]                 aDigits;
+    private Character[]       aDigits;
     private Character[]       aWhiteSpaces;     // "\u000B" - is a vertical tab
     private List<SymbolRange> aWordCharRanges;
 

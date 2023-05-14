@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.util;
+package com.github.curiousoddman.rgxgen.model;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans

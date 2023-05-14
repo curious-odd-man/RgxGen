@@ -2,8 +2,8 @@ package com.github.curiousoddman.rgxgen.data;
 
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import com.github.curiousoddman.rgxgen.util.MatchType;
-import com.github.curiousoddman.rgxgen.util.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 
 import java.math.BigInteger;
 import java.util.*;

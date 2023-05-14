@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.util;
+package com.github.curiousoddman.rgxgen.model;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -17,6 +17,7 @@ package com.github.curiousoddman.rgxgen.util;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
 import java.util.stream.Collectors;

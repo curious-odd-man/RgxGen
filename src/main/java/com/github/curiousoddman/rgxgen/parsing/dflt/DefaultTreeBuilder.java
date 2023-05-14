@@ -18,9 +18,9 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
-import com.github.curiousoddman.rgxgen.util.MatchType;
-import com.github.curiousoddman.rgxgen.util.SymbolRange;
-import com.github.curiousoddman.rgxgen.util.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
@@ -385,13 +385,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
@@ -690,7 +690,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
         List<Character> characters = new ArrayList<>();
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));
@@ -700,7 +700,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
-        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
+        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
     }
 
     public void build() {
