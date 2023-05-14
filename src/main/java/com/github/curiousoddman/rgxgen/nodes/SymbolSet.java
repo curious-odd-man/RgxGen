@@ -30,9 +30,9 @@ import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_AR
  * Generate Any printable character.
  */
 public class SymbolSet extends Node {
-    public static final SymbolRange SMALL_LETTERS   = new SymbolRange('a', 'z');
-    public static final SymbolRange CAPITAL_LETTERS = new SymbolRange('A', 'Z');
-    public static final SymbolRange DIGITS          = new SymbolRange('0', '9');
+    public static final SymbolRange SMALL_LETTERS   = SymbolRange.of('a', 'z');
+    public static final SymbolRange CAPITAL_LETTERS = SymbolRange.of('A', 'Z');
+    public static final SymbolRange DIGITS          = SymbolRange.of('0', '9');
 
     private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
     private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table

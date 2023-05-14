@@ -16,12 +16,15 @@ package com.github.curiousoddman.rgxgen.model;
    limitations under the License.
 /* **************************************************************************/
 
+import lombok.Value;
+
 /**
  * Range of symbols
  */
+@Value(staticConstructor = "of")
 public class SymbolRange {
-    private final int from;
-    private final int to;
+    int from;
+    int to;
 
     /**
      * Create range of symbols.
@@ -30,9 +33,8 @@ public class SymbolRange {
      * @param to   max character; shall be greater than {@code from}
      * @apiNote No verifications are done!
      */
-    public SymbolRange(char from, char to) {
-        this.from = from;
-        this.to = to;
+    public static SymbolRange of(char from, char to) {
+        return of((int) from, to);
     }
 
     public int getFrom() {

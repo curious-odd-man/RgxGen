@@ -45,7 +45,7 @@ public enum TestPattern implements DataInterface {
     }},
     LETTER_RANGE("[a-cA-C]",
                  new SymbolSet("[a-cA-C]",
-                               Arrays.asList(new SymbolRange('a', 'c'), new SymbolRange('A', 'C')), MatchType.POSITIVE)
+                               Arrays.asList(SymbolRange.of('a', 'c'), SymbolRange.of('A', 'C')), MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
