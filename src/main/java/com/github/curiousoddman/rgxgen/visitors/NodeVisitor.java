@@ -21,6 +21,8 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 public interface NodeVisitor {
     void visit(AsciiSymbolSet node);
 
+    void visit(UnicodeSymbolSet node);
+
     void visit(Choice node);
 
     void visit(FinalSymbol node);

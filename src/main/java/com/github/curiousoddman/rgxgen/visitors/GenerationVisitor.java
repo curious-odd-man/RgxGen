@@ -48,6 +48,13 @@ public class GenerationVisitor implements NodeVisitor {
     }
 
     @Override
+    public void visit(UnicodeSymbolSet node) {
+        Character[] allSymbols = node.getSymbols();
+        int idx = aRandom.nextInt(allSymbols.length);
+        aStringBuilder.append(allSymbols[idx]);
+    }
+
+    @Override
     public void visit(Choice node) {
         Node[] nodes = node.getNodes();
         int idx = aRandom.nextInt(nodes.length);

@@ -55,6 +55,20 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     @Override
+    public void visit(UnicodeSymbolSet node) {
+        visitSymbolSet(node, AsciiSymbolSet::getSymbols);
+    }
+
+    protected void visitSymbolSet(UnicodeSymbolSet node, Function<AsciiSymbolSet, Character[]> getSymbols) {
+        // There is only one way to generate not matching for any character - is to not generate anything
+        String pattern = node.getPattern();
+        UnicodeSymbolSet asciiSymbolSet = new UnicodeSymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+        if (!asciiSymbolSet.isEmpty()) {
+            super.visit(asciiSymbolSet);
+        }
+    }
+
+    @Override
     public void visit(Choice node) {
         StringBuilder groupsBuilder = new StringBuilder();
         StringBuilder valuePrefixBuilder = new StringBuilder();

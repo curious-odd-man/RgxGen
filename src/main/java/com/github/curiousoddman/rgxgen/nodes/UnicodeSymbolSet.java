@@ -24,7 +24,15 @@ import java.util.function.Consumer;
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
- * Generate Any printable character.
+ * Generate Any character.
  */
-public class UnicodeSymbolSet {//extends Node {
+public class UnicodeSymbolSet extends Node {
+    protected UnicodeSymbolSet(String pattern) {
+        super(pattern);
+    }
+
+    @Override
+    public void visit(NodeVisitor visitor) {
+        visitor.visit(this);
+    }
 }

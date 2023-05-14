@@ -20,6 +20,7 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.MatchType;
 import com.github.curiousoddman.rgxgen.util.SymbolRange;
+import com.github.curiousoddman.rgxgen.util.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
@@ -384,19 +385,25 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? MatchType.POSITIVE : MatchType.NEGATIVE);
+                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? MatchType.POSITIVE : MatchType.NEGATIVE);
+                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? MatchType.POSITIVE : MatchType.NEGATIVE);
+                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                break;
+
+            case 'p':   // Character classes
+            case 'P':   // Not-matching character classes
+                sbToFinal(sb, nodes);
+                createdNode = createUnicodeSymbolSetNode(sb, getMatchType(c, 'p'));
                 break;
 
             // Hex character:
@@ -443,6 +450,25 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
             nodes.add(createdNode);
         }
+    }
+
+    private Node createUnicodeSymbolSetNode(StringBuilder sb, MatchType matchType) {
+        String characterClassKey = getCharacterClassKey();
+        UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
+        return unicodeCategory.getNode();
+    }
+
+    private String getCharacterClassKey() {
+        if (aCharIterator.peek() == '{') {
+            aCharIterator.skip();
+            return aCharIterator.nextUntil('}');
+        } else {
+            return aCharIterator.next(1);
+        }
+    }
+
+    private static MatchType getMatchType(char parsedCharacter, char positiveMatchCharacter) {
+        return parsedCharacter == positiveMatchCharacter ? MatchType.POSITIVE : MatchType.NEGATIVE;
     }
 
     /**
