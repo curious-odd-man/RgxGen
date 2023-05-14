@@ -18,7 +18,7 @@ package com.github.curiousoddman.rgxgen.visitors;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.Map;
@@ -30,7 +30,7 @@ public class GenerationVisitorCaseInsensitive extends GenerationVisitor {
     }
 
     @Override
-    public void visit(SymbolSet node) {
+    public void visit(AsciiSymbolSet node) {
         Character[] allSymbols = node.getSymbolsCaseInsensitive();
         int idx = aRandom.nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);

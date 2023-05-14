@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.visitors;
+package com.github.curiousoddman.rgxgen.util;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,30 @@ package com.github.curiousoddman.rgxgen.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.*;
+/**
+ * Range of symbols
+ */
+public class SymbolRange {
+    private final int from;
+    private final int to;
 
-public interface NodeVisitor {
-    void visit(AsciiSymbolSet node);
+    /**
+     * Create range of symbols.
+     *
+     * @param from min character; shall be less than {@code to}
+     * @param to   max character; shall be greater than {@code from}
+     * @apiNote No verifications are done!
+     */
+    public SymbolRange(char from, char to) {
+        this.from = from;
+        this.to = to;
+    }
 
-    void visit(Choice node);
+    public int getFrom() {
+        return from;
+    }
 
-    void visit(FinalSymbol node);
-
-    void visit(Repeat node);
-
-    void visit(Sequence node);
-
-    void visit(NotSymbol node);
-
-    void visit(GroupRef node);
-
-    void visit(Group node);
+    public int getTo() {
+        return to;
+    }
 }

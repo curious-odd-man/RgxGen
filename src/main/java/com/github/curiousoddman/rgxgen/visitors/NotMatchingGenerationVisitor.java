@@ -20,6 +20,7 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.util.MatchType;
 
 import java.util.Map;
 import java.util.Random;
@@ -33,23 +34,23 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         return new GenerationVisitorBuilder(false);
     }
 
-    private static final Character[] allSymbols = SymbolSet.getAllSymbols();
+    private static final Character[] allSymbols = AsciiSymbolSet.getAllSymbols();
 
     public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
     }
 
     @Override
-    public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbols);
+    public void visit(AsciiSymbolSet node) {
+        visitSymbolSet(node, AsciiSymbolSet::getSymbols);
     }
 
-    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
+    protected void visitSymbolSet(AsciiSymbolSet node, Function<AsciiSymbolSet, Character[]> getSymbols) {
         // There is only one way to generate not matching for any character - is to not generate anything
         String pattern = node.getPattern();
-        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), SymbolSet.TYPE.NEGATIVE);
-        if (!symbolSet.isEmpty()) {
-            super.visit(symbolSet);
+        AsciiSymbolSet asciiSymbolSet = new AsciiSymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+        if (!asciiSymbolSet.isEmpty()) {
+            super.visit(asciiSymbolSet);
         }
     }
 

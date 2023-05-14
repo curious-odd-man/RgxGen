@@ -41,7 +41,7 @@ public class GenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(SymbolSet node) {
+    public void visit(AsciiSymbolSet node) {
         Character[] allSymbols = node.getSymbols();
         int idx = aRandom.nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);

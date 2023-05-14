@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.visitors;
+package com.github.curiousoddman.rgxgen.util;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,11 @@ package com.github.curiousoddman.rgxgen.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.*;
-
-public interface NodeVisitor {
-    void visit(AsciiSymbolSet node);
-
-    void visit(Choice node);
-
-    void visit(FinalSymbol node);
-
-    void visit(Repeat node);
-
-    void visit(Sequence node);
-
-    void visit(NotSymbol node);
-
-    void visit(GroupRef node);
-
-    void visit(Group node);
+/**
+ * POSITIVE - add characters and ranges
+ * NEGATIVE - all but characters and ranges
+ */
+public enum MatchType {
+    POSITIVE,
+    NEGATIVE
 }

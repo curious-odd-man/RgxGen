@@ -17,7 +17,7 @@ package com.github.curiousoddman.rgxgen.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet;
 
 import java.util.Map;
 import java.util.Random;
@@ -28,8 +28,8 @@ public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGene
     }
 
     @Override
-    public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbolsCaseInsensitive);
+    public void visit(AsciiSymbolSet node) {
+        visitSymbolSet(node, AsciiSymbolSet::getSymbolsCaseInsensitive);
     }
 
     @Override

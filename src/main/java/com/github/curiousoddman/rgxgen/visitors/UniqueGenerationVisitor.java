@@ -46,7 +46,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(SymbolSet node) {
+    public void visit(AsciiSymbolSet node) {
         if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
             aIterators.add(new ArrayIteratorSupplier(node.getSymbolsCaseInsensitive()));
         } else {
@@ -95,7 +95,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        aIterators.add(new NegativeIteratorSupplier(node.getPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
+        aIterators.add(new NegativeIteratorSupplier(node.getPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(AsciiSymbolSet.getAllSymbols()), 0, -1)));
     }
 
     @Override

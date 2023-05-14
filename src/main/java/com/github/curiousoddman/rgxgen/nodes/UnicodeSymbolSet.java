@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.visitors;
+package com.github.curiousoddman.rgxgen.nodes;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,22 +16,15 @@ package com.github.curiousoddman.rgxgen.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public interface NodeVisitor {
-    void visit(AsciiSymbolSet node);
+import java.util.*;
+import java.util.function.Consumer;
 
-    void visit(Choice node);
+import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
-    void visit(FinalSymbol node);
-
-    void visit(Repeat node);
-
-    void visit(Sequence node);
-
-    void visit(NotSymbol node);
-
-    void visit(GroupRef node);
-
-    void visit(Group node);
+/**
+ * Generate Any printable character.
+ */
+public class UnicodeSymbolSet {//extends Node {
 }

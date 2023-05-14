@@ -17,9 +17,8 @@ package com.github.curiousoddman.rgxgen.util;
 /* **************************************************************************/
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.OptionalInt;
-import java.util.Random;
+import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * Utility methods collection
@@ -41,7 +40,7 @@ public final class Util {
      * @param times number of times. Values less or equal to zero will result in empty string
      * @return text repeated multiple times
      */
-    public static String repeat_char(char c, int times) {
+    public static String repeatChar(char c, int times) {
         if (times < 0) {
             return "";
         }
@@ -104,6 +103,25 @@ public final class Util {
             }
         }
         return OptionalInt.empty();
+    }
+
+    /**
+     * Method creates variation by replacing characterToReplace with all allowedReplacements (one at a time)
+     *
+     * @param originalTexts       texts from which variation are to be made
+     * @param characterToReplace  make variations by replacing this character in originalText
+     * @param allowedReplacements replace characterToReplace with each of these characters
+     * @return all unique variations
+     */
+    public static Set<String> makeVariations(List<String> originalTexts, char characterToReplace, char... allowedReplacements) {
+        Set<String> result = new HashSet<>();
+        for (String originalText : originalTexts) {
+            result.add(originalText);
+            for (char replacement : allowedReplacements) {
+                result.add(originalText.replace(characterToReplace, replacement));
+            }
+        }
+        return result;
     }
 
     /**
