@@ -21,7 +21,7 @@ public class NodePatternVerifyingVisitor implements NodeVisitor {
     }
 
     @Override
-    public void visit(AsciiSymbolSet node) {
+    public void visit(SymbolSet node) {
         compareAndReport(node);
     }
 

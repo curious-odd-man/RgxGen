@@ -17,8 +17,7 @@ package com.github.curiousoddman.rgxgen.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet;
-import com.github.curiousoddman.rgxgen.nodes.UnicodeSymbolSet;
+import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 
 import java.util.Map;
 import java.util.Random;
@@ -29,15 +28,9 @@ public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGene
     }
 
     @Override
-    public void visit(AsciiSymbolSet node) {
-        visitSymbolSet(node, AsciiSymbolSet::getSymbolsCaseInsensitive);
+    public void visit(SymbolSet node) {
+        visitSymbolSet(node, SymbolSet::getSymbolsCaseInsensitive);
     }
-
-    @Override
-    public void visit(UnicodeSymbolSet node) {
-        visitSymbolSet(node, UnicodeSymbolSet::getSymbolsCaseInsensitive);
-    }
-
 
     @Override
     protected boolean equalsFinalSymbolRandomString(String s1, String s2) {

@@ -16,8 +16,6 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.util.MatchType;
-import com.github.curiousoddman.rgxgen.util.SymbolRange;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
@@ -26,13 +24,9 @@ import java.util.function.Consumer;
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
- * Generate Any ASCII printable character.
+ * Generate Any printable character.
  */
-public class AsciiSymbolSet extends Node {
-    public static final SymbolRange SMALL_LETTERS   = new SymbolRange('a', 'z');
-    public static final SymbolRange CAPITAL_LETTERS = new SymbolRange('A', 'Z');
-    public static final SymbolRange DIGITS          = new SymbolRange('0', '9');
-
+public class SymbolSet extends Node {
     private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
     private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
 
@@ -48,24 +42,58 @@ public class AsciiSymbolSet extends Node {
         }
     }
 
+    /**
+     * POSITIVE - add characters and ranges
+     * NEGATIVE - all but characters and ranges
+     */
+    public enum TYPE {
+        POSITIVE,
+        NEGATIVE
+    }
+
+    /**
+     * Range of symbols
+     */
+    public static class SymbolRange {
+        public static final SymbolRange SMALL_LETTERS   = new SymbolSet.SymbolRange('a', 'z');
+        public static final SymbolRange CAPITAL_LETTERS = new SymbolSet.SymbolRange('A', 'Z');
+        public static final SymbolRange DIGITS          = new SymbolSet.SymbolRange('0', '9');
+
+        private final int aFrom;
+        private final int aTo;
+
+        /**
+         * Create range of symbols.
+         *
+         * @param from min character shall be less than {@code to}
+         * @param to   max character, shall be greater than {@code from}
+         * @apiNote No verifications are done!
+         */
+        public SymbolRange(char from, char to) {
+            aFrom = from;
+            aTo = to;
+        }
+    }
+
     private final Collection<Character> aInitial;
     private final Collection<Character> aModification;
-    private final MatchType             aType;
-    private       Character[]           aSymbols;
-    private       Character[]           aSymbolsCaseInsensitive;
+    private final TYPE                  aType;
+
+    private Character[] aSymbols;
+    private Character[] aSymbolsCaseInsensitive;
 
     /**
      * Symbol set containing all symbols
      */
-    public AsciiSymbolSet() {
-        this(".", ALL_SYMBOLS.clone(), MatchType.POSITIVE);
+    public SymbolSet() {
+        this(".", ALL_SYMBOLS.clone(), TYPE.POSITIVE);
     }
 
-    public AsciiSymbolSet(String pattern, Character[] symbols, MatchType type) {
+    public SymbolSet(String pattern, Character[] symbols, TYPE type) {
         this(pattern, Collections.emptyList(), symbols, type);
     }
 
-    public AsciiSymbolSet(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
+    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, TYPE type) {
         this(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type);
     }
 
@@ -77,10 +105,10 @@ public class AsciiSymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public AsciiSymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
+    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, TYPE type) {
         super(pattern);
         aType = type;
-        if (aType == MatchType.POSITIVE) {
+        if (aType == TYPE.POSITIVE) {
             aInitial = new HashSet<>(ALL_SYMBOLS.length);
             aModification = new ArrayList<>(Arrays.asList(symbols));
         } else {
@@ -89,13 +117,13 @@ public class AsciiSymbolSet extends Node {
         }
 
         symbolRanges.stream()
-                    .map(AsciiSymbolSet::rangeToList)
+                    .map(SymbolSet::rangeToList)
                     .forEach(aModification::addAll);
     }
 
     private static Collection<Character> rangeToList(SymbolRange range) {
-        Collection<Character> chars = new ArrayList<>(range.getTo() - range.getFrom() + 1);
-        for (int i = range.getFrom(); i <= range.getTo(); i++) {
+        Collection<Character> chars = new ArrayList<>(range.aTo - range.aFrom + 1);
+        for (int i = range.aFrom; i <= range.aTo; i++) {
             chars.add((char) i);
         }
 
@@ -104,7 +132,7 @@ public class AsciiSymbolSet extends Node {
 
     private Character[] getOrInitSymbols() {
         if (aSymbols == null) {
-            if (aType == MatchType.POSITIVE) {
+            if (aType == TYPE.POSITIVE) {
                 aInitial.addAll(aModification);
             } else {
                 aInitial.removeIf(aModification::contains);
@@ -117,7 +145,7 @@ public class AsciiSymbolSet extends Node {
     private Character[] getOrInitCaseInsensitiveSymbols() {
         if (aSymbolsCaseInsensitive == null) {
             Set<Character> caseInsensitive = new HashSet<>(aInitial);
-            if (aType == MatchType.POSITIVE) {
+            if (aType == TYPE.POSITIVE) {
                 handleCaseSensitiveCharacters(aModification, caseInsensitive::add);
             } else {
                 handleCaseSensitiveCharacters(aModification, caseInsensitive::remove);
@@ -153,7 +181,7 @@ public class AsciiSymbolSet extends Node {
 
     @Override
     public String toString() {
-        return "AsciiSymbolSet{" + Arrays.toString(getOrInitSymbols()) + '}';
+        return "SymbolSet{" + Arrays.toString(getOrInitSymbols()) + '}';
     }
 
     public boolean isEmpty() {

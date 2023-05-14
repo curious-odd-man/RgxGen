@@ -10,7 +10,7 @@ public class NodePatternCollectingVisitor implements NodeVisitor {
     private final List<String> aPatterns = new ArrayList<>();
 
     @Override
-    public void visit(AsciiSymbolSet node) {
+    public void visit(SymbolSet node) {
         aPatterns.add(node.getPattern());
     }
 

@@ -271,9 +271,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        AsciiSymbolSet asciiSymbolSet = new AsciiSymbolSet();
-        aNodesStartPos.put(asciiSymbolSet, aCharIterator.prevPos());
-        nodes.add(asciiSymbolSet);
+        SymbolSet symbolSet = new SymbolSet();
+        aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
+        nodes.add(symbolSet);
     }
 
     private int handlePipeCharacter(List<Node> choices, List<Node> nodes, StringBuilder sb, int choicesStartPos) {
@@ -385,19 +385,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getDigits(), getMatchType(c, 'd'));
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), getMatchType(c, 's'));
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = new AsciiSymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -602,7 +602,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         MatchType symbolSetType = determineSymbolSetType(aCharIterator);
         StringBuilder characters = new StringBuilder(aCharIterator.remaining());
         List<SymbolRange> symbolRanges = new ArrayList<>();
-        List<AsciiSymbolSet> asciiSymbolSets = new ArrayList<>();
+        List<SymbolSet> symbolSets = new ArrayList<>();
         boolean rangeStarted = false;
 
         while (aCharIterator.hasNext()) {
@@ -610,9 +610,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             switch (c) {
                 case ']':
                     String pattern = aCharIterator.substringToCurrPos(openSquareBraceIndex);
-                    AsciiSymbolSet finalAsciiSymbolSet = createSymbolSetFromSquareBrackets(pattern, symbolSetType, characters, symbolRanges, asciiSymbolSets);
-                    aNodesStartPos.put(finalAsciiSymbolSet, openSquareBraceIndex);
-                    return finalAsciiSymbolSet;
+                    SymbolSet finalSymbolSet = createSymbolSetFromSquareBrackets(pattern, symbolSetType, characters, symbolRanges, symbolSets);
+                    aNodesStartPos.put(finalSymbolSet, openSquareBraceIndex);
+                    return finalSymbolSet;
 
                 case '-':
                     if (aCharIterator.peek() == ']' || aCharIterator.peek(-2) == '[') {
@@ -623,7 +623,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    Optional<AsciiSymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
+                    Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
 
                     if (rangeStarted) {
                         if (symbolSet.isPresent()) {
@@ -631,7 +631,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                         }
                         handleSymbolRange(characters, symbolRanges);
                     } else {
-                        symbolSet.ifPresent(asciiSymbolSets::add);
+                        symbolSet.ifPresent(symbolSets::add);
                     }
                     rangeStarted = false;
                     break;
@@ -658,7 +658,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Optional<AsciiSymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
+    private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
         // Skip backslash and add next symbol to characters
         List<Node> nodes = new ArrayList<>(5);
 
@@ -673,7 +673,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (nodes.size() > 1) {
             throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
         } else {
-            return Optional.of((AsciiSymbolSet) nodes.get(0));
+            return Optional.of((SymbolSet) nodes.get(0));
         }
     }
 
@@ -690,17 +690,17 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static AsciiSymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType symbolSetType, CharSequence sb, List<SymbolRange> symbolRanges, Iterable<AsciiSymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
         List<Character> characters = new ArrayList<>();
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));
         }
 
-        for (AsciiSymbolSet asciiSymbolSet : symbolSets) {
-            characters.addAll(Arrays.asList(asciiSymbolSet.getSymbols()));
+        for (SymbolSet symbolSet : symbolSets) {
+            characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
-        return new AsciiSymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
+        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
     }
 
     public void build() {

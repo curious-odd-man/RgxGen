@@ -1,8 +1,7 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.util.MatchType;
 import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.nodes.AsciiSymbolSet;
+import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -16,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SquareBracketsParsingTests {
 
-    private static AsciiSymbolSet mkSS(Character... chars) {
-        return new AsciiSymbolSet(Arrays.toString(chars), chars, MatchType.POSITIVE);
+    private static SymbolSet mkSS(Character... chars) {
+        return new SymbolSet(Arrays.toString(chars), chars, SymbolSet.TYPE.POSITIVE);
     }
 
     public static Stream<Arguments> data() {

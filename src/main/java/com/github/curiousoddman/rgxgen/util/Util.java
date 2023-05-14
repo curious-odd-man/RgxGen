@@ -18,7 +18,6 @@ package com.github.curiousoddman.rgxgen.util;
 
 import java.math.BigInteger;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Utility methods collection

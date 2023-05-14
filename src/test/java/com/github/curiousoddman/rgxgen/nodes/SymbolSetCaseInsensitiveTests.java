@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.nodes;
 
-import com.github.curiousoddman.rgxgen.util.MatchType;
 import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,9 +10,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
-public class AsciiSymbolSetCaseInsensitiveTests {
+public class SymbolSetCaseInsensitiveTests {
     public static Character[] excluding(String chars) {
-        Character[] allSymbols = AsciiSymbolSet.getAllSymbols();
+        Character[] allSymbols = SymbolSet.getAllSymbols();
         Character[] result = new Character[allSymbols.length - chars.length()];
         int target = 0;
         for (Character sym : allSymbols) {
@@ -40,8 +39,8 @@ public class AsciiSymbolSetCaseInsensitiveTests {
     @ParameterizedTest
     @MethodSource("parameters")
     public void positiveSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        AsciiSymbolSet asciiSymbolSet = new AsciiSymbolSet(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
-        Character[] actual = asciiSymbolSet.getSymbolsCaseInsensitive();
+        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), SymbolSet.TYPE.POSITIVE);
+        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
         Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
     }
@@ -49,8 +48,8 @@ public class AsciiSymbolSetCaseInsensitiveTests {
     @ParameterizedTest
     @MethodSource("parameters")
     public void negativeSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        AsciiSymbolSet asciiSymbolSet = new AsciiSymbolSet(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
-        Character[] actual = asciiSymbolSet.getSymbolsCaseInsensitive();
+        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), SymbolSet.TYPE.NEGATIVE);
+        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
         Character[] expected = excluding(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
 
