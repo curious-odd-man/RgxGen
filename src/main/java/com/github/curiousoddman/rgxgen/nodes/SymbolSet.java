@@ -18,6 +18,7 @@ package com.github.curiousoddman.rgxgen.nodes;
 
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
@@ -101,6 +102,10 @@ public class SymbolSet extends Node {
         }
 
         return chars;
+    }
+
+    public SymbolSet(String pattern, UnicodeCategory unicodeCategory, MatchType matchType) {
+        this(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), matchType);
     }
 
     private Character[] getOrInitSymbols() {

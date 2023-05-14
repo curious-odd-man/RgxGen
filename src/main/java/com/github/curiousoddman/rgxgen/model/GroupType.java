@@ -1,6 +1,6 @@
-package com.github.curiousoddman.rgxgen.parsing.dflt;
+package com.github.curiousoddman.rgxgen.model;
 
-enum GroupType {
+public enum GroupType {
     POSITIVE_LOOKAHEAD,
     NEGATIVE_LOOKAHEAD,
     POSITIVE_LOOKBEHIND,

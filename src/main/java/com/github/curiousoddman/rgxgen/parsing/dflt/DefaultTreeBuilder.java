@@ -16,6 +16,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.model.GroupType;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.model.MatchType;
@@ -403,7 +404,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'p':   // Character classes
             case 'P':   // Not-matching character classes
                 sbToFinal(sb, nodes);
-                createdNode = createUnicodeSymbolSetNode(sb, getMatchType(c, 'p'));
+                createdNode = createUnicodeSymbolSetNode(sb, c, getMatchType(c, 'p'));
                 break;
 
             // Hex character:
@@ -452,10 +453,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Node createUnicodeSymbolSetNode(StringBuilder sb, MatchType matchType) {
+    private Node createUnicodeSymbolSetNode(StringBuilder sb, char c, MatchType matchType) {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
-        return unicodeCategory.getNode();
+        String pattern = "\\" + c + '{' + characterClassKey + '}';
+        return new SymbolSet(pattern, unicodeCategory, getMatchType(c, 'w'));
     }
 
     private String getCharacterClassKey() {
