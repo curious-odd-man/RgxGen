@@ -270,7 +270,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        SymbolSet symbolSet = new SymbolSet();
+        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern();
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
@@ -384,19 +384,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, ConstantsProvider.getWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, ConstantsProvider.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -455,7 +455,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
         String pattern = "\\" + c + '{' + characterClassKey + '}';
-        return new SymbolSet(pattern, unicodeCategory, getMatchType(c, 'w'));
+        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, getMatchType(c, 'w'));
     }
 
     private String getCharacterClassKey() {
@@ -700,7 +700,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
-        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
     }
 
     public void build() {
