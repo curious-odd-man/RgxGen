@@ -27,6 +27,8 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
+
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
@@ -34,7 +36,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         return new GenerationVisitorBuilder(false);
     }
 
-    private static final Character[] allSymbols = SymbolSet.getAllSymbols();
+    private static final Character[] allSymbols = makeAsciiCharacterArray();
 
     public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
@@ -48,7 +50,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
         // There is only one way to generate not matching for any character - is to not generate anything
         String pattern = node.getPattern();
-        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
         if (!symbolSet.isEmpty()) {
             super.visit(symbolSet);
         }
@@ -74,7 +76,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     /**
-     * We need to add existing group values, so that we could later use it in matching pattern
+     * We need to add existing group values, so that we could later use it in a matching pattern
      *
      * @param groupsBuilder
      * @param valuePrefixBuilder

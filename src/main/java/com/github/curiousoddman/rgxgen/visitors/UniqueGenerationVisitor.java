@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
+
 public class UniqueGenerationVisitor implements NodeVisitor {
     private final List<Supplier<StringIterator>>        aIterators = new ArrayList<>();
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
@@ -95,7 +97,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        aIterators.add(new NegativeIteratorSupplier(node.getPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(SymbolSet.getAllSymbols()), 0, -1)));
+        aIterators.add(new NegativeIteratorSupplier(node.getPattern(), new IncrementalLengthIteratorSupplier(new ArrayIteratorSupplier(makeAsciiCharacterArray()), 0, -1)));
     }
 
     @Override

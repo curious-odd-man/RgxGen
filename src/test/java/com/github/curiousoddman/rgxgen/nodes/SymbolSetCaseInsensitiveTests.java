@@ -9,11 +9,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class SymbolSetCaseInsensitiveTests {
     public static Character[] excluding(String chars) {
-        Character[] allSymbols = SymbolSet.getAllSymbols();
+        Character[] allSymbols = makeAsciiCharacterArray();
         Character[] result = new Character[allSymbols.length - chars.length()];
         int target = 0;
         for (Character sym : allSymbols) {
@@ -40,7 +41,7 @@ public class SymbolSetCaseInsensitiveTests {
     @ParameterizedTest
     @MethodSource("parameters")
     public void positiveSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
+        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
         Character[] actual = symbolSet.getSymbolsCaseInsensitive();
         Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
@@ -49,7 +50,7 @@ public class SymbolSetCaseInsensitiveTests {
     @ParameterizedTest
     @MethodSource("parameters")
     public void negativeSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        SymbolSet symbolSet = new SymbolSet(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
+        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
         Character[] actual = symbolSet.getSymbolsCaseInsensitive();
         Character[] expected = excluding(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");

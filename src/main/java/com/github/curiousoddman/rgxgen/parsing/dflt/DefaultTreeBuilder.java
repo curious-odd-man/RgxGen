@@ -32,13 +32,11 @@ import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_AR
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private static final Character[]       SINGLETON_UNDERSCORE_ARRAY = {'_'};
-    private static final int               HEX_RADIX                  = 16;
-    private static final Node[]            EMPTY_NODES_ARR            = new Node[0];
-    private static final ConstantsProvider CONST_PROVIDER             = new ConstantsProvider();
-
-    private final CharIterator       aCharIterator;
-    private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
+    private static final Character[]        SINGLETON_UNDERSCORE_ARRAY = {'_'};
+    private static final int                HEX_RADIX                  = 16;
+    private static final Node[]             EMPTY_NODES_ARR            = new Node[0];
+    private final        CharIterator       aCharIterator;
+    private final        Map<Node, Integer> aNodesStartPos             = new IdentityHashMap<>();
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -271,7 +269,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        SymbolSet symbolSet = new SymbolSet();
+        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern();
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
@@ -385,19 +383,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), getMatchType(c, 'd'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             // Hex character:
@@ -679,7 +677,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
-        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
     }
 
     public void build() {
