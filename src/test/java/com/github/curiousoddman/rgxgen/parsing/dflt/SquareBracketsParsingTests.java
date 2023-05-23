@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SquareBracketsParsingTests {
 
     private static SymbolSet mkSS(Character... chars) {
-        return new SymbolSet(Arrays.toString(chars), chars, MatchType.POSITIVE);
+        return SymbolSet.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
     }
 
     public static Stream<Arguments> data() {

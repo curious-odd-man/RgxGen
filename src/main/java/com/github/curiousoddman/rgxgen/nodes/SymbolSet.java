@@ -23,30 +23,13 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Generate Any printable character.
  */
 public class SymbolSet extends Node {
-    public static final SymbolRange SMALL_LETTERS   = SymbolRange.of('a', 'z');
-    public static final SymbolRange CAPITAL_LETTERS = SymbolRange.of('A', 'Z');
-    public static final SymbolRange DIGITS          = SymbolRange.of('0', '9');
-
-    private static final int SPACE_ASCII_CODE = 32;     // First printable character in ASCII table
-    private static final int DEL_ASCII_CODE   = 127;    // Bound for printable characters in ASCII table
-
-    private static final Character[] ALL_SYMBOLS = new Character[DEL_ASCII_CODE - SPACE_ASCII_CODE];
-
-    public static Character[] getAllSymbols() {
-        return ALL_SYMBOLS.clone();
-    }
-
-    static {
-        for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
-            ALL_SYMBOLS[i - SPACE_ASCII_CODE] = (char) i;
-        }
-    }
 
     private final Collection<Character> aInitial;
     private final Collection<Character> aModification;
@@ -55,19 +38,21 @@ public class SymbolSet extends Node {
     private Character[] aSymbols;
     private Character[] aSymbolsCaseInsensitive;
 
-    /**
-     * Symbol set containing all symbols
-     */
-    public SymbolSet() {
-        this(".", ALL_SYMBOLS.clone(), MatchType.POSITIVE);
+
+    public static SymbolSet ofAsciiDotPattern() {
+        return ofAsciiCharacters(".", makeAsciiCharacterArray(), MatchType.POSITIVE);
     }
 
-    public SymbolSet(String pattern, Character[] symbols, MatchType type) {
-        this(pattern, Collections.emptyList(), symbols, type);
+    public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
+        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeAsciiCharacterArray());
     }
 
-    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
-        this(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type);
+    public static SymbolSet ofAsciiRanges(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, makeAsciiCharacterArray());
+    }
+
+    public static SymbolSet ofAscii(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, symbols, type, makeAsciiCharacterArray());
     }
 
     /**
@@ -78,14 +63,14 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
+    private SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type, Character[] allAvailableCharacters) {
         super(pattern);
         aType = type;
         if (aType == MatchType.POSITIVE) {
-            aInitial = new HashSet<>(ALL_SYMBOLS.length);
+            aInitial = new HashSet<>(allAvailableCharacters.length);
             aModification = new ArrayList<>(Arrays.asList(symbols));
         } else {
-            aInitial = new HashSet<>(Arrays.asList(ALL_SYMBOLS));
+            aInitial = new HashSet<>(Arrays.asList(allAvailableCharacters));
             aModification = new HashSet<>(Arrays.asList(symbols));
         }
 

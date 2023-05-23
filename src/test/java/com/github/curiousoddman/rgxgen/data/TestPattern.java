@@ -10,8 +10,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.nodes.SymbolSet.*;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 
 
 // CAUTION! Double braced initialization is used.
@@ -28,34 +30,34 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_DIGIT("\\d",
-              new SymbolSet("\\d",
-                            getAllDigits(), MatchType.POSITIVE)) {{
+              SymbolSet.ofAsciiCharacters("\\d",
+                                          getAllDigits(), MatchType.POSITIVE)) {{
         setAllUniqueValues("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A_DIGIT("\\D",      // Any non-digit
-                new SymbolSet("\\D",
-                              getAllDigits(), MatchType.NEGATIVE)
+                SymbolSet.ofAsciiCharacters("\\D",
+                                            getAllDigits(), MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_DIGIT_RANGE("[0-9]",
-                    new SymbolSet("[0-9]",
-                                  getAllDigits(), MatchType.POSITIVE)) {{
+                    SymbolSet.ofAsciiCharacters("[0-9]",
+                                                getAllDigits(), MatchType.POSITIVE)) {{
         setAllUniqueValues("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }},
     LETTER_RANGE("[a-cA-C]",
-                 new SymbolSet("[a-cA-C]",
-                               Arrays.asList(SymbolRange.of('a', 'c'), SymbolRange.of('A', 'C')), MatchType.POSITIVE)
+                 SymbolSet.ofAsciiRanges("[a-cA-C]",
+                                         asList(SymbolRange.of('a', 'c'), SymbolRange.of('A', 'C')), MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
-                       new SymbolSet("\\w",
-                                     Arrays.asList(SMALL_LETTERS, CAPITAL_LETTERS, DIGITS), new Character[]{'_'}, MatchType.POSITIVE)
+                       SymbolSet.ofAscii("\\w",
+                                         asList(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS), new Character[]{'_'}, MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_NON_WORD_CHARACTER("\\W",      // Any non-word symbol  [a-zA-Z0-9_]
-                           new SymbolSet("\\W",
-                                         Arrays.asList(SMALL_LETTERS, CAPITAL_LETTERS, DIGITS), new Character[]{'_'}, MatchType.NEGATIVE)
+                           SymbolSet.ofAscii("\\W",
+                                             asList(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS), new Character[]{'_'}, MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SPACE("\\x20", // Space
@@ -72,16 +74,16 @@ public enum TestPattern implements DataInterface {
                       new FinalSymbol("⛸a")),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B("[ab]",
-           new SymbolSet("[ab]",
-                         new Character[]{
-                                 'a', 'b'
-                         }, MatchType.POSITIVE)) {{
+           SymbolSet.ofAsciiCharacters("[ab]",
+                                       new Character[]{
+                                               'a', 'b'
+                                       }, MatchType.POSITIVE)) {{
         setAllUniqueValues("a", "b");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B_THEN_C("[ab]c",
                   new Sequence("[ab]c",
-                               new SymbolSet("[ab]", new Character[]{
+                               SymbolSet.ofAsciiCharacters("[ab]", new Character[]{
                                        'a', 'b'
                                }, MatchType.POSITIVE), new FinalSymbol("c"))) {{
         setAllUniqueValues("ac", "bc");
@@ -90,7 +92,7 @@ public enum TestPattern implements DataInterface {
     D_THEN_A_OR_B_THEN_C("d[ab]c",
                          new Sequence("d[ab]c",
                                       new FinalSymbol("d"),
-                                      new SymbolSet("[ab]", new Character[]{
+                                      SymbolSet.ofAsciiCharacters("[ab]", new Character[]{
                                               'a', 'b'
                                       }, MatchType.POSITIVE), new FinalSymbol("c"))) {{
         setAllUniqueValues("dac", "dbc");
@@ -147,18 +149,18 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_ANY("a.",
-               new Sequence("a.", new FinalSymbol("a"), new SymbolSet())) {{
-        setAllUniqueValues(Arrays.stream(SymbolSet.getAllSymbols())
-                                 .map(s -> "" + 'a' + s)
-                                 .collect(Collectors.toList()));
+               new Sequence("a.", new FinalSymbol("a"), SymbolSet.ofAsciiDotPattern())) {{
+        setAllUniqueValues(stream(makeAsciiCharacterArray())
+                                   .map(s -> "" + 'a' + s)
+                                   .collect(Collectors.toList()));
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_THEN_ANY("..",
-                 new Sequence("..", new SymbolSet(), new SymbolSet())) {{
-        setAllUniqueValues(Arrays.stream(SymbolSet.getAllSymbols())
-                                 .flatMap(s -> Arrays.stream(SymbolSet.getAllSymbols())
-                                                     .map(v -> "" + s + v))
-                                 .collect(Collectors.toList()));
+                 new Sequence("..", SymbolSet.ofAsciiDotPattern(), SymbolSet.ofAsciiDotPattern())) {{
+        setAllUniqueValues(stream(makeAsciiCharacterArray())
+                                   .flatMap(s -> stream(makeAsciiCharacterArray())
+                                           .map(v -> "" + s + v))
+                                   .collect(Collectors.toList()));
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_ZERO_OR_MORE("a*",
@@ -171,26 +173,26 @@ public enum TestPattern implements DataInterface {
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A("[^a]",
-          new SymbolSet("[^a]", Arrays.stream(SymbolSet.getAllSymbols())
-                                      .filter(c -> !c.equals('a'))
-                                      .toArray(Character[]::new), MatchType.POSITIVE)
+          SymbolSet.ofAsciiCharacters("[^a]", stream(makeAsciiCharacterArray())
+                  .filter(c -> !c.equals('a'))
+                  .toArray(Character[]::new), MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_LETTER_RANGE("[^a-dE-F]",
-                     new SymbolSet("[^a-dE-F]",
-                                   Arrays.stream(SymbolSet.getAllSymbols())
-                                         .filter(c -> !(c.equals('a') || c.equals('b') || c.equals('c') || c.equals('d') || c.equals('E') || c.equals('F')))
-                                         .toArray(Character[]::new), MatchType.POSITIVE)
+                     SymbolSet.ofAsciiCharacters("[^a-dE-F]",
+                                                 stream(makeAsciiCharacterArray())
+                                                         .filter(c -> !(c.equals('a') || c.equals('b') || c.equals('c') || c.equals('d') || c.equals('E') || c.equals('F')))
+                                                         .toArray(Character[]::new), MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WHITESPACE("\\s",      // Any White Space
-                   new SymbolSet("\\s", new Character[]{
+                   SymbolSet.ofAsciiCharacters("\\s", new Character[]{
                            '\r', '\f', '\u000B', ' ', '\t', '\n'
                    }, MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A_WHITESPACE("\\S",      // Any Non White Space
-                     new SymbolSet("\\S", new Character[]{
+                     SymbolSet.ofAsciiCharacters("\\S", new Character[]{
                              '\r', '\f', '\u000B', ' ', '\t', '\n'
                      }, MatchType.NEGATIVE)
     ),
@@ -212,7 +214,7 @@ public enum TestPattern implements DataInterface {
     A_THEN_ANY_REPEAT_INFINITE("a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                                new Sequence("a.*",
                                             new FinalSymbol("a"),
-                                            Repeat.minimum(".*", new SymbolSet(), 0))) {{
+                                            Repeat.minimum(".*", SymbolSet.ofAsciiDotPattern(), 0))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -308,7 +310,7 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     XML_NODE("<([abc])>d<\\/\\1>",
              new Sequence("<([abc])>d<\\/\\1>", new FinalSymbol("<"),
-                          new Group("([abc])", 1, new SymbolSet("[abc]", new Character[]{
+                          new Group("([abc])", 1, SymbolSet.ofAsciiCharacters("[abc]", new Character[]{
                                   'a', 'b', 'c'
                           }, MatchType.POSITIVE)),
                           new FinalSymbol(">d</"),
@@ -319,7 +321,7 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
-                                    new SymbolSet("['\\-/\\.\\s]", new Character[]{'\'', '-', '/', '.', '\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)) {{
+                                    SymbolSet.ofAsciiCharacters("['\\-/\\.\\s]", new Character[]{'\'', '-', '/', '.', '\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)) {{
         setAllUniqueValues("\t", "\n", "\u000B", "\f", "\r", " ", "'", "-", ".", "/");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -421,7 +423,7 @@ public enum TestPattern implements DataInterface {
     }
 
     protected final void setAllUniqueValues(String... values) {
-        setAllUniqueValues(Arrays.asList(values));
+        setAllUniqueValues(asList(values));
     }
 
     protected final void setAllUniqueValues(List<String> values) {
