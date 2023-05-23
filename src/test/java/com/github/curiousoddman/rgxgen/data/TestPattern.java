@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.data;
 
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
@@ -10,7 +11,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.nodes.SymbolSet.*;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
 
 
@@ -50,12 +50,12 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
                        new SymbolSet("\\w",
-                                     Arrays.asList(SMALL_LETTERS, CAPITAL_LETTERS, DIGITS), new Character[]{'_'}, MatchType.POSITIVE)
+                                     Arrays.asList(ConstantsProvider.SMALL_LATIN_LETTERS, ConstantsProvider.CAPITAL_LATIN_LETTERS, ConstantsProvider.DIGITS), new Character[]{'_'}, MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_NON_WORD_CHARACTER("\\W",      // Any non-word symbol  [a-zA-Z0-9_]
                            new SymbolSet("\\W",
-                                         Arrays.asList(SMALL_LETTERS, CAPITAL_LETTERS, DIGITS), new Character[]{'_'}, MatchType.NEGATIVE)
+                                         Arrays.asList(ConstantsProvider.SMALL_LATIN_LETTERS, ConstantsProvider.CAPITAL_LATIN_LETTERS, ConstantsProvider.DIGITS), new Character[]{'_'}, MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SPACE("\\x20", // Space
