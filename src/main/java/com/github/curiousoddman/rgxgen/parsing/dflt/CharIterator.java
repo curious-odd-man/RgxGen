@@ -137,7 +137,7 @@ public class CharIterator implements Iterator<Character> {
         int offsetOfPointer = start == 0
                               ? index
                               : 5;
-        return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeat_char(' ', 1 + offsetOfPointer) + '^';
+        return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeatChar(' ', 1 + offsetOfPointer) + '^';
     }
 
     /**

@@ -17,9 +17,7 @@ package com.github.curiousoddman.rgxgen.util;
 /* **************************************************************************/
 
 import java.math.BigInteger;
-import java.util.Arrays;
-import java.util.OptionalInt;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Utility methods collection
@@ -41,7 +39,7 @@ public final class Util {
      * @param times number of times. Values less or equal to zero will result in empty string
      * @return text repeated multiple times
      */
-    public static String repeat_char(char c, int times) {
+    public static String repeatChar(char c, int times) {
         if (times < 0) {
             return "";
         }

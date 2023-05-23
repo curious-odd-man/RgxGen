@@ -2,6 +2,8 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -27,14 +29,14 @@ public class NotMatchingGenerationTests {
 
     private static Collection<Object[]> initialData() {
         return Arrays.asList(new Object[][]{
-                {"[a-z0-5]", new SymbolSet("[a-z0-5]", Arrays.asList(new SymbolSet.SymbolRange('a', 'z'), new SymbolSet.SymbolRange('0', '5')), SymbolSet.TYPE.POSITIVE)},
+                {"[a-z0-5]", new SymbolSet("[a-z0-5]", Arrays.asList(SymbolRange.of('a', 'z'), SymbolRange.of('0', '5')), MatchType.POSITIVE)},
                 {"abc|def", new Choice("abc|def", new FinalSymbol("abc"), new FinalSymbol("def"))},
                 {"helloworld", new FinalSymbol("helloworld")},
                 {"a{2,3}", new Repeat("a{2,3}", new FinalSymbol("a"), 2, 3)},
                 {"a[a-z]", new Sequence("a[a-z]", new FinalSymbol("a"),
-                                        new SymbolSet("[a-z]", Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE))},
+                                        new SymbolSet("[a-z]", Collections.singletonList(SymbolRange.of('a', 'z')), MatchType.POSITIVE))},
                 {"([a-z])\\1", new Sequence("([a-z])\\1", new Group("([a-z])", 1,
-                                                                    new SymbolSet("[a-z]", Collections.singletonList(new SymbolSet.SymbolRange('a', 'z')), SymbolSet.TYPE.POSITIVE)),
+                                                                    new SymbolSet("[a-z]", Collections.singletonList(SymbolRange.of('a', 'z')), MatchType.POSITIVE)),
                                             new GroupRef("\\1", 1)
                 )},
                 {"foo(?!bar)", new Sequence("foo(?!bar)",
