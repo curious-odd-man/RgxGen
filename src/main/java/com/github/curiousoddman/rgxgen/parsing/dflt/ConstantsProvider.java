@@ -1,11 +1,13 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import static com.github.curiousoddman.rgxgen.nodes.SymbolSet.*;
 
 /**
  * Helper class for lazy initialization and reuse of some constants that are re-used.
@@ -13,9 +15,9 @@ import java.util.stream.IntStream;
  */
 @SuppressWarnings("InstanceVariableMayNotBeInitialized")
 class ConstantsProvider {
-    private Character[]                 aDigits;
-    private Character[]                 aWhiteSpaces;     // "\u000B" - is a vertical tab
-    private List<SymbolSet.SymbolRange> aWordCharRanges;
+    private Character[]       aDigits;
+    private Character[]       aWhiteSpaces;     // "\u000B" - is a vertical tab
+    private List<SymbolRange> aWordCharRanges;
 
     Character[] getDigits() {
         if (aDigits == null) {
@@ -34,9 +36,9 @@ class ConstantsProvider {
         return aWhiteSpaces;
     }
 
-    List<SymbolSet.SymbolRange> getWordCharRanges() {
+    List<SymbolRange> getWordCharRanges() {
         if (aWordCharRanges == null) {
-            aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SymbolSet.SymbolRange.SMALL_LETTERS, SymbolSet.SymbolRange.CAPITAL_LETTERS, SymbolSet.SymbolRange.DIGITS));
+            aWordCharRanges = Collections.unmodifiableList(Arrays.asList(SMALL_LETTERS, CAPITAL_LETTERS, DIGITS));
         }
 
         return aWordCharRanges;

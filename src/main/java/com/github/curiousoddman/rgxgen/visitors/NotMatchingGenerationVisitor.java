@@ -17,6 +17,7 @@ package com.github.curiousoddman.rgxgen.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
@@ -47,7 +48,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
         // There is only one way to generate not matching for any character - is to not generate anything
         String pattern = node.getPattern();
-        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), SymbolSet.TYPE.NEGATIVE);
+        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
         if (!symbolSet.isEmpty()) {
             super.visit(symbolSet);
         }

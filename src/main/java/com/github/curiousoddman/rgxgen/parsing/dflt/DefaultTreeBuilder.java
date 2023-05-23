@@ -16,8 +16,11 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.model.GroupType;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
@@ -382,19 +385,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), c == 'd' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), c == 's' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, c == 'w' ? SymbolSet.TYPE.POSITIVE : SymbolSet.TYPE.NEGATIVE);
+                createdNode = new SymbolSet("\\" + c, CONST_PROVIDER.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             // Hex character:
@@ -441,6 +444,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
             nodes.add(createdNode);
         }
+    }
+
+    private static MatchType getMatchType(char parsedCharacter, char positiveMatchCharacter) {
+        return parsedCharacter == positiveMatchCharacter ? MatchType.POSITIVE : MatchType.NEGATIVE;
     }
 
     /**
@@ -571,9 +578,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private Node handleSquareBrackets() {
         int openSquareBraceIndex = aCharIterator.prevPos();
-        SymbolSet.TYPE symbolSetType = determineSymbolSetType(aCharIterator);
+        MatchType symbolSetType = determineSymbolSetType(aCharIterator);
         StringBuilder characters = new StringBuilder(aCharIterator.remaining());
-        List<SymbolSet.SymbolRange> symbolRanges = new ArrayList<>();
+        List<SymbolRange> symbolRanges = new ArrayList<>();
         List<SymbolSet> symbolSets = new ArrayList<>();
         boolean rangeStarted = false;
 
@@ -621,12 +628,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private static SymbolSet.TYPE determineSymbolSetType(CharIterator charIterator) {
+    private static MatchType determineSymbolSetType(CharIterator charIterator) {
         if (charIterator.peek() == '^') {
             charIterator.skip();
-            return SymbolSet.TYPE.NEGATIVE;
+            return MatchType.NEGATIVE;
         } else {
-            return SymbolSet.TYPE.POSITIVE;
+            return MatchType.POSITIVE;
         }
     }
 
@@ -649,7 +656,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolSet.SymbolRange> symbolRanges) {
+    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolRange> symbolRanges) {
         // If we're here, then previous character was '-'.
         // But dash can be used in such way: [a-c-]. In this case last dash is only a character, not a range start.
         if (characters.length() < 2) {
@@ -658,11 +665,11 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             char lastChar = characters.charAt(characters.length() - 1);
             char firstChar = characters.charAt(characters.length() - 2);
             characters.delete(characters.length() - 2, characters.length());
-            symbolRanges.add(new SymbolSet.SymbolRange(firstChar, lastChar));
+            symbolRanges.add(SymbolRange.of(firstChar, lastChar));
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, SymbolSet.TYPE symbolSetType, CharSequence sb, List<SymbolSet.SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
         List<Character> characters = new ArrayList<>();
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));
@@ -672,7 +679,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
-        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), symbolSetType);
+        return new SymbolSet(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
     }
 
     public void build() {
