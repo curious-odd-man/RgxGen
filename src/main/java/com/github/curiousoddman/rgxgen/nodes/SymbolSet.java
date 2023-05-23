@@ -25,6 +25,7 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 import java.util.*;
 import java.util.function.Consumer;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
