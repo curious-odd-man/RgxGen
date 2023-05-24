@@ -44,9 +44,9 @@ public class ConstantsProvider {
 
     public static Character[] makeUnicodeCharacterArray() {
         int MAX_UNICODE_CHARACTER = 0xFFFF;
-        Character[] characters = new Character[(int) MAX_UNICODE_CHARACTER];
-        for (int i = 0; i < MAX_UNICODE_CHARACTER; ++i) {
-            characters[i] = (char) i;
+        Character[] characters = new Character[MAX_UNICODE_CHARACTER - SPACE_ASCII_CODE];
+        for (int i = SPACE_ASCII_CODE; i < MAX_UNICODE_CHARACTER; ++i) {
+            characters[i - SPACE_ASCII_CODE] = (char) i;
         }
         return characters;
     }

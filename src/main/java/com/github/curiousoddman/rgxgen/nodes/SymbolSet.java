@@ -26,6 +26,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeUnicodeCharacterArray;
 import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
@@ -42,23 +43,23 @@ public class SymbolSet extends Node {
 
 
     public static SymbolSet ofAsciiDotPattern() {
-        return ofAsciiCharacters(".", ConstantsProvider.makeAsciiCharacterArray(), MatchType.POSITIVE);
+        return ofAsciiCharacters(".", makeAsciiCharacterArray(), MatchType.POSITIVE);
     }
 
     public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, ConstantsProvider.makeAsciiCharacterArray());
+        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeAsciiCharacterArray());
     }
 
     public static SymbolSet ofAsciiRanges(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, ConstantsProvider.makeAsciiCharacterArray());
+        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, makeAsciiCharacterArray());
     }
 
     public static SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType type) {
-        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, ConstantsProvider.makeUnicodeCharacterArray());
+        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, makeUnicodeCharacterArray());
     }
 
     public static SymbolSet ofAscii(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, symbols, type, ConstantsProvider.makeAsciiCharacterArray());
+        return new SymbolSet(pattern, symbolRanges, symbols, type, makeAsciiCharacterArray());
     }
 
     /**

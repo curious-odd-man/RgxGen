@@ -30,6 +30,9 @@ import static java.util.Arrays.stream;
 @Getter
 @RequiredArgsConstructor
 public enum UnicodeCategory {
+    /**
+     * The configuration is based on <a href="https://www.regular-expressions.info/unicode.html#category">...</a>
+     */
 
     ANY_LETTER(asList("L", "Letter"), "Any kind of letter from any language", null, null),
     LOWERCASE_LETTER(asList("Ll", "Lowercase_Letter"), "a lowercase letter that has an uppercase variant.", null, null),
