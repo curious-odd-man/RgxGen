@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.symbols;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 
