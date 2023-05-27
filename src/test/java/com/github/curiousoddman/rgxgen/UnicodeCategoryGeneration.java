@@ -5,6 +5,7 @@ import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -23,6 +24,7 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.mak
 import static java.lang.Character.*;
 import static java.lang.Character.isTitleCase;
 
+@Disabled("Generator - not a test")
 public class UnicodeCategoryGeneration {
 
     public static Stream<Character> getAllUnicodes() {
