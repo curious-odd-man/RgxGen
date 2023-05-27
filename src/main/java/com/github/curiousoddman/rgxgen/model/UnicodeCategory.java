@@ -72,7 +72,7 @@ public enum UnicodeCategory {
     CONTROL(asList("Cc", "Control"), "an ASCII or Latin-1 control character", null, null),
     FORMAT(asList("Cf", "Format"), "invisible formatting indicator.", null, null),
     PRIVATE_USE(asList("Co", "Private_Use"), "any code point reserved for private use.", null, null),
-    SURROGATE(asList("Cs", "Surrogate"), "one half of a surrogate pair in UTF-16 encoding.", null, null),
+    //SURROGATE(asList("Cs", "Surrogate"), "one half of a surrogate pair in UTF-16 encoding.", null, null),
     UNASSIGNED(asList("Cn", "Unassigned"), "any code point to which no character has been assigned.", null, null),
     COMMON("Common", "", null, null),
     ARABIC("Arabic", "", null, null),
