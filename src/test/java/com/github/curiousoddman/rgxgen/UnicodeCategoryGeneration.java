@@ -4,10 +4,14 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -32,6 +36,7 @@ public class UnicodeCategoryGeneration {
     }
 
     @Test
+    @SneakyThrows
     void splitUnicodeSymbolsPerCharacterClasses() {
         Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = compiledAllPatterns();
         EnumMap<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
@@ -47,6 +52,26 @@ public class UnicodeCategoryGeneration {
         Map<UnicodeCategory, String> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
 
         System.out.println(textPerPattern);
+        Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java").toAbsolutePath();
+        List<String> lines = Files.readAllLines(path);
+        List<String> transformedLines = new ArrayList<>(lines.size());
+
+        for (String line : lines) {
+            Map.Entry<UnicodeCategory, String> found = null;
+            for (Map.Entry<UnicodeCategory, String> entry : textPerPattern.entrySet()) {
+                if (line.contains(entry.getKey().name())) {
+                    found = entry;
+                }
+            }
+
+            if (found != null) {
+                transformedLines.add(found.getValue());
+            } else {
+                transformedLines.add(line);
+            }
+        }
+
+        Files.write(path, transformedLines);
     }
 
     private static Map<UnicodeCategory, String> formatDescriptorsIntoJavaCode(Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap) {
@@ -55,7 +80,7 @@ public class UnicodeCategoryGeneration {
             UnicodeCategory key = entry.getKey();
             UnicodeCategoryDescriptor value = entry.getValue();
             textPerPattern.put(key, String.format(
-                    "\t%s(%s, %s, asList(%s), %s),%n",
+                    "    %s(%s, %s, asList(%s), %s),",
                     key,
                     makeKeysText(key),
                     makeDescription(key),
