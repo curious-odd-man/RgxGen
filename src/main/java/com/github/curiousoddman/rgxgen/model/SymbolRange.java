@@ -21,7 +21,7 @@ import lombok.Value;
 /**
  * Range of symbols
  */
-@Value(staticConstructor = "symbols")
+@Value(staticConstructor = "range")
 public class SymbolRange {
     int from;
     int to;
@@ -33,8 +33,8 @@ public class SymbolRange {
      * @param to   max character; shall be greater than {@code from}
      * @apiNote No verifications are done!
      */
-    public static SymbolRange symbols(char from, char to) {
-        return symbols((int) from, to);
+    public static SymbolRange range(char from, char to) {
+        return range((int) from, to);
     }
 
     public int getFrom() {

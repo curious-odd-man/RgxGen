@@ -686,7 +686,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             char lastChar = characters.charAt(characters.length() - 1);
             char firstChar = characters.charAt(characters.length() - 2);
             characters.delete(characters.length() - 2, characters.length());
-            symbolRanges.add(SymbolRange.symbols(firstChar, lastChar));
+            symbolRanges.add(SymbolRange.range(firstChar, lastChar));
         }
     }
 

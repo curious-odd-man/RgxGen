@@ -14,9 +14,9 @@ import java.util.stream.IntStream;
  */
 @UtilityClass
 public class ConstantsProvider {
-    public static final  SymbolRange SMALL_LATIN_LETTERS   = SymbolRange.symbols('a', 'z');
-    public static final  SymbolRange CAPITAL_LATIN_LETTERS = SymbolRange.symbols('A', 'Z');
-    public static final  SymbolRange DIGITS                = SymbolRange.symbols('0', '9');
+    public static final  SymbolRange SMALL_LATIN_LETTERS   = SymbolRange.range('a', 'z');
+    public static final  SymbolRange CAPITAL_LATIN_LETTERS = SymbolRange.range('A', 'Z');
+    public static final  SymbolRange DIGITS                = SymbolRange.range('0', '9');
     private static final int         SPACE_ASCII_CODE      = 32;     // First printable character in ASCII table
     private static final int         DEL_ASCII_CODE        = 127;    // Bound for printable characters in ASCII table
 

@@ -299,13 +299,13 @@ public class UnicodeCategoryGeneration {
                 if (lastCharacter != null) {
                     if (lastSymbolRange == null) {
                         if (lastCharacter == next - 1) {
-                            lastSymbolRange = SymbolRange.symbols(lastCharacter, next);
+                            lastSymbolRange = SymbolRange.range(lastCharacter, next);
                         } else {
                             descriptor.characters.add(lastCharacter);
                         }
                     } else {
                         if (lastCharacter == next - 1) {
-                            lastSymbolRange = SymbolRange.symbols(lastSymbolRange.getFrom(), next);
+                            lastSymbolRange = SymbolRange.range(lastSymbolRange.getFrom(), next);
                         } else {
                             descriptor.ranges.add(lastSymbolRange);
                             lastSymbolRange = null;
