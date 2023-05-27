@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,7 +40,8 @@ public class UnicodeCategoryGeneration {
     @SneakyThrows
     void splitUnicodeSymbolsPerCharacterClasses() {
         Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = compiledAllPatterns();
-        EnumMap<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+        Map<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+        Set<UnicodeCategory> failedToCompile = categoryPerPattern.entrySet().stream().filter(entry -> !entry.getValue().isPresent()).map(Map.Entry::getKey).collect(Collectors.toSet());
 
         System.out.println("Sorting all characters in groups");
         for (List<Character> value : matchedMap.values()) {
@@ -49,46 +51,156 @@ public class UnicodeCategoryGeneration {
         System.out.println("Transforming to symbols and groups");
 
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        Map<UnicodeCategory, String> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
+        Map<UnicodeCategory, LineDescriptor> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
 
-        System.out.println(textPerPattern);
+        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerPattern);
+
+        modifySourceJavaFile(failedToCompile, textPerPattern, rangesConstantNames);
+    }
+
+    @SneakyThrows
+    private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) {
+        Map<SymbolRange, Long> countPerRange = textPerPattern.values().stream().map(LineDescriptor::getRanges).flatMap(Collection::stream)
+                                                             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
+        Map<SymbolRange, String> rangesConstantsNames = new LinkedHashMap<>();
+        int constantIndex = 0;
+        for (Map.Entry<SymbolRange, Long> entry : countPerRange.entrySet()) {
+            if (entry.getValue() >= 2) {
+                String name = "RANGE_" + constantIndex++;
+                rangesConstantsNames.put(entry.getKey(), name);
+            }
+        }
+
+        List<String> lines = new ArrayList<>();
+        lines.add("package com.github.curiousoddman.rgxgen.model;");
+        lines.add("");
+        lines.add("public class UnicodeCategoryConstants {");
+        for (Map.Entry<SymbolRange, String> entry : rangesConstantsNames.entrySet()) {
+            String name = entry.getValue();
+            int from = entry.getKey().getFrom();
+            int to = entry.getKey().getTo();
+            lines.add(String.format("    public static final SymbolRange %s = SymbolRange.symbols('%s', '%s');  // 0x%x - 0x%x", name, charAsString(from), charAsString(to), from, to));
+        }
+        lines.add("}");
+        Files.write(path, lines);
+
+        return rangesConstantsNames;
+    }
+
+    @SneakyThrows
+    private static void modifySourceJavaFile(Set<UnicodeCategory> failedToCompile, Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) {
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java").toAbsolutePath();
         List<String> lines = Files.readAllLines(path);
         List<String> transformedLines = new ArrayList<>(lines.size());
 
         for (String line : lines) {
-            Map.Entry<UnicodeCategory, String> found = null;
-            for (Map.Entry<UnicodeCategory, String> entry : textPerPattern.entrySet()) {
-                if (line.contains(entry.getKey().name())) {
+            Map.Entry<UnicodeCategory, LineDescriptor> found = null;
+            for (Map.Entry<UnicodeCategory, LineDescriptor> entry : textPerPattern.entrySet()) {
+                String name = entry.getKey().name();
+                String trim = getKeyFromLine(line);
+                if (trim.equals(name)) {
                     found = entry;
                 }
             }
 
             if (found != null) {
-                transformedLines.add(found.getValue());
+                transformedLines.add(found.getValue().formatToText(constantNames));
             } else {
-                transformedLines.add(line);
+                try {
+                    UnicodeCategory unicodeCategory = UnicodeCategory.valueOf(getKeyFromLine(line));
+
+                    if (failedToCompile.contains(unicodeCategory)) {
+                        transformedLines.add("/*COMPILED_ERR*/" + line);
+                    } else {
+                        transformedLines.add("/*NO_CHANGE*/" + line);
+                    }
+                } catch (Exception e) {
+                    transformedLines.add(line);
+                }
             }
         }
 
-        Files.write(path, transformedLines);
+        Files.write(path, transformedLines, StandardCharsets.UTF_8);
     }
 
-    private static Map<UnicodeCategory, String> formatDescriptorsIntoJavaCode(Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap) {
-        Map<UnicodeCategory, String> textPerPattern = new EnumMap<>(UnicodeCategory.class);
+    private static String getKeyFromLine(String line) {
+        return line.split("\\(")[0].trim();
+    }
+
+    private static Map<UnicodeCategory, LineDescriptor> formatDescriptorsIntoJavaCode(Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap) {
+        Map<UnicodeCategory, LineDescriptor> textPerPattern = new EnumMap<>(UnicodeCategory.class);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
             UnicodeCategory key = entry.getKey();
             UnicodeCategoryDescriptor value = entry.getValue();
-            textPerPattern.put(key, String.format(
-                    "    %s(%s, %s, asList(%s), %s),",
+            textPerPattern.put(key, new LineDescriptor(
                     key,
-                    makeKeysText(key),
-                    makeDescription(key),
-                    makeRanges(value),
-                    makeCharacters(value)
+                    key.getKeys(),
+                    key.getDescription(),
+                    value.getRanges(),
+                    value.getCharacters()
             ));
         }
         return textPerPattern;
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class LineDescriptor {
+        private static final String pattern = "    %s(%s, %s, %s, %s),";
+        UnicodeCategory   unicodeCategory;
+        List<String>      keys;
+        String            description;
+        List<SymbolRange> ranges;
+        List<Character>   characters;
+
+        public String formatToText(Map<SymbolRange, String> constantNames) {
+            return String.format(pattern, unicodeCategory.name(), makeKeysText(unicodeCategory), makeDescription(unicodeCategory), makeRanges(ranges, constantNames), makeCharacters(characters));
+        }
+
+        private static String makeCharacters(List<Character> characters) {
+            if (characters.isEmpty()) {
+                return "null";
+            }
+            return String.format("new Character[]{%s}",
+                                 characters.stream().map(UnicodeCategoryGeneration::charAsString).map(UnicodeCategoryGeneration::sq).collect(Collectors.joining(","))
+            );
+        }
+
+        private static String makeRanges(List<SymbolRange> ranges, Map<SymbolRange, String> constantNames) {
+            if (ranges.isEmpty()) {
+                return "null";
+            }
+            if (ranges.size() == 1) {
+                SymbolRange range = ranges.get(0);
+                return "singletonList(" + rangeOrConstant(constantNames, range) + ')';
+            }
+            return "asList(" + ranges
+                    .stream()
+                    .map(range -> rangeOrConstant(constantNames, range))
+                    .collect(Collectors.joining(",")) + ')';
+        }
+
+        private static String rangeOrConstant(Map<SymbolRange, String> constantNames, SymbolRange range) {
+            return constantNames.getOrDefault(range, String.format("symbols('%s', '%s')", charAsString(range.getFrom()), charAsString(range.getTo())));
+        }
+
+        private static String makeDescription(UnicodeCategory key) {
+            if (key.getDescription() == null) {
+                return "";
+            }
+            return q(key.getDescription());
+        }
+
+        private static String makeKeysText(UnicodeCategory key) {
+            List<String> keys = key.getKeys();
+            if (keys.size() == 1) {
+                return q(keys.get(0));
+            }
+
+            return "asList(" + keys.stream().map(UnicodeCategoryGeneration::q).collect(Collectors.joining(",")) + ")";
+        }
+
     }
 
     private static EnumMap<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern) {
@@ -108,9 +220,7 @@ public class UnicodeCategoryGeneration {
             for (Map.Entry<UnicodeCategory, Optional<Pattern>> entry : categoryPerPattern.entrySet()) {
                 Optional<Pattern> value = entry.getValue();
                 UnicodeCategory category = entry.getKey();
-                if (value.isPresent() && value.get()
-                                              .matcher(str)
-                                              .matches()) {
+                if (value.isPresent() && value.get().matcher(str).matches()) {
                     matchedMap.computeIfAbsent(category, k -> new ArrayList<>())
                               .add(character);
                 }
@@ -120,67 +230,46 @@ public class UnicodeCategoryGeneration {
         return matchedMap;
     }
 
+    private static String charAsString(int c) {
+        if (c == '\\' || c == '\'') {
+            return "\\" + (char) c;
+        }
+        return String.valueOf((char) c);
+    }
+
     private static Map<UnicodeCategory, Optional<Pattern>> compiledAllPatterns() {
-        Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = Arrays.stream(UnicodeCategory.values())
-                                                                           .filter(unicodeCategory -> unicodeCategory.getSymbols() == null && unicodeCategory.getSymbolRanges() == null)
-                                                                           .collect(Collectors.toMap(
-                                                                                   Function.identity(),
-                                                                                   unicodeCategory -> {
-                                                                                       for (String key : unicodeCategory.getKeys()) {
-                                                                                           try {
-                                                                                               return Optional.of(Pattern.compile("\\p{" + key + "}+"));
-                                                                                           } catch (Exception ignore) {
-                                                                                           }
-                                                                                       }
-                                                                                       return Optional.empty();
-                                                                                   }
-                                                                           ));
-        return categoryPerPattern;
+        return Arrays.stream(UnicodeCategory.values())
+                     .filter(unicodeCategory -> !unicodeCategory.isValid())
+                     .collect(Collectors.toMap(
+                             Function.identity(),
+                             unicodeCategory -> {
+                                 for (String key : unicodeCategory.getKeys()) {
+                                     try {
+                                         return Optional.of(Pattern.compile("\\p{" + key + "}+"));      // , Pattern.UNICODE_CHARACTER_CLASS
+                                     } catch (Exception ignore) {
+                                     }
+                                 }
+                                 return Optional.empty();
+                             }
+                     ));
     }
 
-    private static String makeCharacters(UnicodeCategoryDescriptor value) {
-        if (value.getCharacters().isEmpty()) {
-            return "null";
-        }
-        return String.format("new Character[]{%s}",
-                             value.getCharacters().stream().map(UnicodeCategoryGeneration::sq).collect(Collectors.joining(","))
-        );
-    }
-
-    private static String makeRanges(UnicodeCategoryDescriptor value) {
-        if (value.getRanges().isEmpty()) {
-            return "null";
-        }
-        return value.getRanges().stream().map(range -> String.format("symbols(%d, %d)", range.getFrom(), range.getTo())).collect(Collectors.joining(","));
-    }
-
-    private static String makeDescription(UnicodeCategory key) {
-        if (key.getDescription() == null) {
-            return "";
-        }
-        return q(key.getDescription());
-    }
-
-    private static String makeKeysText(UnicodeCategory key) {
-        List<String> keys = key.getKeys();
-        if (keys.size() == 1) {
-            return q(keys.get(0));
-        }
-
-        return "asList(" + keys.stream().map(UnicodeCategoryGeneration::q).collect(Collectors.joining(",")) + ")";
-    }
 
     private static String q(String text) {
         return '"' + text + '"';
     }
 
     private static String sq(Character text) {
-        return '\'' + text.toString() + '\'';
+        return sq(text.toString());
+    }
+
+    private static String sq(String text) {
+        return '\'' + text + '\'';
     }
 
     @Test
     void testCreateDescriptorMap() {
-        EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        Map<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
         matchedMap.put(UnicodeCategory.ANY_LETTER, Arrays.asList('t', 'f', 'g', 'h', 'k'));
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
@@ -190,7 +279,7 @@ public class UnicodeCategoryGeneration {
 
     @Test
     void testCreateDescriptorMap2() {
-        EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        Map<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
         matchedMap.put(UnicodeCategory.ANY_LETTER, Arrays.asList('a', 'b', 'c', 'x', 'y', 'z'));
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
