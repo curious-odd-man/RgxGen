@@ -33,20 +33,40 @@ public class UnicodeCategoryGeneration {
 
     @Test
     void splitUnicodeSymbolsPerCharacterClasses() {
-        Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = Arrays.stream(UnicodeCategory.values())
-                                                                           .filter(unicodeCategory -> unicodeCategory.getSymbols() == null && unicodeCategory.getSymbolRanges() == null)
-                                                                           .collect(Collectors.toMap(
-                                                                                   Function.identity(),
-                                                                                   unicodeCategory -> {
-                                                                                       for (String key : unicodeCategory.getKeys()) {
-                                                                                           try {
-                                                                                               return Optional.of(Pattern.compile("\\p{" + key + "}+"));
-                                                                                           } catch (Exception ignore) {
-                                                                                           }
-                                                                                       }
-                                                                                       return Optional.empty();
-                                                                                   }
-                                                                           ));
+        Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = compiledAllPatterns();
+        EnumMap<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+
+        System.out.println("Sorting all characters in groups");
+        for (List<Character> value : matchedMap.values()) {
+            value.sort(Comparator.naturalOrder());
+        }
+
+        System.out.println("Transforming to symbols and groups");
+
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        Map<UnicodeCategory, String> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
+
+        System.out.println(textPerPattern);
+    }
+
+    private static Map<UnicodeCategory, String> formatDescriptorsIntoJavaCode(Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap) {
+        Map<UnicodeCategory, String> textPerPattern = new EnumMap<>(UnicodeCategory.class);
+        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
+            UnicodeCategory key = entry.getKey();
+            UnicodeCategoryDescriptor value = entry.getValue();
+            textPerPattern.put(key, String.format(
+                    "\t%s(%s, %s, asList(%s), %s),%n",
+                    key,
+                    makeKeysText(key),
+                    makeDescription(key),
+                    makeRanges(value),
+                    makeCharacters(value)
+            ));
+        }
+        return textPerPattern;
+    }
+
+    private static EnumMap<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern) {
         EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
         List<UnicodeCategory> errorCategories = new ArrayList<>();
         for (Map.Entry<UnicodeCategory, Optional<Pattern>> entry : categoryPerPattern.entrySet()) {
@@ -72,27 +92,25 @@ public class UnicodeCategoryGeneration {
             }
         }
         System.out.println("Total errors : " + errorCategories.size() + " of " + UnicodeCategory.values().length);
+        return matchedMap;
+    }
 
-        System.out.println("Sorting all characters in groups");
-        for (List<Character> value : matchedMap.values()) {
-            value.sort(Comparator.naturalOrder());
-        }
-
-        System.out.println("Transforming to symbols and groups");
-
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
-            UnicodeCategory key = entry.getKey();
-            UnicodeCategoryDescriptor value = entry.getValue();
-            System.out.printf(
-                    "\t%s(%s, %s, asList(%s), %s),%n",
-                    key,
-                    makeKeysText(key),
-                    makeDescription(key),
-                    makeRanges(value),
-                    makeCharacters(value)
-            );
-        }
+    private static Map<UnicodeCategory, Optional<Pattern>> compiledAllPatterns() {
+        Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = Arrays.stream(UnicodeCategory.values())
+                                                                           .filter(unicodeCategory -> unicodeCategory.getSymbols() == null && unicodeCategory.getSymbolRanges() == null)
+                                                                           .collect(Collectors.toMap(
+                                                                                   Function.identity(),
+                                                                                   unicodeCategory -> {
+                                                                                       for (String key : unicodeCategory.getKeys()) {
+                                                                                           try {
+                                                                                               return Optional.of(Pattern.compile("\\p{" + key + "}+"));
+                                                                                           } catch (Exception ignore) {
+                                                                                           }
+                                                                                       }
+                                                                                       return Optional.empty();
+                                                                                   }
+                                                                           ));
+        return categoryPerPattern;
     }
 
     private static String makeCharacters(UnicodeCategoryDescriptor value) {
