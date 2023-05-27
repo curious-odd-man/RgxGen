@@ -253,6 +253,10 @@ public enum UnicodeCategory {
         this(Collections.singletonList(key), description, Collections.singletonList(symbolRange), null);
     }
 
+    public boolean isValid() {
+        return (symbolRanges != null && !symbolRanges.isEmpty()) || (symbols != null && symbols.length != 0);
+    }
+
 
     private static class KeyValue {
         private final String          key;
