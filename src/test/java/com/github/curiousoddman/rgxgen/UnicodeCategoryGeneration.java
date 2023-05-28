@@ -247,7 +247,7 @@ public class UnicodeCategoryGeneration {
                              unicodeCategory -> {
                                  for (String key : unicodeCategory.getKeys()) {
                                      try {
-                                         return Optional.of(Pattern.compile("\\p{" + key + "}+"));      // , Pattern.UNICODE_CHARACTER_CLASS
+                                         return Optional.of(Pattern.compile("\\p{" + key + "}+", Pattern.UNICODE_CHARACTER_CLASS));      // , Pattern.UNICODE_CHARACTER_CLASS
                                      } catch (Exception ignore) {
                                      }
                                  }
@@ -259,10 +259,6 @@ public class UnicodeCategoryGeneration {
 
     private static String q(String text) {
         return '"' + text + '"';
-    }
-
-    private static String sq(Character text) {
-        return sq(text.toString());
     }
 
     private static String sq(String text) {
