@@ -19,7 +19,6 @@ package com.github.curiousoddman.rgxgen.nodes;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
-import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
