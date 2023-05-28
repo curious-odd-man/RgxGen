@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen;
+package com.github.curiousoddman.rgxgen.manual;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
