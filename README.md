@@ -105,34 +105,35 @@ public class Main {
 <details>
 <summary><b>Supported syntax</b></summary>
 
-|                        Pattern | Description                                                                                  |
-|-------------------------------:|----------------------------------------------------------------------------------------------|
-|                            `.` | Any symbol                                                                                   |
-|                            `?` | One or zero occurrences                                                                      |
-|                            `+` | One or more occurrences                                                                      |
-|                            `*` | Zero or more occurrences                                                                     |
-|                           `\r` | Carriage return `CR` character                                                               |
-|                           `\t` | Tab `	` character                                                                            |
-|                           `\n` | Line feed `LF` character.                                                                    |
-|                           `\d` | A digit. Equivalent to `[0-9]`                                                               |
-|                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                          |
-|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                |
-|                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                  |
-|                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                             |
-|                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                 |
-|                           `\i` | Places same value as capture group with index `i`. `i` is any integer number.                |
-|                  `\Q` and `\E` | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals. |
-|                  `\b` and `\B` | These characters are ignored. No validation is performed!                                    |
-|          `\xXX` and `\x{XXXX}` | Hexadecimal value of unicode characters 2 or 4 hexadecimal digits                            |
-|        `\uXXXX` | Hexadecimal value of unicode characters 4 hexadecimal digits                                 |
-|              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                         |
-|                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported        |
-|                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                 |
-|                           `()` | To group multiple characters for the repetitions                                             |
-| `foo(?=bar)` and `(?<=foo)bar` | Positive lookahead and lookbehind. These are equivalent to `foobar`                          |
-| `foo(?!bar)` and `(?<!foo)bar` | Negative lookahead and lookbehind.                                                           |
-|        <code>(a&#124;b)</code> | Alternatives                                                                                 |
-|                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                |
+|                        Pattern | Description                                                                                                                                                                                       |
+|-------------------------------:|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+|                            `.` | Any symbol                                                                                                                                                                                        |
+|                            `?` | One or zero occurrences                                                                                                                                                                           |
+|                            `+` | One or more occurrences                                                                                                                                                                           |
+|                            `*` | Zero or more occurrences                                                                                                                                                                          |
+|                           `\r` | Carriage return `CR` character                                                                                                                                                                    |
+|                           `\t` | Tab `	` character                                                                                                                                                                                 |
+|                           `\n` | Line feed `LF` character.                                                                                                                                                                         |
+|                           `\d` | A digit. Equivalent to `[0-9]`                                                                                                                                                                    |
+|                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                                                                                                                               |
+|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                                     |
+|                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                       |
+|                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                                                                                                                                  |
+|                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                                                                                                                      |
+|                           `\i` | Places same value as capture group with index `i`. `i` is any integer number.                                                                                                                     |
+|                  `\Q` and `\E` | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals.                                                                                                      |
+|                  `\b` and `\B` | These characters are ignored. No validation is performed!                                                                                                                                         |
+|          `\xXX` and `\x{XXXX}` | Hexadecimal value of unicode characters 2 or 4 hexadecimal digits                                                                                                                                 |
+|                       `\uXXXX` | Hexadecimal value of unicode characters 4 hexadecimal digits                                                                                                                                      |
+|        `\p{...}` and `\P{...}` | Matching/NotMatching Categories. See all available keys in   [`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java). |
+|              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                                                                                                                              |
+|                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported                                                                                                             |
+|                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                                                                                                                      |
+|                           `()` | To group multiple characters for the repetitions                                                                                                                                                  |
+| `foo(?=bar)` and `(?<=foo)bar` | Positive lookahead and lookbehind. These are equivalent to `foobar`                                                                                                                               |
+| `foo(?!bar)` and `(?<!foo)bar` | Negative lookahead and lookbehind.                                                                                                                                                                |
+|        <code>(a&#124;b)</code> | Alternatives                                                                                                                                                                                      |
+|                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                                                                                                                     |
 
 RgxGen treats any other characters as literals - those are generated as is.
 
@@ -255,6 +256,13 @@ The general rule is - I am trying to generate not matching strings of same lengt
 For example pattern `.` - any symbol - would yield empty string as not matching string. 
 Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings would be only 1 or 2 symbols long.
 I chose these approaches because they seem predictable and easier to implement.
+
+### Unicode Categories
+
+I've used this page as a basis for the unicode categories information: https://www.regular-expressions.info/unicode.html#category
+Though only for a few language related patterns I was able to find exact list/range of code points that belongs to specific categories.
+To overcome this I used Java `Pattern.compile()` to split characters into categories. 
+Unfortunately there were several character categories that are not supported by Java `Pattern.compile()` as a result these are missing.
 
 ## Other tools to generate values by regex and why this might be better
 
