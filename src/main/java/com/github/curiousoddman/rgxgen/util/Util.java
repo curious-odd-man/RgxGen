@@ -16,12 +16,12 @@ package com.github.curiousoddman.rgxgen.util;
    limitations under the License.
 /* **************************************************************************/
 
+import lombok.experimental.UtilityClass;
+
 import java.math.BigInteger;
 import java.util.*;
 
-/**
- * Utility methods collection
- */
+@UtilityClass
 public final class Util {
     public static final Character[] ZERO_LENGTH_CHARACTER_ARRAY = new Character[0];
     public static final BigInteger  BIG_INTEGER_TWO             = BigInteger.valueOf(2);
@@ -102,11 +102,5 @@ public final class Util {
             }
         }
         return OptionalInt.empty();
-    }
-
-    /**
-     * Utility class can't be instantiated
-     */
-    private Util() {
     }
 }
