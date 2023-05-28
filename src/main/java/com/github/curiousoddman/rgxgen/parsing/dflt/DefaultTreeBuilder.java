@@ -455,7 +455,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
         String pattern = "\\" + c + '{' + characterClassKey + '}';
-        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, getMatchType(c, 'w'));
+        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, matchType);
     }
 
     private String getCharacterClassKey() {
