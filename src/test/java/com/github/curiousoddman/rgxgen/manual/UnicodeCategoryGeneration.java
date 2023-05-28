@@ -290,7 +290,7 @@ public class UnicodeCategoryGeneration {
                              unicodeCategory -> {
                                  for (String key : unicodeCategory.getKeys()) {
                                      try {
-                                         return Optional.of(Pattern.compile("\\p{" + key + "}+", Pattern.UNICODE_CHARACTER_CLASS));      // , Pattern.UNICODE_CHARACTER_CLASS
+                                         return Optional.of(Pattern.compile("\\p{" + key + "}+"));      // , Pattern.UNICODE_CHARACTER_CLASS
                                      } catch (Exception ignore) {
                                      }
                                  }
