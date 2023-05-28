@@ -200,7 +200,7 @@ public class UnicodeCategoryGeneration {
                 return q(keys.get(0));
             }
 
-            return "asList(" + keys.stream().map(UnicodeCategoryGeneration::q).collect(Collectors.joining(",")) + ")";
+            return "keys(" + keys.stream().map(UnicodeCategoryGeneration::q).collect(Collectors.joining(",")) + ")";
         }
 
     }
@@ -241,7 +241,7 @@ public class UnicodeCategoryGeneration {
 
     private static Map<UnicodeCategory, Optional<Pattern>> compiledAllPatterns() {
         return Arrays.stream(UnicodeCategory.values())
-                     .filter(unicodeCategory -> !unicodeCategory.isValid())
+                     .filter(unicodeCategory -> !unicodeCategory.isConfigured())
                      .collect(Collectors.toMap(
                              Function.identity(),
                              unicodeCategory -> {
