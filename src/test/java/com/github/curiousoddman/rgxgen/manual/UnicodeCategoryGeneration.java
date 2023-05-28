@@ -18,6 +18,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeUnicodeCharacterArray;
@@ -36,6 +37,48 @@ public class UnicodeCategoryGeneration {
     @MethodSource("getAllUnicodes")
     void allCharactersTest(Character c) {
         System.out.println((int) c + " ' " + c + "' is letter " + isLetter(c) + " is digit " + isDigit(c) + " is uppercase " + isUpperCase(c) + " is lowercase " + isLowerCase(c) + " is defined " + isDefined(c) + " is title " + isTitleCase(c));
+    }
+
+    @Test
+    void generateCasedLetters() {
+        List<SymbolRange> symbolRanges = UnicodeCategory.UPPERCASE_LETTER.getSymbolRanges();
+        Character[] symbols = UnicodeCategory.UPPERCASE_LETTER.getSymbols();
+
+        List<Character> allUppercaseCharacters = createCharactersList(symbolRanges, symbols);
+
+        List<SymbolRange> lowercaseRanges = UnicodeCategory.LOWERCASE_LETTER.getSymbolRanges();
+        Character[] lowercaseSymbols = UnicodeCategory.LOWERCASE_LETTER.getSymbols();
+
+        Set<Character> allLowercaseCharacters = new HashSet<>(createCharactersList(lowercaseRanges, lowercaseSymbols));
+
+        Set<Character> result = new HashSet<>();
+        for (Character uppercaseChar : allUppercaseCharacters) {
+            char lowerCase = toLowerCase(uppercaseChar);
+            if (allLowercaseCharacters.contains(lowerCase)) {
+                result.add(lowerCase);
+                result.add(uppercaseChar);
+            }
+        }
+
+        Map<UnicodeCategory, List<Character>> matchedMap = new HashMap<>();
+        List<Character> characters = new ArrayList<>(result);
+        characters.sort(Comparator.naturalOrder());
+        matchedMap.put(UnicodeCategory.CASED_LETTER, characters);
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        Map<UnicodeCategory, LineDescriptor> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
+        String text = textPerPattern.get(UnicodeCategory.CASED_LETTER).formatToText(new HashMap<>());
+        System.out.println(text);
+    }
+
+    private List<Character> createCharactersList(List<SymbolRange> symbolRanges, Character[] symbols) {
+        return Stream.concat(
+                             Arrays.stream(symbols),
+                             symbolRanges
+                                     .stream()
+                                     .flatMap(range -> IntStream.range(range.getFrom(), range.getTo() + 1)
+                                                                .mapToObj(i -> (char) i))
+                     )
+                     .collect(Collectors.toList());
     }
 
     @Test
@@ -82,7 +125,7 @@ public class UnicodeCategoryGeneration {
             String name = entry.getValue();
             int from = entry.getKey().getFrom();
             int to = entry.getKey().getTo();
-            lines.add(String.format("    public static final SymbolRange %s = SymbolRange.symbols('%s', '%s');  // 0x%x - 0x%x", name, charAsString(from), charAsString(to), from, to));
+            lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, charAsString(from), charAsString(to), from, to));
         }
         lines.add("}");
         Files.write(path, lines);
@@ -184,7 +227,7 @@ public class UnicodeCategoryGeneration {
         }
 
         private static String rangeOrConstant(Map<SymbolRange, String> constantNames, SymbolRange range) {
-            return constantNames.getOrDefault(range, String.format("symbols('%s', '%s')", charAsString(range.getFrom()), charAsString(range.getTo())));
+            return constantNames.getOrDefault(range, String.format("range('%s', '%s')", charAsString(range.getFrom()), charAsString(range.getTo())));
         }
 
         private static String makeDescription(UnicodeCategory key) {
