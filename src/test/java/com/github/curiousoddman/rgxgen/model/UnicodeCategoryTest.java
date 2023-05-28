@@ -76,7 +76,7 @@ class UnicodeCategoryTest {
         Optional<Pattern> compile(String pattern, UnicodeCategory category) {
             Files.deleteIfExists(makePathFromCategory(category));
             try {
-                Optional<Pattern> compile = Optional.of(Pattern.compile(pattern, Pattern.UNICODE_CHARACTER_CLASS));
+                Optional<Pattern> compile = Optional.of(Pattern.compile(pattern));
                 testedCategories.add(category);
                 return compile;
             } catch (Exception e) {
@@ -92,7 +92,26 @@ class UnicodeCategoryTest {
             for (char c : s.toCharArray()) {
                 characterSet.add(c);
             }
-            compiled.ifPresent(p -> assertTrue(p.matcher(s).matches(), "Failed for text '" + s + '\''));
+            compiled.ifPresent(p -> {
+                if (p.matcher(s).matches()) {
+                    return;
+                }
+
+                boolean[] matches = new boolean[s.length()];
+                char[] charArray = s.toCharArray();
+                for (int i = 0; i < charArray.length; i++) {
+                    char c = charArray[i];
+                    matches[i] = p.matcher("" + c).matches();
+                }
+                System.out.println("Match debug:");
+                System.out.println("\t" + s);
+                System.out.print("\t");
+                for (int i = 0; i < charArray.length; i++) {
+                    System.out.print(matches[i] ? " " : '!');
+                }
+                System.out.println();
+                fail("Failed for text '" + s + '\'');
+            });
         }
 
         @AfterEach
@@ -112,7 +131,7 @@ class UnicodeCategoryTest {
         @AfterAll
         void afterAll() {
             List<UnicodeCategory> notTestedCategories = Arrays.stream(UnicodeCategory.values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
-            fail("There are categories that are not tested - " + notTestedCategories);
+            fail("Pattern.compile() failed for - " + notTestedCategories);
         }
     }
 
@@ -121,7 +140,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateInCategoryTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,10}";
+            String pattern = "\\p{" + key + "}{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
@@ -137,7 +156,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateInCategoryNotMatchingTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,10}";
+            String pattern = "\\p{" + key + "}{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
@@ -152,7 +171,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateUniqueTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,10}";
+            String pattern = "\\p{" + key + "}{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             StringIterator stringIterator = rgxGen.iterateUnique();
@@ -168,7 +187,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateNotInCategoryTest(String key, UnicodeCategory category) {
-            String pattern = "\\P{" + key + "}{5,10}";
+            String pattern = "\\P{" + key + "}{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = new Random(pattern.hashCode());
