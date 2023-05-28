@@ -48,6 +48,7 @@ import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 @Getter
@@ -78,7 +79,7 @@ public enum UnicodeCategory {
     MODIFIER_SYMBOL(keys("Sk", "Modifier_Symbol"), "a combining character (mark) as a full character on its own.", asList(RANGE_286, RANGE_626, RANGE_306, RANGE_521, RANGE_53, RANGE_586, RANGE_150, RANGE_499, RANGE_113, RANGE_452, RANGE_179, RANGE_143, RANGE_121, RANGE_146, RANGE_313), new Character[]{'^', '`', '¨', '¯', '´', '¸', '˭', '͵', '᾽', '꭛', '＾', '｀', '￣'}),
     OTHER_SYMBOL(keys("So", "Other_Symbol"), "various symbols that are not math symbols, currency signs, or combining characters.", asList(range('֍', '֎'), RANGE_86, RANGE_91, range('௳', '௸'), RANGE_167, RANGE_598, RANGE_710, RANGE_570, RANGE_22, RANGE_175, RANGE_333, RANGE_244, RANGE_317, RANGE_534, RANGE_35, RANGE_449, RANGE_149, RANGE_220, RANGE_329, range('№', '℗'), RANGE_64, RANGE_660, range('⅌', '⅍'), RANGE_188, range('↕', '↙'), range('↜', '↟'), range('↡', '↢'), range('↤', '↥'), range('↧', '↭'), range('↯', '⇍'), range('⇐', '⇑'), range('⇕', '⇳'), range('⌀', '⌇'), range('⌌', '⌟'), range('⌢', '⌨'), range('⌫', '⍻'), range('⍽', '⎚'), range('⎴', '⏛'), range('⏢', '␦'), RANGE_434, RANGE_234, range('─', '▶'), range('▸', '◀'), range('◂', '◷'), range('☀', '♮'), range('♰', '❧'), range('➔', '➿'), range('⠀', '⣿'), range('⬀', '⬯'), range('⭅', '⭆'), range('⭍', '⭳'), RANGE_503, RANGE_487, RANGE_554, RANGE_95, RANGE_90, RANGE_302, RANGE_350, RANGE_214, RANGE_226, RANGE_185, RANGE_170, RANGE_212, RANGE_378, RANGE_311, RANGE_440, RANGE_612, RANGE_530, RANGE_693, RANGE_383, RANGE_564, RANGE_356, RANGE_619, RANGE_707, RANGE_624, range('꠶', '꠷'), RANGE_128, range('￭', '￮'), RANGE_423), new Character[]{'¦', '©', '®', '°', '҂', '۞', '۩', '߶', '৺', '୰', '௺', '౿', '൏', '൹', '༓', '༴', '༶', '༸', '᥀', '℔', '℥', '℧', '℩', '℮', '⅊', '⅏', '⇓', '〄', '〠', '㉐', '꠹', '﷽', '￤', '￨'}),
     NUMBER(keys("N", "Number"), "any kind of numeric character in any script.", asList(RANGE_85, RANGE_673, RANGE_155, RANGE_376, RANGE_545, RANGE_608, RANGE_142, RANGE_695, RANGE_263, RANGE_513, RANGE_331, RANGE_141, RANGE_395, range('௦', '௲'), RANGE_512, RANGE_160, RANGE_332, RANGE_577, range('൦', '൸'), RANGE_697, RANGE_39, RANGE_588, range('༠', '༳'), RANGE_425, RANGE_678, RANGE_213, RANGE_502, RANGE_569, RANGE_182, RANGE_130, RANGE_197, range('᧐', '᧚'), RANGE_341, RANGE_682, RANGE_402, RANGE_273, RANGE_430, RANGE_41, RANGE_75, RANGE_342, range('⅐', 'ↂ'), range('ↅ', '↉'), RANGE_398, RANGE_417, RANGE_494, RANGE_491, RANGE_252, RANGE_360, RANGE_474, RANGE_601, RANGE_67, RANGE_346, RANGE_653, RANGE_461, RANGE_348, RANGE_99, RANGE_581, RANGE_140, RANGE_211, RANGE_163, RANGE_26, RANGE_164, RANGE_495), new Character[]{'¹', '⁰', '⳽', '〇'}),
-    DECIMAL_DIGIT_NUMBER(keys("Nd", "Decimal_Digit_Number"), "a digit zero through nine in any script except ideographic scripts.", asList(RANGE_85, RANGE_376, RANGE_545, RANGE_608, RANGE_142, RANGE_695, RANGE_513, RANGE_331, RANGE_141, range('௦', '௯'), RANGE_512, RANGE_332, range('൦', '൯'), RANGE_697, RANGE_39, RANGE_588, range('༠', '༩'), RANGE_425, RANGE_678, RANGE_569, RANGE_130, RANGE_197, range('᧐', '᧙'), RANGE_341, RANGE_682, RANGE_402, RANGE_273, RANGE_430, RANGE_41, RANGE_461, RANGE_581, RANGE_140, RANGE_211, RANGE_163, RANGE_26, RANGE_164, RANGE_495), null),
+    DECIMAL_DIGIT_NUMBER(keys("Nd", "Decimal_Digit_Number"), "a digit zero through nine in any script except ideographic scripts.", asList(RANGE_85, RANGE_376, RANGE_545, RANGE_608, RANGE_142, RANGE_695, RANGE_513, RANGE_331, RANGE_141, range('௦', '௯'), RANGE_512, RANGE_332, range('൦', '൯'), RANGE_697, RANGE_39, RANGE_588, range('༠', '༩'), RANGE_425, RANGE_678, RANGE_569, RANGE_130, RANGE_197, range('᧐', '᧙'), RANGE_341, RANGE_682, RANGE_402, RANGE_273, RANGE_430, RANGE_41, RANGE_461, RANGE_581, RANGE_140, RANGE_211, RANGE_163, RANGE_26, RANGE_164, RANGE_495), new Character[]{}),
     LETTER_NUMBER(keys("Nl", "Letter_Number"), "a number that looks like a letter, such as a Roman numeral.", asList(RANGE_502, range('Ⅰ', 'ↂ'), range('ↅ', 'ↈ'), RANGE_491, RANGE_252, RANGE_348), new Character[]{'〇'}),
     OTHER_NUMBER(keys("No", "Other_Number"), "a superscript or subscript digit, or a number that is not a digit 0-9 (excluding numbers from ideographic scripts).", asList(RANGE_673, RANGE_155, RANGE_263, RANGE_395, range('௰', '௲'), RANGE_160, RANGE_577, range('൰', '൸'), range('༪', '༳'), RANGE_213, RANGE_182, RANGE_75, RANGE_342, range('⅐', '⅟'), RANGE_398, RANGE_417, RANGE_494, RANGE_360, RANGE_474, RANGE_601, RANGE_67, RANGE_346, RANGE_653, RANGE_99), new Character[]{'¹', '᧚', '⁰', '↉', '⳽'}),
     PUNCTUATION(keys("P", "Punctuation"), "any kind of punctuation character.", asList(RANGE_493, range('%', '*'), range(',', '/'), RANGE_298, RANGE_399, range('[', ']'), RANGE_23, RANGE_611, range('։', '֊'), RANGE_236, RANGE_711, RANGE_42, RANGE_426, RANGE_594, RANGE_154, RANGE_330, RANGE_89, RANGE_105, RANGE_254, RANGE_239, range('༺', '༽'), RANGE_222, RANGE_410, RANGE_637, RANGE_11, RANGE_651, range('᚛', '᚜'), RANGE_433, RANGE_559, RANGE_310, RANGE_387, range('᠀', '᠊'), RANGE_145, RANGE_429, RANGE_288, RANGE_458, RANGE_609, RANGE_432, RANGE_325, RANGE_290, RANGE_247, range('‐', '‧'), range('‰', '⁃'), range('⁅', '⁑'), range('⁓', '⁞'), range('⁽', '⁾'), range('₍', '₎'), range('⌈', '⌋'), range('〈', '〉'), range('❨', '❵'), range('⟅', '⟆'), range('⟦', '⟯'), range('⦃', '⦘'), range('⧘', '⧛'), range('⧼', '⧽'), RANGE_731, RANGE_114, range('⸀', '⸮'), range('⸰', '⹉'), RANGE_540, range('〈', '】'), range('〔', '〟'), RANGE_102, RANGE_52, RANGE_592, RANGE_92, RANGE_535, RANGE_702, RANGE_391, RANGE_616, RANGE_511, RANGE_282, RANGE_144, RANGE_552, range('﴾', '﴿'), range('︐', '︙'), range('︰', '﹒'), range('﹔', '﹡'), RANGE_584, RANGE_184, range('％', '＊'), range('，', '／'), RANGE_696, RANGE_88, range('［', '］'), range('｟', '･')), new Character[]{'_', '{', '}', '¡', '§', '«', '»', '¿', ';', '·', '־', '׀', '׃', '׆', '؛', '۔', '࡞', '॰', '৽', '૰', '෴', '๏', '༔', '྅', '჻', '᐀', '᳓', '⵰', '〰', '〽', '゠', '・', '꙳', '꙾', '꣼', '꥟', '꯫', '﹣', '﹨', '＿', '｛', '｝'}),
@@ -231,15 +232,15 @@ public enum UnicodeCategory {
     }
 
     UnicodeCategory(List<String> keys, String description, Character[] symbols) {
-        this(keys, description, null, symbols);
+        this(keys, description, emptyList(), symbols);
     }
 
     UnicodeCategory(List<String> keys, String description, SymbolRange symbolRange) {
-        this(keys, description, singletonList(symbolRange), null);
+        this(keys, description, singletonList(symbolRange), new Character[]{});
     }
 
     public boolean isConfigured() {
-        return (symbolRanges != null && !symbolRanges.isEmpty()) || (symbols != null && symbols.length != 0);
+        return (!symbolRanges.isEmpty()) || (symbols.length != 0);
     }
 
 
