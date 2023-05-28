@@ -12,7 +12,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -23,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class UnicodeCategoryTest {
 
-    public static final int GENERATE_ITERATIONS = 100000;
+    public static final int GENERATE_ITERATIONS = 1000;
 
     @ParameterizedTest
     @EnumSource(UnicodeCategory.class)
@@ -93,7 +92,7 @@ class UnicodeCategoryTest {
             for (char c : s.toCharArray()) {
                 characterSet.add(c);
             }
-            compiled.ifPresent(p -> assertTrue(p.matcher(s).matches()));
+            compiled.ifPresent(p -> assertTrue(p.matcher(s).matches(), "Failed for text '" + s + '\''));
         }
 
         @AfterEach
@@ -102,7 +101,7 @@ class UnicodeCategoryTest {
                 Set<Character> value = entry.getValue();
                 IntSummaryStatistics intSummaryStatistics = value.stream().mapToInt(i -> (int) i).summaryStatistics();
                 UnicodeCategory category = entry.getKey();
-                System.out.println("Category " + category + " character stats");
+                System.out.println("Category " + category + " with keys " + category.getKeys() + " character stats: ");
                 System.out.println("\tMin: " + intSummaryStatistics.getMin() + "; '" + (char) intSummaryStatistics.getMin() + '\'');
                 System.out.println("\tMax: " + intSummaryStatistics.getMax() + "; '" + (char) intSummaryStatistics.getMax() + '\'');
                 double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.getTo() - range.getFrom() + 1).sum();

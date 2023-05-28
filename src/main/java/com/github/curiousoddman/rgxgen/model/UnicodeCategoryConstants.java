@@ -270,7 +270,7 @@ public class UnicodeCategoryConstants {
     public static final SymbolRange RANGE_325                 = SymbolRange.range('᰻', '᰿');  // 0x1c3b - 0x1c3f
     public static final SymbolRange RANGE_326                 = SymbolRange.range('ꚠ', 'ꛥ');  // 0xa6a0 - 0xa6e5
     public static final SymbolRange RANGE_327                 = SymbolRange.range('ꩾ', 'ꪯ');  // 0xaa7e - 0xaaaf
-    public static final SymbolRange RANGE_328                 = SymbolRange.range('', '');  // 0x7f - 0x9f
+    public static final SymbolRange C1_CONTROLS               = SymbolRange.range('', '');  // 0x7f - 0x9f
     public static final SymbolRange RANGE_329                 = SymbolRange.range('℈', '℉');  // 0x2108 - 0x2109
     public static final SymbolRange RANGE_33                  = SymbolRange.range('⁲', '⁳');  // 0x2072 - 0x2073
     public static final SymbolRange RANGE_330                 = SymbolRange.range('߷', '߹');  // 0x7f7 - 0x7f9
