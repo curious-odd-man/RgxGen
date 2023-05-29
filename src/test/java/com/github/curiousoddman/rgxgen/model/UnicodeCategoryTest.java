@@ -91,8 +91,9 @@ class UnicodeCategoryTest {
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
+            RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generate(random), category, true);
+                validatePattern(rgxGenTestPattern, () -> rgxGen.generate(random));
             }
         }
     }
@@ -107,8 +108,9 @@ class UnicodeCategoryTest {
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
+            RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, false);
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generateNotMatching(random), category, false);
+                validatePattern(rgxGenTestPattern, () -> rgxGen.generateNotMatching(random));
             }
         }
     }
@@ -122,8 +124,9 @@ class UnicodeCategoryTest {
             RgxGen rgxGen = new RgxGen(pattern);
             StringIterator stringIterator = rgxGen.iterateUnique();
             Optional<Pattern> compiled = compile(pattern, category);
+            RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
             for (int i = 0; i < GENERATE_ITERATIONS && stringIterator.hasNext(); i++) {
-                validatePattern(compiled, stringIterator::next, category, true);
+                validatePattern(rgxGenTestPattern, stringIterator::next);
             }
         }
     }
@@ -137,8 +140,9 @@ class UnicodeCategoryTest {
             RgxGen rgxGen = new RgxGen(pattern);
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = new Random(pattern.hashCode());
+            RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generate(random), category, true);
+                validatePattern(rgxGenTestPattern, () -> rgxGen.generate(random));
             }
         }
     }

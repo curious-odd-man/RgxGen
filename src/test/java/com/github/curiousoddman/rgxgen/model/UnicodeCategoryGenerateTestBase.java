@@ -58,27 +58,29 @@ class UnicodeCategoryGenerateTestBase {
     }
 
     @SneakyThrows
-    void validatePattern(Optional<Pattern> compiledPattern, Supplier<String> generateFunction, UnicodeCategory category, boolean expectToMatch) {
+    void validatePattern(RgxGenTestPattern testPattern, Supplier<String> generateFunction) {
         String generatedText = assertDoesNotThrow(generateFunction::get);
-        Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(category, k -> new HashSet<>());
+        Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(testPattern.getUnicodeCategory(), k -> new HashSet<>());
         char[] generatedTextCharArray = generatedText.toCharArray();
         for (char c : generatedTextCharArray) {
             generatedCharactersForCategory.add(c);
         }
-        compiledPattern.ifPresent(pattern -> {
-            if (pattern.matcher(generatedText).matches() == expectToMatch) {
+        testPattern.getCompiled().ifPresent(pattern -> {
+            if (pattern.matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
                 return;
             }
 
+            Pattern singleLetterPattern = Pattern.compile(testPattern.getSingleLetterPattern() + "*");
+
             boolean[] matches = new boolean[generatedText.length()];
             for (int i = 0; i < generatedTextCharArray.length; i++) {
-                matches[i] = pattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
+                matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
             }
             System.out.println("Match debug:");
-            System.out.println('\t' + generatedText);
+            System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
             System.out.print('\t');
             for (int i = 0; i < generatedTextCharArray.length; i++) {
-                System.out.print(matches[i] == expectToMatch ? " " : '!');
+                System.out.print(matches[i] == testPattern.isExpectToMatch() ? " " : '!');
             }
             System.out.println();
             fail("Failed for text '" + generatedText + '\'');
