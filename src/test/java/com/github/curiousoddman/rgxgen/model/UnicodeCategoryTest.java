@@ -18,11 +18,33 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UnicodeCategoryTest {
+    public static final List<UnicodeCategory> UNCOMPILABLE_KEYS = Arrays.asList(
+            CASED_LETTER,
+            IN_LATIN_1_SUPPLEMENT,
+            IN_LATIN_EXTENDED_A,
+            IN_LATIN_EXTENDED_B,
+            IN_GREEK_AND_COPTIC,
+            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
+            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
+            IN_SUPPLEMENTAL_ARROWS_A,
+            IN_SUPPLEMENTAL_ARROWS_B,
+            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
+            IN_ARABIC_PRESENTATION_FORMS_A,
+            IN_ARABIC_PRESENTATION_FORMS_B
+    );
 
     public static final int GENERATE_ITERATIONS = 1000;
+
+    @Test
+        // FIXME
+    void tmpTest() {
+        Pattern pattern = Pattern.compile("\\P{L}+");
+        System.out.println(pattern.matcher(".}~+.|^9- 6(3&|").matches());
+    }
 
     @ParameterizedTest
     @EnumSource(UnicodeCategory.class)
@@ -40,8 +62,7 @@ class UnicodeCategoryTest {
     @ParameterizedTest
     @EnumSource(UnicodeCategory.class)
     void symbolsOrSymbolRangesPresentTest(UnicodeCategory unicodeCategory) {
-        boolean rangesPresent = unicodeCategory.getSymbolRanges() != null && !unicodeCategory.getSymbolRanges()
-                                                                                             .isEmpty();
+        boolean rangesPresent = unicodeCategory.getSymbolRanges() != null && !unicodeCategory.getSymbolRanges().isEmpty();
         boolean symbolsPresent = unicodeCategory.getSymbols() != null && unicodeCategory.getSymbols().length != 0;
         assertTrue(rangesPresent || symbolsPresent);
     }
@@ -50,7 +71,7 @@ class UnicodeCategoryTest {
     public static class GenerateTestBase {
 
         public static Stream<Arguments> getKeyAndCategory() {
-            return Arrays.stream(UnicodeCategory.values())
+            return Arrays.stream(values())
                          .flatMap(uc -> uc.getKeys().stream().map(k -> Arguments.of(k, uc)));
 
         }
@@ -85,7 +106,7 @@ class UnicodeCategoryTest {
         }
 
         @SneakyThrows
-        void validatePattern(Optional<Pattern> compiled, Supplier<String> generateFunction, UnicodeCategory category) {
+        void validatePattern(Optional<Pattern> compiled, Supplier<String> generateFunction, UnicodeCategory category, boolean expectMatch) {
             String s = assertDoesNotThrow(generateFunction::get);
             //Files.write(makePathFromCategory(category), Collections.singletonList(s), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             Set<Character> characterSet = generatedCharacters.computeIfAbsent(category, k -> new HashSet<>());
@@ -93,7 +114,7 @@ class UnicodeCategoryTest {
                 characterSet.add(c);
             }
             compiled.ifPresent(p -> {
-                if (p.matcher(s).matches()) {
+                if (p.matcher(s).matches() == expectMatch) {
                     return;
                 }
 
@@ -107,7 +128,7 @@ class UnicodeCategoryTest {
                 System.out.println("\t" + s);
                 System.out.print("\t");
                 for (int i = 0; i < charArray.length; i++) {
-                    System.out.print(matches[i] ? " " : '!');
+                    System.out.print(matches[i] == expectMatch ? " " : '!');
                 }
                 System.out.println();
                 fail("Failed for text '" + s + '\'');
@@ -130,8 +151,11 @@ class UnicodeCategoryTest {
 
         @AfterAll
         void afterAll() {
-            List<UnicodeCategory> notTestedCategories = Arrays.stream(UnicodeCategory.values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
-            fail("Pattern.compile() failed for - " + notTestedCategories);
+            List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
+            notTestedCategories.removeAll(UNCOMPILABLE_KEYS);
+            if (!notTestedCategories.isEmpty()) {
+                fail("Pattern.compile() failed for - " + notTestedCategories);
+            }
         }
     }
 
@@ -145,7 +169,7 @@ class UnicodeCategoryTest {
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generate(random), category);
+                validatePattern(compiled, () -> rgxGen.generate(random), category, true);
             }
         }
     }
@@ -161,7 +185,7 @@ class UnicodeCategoryTest {
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generateNotMatching(random), category);
+                validatePattern(compiled, () -> rgxGen.generateNotMatching(random), category, false);
             }
         }
     }
@@ -177,7 +201,7 @@ class UnicodeCategoryTest {
             StringIterator stringIterator = rgxGen.iterateUnique();
             Optional<Pattern> compiled = compile(pattern, category);
             for (int i = 0; i < GENERATE_ITERATIONS && stringIterator.hasNext(); i++) {
-                validatePattern(compiled, stringIterator::next, category);
+                validatePattern(compiled, stringIterator::next, category, true);
             }
         }
     }
@@ -192,7 +216,7 @@ class UnicodeCategoryTest {
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = new Random(pattern.hashCode());
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(compiled, () -> rgxGen.generate(random), category);
+                validatePattern(compiled, () -> rgxGen.generate(random), category, true);
             }
         }
     }
