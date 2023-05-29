@@ -9,12 +9,14 @@ import java.util.regex.Pattern;
 @Getter
 @AllArgsConstructor
 public class RgxGenTestPattern {
+    private static final Pattern COMPILE = Pattern.compile("\\{\\d+,\\d+}");
+
     private final String            pattern;
     private final Optional<Pattern> compiled;
     private final UnicodeCategory   unicodeCategory;
     private final boolean           expectToMatch;
 
-    public String getSingleLetterPattern() {
-        return pattern.split("\\{")[0];
+    public String getPatternWithoutLength() {
+        return COMPILE.split(pattern)[0];
     }
 }

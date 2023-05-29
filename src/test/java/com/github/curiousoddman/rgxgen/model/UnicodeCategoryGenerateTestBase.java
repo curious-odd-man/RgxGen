@@ -4,9 +4,6 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.provider.Arguments;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
@@ -70,7 +67,7 @@ class UnicodeCategoryGenerateTestBase {
                 return;
             }
 
-            Pattern singleLetterPattern = Pattern.compile(testPattern.getSingleLetterPattern() + "*");
+            Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + "*");
 
             boolean[] matches = new boolean[generatedText.length()];
             for (int i = 0; i < generatedTextCharArray.length; i++) {
@@ -78,6 +75,10 @@ class UnicodeCategoryGenerateTestBase {
             }
             System.out.println("Match debug:");
             System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
+            for (int i = 0; i < generatedText.length(); i++) {
+                System.out.print("'" + generatedText.charAt(i) + "' ");
+            }
+            System.out.println();
             System.out.print('\t');
             for (int i = 0; i < generatedTextCharArray.length; i++) {
                 System.out.print(matches[i] == testPattern.isExpectToMatch() ? " " : '!');
