@@ -402,7 +402,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'p':   // Character classes
             case 'P':   // Not-matching character classes
                 sbToFinal(sb, nodes);
-                createdNode = createUnicodeSymbolSetNode(sb, c, getMatchType(c, 'p'));
+                createdNode = createUnicodeSymbolSetNode(c, getMatchType(c, 'p'));
                 break;
 
             // Hex character:
@@ -451,7 +451,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private Node createUnicodeSymbolSetNode(StringBuilder sb, char c, MatchType matchType) {
+    private Node createUnicodeSymbolSetNode(char c, MatchType matchType) {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
         String pattern = "\\" + c + '{' + characterClassKey + '}';

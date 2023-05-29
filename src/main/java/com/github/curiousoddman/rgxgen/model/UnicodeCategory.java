@@ -204,15 +204,10 @@ public enum UnicodeCategory {
                    .map(key -> new KeyValue(key, unicodeCategory));
     }
 
-    // TODO: allow you to use the shorthand \pL. The shorthand only works with single-letter Unicode properties.
     private final List<String>      keys;
     private final String            description;
     private final List<SymbolRange> symbolRanges;
     private final Character[]       symbols;
-
-    UnicodeCategory(String key, String description, List<SymbolRange> symbolRanges, Character... symbols) {
-        this(keys(key), description, symbolRanges, symbols);
-    }
 
     UnicodeCategory(List<String> keys, String description, Character... symbols) {
         this(keys, description, emptyList(), symbols);

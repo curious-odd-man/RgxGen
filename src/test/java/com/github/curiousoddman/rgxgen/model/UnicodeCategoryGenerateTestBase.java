@@ -22,7 +22,15 @@ class UnicodeCategoryGenerateTestBase {
 
     public static Stream<Arguments> getKeyAndCategory() {
         return Arrays.stream(values())
-                     .flatMap(uc -> uc.getKeys().stream().map(k -> Arguments.of(k, uc)));
+                     .flatMap(uc -> uc
+                             .getKeys()
+                             .stream()
+                             .flatMap(k -> k.length() == 1 ? Stream.of(k, wrapInCurvy(k)) : Stream.of(wrapInCurvy(k)))
+                             .map(k -> Arguments.of(k, uc)));
+    }
+
+    private static String wrapInCurvy(String s) {
+        return '{' + s + '}';
     }
 
     Set<UnicodeCategory>                 testedCategories;

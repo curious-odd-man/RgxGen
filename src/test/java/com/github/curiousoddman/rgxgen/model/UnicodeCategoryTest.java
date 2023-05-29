@@ -64,7 +64,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateInCategoryTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,20}";
+            String pattern = "\\p" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
@@ -80,7 +80,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateInCategoryNotMatchingTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,20}";
+            String pattern = "\\p" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
@@ -95,7 +95,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateUniqueTest(String key, UnicodeCategory category) {
-            String pattern = "\\p{" + key + "}{5,20}";
+            String pattern = "\\p" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             StringIterator stringIterator = rgxGen.iterateUnique();
             Optional<Pattern> compiled = compile(pattern, category);
@@ -110,7 +110,7 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")
         void generateNotInCategoryTest(String key, UnicodeCategory category) {
-            String pattern = "\\P{" + key + "}{5,20}";
+            String pattern = "\\P" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = new Random(pattern.hashCode());
