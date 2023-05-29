@@ -68,7 +68,6 @@ class UnicodeCategoryGenerateTestBase {
             }
 
             Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + "*");
-
             boolean[] matches = new boolean[generatedText.length()];
             for (int i = 0; i < generatedTextCharArray.length; i++) {
                 matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
