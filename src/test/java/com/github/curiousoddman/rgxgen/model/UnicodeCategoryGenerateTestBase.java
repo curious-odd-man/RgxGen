@@ -46,13 +46,8 @@ class UnicodeCategoryGenerateTestBase {
         generatedCharacters = new HashMap<>();
     }
 
-    static Path makePathFromCategory(UnicodeCategory category) {
-        return Paths.get("testdata/" + category.name() + ".txt");
-    }
-
     @SneakyThrows
     Optional<Pattern> compile(String pattern, UnicodeCategory category) {
-        Files.deleteIfExists(makePathFromCategory(category));
         try {
             Optional<Pattern> compiledPattern = Optional.of(Pattern.compile(pattern));
             testedCategories.add(category);
@@ -65,7 +60,6 @@ class UnicodeCategoryGenerateTestBase {
     @SneakyThrows
     void validatePattern(Optional<Pattern> compiledPattern, Supplier<String> generateFunction, UnicodeCategory category, boolean expectToMatch) {
         String generatedText = assertDoesNotThrow(generateFunction::get);
-        //Files.write(makePathFromCategory(category), Collections.singletonList(generatedText), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(category, k -> new HashSet<>());
         char[] generatedTextCharArray = generatedText.toCharArray();
         for (char c : generatedTextCharArray) {

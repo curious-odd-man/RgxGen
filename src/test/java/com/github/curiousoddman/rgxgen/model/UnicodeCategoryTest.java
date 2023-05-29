@@ -34,8 +34,31 @@ class UnicodeCategoryTest {
     @Test
         // FIXME
     void tmpTest() {
-        Pattern pattern = Pattern.compile("\\P{L}+");
-        System.out.println(pattern.matcher(".}~+.|^9- 6(3&|").matches());
+        Pattern pattern = Pattern.compile("\\p{C}");
+
+        List<Character> matching = new ArrayList<>();
+        List<Character> notMatching = new ArrayList<>();
+
+        for (Character symbol : OTHER.getSymbols()) {
+            if (pattern.matcher(String.valueOf(symbol)).matches()) {
+                matching.add(symbol);
+            } else {
+                notMatching.add(symbol);
+            }
+        }
+
+        for (SymbolRange symbolRange : OTHER.getSymbolRanges()) {
+            for (int i = symbolRange.getFrom(); i <= symbolRange.getTo(); i++) {
+                if (pattern.matcher(String.valueOf((char) i)).matches()) {
+                    matching.add((char) i);
+                } else {
+                    notMatching.add((char) i);
+                }
+            }
+        }
+
+        System.out.println("Matching = " + matching);
+        System.out.println("Not Matching = " + notMatching);
     }
 
     @ParameterizedTest
