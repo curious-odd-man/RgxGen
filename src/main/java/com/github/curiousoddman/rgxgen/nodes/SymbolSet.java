@@ -23,6 +23,8 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeUnicodeCharacterArray;
@@ -36,6 +38,7 @@ public class SymbolSet extends Node {
     private final Collection<Character> aInitial;
     private final Collection<Character> aModification;
     private final MatchType             aType;
+    private final UnicodeCategory       unicodeCategory;
 
     private Character[] aSymbols;
     private Character[] aSymbolsCaseInsensitive;
@@ -46,19 +49,23 @@ public class SymbolSet extends Node {
     }
 
     public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeAsciiCharacterArray());
+        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeAsciiCharacterArray(), null);
     }
 
     public static SymbolSet ofAsciiRanges(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, makeAsciiCharacterArray());
+        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, makeAsciiCharacterArray(), null);
     }
 
     public static SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType type) {
-        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, makeUnicodeCharacterArray());
+        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, makeUnicodeCharacterArray(), unicodeCategory);
+    }
+
+    public static SymbolSet ofUnicodeCharacterClass(String pattern, Character[] symbols, UnicodeCategory unicodeCategory, MatchType type) {
+        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeUnicodeCharacterArray(), unicodeCategory);
     }
 
     public static SymbolSet ofAscii(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, symbols, type, makeAsciiCharacterArray());
+        return new SymbolSet(pattern, symbolRanges, symbols, type, makeAsciiCharacterArray(), null);
     }
 
     /**
@@ -69,29 +76,25 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    private SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type, Character[] allAvailableCharacters) {
+    private SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type, Character[] allAvailableCharacters, UnicodeCategory unicodeCategory) {
         super(pattern);
         aType = type;
+        this.unicodeCategory = unicodeCategory;
         if (aType == MatchType.POSITIVE) {
-            aInitial = new HashSet<>(allAvailableCharacters.length);
+            aInitial = new ArrayList<>();
             aModification = new ArrayList<>(Arrays.asList(symbols));
         } else {
-            aInitial = new HashSet<>(Arrays.asList(allAvailableCharacters));
+            aInitial = new ArrayList<>(Arrays.asList(allAvailableCharacters));
             aModification = new HashSet<>(Arrays.asList(symbols));
         }
 
         symbolRanges.stream()
-                    .map(SymbolSet::rangeToList)
-                    .forEach(aModification::addAll);
+                    .flatMap(SymbolSet::rangeToStream)
+                    .forEach(aModification::add);
     }
 
-    private static Collection<Character> rangeToList(SymbolRange range) {
-        Collection<Character> chars = new ArrayList<>(range.getTo() - range.getFrom() + 1);
-        for (int i = range.getFrom(); i <= range.getTo(); i++) {
-            chars.add((char) i);
-        }
-
-        return chars;
+    private static Stream<Character> rangeToStream(SymbolRange range) {
+        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj(i -> (char) i);
     }
 
     private Character[] getOrInitSymbols() {
@@ -128,6 +131,14 @@ public class SymbolSet extends Node {
             }
             consumer.accept(c);
         }
+    }
+
+    public UnicodeCategory getUnicodeCategory() {
+        return unicodeCategory;
+    }
+
+    public boolean isAsciiOnly() {
+        return unicodeCategory == null;
     }
 
     @Override

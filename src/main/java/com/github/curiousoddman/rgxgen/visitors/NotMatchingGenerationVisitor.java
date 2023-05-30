@@ -22,6 +22,7 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
@@ -31,6 +32,7 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.mak
 
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
+    private final Map<SymbolSet, SymbolSet> originalToNotMatchingSymbolSetCache = new IdentityHashMap<>();
 
     public static GenerationVisitorBuilder builder() {
         return new GenerationVisitorBuilder(false);
@@ -50,7 +52,15 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
         // There is only one way to generate not matching for any character - is to not generate anything
         String pattern = node.getPattern();
-        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+        SymbolSet symbolSet = originalToNotMatchingSymbolSetCache.get(node);
+        if (symbolSet == null) {
+            if (node.isAsciiOnly()) {
+                symbolSet = SymbolSet.ofAsciiCharacters("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+            } else {
+                symbolSet = SymbolSet.ofUnicodeCharacterClass("[^" + pattern.substring(1), node.getSymbols(), node.getUnicodeCategory(), MatchType.NEGATIVE);
+            }
+            originalToNotMatchingSymbolSetCache.put(node, symbolSet);
+        }
         if (!symbolSet.isEmpty()) {
             super.visit(symbolSet);
         }
