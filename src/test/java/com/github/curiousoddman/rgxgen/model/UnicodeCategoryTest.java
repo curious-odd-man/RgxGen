@@ -62,9 +62,11 @@ class UnicodeCategoryTest {
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
+            ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(rgxGenTestPattern, () -> rgxGen.generate(random));
+                validateGeneratedText(rgxGenTestPattern, () -> rgxGen.generate(random), validationResult);
             }
+            validationResult.assertPassed();
         }
     }
 
@@ -79,9 +81,11 @@ class UnicodeCategoryTest {
             Random random = new Random(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, false);
+            ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(rgxGenTestPattern, () -> rgxGen.generateNotMatching(random));
+                validateGeneratedText(rgxGenTestPattern, () -> rgxGen.generateNotMatching(random), validationResult);
             }
+            validationResult.assertPassed();
         }
     }
 
@@ -95,9 +99,11 @@ class UnicodeCategoryTest {
             StringIterator stringIterator = rgxGen.iterateUnique();
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
+            ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS && stringIterator.hasNext(); i++) {
-                validatePattern(rgxGenTestPattern, stringIterator::next);
+                validateGeneratedText(rgxGenTestPattern, stringIterator::next, validationResult);
             }
+            validationResult.assertPassed();
         }
     }
 
@@ -111,9 +117,11 @@ class UnicodeCategoryTest {
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = new Random(pattern.hashCode());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
+            ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
-                validatePattern(rgxGenTestPattern, () -> rgxGen.generate(random));
+                validateGeneratedText(rgxGenTestPattern, () -> rgxGen.generate(random), validationResult);
             }
+            validationResult.assertPassed();
         }
     }
 }

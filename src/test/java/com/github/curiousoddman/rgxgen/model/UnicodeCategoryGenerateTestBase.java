@@ -55,16 +55,17 @@ class UnicodeCategoryGenerateTestBase {
     }
 
     @SneakyThrows
-    void validatePattern(RgxGenTestPattern testPattern, Supplier<String> generateFunction) {
+    ValidationResult validateGeneratedText(RgxGenTestPattern testPattern, Supplier<String> generateFunction, ValidationResult validationResult) {
         String generatedText = assertDoesNotThrow(generateFunction::get);
         Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(testPattern.getUnicodeCategory(), k -> new HashSet<>());
         char[] generatedTextCharArray = generatedText.toCharArray();
         for (char c : generatedTextCharArray) {
             generatedCharactersForCategory.add(c);
         }
-        testPattern.getCompiled().ifPresent(pattern -> {
-            if (pattern.matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
-                return;
+
+        if (testPattern.getCompiled().isPresent()) {
+            if (testPattern.getCompiled().get().matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
+                return validationResult.addMatched();
             }
 
             Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + "*");
@@ -82,9 +83,11 @@ class UnicodeCategoryGenerateTestBase {
             for (int i = 0; i < generatedTextCharArray.length; i++) {
                 System.out.print(matches[i] == testPattern.isExpectToMatch() ? " " : '!');
             }
-            System.out.println();
-            fail("Failed for text '" + generatedText + '\'');
-        });
+            System.out.println("Failed for text '" + generatedText + '\'');
+            return validationResult.addNotMatched();
+        }
+
+        return validationResult.addMatched();
     }
 
     @AfterEach
