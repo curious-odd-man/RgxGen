@@ -31,7 +31,7 @@ public class GenerationVisitorCaseInsensitive extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        Character[] allSymbols = node.getSymbolsCaseInsensitive();
+        Character[] allSymbols = null;// FIXME node.getSymbolsCaseInsensitive();
         int idx = aRandom.nextInt(allSymbols.length);
         aStringBuilder.append(allSymbols[idx]);
     }

@@ -148,20 +148,21 @@ public enum TestPattern implements DataInterface {
         setAllUniqueValues("", "a", "aa", "b", "bb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    A_THEN_ANY("a.",
-               new Sequence("a.", new FinalSymbol("a"), SymbolSet.ofAsciiDotPattern())) {{
-        setAllUniqueValues(stream(makeAsciiCharacterArray())
-                                   .map(s -> "" + 'a' + s)
-                                   .collect(Collectors.toList()));
-    }},
-    //-----------------------------------------------------------------------------------------------------------------------------------------
-    ANY_THEN_ANY("..",
-                 new Sequence("..", SymbolSet.ofAsciiDotPattern(), SymbolSet.ofAsciiDotPattern())) {{
-        setAllUniqueValues(stream(makeAsciiCharacterArray())
-                                   .flatMap(s -> stream(makeAsciiCharacterArray())
-                                           .map(v -> "" + s + v))
-                                   .collect(Collectors.toList()));
-    }},
+    // FIXME
+//    A_THEN_ANY("a.",
+//               new Sequence("a.", new FinalSymbol("a"), SymbolSet.ofAsciiDotPattern())) {{
+//        setAllUniqueValues(stream(makeAsciiCharacterArray())
+//                                   .map(s -> "" + 'a' + s)
+//                                   .collect(Collectors.toList()));
+//    }},
+//    //-----------------------------------------------------------------------------------------------------------------------------------------
+//    ANY_THEN_ANY("..",
+//                 new Sequence("..", SymbolSet.ofAsciiDotPattern(), SymbolSet.ofAsciiDotPattern())) {{
+//        setAllUniqueValues(stream(makeAsciiCharacterArray())
+//                                   .flatMap(s -> stream(makeAsciiCharacterArray())
+//                                           .map(v -> "" + s + v))
+//                                   .collect(Collectors.toList()));
+//    }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_ZERO_OR_MORE("a*",
                           Repeat.minimum("a*", new FinalSymbol("a"), 0)) {{
@@ -172,18 +173,19 @@ public enum TestPattern implements DataInterface {
                    Repeat.minimum("a{4,}", new FinalSymbol("a"), 4)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
-    NOT_A("[^a]",
-          SymbolSet.ofAsciiCharacters("[^a]", stream(makeAsciiCharacterArray())
-                  .filter(c -> !c.equals('a'))
-                  .toArray(Character[]::new), MatchType.POSITIVE)
-    ),
-    //-----------------------------------------------------------------------------------------------------------------------------------------
-    NOT_LETTER_RANGE("[^a-dE-F]",
-                     SymbolSet.ofAsciiCharacters("[^a-dE-F]",
-                                                 stream(makeAsciiCharacterArray())
-                                                         .filter(c -> !(c.equals('a') || c.equals('b') || c.equals('c') || c.equals('d') || c.equals('E') || c.equals('F')))
-                                                         .toArray(Character[]::new), MatchType.POSITIVE)
-    ),
+    // FIXME
+//    NOT_A("[^a]",
+//          SymbolSet.ofAsciiCharacters("[^a]", stream(makeAsciiCharacterArray())
+//                  .filter(c -> !c.equals('a'))
+//                  .toArray(Character[]::new), MatchType.POSITIVE)
+//    ),
+//    //-----------------------------------------------------------------------------------------------------------------------------------------
+//    NOT_LETTER_RANGE("[^a-dE-F]",
+//                     SymbolSet.ofAsciiCharacters("[^a-dE-F]",
+//                                                 stream(makeAsciiCharacterArray())
+//                                                         .filter(c -> !(c.equals('a') || c.equals('b') || c.equals('c') || c.equals('d') || c.equals('E') || c.equals('F')))
+//                                                         .toArray(Character[]::new), MatchType.POSITIVE)
+//    ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WHITESPACE("\\s",      // Any White Space
                    SymbolSet.ofAsciiCharacters("\\s", new Character[]{

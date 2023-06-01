@@ -16,16 +16,16 @@ package com.github.curiousoddman.rgxgen.util;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import lombok.experimental.UtilityClass;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @UtilityClass
 public final class Util {
-    public static final Character[] ZERO_LENGTH_CHARACTER_ARRAY = new Character[0];
-    public static final BigInteger  BIG_INTEGER_TWO             = BigInteger.valueOf(2);
-
     public static Character[] stringToChars(CharSequence str) {
         return str.chars()
                   .mapToObj(i -> (char) i)
@@ -83,7 +83,7 @@ public final class Util {
         int switchableCase = value.chars()
                                   .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
                                   .sum();
-        return BIG_INTEGER_TWO.pow(switchableCase);
+        return ConstantsProvider.BIG_INTEGER_TWO.pow(switchableCase);
     }
 
     /**
@@ -121,5 +121,38 @@ public final class Util {
             }
         }
         return result;
+    }
+
+    public static void invertSymbolsAndRanges(List<SymbolRange> symbolRanges,
+                                              Character[] symbols,
+                                              SymbolRange allCharactersRange,
+                                              List<SymbolRange> invertedRanges,
+                                              List<Character> invertedCharacters) {
+        List<SymbolRange> sortedRanges = symbolRanges.stream().sorted(Comparator.comparing(SymbolRange::getFrom)).collect(Collectors.toList());
+        List<Character> sortedCharacters = Arrays.stream(symbols).sorted().collect(Collectors.toList());
+        Iterator<SymbolRange> rangeIterator = sortedRanges.iterator();
+        Iterator<Character> characterIterator = sortedCharacters.iterator();
+        SymbolRange nextRange = null;
+        Character nextCharacter = null;
+        for (int characterIndex = allCharactersRange.getFrom(); characterIndex < allCharactersRange.getTo(); ) {
+            if (nextRange == null && rangeIterator.hasNext()) {
+                nextRange = rangeIterator.next();
+            }
+            if (nextCharacter == null && characterIterator.hasNext()) {
+                nextCharacter = characterIterator.next();
+            }
+            int next;
+            if (nextRange != null && nextCharacter != null) {
+                next = Math.min(nextRange.getFrom(), nextCharacter);
+            } else if (nextRange != null) {
+                next = nextRange.getFrom();
+            } else if (nextCharacter != null) {
+                next = nextCharacter;
+            } else {
+                // TODO: Complete any started range
+                break;
+            }
+
+        }
     }
 }

@@ -26,7 +26,7 @@ import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
 
-import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
@@ -390,13 +390,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -697,7 +697,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         for (SymbolSet symbolSet : symbolSets) {
-            characters.addAll(Arrays.asList(symbolSet.getSymbols()));
+            // FIXME: characters.addAll(Arrays.asList(symbolSet.getSymbols()));
         }
 
         return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);

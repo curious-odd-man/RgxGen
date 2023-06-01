@@ -28,8 +28,6 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
-
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
     private final Map<SymbolSet, SymbolSet> originalToNotMatchingSymbolSetCache = new IdentityHashMap<>();
@@ -38,7 +36,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         return new GenerationVisitorBuilder(false);
     }
 
-    private static final Character[] allSymbols = makeAsciiCharacterArray();
+    private static final Character[] allSymbols = null; // FIXME makeAsciiCharacterArray();
 
     public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
@@ -46,7 +44,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbols);
+        // FIXME visitSymbolSet(node, SymbolSet::getSymbols);
     }
 
     protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
@@ -54,16 +52,18 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
         String pattern = node.getPattern();
         SymbolSet symbolSet = originalToNotMatchingSymbolSetCache.get(node);
         if (symbolSet == null) {
-            if (node.isAsciiOnly()) {
-                symbolSet = SymbolSet.ofAsciiCharacters("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
-            } else {
-                symbolSet = SymbolSet.ofUnicodeCharacterClass("[^" + pattern.substring(1), node.getSymbols(), node.getUnicodeCategory(), MatchType.NEGATIVE);
-            }
+            // FIXME
+//            if (node.isAsciiOnly()) {
+//                symbolSet = SymbolSet.ofAsciiCharacters("[^" + pattern.substring(1), getSymbols.apply(node), MatchType.NEGATIVE);
+//            } else {
+//                symbolSet = SymbolSet.ofUnicodeCharacterClass("[^" + pattern.substring(1), node.getSymbols(), node.getUnicodeCategory(), MatchType.NEGATIVE);
+//            }
             originalToNotMatchingSymbolSetCache.put(node, symbolSet);
-        }
-        if (!symbolSet.isEmpty()) {
-            super.visit(symbolSet);
-        }
+
+        }// FIXME
+//        if (!symbolSet.isEmpty()) {
+//            super.visit(symbolSet);
+//        }
     }
 
     @Override

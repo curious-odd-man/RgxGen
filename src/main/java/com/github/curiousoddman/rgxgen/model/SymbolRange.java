@@ -27,7 +27,7 @@ public class SymbolRange {
     int to;
 
     /**
-     * Create range of symbols.
+     * Create inclusive range of symbols.
      *
      * @param from min character; shall be less than {@code to}
      * @param to   max character; shall be greater than {@code from}
