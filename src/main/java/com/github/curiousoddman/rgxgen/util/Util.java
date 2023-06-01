@@ -23,6 +23,9 @@ import lombok.experimental.UtilityClass;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 
 @UtilityClass
 public final class Util {
@@ -128,31 +131,33 @@ public final class Util {
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               List<Character> invertedCharacters) {
-        List<SymbolRange> sortedRanges = symbolRanges.stream().sorted(Comparator.comparing(SymbolRange::getFrom)).collect(Collectors.toList());
-        List<Character> sortedCharacters = Arrays.stream(symbols).sorted().collect(Collectors.toList());
-        Iterator<SymbolRange> rangeIterator = sortedRanges.iterator();
-        Iterator<Character> characterIterator = sortedCharacters.iterator();
-        SymbolRange nextRange = null;
-        Character nextCharacter = null;
-        for (int characterIndex = allCharactersRange.getFrom(); characterIndex < allCharactersRange.getTo(); ) {
-            if (nextRange == null && rangeIterator.hasNext()) {
-                nextRange = rangeIterator.next();
-            }
-            if (nextCharacter == null && characterIterator.hasNext()) {
-                nextCharacter = characterIterator.next();
-            }
-            int next;
-            if (nextRange != null && nextCharacter != null) {
-                next = Math.min(nextRange.getFrom(), nextCharacter);
-            } else if (nextRange != null) {
-                next = nextRange.getFrom();
-            } else if (nextCharacter != null) {
-                next = nextCharacter;
-            } else {
-                // TODO: Complete any started range
-                break;
+        TreeSet<SymbolRange> sortedRanges = Stream.concat(
+                symbolRanges.stream(),
+                Arrays.stream(symbols).map(symbol -> range(symbol, symbol))
+        ).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
+
+        int start = allCharactersRange.getFrom();
+        for (SymbolRange range : sortedRanges) {
+            int from = range.getFrom();
+            int to = range.getTo();
+
+            if (start <= from) {
+                if (start + 1 == from) {
+                    invertedCharacters.add((char) start);
+                } else if (start != from) {
+                    invertedRanges.add(range(start, from - 1));
+                }
+                start = to + 1;
             }
 
+            if (start > allCharactersRange.getTo()) {
+                return;
+            }
+        }
+        if (start < allCharactersRange.getTo()) {
+            invertedRanges.add(range(start, allCharactersRange.getTo()));
+        } else if (start == allCharactersRange.getTo()) {
+            invertedCharacters.add((char) start);
         }
     }
 }

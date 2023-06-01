@@ -122,6 +122,7 @@ public class UtilTests {
     }
 
     public static Stream<Args> getInvertRangesAndCharactersTestData() {
+        // TODO: Test for overlapping ranges
         SymbolRange A_E = range('a', 'e');
         return Stream.of(
                 args("Whole range").allCharacters(A_E).expectRange(A_E).build(),
@@ -131,7 +132,7 @@ public class UtilTests {
                 args("Pre-First Char").character('b').allCharacters(A_E).expectRange(range('c', 'e')).expectCharacter('a').build(),
                 args("Pre-Last Char").character('d').allCharacters(A_E).expectRange(range('a', 'c')).expectCharacter('e').build(),
 
-                args("Range in the middle").range(range('b', 'c')).allCharacters(A_E).expectCharacter('a').expectRanges(asList(range('a', 'b'), range('d', 'e'))).build(),
+                args("Range in the middle").range(range('b', 'd')).allCharacters(A_E).expectCharacters(asList('a', 'e')).build(),
                 args("First Range").range(range('a', 'b')).allCharacters(A_E).expectRange(range('c', 'e')).build(),
                 args("Last Range").range(range('c', 'e')).allCharacters(A_E).expectRange(range('a', 'b')).build(),
                 args("Pre-First Range").range(range('c', 'd')).allCharacters(A_E).expectRange(range('a', 'b')).expectCharacter('e').build(),
