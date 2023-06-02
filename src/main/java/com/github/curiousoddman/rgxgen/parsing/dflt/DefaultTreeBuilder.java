@@ -690,17 +690,26 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
         List<Character> characters = new ArrayList<>();
+        List<SymbolRange> symbolRanges = new ArrayList<>(externalRanges);
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));
         }
 
-        for (SymbolSet symbolSet : symbolSets) {
-            // FIXME: characters.addAll(Arrays.asList(symbolSet.getSymbols()));
+        boolean isAscii = true;
+
+        for (SymbolSet symbolSet : externalSets) {
+            isAscii = isAscii && symbolSet.isAscii();
+            characters.addAll(symbolSet.getSymbols());
+            symbolRanges.addAll(symbolSet.getSymbolRanges());
         }
 
-        return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        if (isAscii) {
+            return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        } else {
+            return SymbolSet.ofUnicode(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        }
     }
 
     public void build() {

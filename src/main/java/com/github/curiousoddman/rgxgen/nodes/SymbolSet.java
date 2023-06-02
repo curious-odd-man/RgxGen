@@ -21,6 +21,8 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
+import lombok.Getter;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -34,10 +36,15 @@ import static java.util.Collections.singletonList;
 /**
  * Generate Any printable character.
  */
+
+@Getter
 public class SymbolSet extends Node {
     private final MatchType         aType;
     private final List<SymbolRange> symbolRanges;
     private final List<Character>   symbols;
+    private final boolean           isAscii;
+
+    private SymbolSetIndexer symbolSetIndexer;
 
     public static SymbolSet ofAsciiDotPattern() {
         return ofAscii(".", singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
@@ -55,6 +62,11 @@ public class SymbolSet extends Node {
         return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, UNICODE_SYMBOL_RANGE);
     }
 
+    public static SymbolSet ofUnicode(String pattern, List<SymbolRange> symbolRanges, Character[] characters, MatchType matchType) {
+        return new SymbolSet(pattern, symbolRanges, characters, matchType, UNICODE_SYMBOL_RANGE);
+    }
+
+    // TODO: unused?
     public static SymbolSet ofUnicodeCharacterClass(String pattern, Character[] symbols, MatchType type) {
         return new SymbolSet(pattern, emptyList(), symbols, type, UNICODE_SYMBOL_RANGE);
     }
@@ -74,6 +86,9 @@ public class SymbolSet extends Node {
     private SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
         super(pattern);
         aType = type;
+        isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;
+
+        // TODO: Compact overlapping ranges and symbols
 
         if (aType == MatchType.POSITIVE) {
             this.symbolRanges = symbolRanges;
@@ -86,6 +101,7 @@ public class SymbolSet extends Node {
     }
 
     private static void handleCaseSensitiveCharacters(Iterable<Character> symbols, Consumer<Character> consumer) {
+        // TODO:
         for (Character c : symbols) {
             if (Character.isUpperCase(c)) {
                 consumer.accept(Character.toLowerCase(c));
@@ -105,4 +121,11 @@ public class SymbolSet extends Node {
     public String toString() {
         return "SymbolSet{" + '}';
     }       // FIXME
+
+    public SymbolSetIndexer getSymbolSetIndexer() {
+        if (symbolSetIndexer == null) {
+            symbolSetIndexer = new SymbolSetIndexer(this);
+        }
+        return symbolSetIndexer;
+    }
 }

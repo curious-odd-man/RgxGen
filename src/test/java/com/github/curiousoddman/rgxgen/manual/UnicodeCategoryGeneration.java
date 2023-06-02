@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
 import static java.lang.Character.*;
 import static java.lang.Character.isTitleCase;
 
@@ -45,9 +46,8 @@ import static java.lang.Character.isTitleCase;
 public class UnicodeCategoryGeneration {
 
     public static Stream<Character> getAllUnicodes() {
-        return null; // FIXME Arrays.stream(makeUnicodeCharacterArray());
+        return Arrays.stream(makeUnicodeCharacterArray());
     }
-
 
     @ParameterizedTest
     @MethodSource("getAllUnicodes")
@@ -281,7 +281,7 @@ public class UnicodeCategoryGeneration {
             }
         }
 
-        Character[] characters = null; // FIXME makeUnicodeCharacterArray();
+        Character[] characters = makeUnicodeCharacterArray();
 
         for (Character character : characters) {
             String str = String.valueOf(character);

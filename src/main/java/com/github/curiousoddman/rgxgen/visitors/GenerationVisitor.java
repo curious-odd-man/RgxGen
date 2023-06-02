@@ -19,6 +19,9 @@ package com.github.curiousoddman.rgxgen.visitors;
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 import java.util.Random;
@@ -42,9 +45,9 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        Character[] allSymbols = null; // FIXME node.getSymbols();
-        int idx = aRandom.nextInt(allSymbols.length);
-        aStringBuilder.append(allSymbols[idx]);
+        SymbolSetIndexer indexer = node.getSymbolSetIndexer();
+        int idx = aRandom.nextInt(indexer.size());
+        aStringBuilder.append(indexer.get(idx));
     }
 
     @Override
