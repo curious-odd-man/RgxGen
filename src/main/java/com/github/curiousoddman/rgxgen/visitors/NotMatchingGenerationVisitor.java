@@ -24,7 +24,6 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;

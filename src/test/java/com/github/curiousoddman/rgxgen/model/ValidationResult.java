@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @Getter
 public class ValidationResult {
-    int countMatched    = 0;
-    int countNotMatched = 0;
+    int countMatched;
+    int countNotMatched;
 
     public ValidationResult addMatched() {
         ++countMatched;

@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 

@@ -40,8 +40,8 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
 import static java.lang.Character.*;
-import static java.lang.Character.isTitleCase;
 
+@SuppressWarnings({"TestMethodWithoutAssertion", "NewClassNamingConvention"})
 @Disabled("Generator - not a test")
 public class UnicodeCategoryGeneration {
 
@@ -86,7 +86,7 @@ public class UnicodeCategoryGeneration {
         System.out.println(text);
     }
 
-    private List<Character> createCharactersList(List<SymbolRange> symbolRanges, Character[] symbols) {
+    private static List<Character> createCharactersList(List<SymbolRange> symbolRanges, Character[] symbols) {
         return Stream.concat(
                              Arrays.stream(symbols),
                              symbolRanges

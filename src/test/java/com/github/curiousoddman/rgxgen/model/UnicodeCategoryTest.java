@@ -16,21 +16,6 @@ import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UnicodeCategoryTest {
-    public static final List<UnicodeCategory> UNCOMPILABLE_KEYS = asList(
-            CASED_LETTER,
-            IN_LATIN_1_SUPPLEMENT,
-            IN_LATIN_EXTENDED_A,
-            IN_LATIN_EXTENDED_B,
-            IN_GREEK_AND_COPTIC,
-            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
-            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
-            IN_SUPPLEMENTAL_ARROWS_A,
-            IN_SUPPLEMENTAL_ARROWS_B,
-            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
-            IN_ARABIC_PRESENTATION_FORMS_A,
-            IN_ARABIC_PRESENTATION_FORMS_B
-    );
-
     public static final int GENERATE_ITERATIONS = 100;
 
     @ParameterizedTest

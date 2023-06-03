@@ -201,7 +201,7 @@ public class CharIterator implements Iterator<Character> {
                 }
             }
             int cnt = 1;        // One, because we subtract it from aCurrentIndex. Just to avoid extra subtraction
-            // Count how much backslashes there are -
+            // Count how many backslashes there are -
             // Even number means that they all are escaped
             // Odd number means that the {@code c} is escaped
             while (aValue.charAt(aCurrentIndex - cnt) == '\\') {

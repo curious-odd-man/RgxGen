@@ -20,8 +20,6 @@ import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 import java.util.Random;

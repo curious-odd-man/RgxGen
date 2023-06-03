@@ -10,12 +10,29 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.values;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UnicodeCategoryGenerateTestBase {
+
+    protected static final List<UnicodeCategory> UNCOMPILABLE_KEYS = unmodifiableList(asList(
+            CASED_LETTER,
+            IN_LATIN_1_SUPPLEMENT,
+            IN_LATIN_EXTENDED_A,
+            IN_LATIN_EXTENDED_B,
+            IN_GREEK_AND_COPTIC,
+            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
+            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
+            IN_SUPPLEMENTAL_ARROWS_A,
+            IN_SUPPLEMENTAL_ARROWS_B,
+            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
+            IN_ARABIC_PRESENTATION_FORMS_A,
+            IN_ARABIC_PRESENTATION_FORMS_B
+    ));
 
     public static Stream<Arguments> getKeyAndCategory() {
         return Arrays.stream(values())
@@ -107,7 +124,7 @@ class UnicodeCategoryGenerateTestBase {
     @AfterAll
     void verifyAllCategoriesTestedWithPatternCompile() {
         List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
-        notTestedCategories.removeAll(UnicodeCategoryTest.UNCOMPILABLE_KEYS);
+        notTestedCategories.removeAll(UNCOMPILABLE_KEYS);
         if (!notTestedCategories.isEmpty()) {
             fail("Pattern.compile() failed for - " + notTestedCategories);
         }
