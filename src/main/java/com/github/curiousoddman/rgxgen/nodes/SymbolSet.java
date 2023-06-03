@@ -73,11 +73,6 @@ public class SymbolSet extends Node {
         return new SymbolSet(pattern, symbolRanges, characters, matchType, UNICODE_SYMBOL_RANGE);
     }
 
-    // TODO: unused?
-    public static SymbolSet ofUnicodeCharacterClass(String pattern, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, emptyList(), symbols, type, UNICODE_SYMBOL_RANGE);
-    }
-
     public static SymbolSet ofAscii(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
         return new SymbolSet(pattern, symbolRanges, symbols, type, ASCII_SYMBOL_RANGE);
     }

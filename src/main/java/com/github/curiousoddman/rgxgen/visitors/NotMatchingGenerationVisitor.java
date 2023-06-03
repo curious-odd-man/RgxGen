@@ -22,6 +22,7 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.List;
 import java.util.Map;
@@ -46,19 +47,22 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbolRanges, SymbolSet::getSymbols);
+        visitSymbolSet(node, SymbolSet::getSymbolSetIndexer);
     }
 
-    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, List<SymbolRange>> getRanges, Function<SymbolSet, List<Character>> getSymbols) {
+    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, SymbolSetIndexer> indexerFunction) {
         String pattern = node.getPattern();
+
         SymbolSet invertedNode;
-        if (node.isAscii()) { // TODO: this could be optimized by utilizing SymbolSetIndexer without creation of not matching symbol set
-            invertedNode = SymbolSet.ofAscii("[^" + pattern.substring(1), getRanges.apply(node), getSymbols.apply(node).toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+        if (node.isAscii()) {
+            invertedNode = SymbolSet.ofAscii("[^" + pattern.substring(1), node.getOriginalSymbolRanges(), node.getOriginalSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         } else {
-            invertedNode = SymbolSet.ofUnicode("[^" + pattern.substring(1), getRanges.apply(node), getSymbols.apply(node).toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+            invertedNode = SymbolSet.ofUnicode("[^" + pattern.substring(1), node.getOriginalSymbolRanges(), node.getOriginalSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         }
 
-        super.visit(invertedNode);
+        SymbolSetIndexer indexer = indexerFunction.apply(invertedNode);
+        int idx = aRandom.nextInt(indexer.size());
+        aStringBuilder.append(indexer.get(idx));
     }
 
     @Override

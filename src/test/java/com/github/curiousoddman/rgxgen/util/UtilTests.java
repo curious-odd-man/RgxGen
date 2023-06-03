@@ -122,7 +122,6 @@ public class UtilTests {
     }
 
     public static Stream<Args> getInvertRangesAndCharactersTestData() {
-        // TODO: Test for overlapping ranges
         SymbolRange A_E = range('a', 'e');
         return Stream.of(
                 args("Whole range").allCharacters(A_E).expectRange(A_E).build(),

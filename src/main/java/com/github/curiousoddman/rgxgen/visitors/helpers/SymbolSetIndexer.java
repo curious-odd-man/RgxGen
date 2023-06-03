@@ -42,6 +42,14 @@ public class SymbolSetIndexer {
         return size;
     }
 
+    public Character[] getAll() {
+        Character[] chars = new Character[size];
+        for (int i = 0; i < size; i++) {
+            chars[i] = get(i);
+        }
+        return chars;
+    }
+
     public char get(int seed) {
         if (seed < symbols.size()) {
             return symbols.get(seed);

@@ -141,7 +141,6 @@ public final class Util {
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               List<Character> invertedCharacters) {
-        // TODO: point of improvement - can we guarantee that symbols and ranges are sorted somehow?
         TreeSet<SymbolRange> sortedRanges = Stream.concat(
                 symbolRanges.stream(),
                 symbols.stream().map(symbol -> range(symbol, symbol))

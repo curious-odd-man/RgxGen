@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.visitors;
+package com.github.curiousoddman.rgxgen.iterators.suppliers;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,24 +16,21 @@ package com.github.curiousoddman.rgxgen.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.iterators.IndexIterator;
+import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
-import java.util.Map;
-import java.util.Random;
+import java.util.function.Supplier;
 
-public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGenerationVisitor {
-    public NotMatchingCaseInsensitiveGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
-        super(random, groupValues, properties);
+public class IndexIteratorSupplier implements Supplier<StringIterator> {
+    private final SymbolSetIndexer symbolSetIndexer;
+
+    public IndexIteratorSupplier(SymbolSetIndexer symbolSetIndexer) {
+        this.symbolSetIndexer = symbolSetIndexer;
     }
 
     @Override
-    public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getCaseInsensitiveSymbolSetIndexer);
-    }
-
-    @Override
-    protected boolean equalsFinalSymbolRandomString(String s1, String s2) {
-        return s1.equalsIgnoreCase(s2);
+    public IndexIterator get() {
+        return new IndexIterator(symbolSetIndexer);
     }
 }
