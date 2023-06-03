@@ -98,15 +98,17 @@ public class SymbolSet extends Node {
         originalSymbols = asList(symbols);
         this.allCharactersRange = allCharactersRange;
 
-        // TODO: Compact overlapping and sort ranges and symbols
+        List<SymbolRange> compactedRanges = new ArrayList<>(originalSymbolRanges.size());
+        List<Character> compactedCharacters = new ArrayList<>(originalSymbols.size());
+        Util.compactOverlappingRangesAndSymbols(originalSymbolRanges, originalSymbols, compactedRanges, compactedCharacters);
 
         if (aType == MatchType.POSITIVE) {
-            this.symbolRanges = symbolRanges;
-            this.symbols = asList(symbols);
+            this.symbolRanges = compactedRanges;
+            this.symbols = compactedCharacters;
         } else {
             this.symbolRanges = new ArrayList<>();
             this.symbols = new ArrayList<>();
-            Util.invertSymbolsAndRanges(symbolRanges, symbols, allCharactersRange, this.symbolRanges, this.symbols);
+            Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, allCharactersRange, this.symbolRanges, this.symbols);
         }
     }
 

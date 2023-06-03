@@ -129,6 +129,7 @@ public final class Util {
     /**
      * In terms of sets = invertedRanges and invertedCharacters = allCharacterRange - symbols and symbolRanges
      * i.e. in invertedRanges and invertedCharacters are all characters that are not in symbols and symbolRanges
+     *
      * @param symbolRanges
      * @param symbols
      * @param allCharactersRange
@@ -136,14 +137,14 @@ public final class Util {
      * @param invertedCharacters
      */
     public static void invertSymbolsAndRanges(List<SymbolRange> symbolRanges,
-                                              Character[] symbols,
+                                              List<Character> symbols,
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               List<Character> invertedCharacters) {
         // TODO: point of improvement - can we guarantee that symbols and ranges are sorted somehow?
         TreeSet<SymbolRange> sortedRanges = Stream.concat(
                 symbolRanges.stream(),
-                Arrays.stream(symbols).map(symbol -> range(symbol, symbol))
+                symbols.stream().map(symbol -> range(symbol, symbol))
         ).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
 
         int start = allCharactersRange.getFrom();
@@ -169,5 +170,53 @@ public final class Util {
         } else if (start == allCharactersRange.getTo()) {
             invertedCharacters.add((char) start);
         }
+    }
+
+    public static void compactOverlappingRangesAndSymbols(List<SymbolRange> originalSymbolRanges, List<Character> originalSymbols,
+                                                          List<SymbolRange> compactedRanges, List<Character> compactedSymbols) {
+        List<SymbolRange> sortedRanges = Stream
+                .concat(
+                        originalSymbolRanges.stream(),
+                        originalSymbols.stream().map(symbol -> range(symbol, symbol))
+                )
+                .sorted(Comparator.comparing(SymbolRange::getFrom))
+                .collect(Collectors.toList());
+
+        if (sortedRanges.size() == 1) {
+            compactedSymbols.addAll(originalSymbols);
+            compactedRanges.addAll(originalSymbolRanges);
+            return;
+        }
+
+        for (int i = 1; i < sortedRanges.size(); ) {
+            SymbolRange a = sortedRanges.get(i - 1);
+            SymbolRange b = sortedRanges.get(i);
+            if (isRightWithinLeft(a, b)) {
+                sortedRanges.remove(i);
+            } else if (isRightWithinLeft(b, a)) {
+                sortedRanges.remove(i - 1);
+            } else if (isRightCanContinueLeft(a, b)) {
+                sortedRanges.remove(i);
+                sortedRanges.set(i - 1, range(a.getFrom(), b.getTo()));
+            } else {
+                ++i;
+            }
+        }
+
+        for (SymbolRange range : sortedRanges) {
+            if (range.getFrom() == range.getTo()) {
+                compactedSymbols.add((char) range.getFrom());
+            } else {
+                compactedRanges.add(range);
+            }
+        }
+    }
+
+    public static boolean isRightCanContinueLeft(SymbolRange left, SymbolRange right) {
+        return left.getFrom() <= right.getFrom() && right.getFrom() <= left.getTo() + 1 && left.getTo() < right.getTo();
+    }
+
+    public static boolean isRightWithinLeft(SymbolRange left, SymbolRange right) {
+        return left.getFrom() <= right.getFrom() && left.getTo() >= right.getTo();
     }
 }
