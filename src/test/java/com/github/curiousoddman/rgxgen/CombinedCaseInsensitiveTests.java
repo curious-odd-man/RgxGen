@@ -30,8 +30,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
-                                                            .orElse(null));
+        assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
     @ParameterizedTest
@@ -59,8 +58,7 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         boolean atLeastOneCaseSensitiveMismatch = false;
         for (String generated : strings) {
             boolean result = isValidGenerated(testPattern, generated, Pattern.CASE_INSENSITIVE);
-            boolean caseSensitiveMatches = !caseSensitivePattern.matcher(generated)
-                                                                .matches();
+            boolean caseSensitiveMatches = !caseSensitivePattern.matcher(generated).matches();
             assertTrue(result, "Text: '" + generated + "' does not match pattern " + testPattern.getPattern());
             atLeastOneCaseSensitiveMismatch = atLeastOneCaseSensitiveMismatch || caseSensitiveMatches;
         }
