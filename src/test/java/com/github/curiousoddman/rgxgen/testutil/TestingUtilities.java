@@ -39,14 +39,6 @@ public final class TestingUtilities {
         return random;
     }
 
-    public static Character[] makeAsciiCharacterArray() {
-        Character[] characters = new Character[DEL_ASCII_CODE - SPACE_ASCII_CODE];
-        for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
-            characters[i - SPACE_ASCII_CODE] = (char) i;
-        }
-        return characters;
-    }
-
     public static Character[] makeUnicodeCharacterArray() {
         Character[] characters = new Character[MAX_UNICODE_CHARACTER - SPACE_ASCII_CODE];
         for (int i = SPACE_ASCII_CODE; i < MAX_UNICODE_CHARACTER; ++i) {

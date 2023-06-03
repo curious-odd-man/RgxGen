@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeAsciiCharacterArray;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class SymbolSetCaseInsensitiveTests {

@@ -44,4 +44,8 @@ public class SymbolRange {
     public int getTo() {
         return to;
     }
+
+    public int size() {
+        return to - from + 1;
+    }
 }

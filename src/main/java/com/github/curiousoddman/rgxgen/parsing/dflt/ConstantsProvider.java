@@ -56,4 +56,12 @@ public class ConstantsProvider {
     public static List<SymbolRange> getAsciiWordCharRanges() {
         return Collections.unmodifiableList(Arrays.asList(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS));
     }
+
+    public static Character[] makeAsciiCharacterArray() {
+        Character[] characters = new Character[DEL_ASCII_CODE - SPACE_ASCII_CODE];
+        for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
+            characters[i - SPACE_ASCII_CODE] = (char) i;
+        }
+        return characters;
+    }
 }
