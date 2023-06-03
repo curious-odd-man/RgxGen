@@ -25,21 +25,17 @@ public class SymbolSetIndexer {
             rangeOffsets[0] = currentOffset;
             for (int i = 0; i < rangesCount - 1; ++i) {
                 SymbolRange symbolRange = symbolRanges.get(i);
-                int rangeSize = getRangeSize(symbolRange);
+                int rangeSize = symbolRange.size();
                 tmpSize += rangeSize;
                 int offset = currentOffset + rangeSize;
                 rangeOffsets[i + 1] = offset;
                 currentOffset = offset;
             }
-            tmpSize += getRangeSize(symbolRanges.get(rangesCount - 1));
+            tmpSize += symbolRanges.get(rangesCount - 1).size();
         } else {
             rangeOffsets = new int[0];
         }
         size = tmpSize;
-    }
-
-    private static int getRangeSize(SymbolRange symbolRange) {
-        return symbolRange.getTo() - symbolRange.getFrom() + 1;
     }
 
     public int size() {
