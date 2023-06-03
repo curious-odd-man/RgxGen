@@ -23,6 +23,7 @@ import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -30,6 +31,7 @@ import java.util.function.Consumer;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -38,13 +40,18 @@ import static java.util.Collections.singletonList;
  */
 
 @Getter
+@ToString
 public class SymbolSet extends Node {
     private final MatchType         aType;
+    private final boolean           isAscii;
+    private final List<SymbolRange> originalSymbolRanges;
+    private final List<Character>   originalSymbols;
+    private final SymbolRange       allCharactersRange;
     private final List<SymbolRange> symbolRanges;
     private final List<Character>   symbols;
-    private final boolean           isAscii;
 
     private SymbolSetIndexer symbolSetIndexer;
+    private SymbolSetIndexer caseInsensitiveSymbolSetIndexer;
 
     public static SymbolSet ofAsciiDotPattern() {
         return ofAscii(".", singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
@@ -87,28 +94,19 @@ public class SymbolSet extends Node {
         super(pattern);
         aType = type;
         isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;
+        originalSymbolRanges = symbolRanges;
+        originalSymbols = asList(symbols);
+        this.allCharactersRange = allCharactersRange;
 
-        // TODO: Compact overlapping ranges and symbols
+        // TODO: Compact overlapping and sort ranges and symbols
 
         if (aType == MatchType.POSITIVE) {
             this.symbolRanges = symbolRanges;
-            this.symbols = Arrays.asList(symbols);
+            this.symbols = asList(symbols);
         } else {
             this.symbolRanges = new ArrayList<>();
             this.symbols = new ArrayList<>();
             Util.invertSymbolsAndRanges(symbolRanges, symbols, allCharactersRange, this.symbolRanges, this.symbols);
-        }
-    }
-
-    private static void handleCaseSensitiveCharacters(Iterable<Character> symbols, Consumer<Character> consumer) {
-        // TODO:
-        for (Character c : symbols) {
-            if (Character.isUpperCase(c)) {
-                consumer.accept(Character.toLowerCase(c));
-            } else if (Character.isLowerCase(c)) {
-                consumer.accept(Character.toUpperCase(c));
-            }
-            consumer.accept(c);
         }
     }
 
@@ -117,15 +115,36 @@ public class SymbolSet extends Node {
         visitor.visit(this);
     }
 
-    @Override
-    public String toString() {
-        return "SymbolSet{" + '}';
-    }       // FIXME
-
     public SymbolSetIndexer getSymbolSetIndexer() {
         if (symbolSetIndexer == null) {
             symbolSetIndexer = new SymbolSetIndexer(this);
         }
         return symbolSetIndexer;
+    }
+
+    public SymbolSetIndexer getCaseInsensitiveSymbolSetIndexer() {
+        if (caseInsensitiveSymbolSetIndexer == null) {
+            List<Character> caseInsensitiveSymbols = new ArrayList<>(originalSymbols);
+            for (Character c : originalSymbols) {
+                addIfChangedCase(caseInsensitiveSymbols, c);
+            }
+            for (SymbolRange originalSymbolRange : originalSymbolRanges) {
+                for (char c = (char) originalSymbolRange.getFrom(); c <= originalSymbolRange.getTo(); ++c) {
+                    addIfChangedCase(caseInsensitiveSymbols, c);
+                }
+            }
+            caseInsensitiveSymbolSetIndexer = new SymbolSetIndexer(
+                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), aType, allCharactersRange)
+            );
+        }
+        return caseInsensitiveSymbolSetIndexer;
+    }
+
+    private static void addIfChangedCase(List<Character> caseInsensitiveSymbols, char c) {
+        if (Character.isUpperCase(c)) {
+            caseInsensitiveSymbols.add(Character.toLowerCase(c));
+        } else if (Character.isLowerCase(c)) {
+            caseInsensitiveSymbols.add(Character.toUpperCase(c));
+        }
     }
 }

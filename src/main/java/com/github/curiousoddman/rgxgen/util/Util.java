@@ -126,11 +126,21 @@ public final class Util {
         return result;
     }
 
+    /**
+     * In terms of sets = invertedRanges and invertedCharacters = allCharacterRange - symbols and symbolRanges
+     * i.e. in invertedRanges and invertedCharacters are all characters that are not in symbols and symbolRanges
+     * @param symbolRanges
+     * @param symbols
+     * @param allCharactersRange
+     * @param invertedRanges
+     * @param invertedCharacters
+     */
     public static void invertSymbolsAndRanges(List<SymbolRange> symbolRanges,
                                               Character[] symbols,
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               List<Character> invertedCharacters) {
+        // TODO: point of improvement - can we guarantee that symbols and ranges are sorted somehow?
         TreeSet<SymbolRange> sortedRanges = Stream.concat(
                 symbolRanges.stream(),
                 Arrays.stream(symbols).map(symbol -> range(symbol, symbol))
