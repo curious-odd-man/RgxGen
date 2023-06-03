@@ -87,8 +87,7 @@ public class CompleteTests {
     }
 
     private boolean matches(String aRegex, String text, boolean aUseFind) {
-        Matcher matcher = Pattern.compile(aRegex)
-                                 .matcher(text);
+        Matcher matcher = Pattern.compile(aRegex).matcher(text);
         return aUseFind ? matcher.find() : matcher.matches();
     }
 }

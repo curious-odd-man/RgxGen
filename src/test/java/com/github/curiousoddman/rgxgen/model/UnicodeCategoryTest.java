@@ -11,6 +11,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;
+import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,7 +61,7 @@ class UnicodeCategoryTest {
         void generateInCategoryTest(String key, UnicodeCategory category) {
             String pattern = "\\p" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
-            Random random = new Random(pattern.hashCode());
+            Random random = newRandom(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
             ValidationResult validationResult = new ValidationResult();
@@ -79,7 +80,7 @@ class UnicodeCategoryTest {
         void generateInCategoryNotMatchingTest(String key, UnicodeCategory category) {
             String pattern = "\\p" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
-            Random random = new Random(pattern.hashCode());
+            Random random = newRandom(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, false);
             ValidationResult validationResult = new ValidationResult();
@@ -116,7 +117,7 @@ class UnicodeCategoryTest {
             String pattern = "\\P" + key + "{5,20}";
             RgxGen rgxGen = new RgxGen(pattern);
             Optional<Pattern> compiled = compile(pattern, category);
-            Random random = new Random(pattern.hashCode());
+            Random random = newRandom(pattern.hashCode());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
             ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {

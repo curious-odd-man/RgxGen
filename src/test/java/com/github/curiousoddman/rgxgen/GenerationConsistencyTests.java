@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -50,7 +51,7 @@ public class GenerationConsistencyTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        Random random = new Random(17);
+        Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
             if (WRITE_MODE) {
@@ -72,7 +73,7 @@ public class GenerationConsistencyTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         rgxGen.setProperties(properties);
-        Random random = new Random(17);
+        Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
             if (WRITE_MODE) {
@@ -94,7 +95,7 @@ public class GenerationConsistencyTests {
         Path fileName = caseSensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
         List<String> lines = getLines(fileName);
         RgxGen rgxGen = new RgxGen(data.getPattern());
-        Random random = new Random(17);
+        Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
             if (WRITE_MODE) {
@@ -114,7 +115,7 @@ public class GenerationConsistencyTests {
         Path fileName = caseSensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
         List<String> lines = getLines(fileName);
         RgxGen rgxGen = new RgxGen(data.getPattern());
-        Random random = new Random(17);
+        Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
             if (WRITE_MODE) {

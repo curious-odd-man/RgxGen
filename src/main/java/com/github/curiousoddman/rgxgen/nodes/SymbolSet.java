@@ -38,7 +38,7 @@ import static java.util.Collections.singletonList;
 
 @Getter
 public class SymbolSet extends Node {
-    private final MatchType         aType;
+    private final MatchType         originalMatchType;
     private final boolean           isAscii;
     private final List<SymbolRange> originalSymbolRanges;
     private final List<Character>   originalSymbols;
@@ -83,7 +83,7 @@ public class SymbolSet extends Node {
      */
     private SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
         super(pattern);
-        aType = type;
+
         isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;
         originalSymbolRanges = symbolRanges;
         originalSymbols = asList(symbols);
@@ -92,8 +92,7 @@ public class SymbolSet extends Node {
         List<SymbolRange> compactedRanges = new ArrayList<>(originalSymbolRanges.size());
         List<Character> compactedCharacters = new ArrayList<>(originalSymbols.size());
         Util.compactOverlappingRangesAndSymbols(originalSymbolRanges, originalSymbols, compactedRanges, compactedCharacters);
-
-        if (aType == MatchType.POSITIVE) {
+        if (type == MatchType.POSITIVE) {
             this.symbolRanges = compactedRanges;
             this.symbols = compactedCharacters;
         } else {
@@ -101,6 +100,7 @@ public class SymbolSet extends Node {
             this.symbols = new ArrayList<>();
             Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, allCharactersRange, this.symbolRanges, this.symbols);
         }
+        originalMatchType = type;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class SymbolSet extends Node {
                 }
             }
             caseInsensitiveSymbolSetIndexer = new SymbolSetIndexer(
-                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), aType, allCharactersRange)
+                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), originalMatchType, allCharactersRange)
             );
         }
         return caseInsensitiveSymbolSetIndexer;
@@ -144,7 +144,7 @@ public class SymbolSet extends Node {
     @Override
     public String toString() {
         return "SymbolSet{" +
-                "aType=" + aType +
+                "originalMatchType=" + originalMatchType +
                 ", isAscii=" + isAscii +
                 ", symbolRanges=" + symbolRanges +
                 ", symbols=" + symbols +

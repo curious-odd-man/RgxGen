@@ -55,14 +55,16 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
         SymbolSet invertedNode;
         if (node.isAscii()) {
-            invertedNode = SymbolSet.ofAscii("[^" + pattern.substring(1), node.getOriginalSymbolRanges(), node.getOriginalSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+            invertedNode = SymbolSet.ofAscii("[^" + pattern.substring(1), node.getSymbolRanges(), node.getSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         } else {
-            invertedNode = SymbolSet.ofUnicode("[^" + pattern.substring(1), node.getOriginalSymbolRanges(), node.getOriginalSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+            invertedNode = SymbolSet.ofUnicode("[^" + pattern.substring(1), node.getSymbolRanges(), node.getSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         }
-
         SymbolSetIndexer indexer = indexerFunction.apply(invertedNode);
-        int idx = aRandom.nextInt(indexer.size());
-        aStringBuilder.append(indexer.get(idx));
+        // There is only one way to generate not matching for any character - is to not generate anything
+        if (indexer.size() != 0) {
+            int idx = aRandom.nextInt(indexer.size());
+            aStringBuilder.append(indexer.get(idx));
+        }
     }
 
     @Override

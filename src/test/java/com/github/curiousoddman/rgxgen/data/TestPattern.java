@@ -174,22 +174,15 @@ public enum TestPattern implements DataInterface {
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A("[^a]",
-          SymbolSet.ofAsciiCharacters("[^a]", stream(makeAsciiCharacterArray())
-                  .filter(c -> !c.equals('a'))
-                  .toArray(Character[]::new), MatchType.POSITIVE)
+          SymbolSet.ofAsciiCharacters("[^a]", new Character[]{'a'}, MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_LETTER_RANGE("[^a-dE-F]",
-                     SymbolSet.ofAsciiCharacters("[^a-dE-F]",
-                                                 stream(makeAsciiCharacterArray())
-                                                         .filter(c -> !(c.equals('a') || c.equals('b') || c.equals('c') || c.equals('d') || c.equals('E') || c.equals('F')))
-                                                         .toArray(Character[]::new), MatchType.POSITIVE)
+                     SymbolSet.ofAsciiCharacters("[^a-dE-F]", new Character[]{'E', 'F', 'a', 'b', 'c', 'd'}, MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WHITESPACE("\\s",      // Any White Space
-                   SymbolSet.ofAsciiCharacters("\\s", new Character[]{
-                           '\r', '\f', '\u000B', ' ', '\t', '\n'
-                   }, MatchType.POSITIVE)
+                   SymbolSet.ofAsciiCharacters("\\s", new Character[]{'\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A_WHITESPACE("\\S",      // Any Non White Space

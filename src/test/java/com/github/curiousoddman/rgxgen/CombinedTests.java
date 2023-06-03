@@ -34,13 +34,10 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void parseTest(TestPattern testPattern) {
         NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern());
         Node node = defaultTreeBuilder.get();
-        assertEquals(testPattern.getResultNode()
-                                .toString(), node.toString());
+        assertEquals(testPattern.getResultNode().toString(), node.toString());
         NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(testPattern.getResultNode());
         node.visit(visitor);
-        assertTrue(visitor.getErrors()
-                          .isEmpty(), visitor.getErrors()
-                                             .toString());
+        assertTrue(visitor.getErrors().isEmpty(), visitor.getErrors().toString());
     }
 
     @ParameterizedTest
