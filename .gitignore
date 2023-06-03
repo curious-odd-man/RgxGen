@@ -3,4 +3,3 @@
 target/
 *.iml
 src/test/java/com/github/curiousoddman/rgxgen/CustomTests.java
-testdata
