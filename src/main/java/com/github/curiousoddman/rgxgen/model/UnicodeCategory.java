@@ -16,6 +16,7 @@ package com.github.curiousoddman.rgxgen.model;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.Util;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -76,7 +77,7 @@ public enum UnicodeCategory {
     CONTROL(keys("Cc", "Control"), "an ASCII or Latin-1 control character", C1_CONTROLS),
     FORMAT(keys("Cf", "Format"), "invisible formatting indicator.", asList(range('؀', '؅'), RANGE_19, RANGE_686, range('⁠', '⁤'), range('⁦', '⁯'), range('￹', '￻')), new Character[]{'­', '؜', '۝', '܏', '࣢', '᠎', '﻿'}),
     PRIVATE_USE(keys("Co", "Private_Use"), "any code point reserved for private use.", range('', '')),
-    IN_BASIC_LATIN(keys("InBasic_Latin", "Latin"), "U+0000-U+007F", range(0x0000, 0x007F)),
+    IN_BASIC_LATIN(keys("InBasic_Latin", "Latin"), "32-U+007F", range(ConstantsProvider.SPACE_ASCII_CODE, 0x007F)),
     IN_LATIN_1_SUPPLEMENT(keys("InLatin-1_Supplement"), "U+0080-U+00FF", range(0x0080, 0x00FF)),
     IN_LATIN_EXTENDED_A(keys("InLatin_Extended-A"), "U+0100-U+017F", range(0x0100, 0x017F)),
     IN_LATIN_EXTENDED_B(keys("InLatin_Extended-B"), "U+0180-U+024F", range(0x0180, 0x024F)),
