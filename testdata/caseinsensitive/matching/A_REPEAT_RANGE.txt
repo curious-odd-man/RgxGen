@@ -1,6 +1,6 @@
-AAA
-aA
-aAa
+AAa
+AA
+Aa
 AaA
 AA
 Aa
