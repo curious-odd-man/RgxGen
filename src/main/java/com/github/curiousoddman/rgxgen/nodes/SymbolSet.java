@@ -23,14 +23,11 @@ import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 import lombok.Getter;
-import lombok.ToString;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -40,7 +37,6 @@ import static java.util.Collections.singletonList;
  */
 
 @Getter
-@ToString
 public class SymbolSet extends Node {
     private final MatchType         aType;
     private final boolean           isAscii;
@@ -143,5 +139,15 @@ public class SymbolSet extends Node {
         } else if (Character.isLowerCase(c)) {
             caseInsensitiveSymbols.add(Character.toUpperCase(c));
         }
+    }
+
+    @Override
+    public String toString() {
+        return "SymbolSet{" +
+                "aType=" + aType +
+                ", isAscii=" + isAscii +
+                ", symbolRanges=" + symbolRanges +
+                ", symbols=" + symbols +
+                '}';
     }
 }

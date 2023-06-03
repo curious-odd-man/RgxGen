@@ -92,7 +92,7 @@ public enum TestPatternCaseInsensitive implements DataInterface {
 
     @Override
     public String toString() {
-        return aPattern;
+        return name() + " : " + aPattern;
     }
 
     @Override

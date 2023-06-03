@@ -323,7 +323,7 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
                                     SymbolSet.ofAsciiCharacters("['\\-/\\.\\s]", new Character[]{'\'', '-', '/', '.', '\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)) {{
-        setAllUniqueValues("\t", "\n", "\u000B", "\f", "\r", " ", "'", "-", ".", "/");
+        setAllUniqueValues(" ", "'", "\t", "\n", "\u000B", "\f", "\r", "-", ".", "/");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
@@ -457,6 +457,6 @@ public enum TestPattern implements DataInterface {
 
     @Override
     public String toString() {
-        return aPattern;
+        return name() + " : " + aPattern;
     }
 }

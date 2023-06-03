@@ -30,10 +30,10 @@ public class SymbolSetCaseInsensitiveTests {
     public static Stream<Arguments> parameters() {
         return Stream.of(
                 Arguments.of("a", "Aa"),
-                Arguments.of("abc", "AaBbCc"),
+                Arguments.of("abc", "ABCabc"),
                 Arguments.of("123", "123"),
-                Arguments.of("123ab", "1Aa2Bb3"),
-                Arguments.of("A", "aA")
+                Arguments.of("123ab", "123ABab"),
+                Arguments.of("A", "Aa")
         );
     }
 

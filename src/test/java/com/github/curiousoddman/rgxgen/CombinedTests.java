@@ -48,20 +48,16 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void countUniqueUsingVisitorTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
-        testPattern.getResultNode()
-                   .visit(v);
-        assertEquals(testPattern.getEstimatedCount(), v.getEstimation()
-                                                       .orElse(null));
+        testPattern.getResultNode().visit(v);
+        assertEquals(testPattern.getEstimatedCount(), v.getEstimation().orElse(null));
     }
-
 
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void countUniqueTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
         RgxGen rgxGen = new RgxGen(testPattern.getPattern());
-        assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
-                                                            .orElse(null));
+        assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
     @ParameterizedTest
@@ -70,8 +66,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         assumeTrue(testPattern.hasAllUniqueValues());
 
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
-        testPattern.getResultNode()
-                   .visit(v);
+        testPattern.getResultNode().visit(v);
         assertEquals(testPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 
@@ -80,8 +75,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     public void classRgxGenTest(TestPattern testPattern) {
         RgxGen rgxGen = new RgxGen(testPattern.getPattern());
         if (testPattern.hasEstimatedCount()) {
-            assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation()
-                                                                .orElse(null));
+            assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
         }
         for (int i = 0; i < 100; i++) {
             Random rand = TestingUtilities.newRandom(i);

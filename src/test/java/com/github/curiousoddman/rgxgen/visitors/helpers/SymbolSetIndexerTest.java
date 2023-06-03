@@ -26,7 +26,7 @@ class SymbolSetIndexerTest {
         return Stream.of(
                 arguments("Single Range", symbolSet(range('a', 'd')), 4, asList('a', 'b', 'c', 'd')),
                 arguments("Several Ranges", symbolSet(range('a', 'd'), range('k', 'l'), range('x', 'z')), 9, asList('a', 'b', 'c', 'd', 'k', 'l', 'x', 'y', 'z')),
-                arguments("Several characters", symbolSet('a', 'd', 'k', 'l', 'x', 'z'), 6, asList('a', 'd', 'k', 'l', 'x', 'z')),
+                arguments("Several characters", symbolSet('a', 'd', 'k', 't', 'x', 'z'), 6, asList('a', 'd', 'k', 't', 'x', 'z')),
                 arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList( '1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z'))
         );
     }
