@@ -75,7 +75,7 @@ Enter your pattern and see the results.
 Changes in snapshot:
 
 - Support for Character Classes `\p{...}` and `\P{...}`
-  patterns. [#76](https://github.com/curious-odd-man/RgxGen/pull/76)
+  patterns. [#76](https://github.com/curious-odd-man/RgxGen/issues/73)
 
 ---
 
@@ -278,16 +278,17 @@ I chose these approaches because they seem predictable and easier to implement.
 ### Unicode Categories
 
 I've used this page as a basis for the unicode categories
-information: https://www.regular-expressions.info/unicode.html#category
+information: https://www.regular-expressions.info/unicode.html#category.
 Though only for a few language related patterns I was able to find exact list/range of code points that belongs to
 specific categories.
 To overcome this I used Java `Pattern.compile()` to split characters into categories.
 Unfortunately there were several character categories that are not supported by Java `Pattern.compile()` as a result
 these are missing.
+
 If you need to know which category may produce which values - please refer
 to [`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
-Each there is list of ranges and list of characters - the RgxGen will generate any character within any of ranges (including
-first and last) or any character from the list.
+Each there is list of ranges and list of characters - the RgxGen will generate any character within any of ranges (
+including first and last) or any character from the list.
 
 ## Other tools to generate values by regex and why this might be better
 
