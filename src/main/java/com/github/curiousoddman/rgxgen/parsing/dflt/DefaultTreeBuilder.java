@@ -380,6 +380,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
         Node createdNode = null;
+        int nodeStartOffset = aCharIterator.prevPos() - 1;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
@@ -446,7 +447,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (createdNode != null) {
-            aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
+            aNodesStartPos.put(createdNode, nodeStartOffset);
             nodes.add(createdNode);
         }
     }

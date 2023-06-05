@@ -1,5 +1,6 @@
 package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.model.MatchType;
@@ -8,8 +9,11 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.DECIMAL_DIGIT_NUMBER;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.LATIN_LOWERCASE;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
 import static java.util.Arrays.asList;
@@ -379,7 +383,49 @@ public enum TestPattern implements DataInterface {
     }},
     UNICODE("\\u0041", new FinalSymbol("A")) {{
         setAllUniqueValues("A");
+    }},
+    IN_CYRILLIC_CATEGORY("\\p{InCyrillic}{2}", new Repeat("\\p{InCyrillic}{2}",
+                                                          SymbolSet.ofUnicodeCharacterClass("\\p{InRunic}", UnicodeCategory.IN_CYRILLIC, MatchType.POSITIVE),
+                                                          2)
+    ) {{
+        setAllUniqueValues(
+                getSymbolStream(UnicodeCategory.IN_CYRILLIC)
+                        .flatMap(c -> getSymbolStream(UnicodeCategory.IN_CYRILLIC).map(cc -> c + cc))
+                        .collect(Collectors.toList()));
+    }},
+    CATEGORY_WITHIN_SQUART_BRACKETS("[a-z\\p{Nd}]{2}", new Repeat("[a-z\\p{Nd}]{2}",
+                                                                  SymbolSet.ofUnicode("\\p{Decimal_Digit_Number}",
+                                                                                      Stream.concat(
+                                                                                                    Stream.of(LATIN_LOWERCASE),
+                                                                                                    DECIMAL_DIGIT_NUMBER.getSymbolRanges().stream())
+                                                                                            .collect(Collectors.toList()),
+                                                                                      ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE), 2)) {{
+        setAllUniqueValues(
+                Stream.concat(
+                              getRangeSymbolStream(LATIN_LOWERCASE),
+                              getSymbolStream(DECIMAL_DIGIT_NUMBER)
+                      )
+                      .sorted(Comparator.naturalOrder())
+                      .flatMap(c -> Stream
+                              .concat(getRangeSymbolStream(LATIN_LOWERCASE), getSymbolStream(DECIMAL_DIGIT_NUMBER))
+                              .sorted(Comparator.naturalOrder())
+                              .map(cc -> c + cc))
+                      .collect(Collectors.toList()));
     }};
+
+    private static Stream<String> getSymbolStream(UnicodeCategory category) {
+        return Stream.concat(
+                stream(category.getSymbols()).map(String::valueOf),
+                category
+                        .getSymbolRanges()
+                        .stream()
+                        .flatMap(TestPattern::getRangeSymbolStream)
+        );
+    }
+
+    private static Stream<String> getRangeSymbolStream(SymbolRange range) {
+        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj(i -> String.valueOf((char) i));
+    }
 
     final String aPattern;
     final Node   aResultNode;
