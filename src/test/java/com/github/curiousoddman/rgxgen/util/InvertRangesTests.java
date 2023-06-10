@@ -16,6 +16,40 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class InvertRangesTests {
 
+    public static Stream<Args> getInvertRangesAndCharactersTestData() {
+        SymbolRange A_E = range('a', 'e');
+        SymbolRange B_E = range('b', 'e');
+        SymbolRange K_M = range('k', 'm');
+        SymbolRange A_Z = range('a', 'z');
+        return Stream.of(
+                args("Whole range, when nothing gets excluded").allCharacters(A_E).expectRange(A_E),
+                args("Char in the middle is excluded").character('c').allCharacters(A_E).expectRange("a-b").expectRange("d-e"),
+                args("First Char is excluded").character('a').allCharacters(A_E).expectRange("b-e"),
+                args("Last Char is excluded").character('e').allCharacters(A_E).expectRange("a-d"),
+                args("Pre-First Char is excluded").character('b').allCharacters(A_E).expectRange("c-e").expectCharacter('a'),
+                args("Pre-Last Char is excluded").character('d').allCharacters(A_E).expectRange("a-c").expectCharacter('e'),
+                args("Char before allCharacters is ignored").allCharacters(B_E).character('a').expectRange(B_E),
+                args("Char after allCharacters is ignored").allCharacters(B_E).character('f').expectRange(B_E),
+
+                args("Range in the middle").range("b-d").allCharacters(A_E).expectCharacters("ae"),
+                args("First Range").range("a-b").allCharacters(A_E).expectRange("c-e"),
+                args("Last Range").range("c-e").allCharacters(A_E).expectRange("a-b"),
+                args("Pre-First Range").range("c-d").allCharacters(A_E).expectRange("a-b").expectCharacter('e'),
+                args("Pre-Last Range").range("b-c").allCharacters(A_E).expectRange("d-e").expectCharacter('a'),
+                args("Range after range").allCharacters(K_M).range("x-z").expectRange(K_M),
+                args("Range before range").allCharacters(K_M).range("a-c").range("A-C").expectRange(K_M),
+                args("Range that starts before allCharacters 1").allCharacters(K_M).range("h-l").expectCharacter('m'),
+                args("Range that starts before allCharacters 2").allCharacters(K_M).range("h-k").expectRange("l-m"),
+                args("Range that ends after allCharacters 1").allCharacters(K_M).range("l-o").expectCharacter('k'),
+                args("Range that ends after allCharacters 2").allCharacters(K_M).range("m-o").expectRange("k-l"),
+
+                args("Adjacent ranges 1").allCharacters(A_Z).range("a-k").range("l-y").expectCharacter('z'),
+                args("Adjacent ranges 2").allCharacters(A_Z).range("a-k").range("l-x").expectRange("y-z"),
+
+                args("Adjacent characters").allCharacters(K_M).character('k').character('l').expectCharacter('m')
+        );
+    }
+
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getInvertRangesAndCharactersTestData")
     void invertRangesAndCharactersTest(Args args) {
@@ -30,27 +64,6 @@ public class InvertRangesTests {
         invertSymbolsAndRanges(ranges, characters, allCharacters, actualRanges, actualCharacters);
         assertEquals(expectedRanges, actualRanges);
         assertEquals(expectedCharacters, actualCharacters);
-    }
-
-    public static Stream<Args> getInvertRangesAndCharactersTestData() {
-        SymbolRange A_E = range('a', 'e');
-        return Stream.of(
-                args("Whole range").allCharacters(A_E).expectRange(A_E),
-                args("Char in the middle").character('c').allCharacters(A_E).expectRange("a-b").expectRange("d-e"),
-                args("First Char").character('a').allCharacters(A_E).expectRange("b-e"),
-                args("Last Char").character('e').allCharacters(A_E).expectRange("a-d"),
-                args("Pre-First Char").character('b').allCharacters(A_E).expectRange("c-e").expectCharacter('a'),
-                args("Pre-Last Char").character('d').allCharacters(A_E).expectRange("a-c").expectCharacter('e'),
-
-                args("Range in the middle").range("b-d").allCharacters(A_E).expectCharacters("ae"),
-                args("First Range").range("a-b").allCharacters(A_E).expectRange("c-e"),
-                args("Last Range").range("c-e").allCharacters(A_E).expectRange("a-b"),
-                args("Pre-First Range").range("c-d").allCharacters(A_E).expectRange("a-b").expectCharacter('e'),
-                args("Pre-Last Range").range("b-c").allCharacters(A_E).expectRange("d-e").expectCharacter('a'),
-
-                args("Range after range").allCharacters(A_E).range("a-c").range("x-z").expectRange("d-e"),
-                args("Range before range").allCharacters(A_E).range("a-c").range("A-C").expectRange("d-e")
-        );
     }
 
     private static Args args(String description) {

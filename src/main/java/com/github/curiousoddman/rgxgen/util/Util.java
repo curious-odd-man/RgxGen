@@ -141,12 +141,12 @@ public final class Util {
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               List<Character> invertedCharacters) {
-        TreeSet<SymbolRange> sortedRanges = Stream.concat(
-                symbolRanges.stream(),
-                symbols.stream().map(symbol -> range(symbol, symbol))
-        ).collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
+        int firstCharInRange = allCharactersRange.getFrom();
+        int lastCharInRange = allCharactersRange.getTo();
 
-        int start = allCharactersRange.getFrom();
+        TreeSet<SymbolRange> sortedRanges = getApplicableSortedUniqueRanges(symbolRanges, symbols, allCharactersRange);
+
+        int start = firstCharInRange;
         for (SymbolRange range : sortedRanges) {
             int from = range.getFrom();
             int to = range.getTo();
@@ -157,18 +157,33 @@ public final class Util {
                 } else if (start != from) {
                     invertedRanges.add(range(start, from - 1));
                 }
-                start = to + 1;
             }
-
-            if (start > allCharactersRange.getTo()) {
+            start = to + 1;
+            if (start > lastCharInRange) {
                 return;
             }
         }
-        if (start < allCharactersRange.getTo()) {
-            invertedRanges.add(range(start, allCharactersRange.getTo()));
-        } else if (start == allCharactersRange.getTo()) {
+
+        if (start < lastCharInRange) {
+            invertedRanges.add(range(start, lastCharInRange));
+        } else if (start == lastCharInRange) {
             invertedCharacters.add((char) start);
         }
+    }
+
+    private static TreeSet<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, List<Character> symbols, SymbolRange allowedRange) {
+        int firstCharInRange = allowedRange.getFrom();
+        int lastCharInRange = allowedRange.getTo();
+
+        Stream<SymbolRange> matchingRanges = symbolRanges
+                .stream()
+                .filter(range -> range.getTo() >= firstCharInRange && range.getFrom() <= lastCharInRange);
+        Stream<SymbolRange> matchingCharactersAsRanges = symbols
+                .stream()
+                .filter(c -> firstCharInRange <= c && c <= lastCharInRange).map(symbol -> range(symbol, symbol));
+        return Stream
+                .concat(matchingRanges, matchingCharactersAsRanges)
+                .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
     }
 
     public static void compactOverlappingRangesAndSymbols(List<SymbolRange> originalSymbolRanges, List<Character> originalSymbols,
