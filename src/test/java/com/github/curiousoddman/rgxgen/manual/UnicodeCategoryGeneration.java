@@ -387,8 +387,8 @@ public class UnicodeCategoryGeneration {
     }
 
     private static class UnicodeCategoryDescriptor {
-        private List<SymbolRange> ranges;
-        private List<Character>   characters;
+        private final List<SymbolRange> ranges;
+        private final List<Character>   characters;
 
         UnicodeCategoryDescriptor(List<SymbolRange> ranges, List<Character> characters) {
             this.ranges = ranges;
@@ -399,16 +399,16 @@ public class UnicodeCategoryGeneration {
             return ranges;
         }
 
-        public void setRanges(List<SymbolRange> ranges) {
-            this.ranges = ranges;
-        }
-
         public List<Character> getCharacters() {
             return characters;
         }
 
-        public void setCharacters(List<Character> characters) {
-            this.characters = characters;
+        @Override
+        public String toString() {
+            return "UnicodeCategoryDescriptor{" +
+                    "ranges=" + ranges +
+                    ", characters=" + characters +
+                    '}';
         }
     }
 }
