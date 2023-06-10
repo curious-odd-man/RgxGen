@@ -1,27 +1,14 @@
 package com.github.curiousoddman.rgxgen.util;
 
-import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Singular;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.HashSet;
+import java.util.Set;
 
-import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 import static com.github.curiousoddman.rgxgen.util.Util.*;
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class UtilTests {
     @Test

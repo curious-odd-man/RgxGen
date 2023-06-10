@@ -1,10 +1,7 @@
 package com.github.curiousoddman.rgxgen.model;
 
-import lombok.Getter;
-
 import static org.junit.jupiter.api.Assertions.fail;
 
-@Getter
 public class ValidationResult {
     int countMatched;
     int countNotMatched;

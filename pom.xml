@@ -36,7 +36,6 @@
         <maven.versions.plugin.version>2.15.0</maven.versions.plugin.version>
 
         <jacoco.maven.plugin.version>0.8.10</jacoco.maven.plugin.version>
-        <lombok.version>1.18.26</lombok.version>
     </properties>
 
     <licenses>
@@ -268,13 +267,6 @@
     </build>
 
     <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
         <!-- Test scope below -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -19,14 +19,12 @@ package com.github.curiousoddman.rgxgen.manual;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -98,8 +96,7 @@ public class UnicodeCategoryGeneration {
     }
 
     @Test
-    @SneakyThrows
-    void splitUnicodeSymbolsPerCharacterClasses() {
+    void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
         Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = compiledAllPatterns();
         Map<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
         Set<UnicodeCategory> failedToCompile = categoryPerPattern.entrySet().stream().filter(entry -> !entry.getValue().isPresent()).map(Map.Entry::getKey).collect(Collectors.toSet());
@@ -119,8 +116,7 @@ public class UnicodeCategoryGeneration {
         modifySourceJavaFile(failedToCompile, textPerPattern, rangesConstantNames);
     }
 
-    @SneakyThrows
-    private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) {
+    private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) throws IOException {
         Map<SymbolRange, Long> countPerRange = textPerPattern.values().stream().map(LineDescriptor::getRanges).flatMap(Collection::stream)
                                                              .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
@@ -149,8 +145,7 @@ public class UnicodeCategoryGeneration {
         return rangesConstantsNames;
     }
 
-    @SneakyThrows
-    private static void modifySourceJavaFile(Set<UnicodeCategory> failedToCompile, Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) {
+    private static void modifySourceJavaFile(Set<UnicodeCategory> failedToCompile, Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) throws IOException {
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java").toAbsolutePath();
         List<String> lines = Files.readAllLines(path);
         List<String> transformedLines = new ArrayList<>(lines.size());
@@ -205,8 +200,6 @@ public class UnicodeCategoryGeneration {
         return textPerPattern;
     }
 
-    @Data
-    @AllArgsConstructor
     private static class LineDescriptor {
         private static final String pattern = "    %s(%s, %s, %s, %s),";
         UnicodeCategory   unicodeCategory;
@@ -214,6 +207,14 @@ public class UnicodeCategoryGeneration {
         String            description;
         List<SymbolRange> ranges;
         List<Character>   characters;
+
+        LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, List<Character> characters) {
+            this.unicodeCategory = unicodeCategory;
+            this.keys = keys;
+            this.description = description;
+            this.ranges = ranges;
+            this.characters = characters;
+        }
 
         public String formatToText(Map<SymbolRange, String> constantNames) {
             return String.format(pattern, unicodeCategory.name(), makeKeysText(unicodeCategory), makeDescription(unicodeCategory), makeRanges(ranges, constantNames), makeCharacters(characters));
@@ -268,6 +269,10 @@ public class UnicodeCategoryGeneration {
 
         private static String sq(String text) {
             return '\'' + text + '\'';
+        }
+
+        public List<SymbolRange> getRanges() {
+            return ranges;
         }
     }
 
@@ -381,10 +386,29 @@ public class UnicodeCategoryGeneration {
         return descriptorMap;
     }
 
-    @Data
-    @AllArgsConstructor
     private static class UnicodeCategoryDescriptor {
         private List<SymbolRange> ranges;
         private List<Character>   characters;
+
+        UnicodeCategoryDescriptor(List<SymbolRange> ranges, List<Character> characters) {
+            this.ranges = ranges;
+            this.characters = characters;
+        }
+
+        public List<SymbolRange> getRanges() {
+            return ranges;
+        }
+
+        public void setRanges(List<SymbolRange> ranges) {
+            this.ranges = ranges;
+        }
+
+        public List<Character> getCharacters() {
+            return characters;
+        }
+
+        public void setCharacters(List<Character> characters) {
+            this.characters = characters;
+        }
     }
 }

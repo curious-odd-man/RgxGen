@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.model;
 
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -60,7 +59,6 @@ class UnicodeCategoryGenerateTestBase {
         generatedCharacters = new HashMap<>();
     }
 
-    @SneakyThrows
     Optional<Pattern> compile(String pattern, UnicodeCategory category) {
         try {
             Optional<Pattern> compiledPattern = Optional.of(Pattern.compile(pattern));
@@ -71,7 +69,6 @@ class UnicodeCategoryGenerateTestBase {
         }
     }
 
-    @SneakyThrows
     ValidationResult validateGeneratedText(RgxGenTestPattern testPattern, Supplier<String> generateFunction, ValidationResult validationResult) {
         String generatedText = assertDoesNotThrow(generateFunction::get);
         Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(testPattern.getUnicodeCategory(), k -> new HashSet<>());

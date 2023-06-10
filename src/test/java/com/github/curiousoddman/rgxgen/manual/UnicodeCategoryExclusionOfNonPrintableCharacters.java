@@ -2,11 +2,10 @@ package com.github.curiousoddman.rgxgen.manual;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
-import lombok.SneakyThrows;
-import lombok.Value;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -22,8 +21,7 @@ import static java.util.stream.Collectors.*;
 @Disabled("Manual test")
 class UnicodeCategoryExclusionOfNonPrintableCharacters {
     @Test
-    @SneakyThrows
-    void tryWritingEachCharacterToFile() {
+    void tryWritingEachCharacterToFile() throws IOException {
         Map<Character, List<UnicodeCategory>> characterListMap = Arrays.stream(UnicodeCategory
                                                                                        .values())
                                                                        .flatMap(unicodeCategory ->
@@ -53,12 +51,24 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
     }
 
     private static Stream<Character> getCharacterStream(SymbolRange range) {
-        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj((int c1) -> Character.valueOf((char) c1));
+        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj((int c1) -> (char) c1);
     }
 
-    @Value
     private static class Pair {
-        UnicodeCategory category;
-        Character       character;
+        private final UnicodeCategory category;
+        private final Character       character;
+
+        Pair(UnicodeCategory category, Character character) {
+            this.category = category;
+            this.character = character;
+        }
+
+        public UnicodeCategory getCategory() {
+            return category;
+        }
+
+        public Character getCharacter() {
+            return character;
+        }
     }
 }

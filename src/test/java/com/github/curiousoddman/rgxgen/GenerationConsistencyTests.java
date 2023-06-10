@@ -4,12 +4,11 @@ import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.data.TestPatternCaseInsensitive;
-import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
 import java.nio.charset.MalformedInputException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,10 +45,9 @@ public class GenerationConsistencyTests {
         return Arrays.stream(TestPattern.values());
     }
 
-    @SneakyThrows
     @ParameterizedTest
     @MethodSource("getCaseInsensitivePatterns")
-    void verifyThatAllCaseInsensitivePatternsStaysTheSameTest(TestPatternCaseInsensitive data) {
+    void verifyThatAllCaseInsensitivePatternsStaysTheSameTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
@@ -64,10 +62,9 @@ public class GenerationConsistencyTests {
         }
     }
 
-    @SneakyThrows
     @ParameterizedTest
     @MethodSource("getCaseInsensitivePatterns")
-    void verifyThatAllCaseInsensitivePatternsStaysTheSameNotMatchingTest(TestPatternCaseInsensitive data) {
+    void verifyThatAllCaseInsensitivePatternsStaysTheSameNotMatchingTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
@@ -82,10 +79,9 @@ public class GenerationConsistencyTests {
         }
     }
 
-    @SneakyThrows
     @ParameterizedTest
     @MethodSource("getPatterns")
-    void verifyThatAllCaseSensitivePatternsStaysTheSameTest(TestPattern data) {
+    void verifyThatAllCaseSensitivePatternsStaysTheSameTest(TestPattern data) throws IOException {
         assumeFalse(
                 data == TestPattern.ANY_WHITESPACE || data == TestPattern.METASEQUENCE_IN_SQUARE_BRACKETS
         );
@@ -101,10 +97,9 @@ public class GenerationConsistencyTests {
     }
 
 
-    @SneakyThrows
     @ParameterizedTest
     @MethodSource("getPatterns")
-    void verifyThatAllCaseSensitivePatternsStaysTheSameNotMatchingTest(TestPattern data) {
+    void verifyThatAllCaseSensitivePatternsStaysTheSameNotMatchingTest(TestPattern data) throws IOException {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);

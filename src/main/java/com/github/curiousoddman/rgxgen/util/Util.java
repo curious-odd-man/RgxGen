@@ -18,7 +18,6 @@ package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
-import lombok.experimental.UtilityClass;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -27,7 +26,6 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 
-@UtilityClass
 public final class Util {
     public static Character[] stringToChars(CharSequence str) {
         return str.chars()

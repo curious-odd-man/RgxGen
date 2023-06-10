@@ -22,7 +22,6 @@ import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +35,6 @@ import static java.util.Collections.singletonList;
  * Generate Any printable character.
  */
 
-@Getter
 public class SymbolSet extends Node {
     private final MatchType         originalMatchType;
     private final boolean           isAscii;
@@ -139,6 +137,18 @@ public class SymbolSet extends Node {
         } else if (Character.isLowerCase(c)) {
             caseInsensitiveSymbols.add(Character.toUpperCase(c));
         }
+    }
+
+    public boolean isAscii() {
+        return isAscii;
+    }
+
+    public List<SymbolRange> getSymbolRanges() {
+        return symbolRanges;
+    }
+
+    public List<Character> getSymbols() {
+        return symbols;
     }
 
     @Override

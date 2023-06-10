@@ -18,8 +18,6 @@ package com.github.curiousoddman.rgxgen.model;
 
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.Util;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import java.util.Collections;
 import java.util.List;
@@ -36,8 +34,6 @@ import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
-@Getter
-@RequiredArgsConstructor
 public enum UnicodeCategory {
     /**
      * The configuration is based on <a href="https://www.regular-expressions.info/unicode.html#category">...</a>
@@ -220,6 +216,13 @@ public enum UnicodeCategory {
     private final List<SymbolRange> symbolRanges;
     private final Character[]       symbols;
 
+    UnicodeCategory(List<String> keys, String description, List<SymbolRange> symbolRanges, Character[] symbols) {
+        this.keys = keys;
+        this.description = description;
+        this.symbolRanges = symbolRanges;
+        this.symbols = symbols;
+    }
+
     UnicodeCategory(List<String> keys, String description, Character... symbols) {
         this(keys, description, emptyList(), symbols);
     }
@@ -232,6 +235,13 @@ public enum UnicodeCategory {
         return (!symbolRanges.isEmpty()) || (symbols.length != 0);
     }
 
+    public List<SymbolRange> getSymbolRanges() {
+        return symbolRanges;
+    }
+
+    public Character[] getSymbols() {
+        return symbols;
+    }
 
     private static class KeyValue {
         private final String          key;
@@ -249,5 +259,13 @@ public enum UnicodeCategory {
         public UnicodeCategory getValue() {
             return value;
         }
+    }
+
+    public List<String> getKeys() {
+        return keys;
+    }
+
+    public String getDescription() {
+        return description;
     }
 }

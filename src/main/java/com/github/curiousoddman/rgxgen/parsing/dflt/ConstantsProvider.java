@@ -18,7 +18,6 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
-import lombok.experimental.UtilityClass;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -30,7 +29,6 @@ import java.util.stream.IntStream;
  * Helper class for lazy initialization and reuse of some constants that are re-used.
  * Use with caution - don't modify values inside those!!!
  */
-@UtilityClass
 public class ConstantsProvider {
     public static final SymbolRange SMALL_LATIN_LETTERS         = SymbolRange.range('a', 'z');
     public static final SymbolRange CAPITAL_LATIN_LETTERS       = SymbolRange.range('A', 'Z');

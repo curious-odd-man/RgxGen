@@ -1,8 +1,6 @@
 package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
-import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -70,8 +68,6 @@ public class InvertRangesTests {
         return new Args(description);
     }
 
-    @Getter
-    @Setter
     public static class Args {
         String            description;
         List<SymbolRange> ranges           = new ArrayList<>();
@@ -79,6 +75,26 @@ public class InvertRangesTests {
         SymbolRange       allCharacters;
         List<SymbolRange> expectRanges     = new ArrayList<>();
         List<Character>   expectCharacters = new ArrayList<>();
+
+        public List<SymbolRange> getRanges() {
+            return ranges;
+        }
+
+        public List<Character> getCharacters() {
+            return characters;
+        }
+
+        public SymbolRange getAllCharacters() {
+            return allCharacters;
+        }
+
+        public List<SymbolRange> getExpectRanges() {
+            return expectRanges;
+        }
+
+        public List<Character> getExpectCharacters() {
+            return expectCharacters;
+        }
 
         public Args(String description) {
             this.description = description;

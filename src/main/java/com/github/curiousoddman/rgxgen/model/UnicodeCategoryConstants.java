@@ -17,9 +17,6 @@ package com.github.curiousoddman.rgxgen.model;
 /* **************************************************************************/
 
 
-import lombok.experimental.UtilityClass;
-
-@UtilityClass
 public class UnicodeCategoryConstants {
     public static final SymbolRange INVISIBLE_WHITECHARACTERS = SymbolRange.range(' ', ' ');  // 0x2000 - 0x200a
     public static final SymbolRange LATIN_LOWERCASE           = SymbolRange.range('a', 'z');  // 0x61 - 0x7a
