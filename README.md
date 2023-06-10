@@ -271,9 +271,33 @@ It is suggested to avoid using such infinite patterns to generate data based on 
 The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though
 it is not always possible.
 For example pattern `.` - any symbol - would yield empty string as not matching string.
-Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings
-would be only 1 or 2 symbols long.
+Another example `a{0,2}` - for this pattern not matching string would be an empty string, but I would only generate
+the resulting strings of 1 or 2 symbols long.
 I chose these approaches because they seem predictable and easier to implement.
+
+#### Which values are used in non-matching generation
+
+Whenever non-matching result is requested, with either `new RgxGen(".").generateNotMatching()` method or with pattern,
+like `"[^a-z]"` - there is a choice in generator which are characters that do not match mentioned characters.
+For example - for `"[^a-z]"` - any unicode character except the ones in a range `a-z` would be ok. Though that would
+include non-printable, all kinds of blank characters and all the different wierd unicode characters. I expect that this
+might not be expected behavior. Thus, I have defined 2 different universe ranges of characters that are used - one for
+the ASCII only characters and another - for unicode characters.
+
+These ranges are defined here:
+
+- ASCII: `ASCII_SYMBOL_RANGE` constant
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+- Unicode: `UNICODE_SYMBOL_RANGE` constant
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+
+`UNICODE_SYMBOL_RANGE` is currently used ONLY when Character Classes are used `\p{}` ir `\P{}` patterns.
+By default `ASCII_SYMBOL_RANGE` is used.
+
+To generate not matching characters I take one of the aforementioned constant ranges and subtract characters provided in
+pattern - resulting range is the one that is used for non-matching generation.
+For example for pattern `"[^a-z]"` `ASCII_SYMBOL_RANGE` will be used as a universe. 
+The result then will be `ASCII_SYMBOL_RANGE` except `A-z` = `space - @` union `{ - ~`
 
 ### Unicode Categories
 
