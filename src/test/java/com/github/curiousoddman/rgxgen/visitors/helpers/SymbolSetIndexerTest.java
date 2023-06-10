@@ -29,8 +29,8 @@ class SymbolSetIndexerTest {
                 arguments("Single Range", symbolSet(range('a', 'd')), 4, asList('a', 'b', 'c', 'd')),
                 arguments("Several Ranges", symbolSet(range('a', 'd'), range('k', 'l'), range('x', 'z')), 9, asList('a', 'b', 'c', 'd', 'k', 'l', 'x', 'y', 'z')),
                 arguments("Several characters", symbolSet('a', 'd', 'k', 't', 'x', 'z'), 6, asList('a', 'd', 'k', 't', 'x', 'z')),
-                arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList( '1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z')),
-                arguments("Unicode Ranges", negativeSymbolSet(asList(range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 1), RANGE_OUTSIDE_OF_SYMBOLS)), 1, asList())
+                arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList('1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z')),
+                arguments("Negative Ranges", negativeSymbolSet(asList(range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 2), RANGE_OUTSIDE_OF_SYMBOLS)), 1, asList((char) (DEL_ASCII_CODE - 1)))
         );
     }
 
@@ -46,8 +46,8 @@ class SymbolSetIndexerTest {
         return SymbolSet.ofAscii("", ranges, characters, MatchType.POSITIVE);
     }
 
-    private static SymbolSet negativeSymbolSet(List<SymbolRange> ranges, Character... characters) {
-        return SymbolSet.ofAscii("", ranges, characters, MatchType.NEGATIVE);
+    private static SymbolSet negativeSymbolSet(List<SymbolRange> ranges) {
+        return SymbolSet.ofAscii("", ranges, ZERO_LENGTH_CHARACTER_ARRAY, MatchType.NEGATIVE);
     }
 
     @ParameterizedTest(name = "{index}: {0}")
