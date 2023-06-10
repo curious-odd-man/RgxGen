@@ -39,7 +39,7 @@ public class ConstantsProvider {
     public static final BigInteger  BIG_INTEGER_TWO             = BigInteger.valueOf(2);
     public static final int         SPACE_ASCII_CODE            = 32;     // First printable character in ASCII table
     public static final int         DEL_ASCII_CODE              = 127;    // Bound for printable characters in ASCII table
-    public static final int         MAX_UNICODE_CHARACTER       = 0xFFFF;
+    public static final int         MAX_UNICODE_CHARACTER       = 0xD800 - 1;       // The start of IN_HIGH_SURROGATES - which cause errors when trying to write those values to file
     public static final SymbolRange ASCII_SYMBOL_RANGE          = SymbolRange.range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 1);  // -1 because we exclude DEL symbol
     public static final SymbolRange UNICODE_SYMBOL_RANGE        = SymbolRange.range(SPACE_ASCII_CODE, MAX_UNICODE_CHARACTER);
 

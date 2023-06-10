@@ -8,16 +8,20 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.charset.MalformedInputException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
@@ -108,7 +112,14 @@ public class GenerationConsistencyTests {
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
-            Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            try {
+                Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+            } catch (MalformedInputException e) {
+                System.out.println("Failed to write a text " + e.getMessage());
+                System.out.println(generated.chars().mapToObj(String::valueOf).collect(Collectors.toList()));
+                System.out.println(generated);
+                fail(e);
+            }
         }
     }
 }
