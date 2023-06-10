@@ -33,38 +33,38 @@ public class RgxGenConfigurationTests {
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void defaultValueTest(RgxGenOption option) {
+    public void defaultValueTest(RgxGenOption<Integer> option) {
         RgxGen.setDefaultProperties(null);
         RgxGen rgxGen = new RgxGen("xxx");
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals(option.getDefault(), option.getFromProperties(localProperties));
+        assertEquals((Object) option.getDefault(), option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void globalConfigOnlyTest(RgxGenOption option) {
+    public void globalConfigOnlyTest(RgxGenOption<Integer> option) {
         RgxGenProperties properties = new RgxGenProperties();
         option.setInProperties(properties, 20);
         RgxGen.setDefaultProperties(properties);
         RgxGen rgxGen = new RgxGen("xxx");
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals("20", option.getFromProperties(localProperties));
+        assertEquals(20, option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localConfigOnlyTest(RgxGenOption option) {
+    public void localConfigOnlyTest(RgxGenOption<Integer> option) {
         RgxGenProperties properties = new RgxGenProperties();
         option.setInProperties(properties, 20);
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(properties);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals("20", option.getFromProperties(localProperties));
+        assertEquals(20, option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localOverridesGlobalTest(RgxGenOption option) {
+    public void localOverridesGlobalTest(RgxGenOption<Integer> option) {
         RgxGenProperties globProp = new RgxGenProperties();
         option.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
@@ -73,12 +73,12 @@ public class RgxGenConfigurationTests {
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(localProp);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals("10", option.getFromProperties(localProperties));
+        assertEquals(10, option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localMissingGlobalPresentTest(RgxGenOption option) {
+    public void localMissingGlobalPresentTest(RgxGenOption<Integer> option) {
         RgxGenProperties globProp = new RgxGenProperties();
         option.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
@@ -86,25 +86,24 @@ public class RgxGenConfigurationTests {
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(localProp);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals("20", option.getFromProperties(localProperties));
+        assertEquals(20, option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localAndGlobalMissingUseDefaultTest(RgxGenOption option) {
+    public void localAndGlobalMissingUseDefaultTest(RgxGenOption<Integer> option) {
         RgxGenProperties globProp = new RgxGenProperties();
         RgxGen.setDefaultProperties(globProp);
         RgxGenProperties localProp = new RgxGenProperties();
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(localProp);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals(option.getDefault(),
-                     option.getFromProperties(localProperties));
+        assertEquals((Object) option.getDefault(), option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localResetToGlobalTest(RgxGenOption option) {
+    public void localResetToGlobalTest(RgxGenOption<Integer> option) {
         RgxGenProperties globProp = new RgxGenProperties();
         option.setInProperties(globProp, 20);
         RgxGen.setDefaultProperties(globProp);
@@ -113,23 +112,23 @@ public class RgxGenConfigurationTests {
         rgxGen.setProperties(localProp);
         rgxGen.setProperties(null);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals("20", option.getFromProperties(localProperties));
+        assertEquals(20, option.getFromProperties(localProperties));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
-    public void localResetToDefaultTest(RgxGenOption option) {
+    public void localResetToDefaultTest(RgxGenOption<Integer> option) {
         RgxGenProperties localProp = new RgxGenProperties();
         RgxGen rgxGen = new RgxGen("xxx");
         rgxGen.setProperties(localProp);
         rgxGen.setProperties(null);
         RgxGenProperties localProperties = getLocalProperties(rgxGen);
-        assertEquals(option.getDefault(), option.getFromProperties(localProperties));
+        assertEquals((Object) option.getDefault(), option.getFromProperties(localProperties));
     }
 
     private static RgxGenProperties getLocalProperties(RgxGen o) {
         try {
-            Field localProperties = RgxGen.class.getDeclaredField("aLocalProperties");
+            Field localProperties = RgxGen.class.getDeclaredField("localProperties");
             localProperties.setAccessible(true);
             return (RgxGenProperties) localProperties.get(o);
         } catch (ClassCastException | NoSuchFieldException | IllegalAccessException e) {

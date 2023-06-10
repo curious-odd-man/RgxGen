@@ -35,11 +35,11 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-    private static RgxGenProperties aGlobalProperties;
+    private static RgxGenProperties globalProperties = new RgxGenProperties();
 
-    private final Node aNode;
+    private final Node node;
 
-    private RgxGenProperties aLocalProperties = aGlobalProperties;
+    private RgxGenProperties localProperties = globalProperties;
 
     /**
      * Set default properties for RgxGen.
@@ -50,7 +50,7 @@ public class RgxGen {
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
     public static void setDefaultProperties(RgxGenProperties properties) {
-        aGlobalProperties = properties;
+        globalProperties = properties;
     }
 
     /**
@@ -68,7 +68,7 @@ public class RgxGen {
      * @param builder node tree builder implementation
      */
     public RgxGen(NodeTreeBuilder builder) {
-        aNode = builder.get();
+        node = builder.get();
     }
 
     /**
@@ -79,11 +79,11 @@ public class RgxGen {
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
     public void setProperties(RgxGenProperties properties) {
-        aLocalProperties = properties;
-        if (aLocalProperties == null) {
-            aLocalProperties = aGlobalProperties;
+        localProperties = properties;
+        if (localProperties == null) {
+            localProperties = globalProperties;
         } else {
-            aLocalProperties.setDefaults(aGlobalProperties);
+            localProperties.setDefaults(globalProperties);
         }
     }
 
@@ -97,8 +97,8 @@ public class RgxGen {
      */
     @Deprecated
     public BigInteger numUnique() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
-        aNode.visit(v);
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(localProperties);
+        node.visit(v);
         return v.getEstimation()
                 .orElse(null);
     }
@@ -111,8 +111,8 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public Optional<BigInteger> getUniqueEstimation() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
-        aNode.visit(v);
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(localProperties);
+        node.visit(v);
         return v.getEstimation();
     }
 
@@ -132,8 +132,8 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
-        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
-        aNode.visit(ugv);
+        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(localProperties);
+        node.visit(ugv);
         return ugv.getUniqueStrings();
     }
 
@@ -156,9 +156,9 @@ public class RgxGen {
     public String generate(Random random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
-                                                .withProperties(aLocalProperties)
+                                                .withProperties(localProperties)
                                                 .get();
-        aNode.visit(gv);
+        node.visit(gv);
         return gv.getString();
     }
 
@@ -182,7 +182,7 @@ public class RgxGen {
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
                                                              .withRandom(random)
                                                              .get();
-        aNode.visit(nmgv);
+        node.visit(nmgv);
         return nmgv.getString();
     }
 }

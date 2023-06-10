@@ -49,7 +49,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
             aIterators.add(new IndexIteratorSupplier(node.getCaseInsensitiveSymbolSetIndexer()));
         } else {
             aIterators.add(new IndexIteratorSupplier(node.getSymbolSetIndexer()));
@@ -70,7 +70,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
             aIterators.add(new SingleCaseInsensitiveValueIteratorSupplier(node.getValue()));
         } else {
             aIterators.add(new SingleValueIteratorSupplier(node.getValue()));
