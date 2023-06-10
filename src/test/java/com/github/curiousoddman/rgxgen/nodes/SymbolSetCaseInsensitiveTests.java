@@ -30,19 +30,18 @@ public class SymbolSetCaseInsensitiveTests {
     public static Stream<Arguments> parameters() {
         return Stream.of(
                 Arguments.of("a", "Aa"),
-                Arguments.of("abc", "AaBbCc"),
+                Arguments.of("abc", "ABCabc"),
                 Arguments.of("123", "123"),
-                Arguments.of("123ab", "1Aa2Bb3"),
-                Arguments.of("A", "aA")
+                Arguments.of("123ab", "123ABab"),
+                Arguments.of("A", "Aa")
         );
     }
-
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void positiveSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
         SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
-        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
+        Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
         Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
     }
@@ -51,7 +50,7 @@ public class SymbolSetCaseInsensitiveTests {
     @MethodSource("parameters")
     public void negativeSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
         SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
-        Character[] actual = symbolSet.getSymbolsCaseInsensitive();
+        Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
         Character[] expected = excluding(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
 

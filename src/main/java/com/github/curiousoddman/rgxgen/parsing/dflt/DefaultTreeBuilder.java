@@ -21,11 +21,12 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
 
-import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
@@ -379,6 +380,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed) {
         char c = aCharIterator.next();
         Node createdNode = null;
+        int nodeStartOffset = aCharIterator.prevPos() - 1;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
@@ -389,13 +391,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                break;
+
+            case 'p':   // Character classes
+            case 'P':   // Not-matching character classes
+                sbToFinal(sb, nodes);
+                createdNode = createUnicodeSymbolSetNode(c, getMatchType(c, 'p'));
                 break;
 
             // Hex character:
@@ -439,8 +447,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (createdNode != null) {
-            aNodesStartPos.put(createdNode, aCharIterator.prevPos() - 1);
+            aNodesStartPos.put(createdNode, nodeStartOffset);
             nodes.add(createdNode);
+        }
+    }
+
+    private Node createUnicodeSymbolSetNode(char c, MatchType matchType) {
+        String characterClassKey = getCharacterClassKey();
+        UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
+        String pattern = "\\" + c + '{' + characterClassKey + '}';
+        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, matchType);
+    }
+
+    private String getCharacterClassKey() {
+        if (aCharIterator.peek() == '{') {
+            aCharIterator.skip();
+            return aCharIterator.nextUntil('}');
+        } else {
+            return aCharIterator.next(1);
         }
     }
 
@@ -667,17 +691,26 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> symbolRanges, Iterable<SymbolSet> symbolSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
         List<Character> characters = new ArrayList<>();
+        List<SymbolRange> symbolRanges = new ArrayList<>(externalRanges);
         if (sb.length() > 0) {
             characters.addAll(Arrays.asList(Util.stringToChars(sb)));
         }
 
-        for (SymbolSet symbolSet : symbolSets) {
-            characters.addAll(Arrays.asList(symbolSet.getSymbols()));
+        boolean isAscii = true;
+
+        for (SymbolSet symbolSet : externalSets) {
+            isAscii = isAscii && symbolSet.isAscii();
+            characters.addAll(symbolSet.getSymbols());
+            symbolRanges.addAll(symbolSet.getSymbolRanges());
         }
 
-        return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        if (isAscii) {
+            return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        } else {
+            return SymbolSet.ofUnicode(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+        }
     }
 
     public void build() {

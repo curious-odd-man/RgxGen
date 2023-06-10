@@ -20,7 +20,7 @@ public enum TestPatternCaseInsensitive implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B("[ab]") {{
-        setAllUniqueValues("A", "a", "B", "b");
+        setAllUniqueValues("A", "B", "a", "b");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_RANGE("a{2,3}") {{
@@ -92,7 +92,7 @@ public enum TestPatternCaseInsensitive implements DataInterface {
 
     @Override
     public String toString() {
-        return aPattern;
+        return name() + " : " + aPattern;
     }
 
     @Override

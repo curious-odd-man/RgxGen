@@ -3,11 +3,11 @@ package com.github.curiousoddman.rgxgen.util;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
 import static com.github.curiousoddman.rgxgen.util.Util.*;
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class UtilTests {
@@ -79,5 +79,19 @@ public class UtilTests {
         assertEquals(1, indexOfNextCaseSensitiveCharacter("1a123", 0).getAsInt());
         assertEquals(3, indexOfNextCaseSensitiveCharacter("123a", 0).getAsInt());
     }
+
+    @Test
+    void textVariationsTest() {
+
+        Set<String> strings = makeVariations(
+                asList("L", "Spacing_Combining_Mark"),
+                '_',
+                '-', ' '
+        );
+
+        Set<String> expected = new HashSet<>(asList("Spacing_Combining_Mark", "Spacing-Combining-Mark", "L", "Spacing Combining Mark"));
+        assertEquals(expected, strings);
+    }
+
 }
 

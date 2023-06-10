@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.regex.Pattern;
 
-import static com.github.curiousoddman.rgxgen.util.Util.BIG_INTEGER_TWO;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.BIG_INTEGER_TWO;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RegressionTests {

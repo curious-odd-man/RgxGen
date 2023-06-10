@@ -18,41 +18,57 @@ package com.github.curiousoddman.rgxgen.nodes;
 
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
-import static com.github.curiousoddman.rgxgen.util.Util.ZERO_LENGTH_CHARACTER_ARRAY;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * Generate Any printable character.
  */
+
 public class SymbolSet extends Node {
+    private final MatchType         originalMatchType;
+    private final boolean           isAscii;
+    private final List<SymbolRange> originalSymbolRanges;
+    private final List<Character>   originalSymbols;
+    private final SymbolRange       allCharactersRange;
+    private final List<SymbolRange> symbolRanges;
+    private final List<Character>   symbols;
 
-    private final Collection<Character> aInitial;
-    private final Collection<Character> aModification;
-    private final MatchType             aType;
-
-    private Character[] aSymbols;
-    private Character[] aSymbolsCaseInsensitive;
-
+    private SymbolSetIndexer symbolSetIndexer;
+    private SymbolSetIndexer caseInsensitiveSymbolSetIndexer;
 
     public static SymbolSet ofAsciiDotPattern() {
-        return ofAsciiCharacters(".", makeAsciiCharacterArray(), MatchType.POSITIVE);
+        return ofAscii(".", singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
     }
 
     public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, Collections.emptyList(), symbols, type, makeAsciiCharacterArray());
+        return new SymbolSet(pattern, emptyList(), symbols, type, ASCII_SYMBOL_RANGE);
     }
 
-    public static SymbolSet ofAsciiRanges(String pattern, Collection<SymbolRange> symbolRanges, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, makeAsciiCharacterArray());
+    public static SymbolSet ofAsciiRanges(String pattern, List<SymbolRange> symbolRanges, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, ASCII_SYMBOL_RANGE);
     }
 
-    public static SymbolSet ofAscii(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, symbols, type, makeAsciiCharacterArray());
+    public static SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType type) {
+        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, UNICODE_SYMBOL_RANGE);
+    }
+
+    public static SymbolSet ofUnicode(String pattern, List<SymbolRange> symbolRanges, Character[] characters, MatchType matchType) {
+        return new SymbolSet(pattern, symbolRanges, characters, matchType, UNICODE_SYMBOL_RANGE);
+    }
+
+    public static SymbolSet ofAscii(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, symbols, type, ASCII_SYMBOL_RANGE);
     }
 
     /**
@@ -63,65 +79,26 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    private SymbolSet(String pattern, Collection<SymbolRange> symbolRanges, Character[] symbols, MatchType type, Character[] allAvailableCharacters) {
+    private SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
         super(pattern);
-        aType = type;
-        if (aType == MatchType.POSITIVE) {
-            aInitial = new HashSet<>(allAvailableCharacters.length);
-            aModification = new ArrayList<>(Arrays.asList(symbols));
+
+        isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;
+        originalSymbolRanges = symbolRanges;
+        originalSymbols = asList(symbols);
+        this.allCharactersRange = allCharactersRange;
+
+        List<SymbolRange> compactedRanges = new ArrayList<>(originalSymbolRanges.size());
+        List<Character> compactedCharacters = new ArrayList<>(originalSymbols.size());
+        Util.compactOverlappingRangesAndSymbols(originalSymbolRanges, originalSymbols, compactedRanges, compactedCharacters);
+        if (type == MatchType.POSITIVE) {
+            this.symbolRanges = compactedRanges;
+            this.symbols = compactedCharacters;
         } else {
-            aInitial = new HashSet<>(Arrays.asList(allAvailableCharacters));
-            aModification = new HashSet<>(Arrays.asList(symbols));
+            this.symbolRanges = new ArrayList<>();
+            this.symbols = new ArrayList<>();
+            Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, allCharactersRange, this.symbolRanges, this.symbols);
         }
-
-        symbolRanges.stream()
-                    .map(SymbolSet::rangeToList)
-                    .forEach(aModification::addAll);
-    }
-
-    private static Collection<Character> rangeToList(SymbolRange range) {
-        Collection<Character> chars = new ArrayList<>(range.getTo() - range.getFrom() + 1);
-        for (int i = range.getFrom(); i <= range.getTo(); i++) {
-            chars.add((char) i);
-        }
-
-        return chars;
-    }
-
-    private Character[] getOrInitSymbols() {
-        if (aSymbols == null) {
-            if (aType == MatchType.POSITIVE) {
-                aInitial.addAll(aModification);
-            } else {
-                aInitial.removeIf(aModification::contains);
-            }
-            aSymbols = aInitial.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
-        }
-        return aSymbols;
-    }
-
-    private Character[] getOrInitCaseInsensitiveSymbols() {
-        if (aSymbolsCaseInsensitive == null) {
-            Set<Character> caseInsensitive = new HashSet<>(aInitial);
-            if (aType == MatchType.POSITIVE) {
-                handleCaseSensitiveCharacters(aModification, caseInsensitive::add);
-            } else {
-                handleCaseSensitiveCharacters(aModification, caseInsensitive::remove);
-            }
-            aSymbolsCaseInsensitive = caseInsensitive.toArray(ZERO_LENGTH_CHARACTER_ARRAY);
-        }
-        return aSymbolsCaseInsensitive;
-    }
-
-    private static void handleCaseSensitiveCharacters(Iterable<Character> symbols, Consumer<Character> consumer) {
-        for (Character c : symbols) {
-            if (Character.isUpperCase(c)) {
-                consumer.accept(Character.toLowerCase(c));
-            } else if (Character.isLowerCase(c)) {
-                consumer.accept(Character.toUpperCase(c));
-            }
-            consumer.accept(c);
-        }
+        originalMatchType = type;
     }
 
     @Override
@@ -129,20 +106,58 @@ public class SymbolSet extends Node {
         visitor.visit(this);
     }
 
-    public Character[] getSymbols() {
-        return getOrInitSymbols();
+    public SymbolSetIndexer getSymbolSetIndexer() {
+        if (symbolSetIndexer == null) {
+            symbolSetIndexer = new SymbolSetIndexer(this);
+        }
+        return symbolSetIndexer;
     }
 
-    public Character[] getSymbolsCaseInsensitive() {
-        return getOrInitCaseInsensitiveSymbols();
+    public SymbolSetIndexer getCaseInsensitiveSymbolSetIndexer() {
+        if (caseInsensitiveSymbolSetIndexer == null) {
+            List<Character> caseInsensitiveSymbols = new ArrayList<>(originalSymbols);
+            for (Character c : originalSymbols) {
+                addIfChangedCase(caseInsensitiveSymbols, c);
+            }
+            for (SymbolRange originalSymbolRange : originalSymbolRanges) {
+                for (char c = (char) originalSymbolRange.getFrom(); c <= originalSymbolRange.getTo(); ++c) {
+                    addIfChangedCase(caseInsensitiveSymbols, c);
+                }
+            }
+            caseInsensitiveSymbolSetIndexer = new SymbolSetIndexer(
+                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), originalMatchType, allCharactersRange)
+            );
+        }
+        return caseInsensitiveSymbolSetIndexer;
+    }
+
+    private static void addIfChangedCase(List<Character> caseInsensitiveSymbols, char c) {
+        if (Character.isUpperCase(c)) {
+            caseInsensitiveSymbols.add(Character.toLowerCase(c));
+        } else if (Character.isLowerCase(c)) {
+            caseInsensitiveSymbols.add(Character.toUpperCase(c));
+        }
+    }
+
+    public boolean isAscii() {
+        return isAscii;
+    }
+
+    public List<SymbolRange> getSymbolRanges() {
+        return symbolRanges;
+    }
+
+    public List<Character> getSymbols() {
+        return symbols;
     }
 
     @Override
     public String toString() {
-        return "SymbolSet{" + Arrays.toString(getOrInitSymbols()) + '}';
-    }
-
-    public boolean isEmpty() {
-        return getOrInitSymbols().length == 0;
+        return "SymbolSet{" +
+                "originalMatchType=" + originalMatchType +
+                ", isAscii=" + isAscii +
+                ", symbolRanges=" + symbolRanges +
+                ", symbols=" + symbols +
+                '}';
     }
 }

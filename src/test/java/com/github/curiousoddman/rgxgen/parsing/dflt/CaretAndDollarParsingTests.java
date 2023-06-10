@@ -77,7 +77,7 @@ public class CaretAndDollarParsingTests {
                                                                                        new Choice("(^a|^b)",
                                                                                                   new FinalSymbol("a"),
                                                                                                   new FinalSymbol("b")))))),
-                         new TestCase("(^a)+", Repeat.minimum("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1)), // Correctly matches first a in string "aaaa"
+                         new TestCase("(^a)+", Repeat.minimum("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1)), // Correctly matches first 'a' in string "aaaa"
                          new TestCase("(b$)+", Repeat.minimum("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1)), // Correctly matches last b letter in "bbbb"
                          new TestCase("a$\n^b", new FinalSymbol("a\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
                          new TestCase("a\n^b", new FinalSymbol("a\nb")),

@@ -50,9 +50,9 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     @Override
     public void visit(SymbolSet node) {
         if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
-            aIterators.add(new ArrayIteratorSupplier(node.getSymbolsCaseInsensitive()));
+            aIterators.add(new IndexIteratorSupplier(node.getCaseInsensitiveSymbolSetIndexer()));
         } else {
-            aIterators.add(new ArrayIteratorSupplier(node.getSymbols()));
+            aIterators.add(new IndexIteratorSupplier(node.getSymbolSetIndexer()));
         }
     }
 

@@ -29,7 +29,7 @@ public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGene
 
     @Override
     public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbolsCaseInsensitive);
+        visitSymbolSet(node, SymbolSet::getCaseInsensitiveSymbolSetIndexer);
     }
 
     @Override

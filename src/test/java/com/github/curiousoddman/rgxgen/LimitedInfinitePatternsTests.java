@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
 public class LimitedInfinitePatternsTests {
     public static Stream<Arguments> getTestData() {
         return Stream.of(
-                Arguments.of(
+                arguments(
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
@@ -34,7 +35,7 @@ public class LimitedInfinitePatternsTests {
                                                       .reduce("", String::concat))
                                  .collect(Collectors.toList())
                 ),
-                Arguments.of(
+                arguments(
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
@@ -44,13 +45,13 @@ public class LimitedInfinitePatternsTests {
                                                             .reduce("", String::concat))
                                  .collect(Collectors.toList())
                 ),
-                Arguments.of(
+                arguments(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSet.ofAsciiDotPattern(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(makeAsciiCharacterArray()),
                                                                    Arrays.stream(makeAsciiCharacterArray())
                                                                          .flatMap(symbol -> Arrays.stream(makeAsciiCharacterArray())
-                                                                                                  .map(v -> "" + symbol + v))))
+                                                                                                  .map(v -> String.valueOf(symbol) + v))))
                               .map(v -> "" + 'a' + v)
                               .collect(Collectors.toList())
                 )
