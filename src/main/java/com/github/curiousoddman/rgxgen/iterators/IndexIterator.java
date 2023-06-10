@@ -21,38 +21,38 @@ import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 import java.util.NoSuchElementException;
 
 public class IndexIterator implements StringIterator {
-    private final int              aMaxIndex;
+    private final int              maxIndex;
     private final SymbolSetIndexer symbolSetIndexer;
 
-    private int aIndex = -1;
+    private int index = -1;
 
     public IndexIterator(SymbolSetIndexer symbolSetIndexer) {
         this.symbolSetIndexer = symbolSetIndexer;
-        aMaxIndex = symbolSetIndexer.size() - 1;        // Because of prefix increment in nextImpl()
+        maxIndex = symbolSetIndexer.size() - 1;        // Because of prefix increment in nextImpl()
     }
 
     @Override
     public boolean hasNext() {
-        return aIndex < aMaxIndex;
+        return index < maxIndex;
     }
 
     @Override
     public String next() {
-        ++aIndex;
-        if (aIndex >= symbolSetIndexer.size()) {
+        ++index;
+        if (index >= symbolSetIndexer.size()) {
             throw new NoSuchElementException("Not enough elements in arrays");
         } else {
-            return String.valueOf(symbolSetIndexer.get(aIndex));
+            return String.valueOf(symbolSetIndexer.get(index));
         }
     }
 
     @Override
     public void reset() {
-        aIndex = -1;
+        index = -1;
     }
 
     @Override
     public String current() {
-        return String.valueOf(symbolSetIndexer.get(aIndex));
+        return String.valueOf(symbolSetIndexer.get(index));
     }
 }
