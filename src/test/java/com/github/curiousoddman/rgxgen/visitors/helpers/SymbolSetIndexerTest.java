@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,12 +22,15 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class SymbolSetIndexerTest {
 
+    public static final SymbolRange RANGE_OUTSIDE_OF_SYMBOLS = range(0x1000, 0x2000);
+
     public static Stream<Arguments> getSymbolSets() {
         return Stream.of(
                 arguments("Single Range", symbolSet(range('a', 'd')), 4, asList('a', 'b', 'c', 'd')),
                 arguments("Several Ranges", symbolSet(range('a', 'd'), range('k', 'l'), range('x', 'z')), 9, asList('a', 'b', 'c', 'd', 'k', 'l', 'x', 'y', 'z')),
                 arguments("Several characters", symbolSet('a', 'd', 'k', 't', 'x', 'z'), 6, asList('a', 'd', 'k', 't', 'x', 'z')),
-                arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList( '1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z'))
+                arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList( '1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z')),
+                arguments("Unicode Ranges", negativeSymbolSet(asList(range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 1), RANGE_OUTSIDE_OF_SYMBOLS)), 1, asList())
         );
     }
 
@@ -41,6 +44,10 @@ class SymbolSetIndexerTest {
 
     private static SymbolSet symbolSet(List<SymbolRange> ranges, Character... characters) {
         return SymbolSet.ofAscii("", ranges, characters, MatchType.POSITIVE);
+    }
+
+    private static SymbolSet negativeSymbolSet(List<SymbolRange> ranges, Character... characters) {
+        return SymbolSet.ofAscii("", ranges, characters, MatchType.NEGATIVE);
     }
 
     @ParameterizedTest(name = "{index}: {0}")
