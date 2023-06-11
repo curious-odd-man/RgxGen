@@ -34,8 +34,6 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZER
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-
-
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
     private final RgxGenProperties   properties;

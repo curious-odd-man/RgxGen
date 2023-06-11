@@ -43,10 +43,6 @@ public class RgxGenCharsDefinition {
         return new RgxGenCharsDefinition(Collections.emptyList(), Arrays.asList(characters));
     }
 
-    public static RgxGenCharsDefinition of(List<SymbolRange> ranges, List<Character> characters) {
-        return new RgxGenCharsDefinition(ranges, characters);
-    }
-
     public static RgxGenCharsDefinition of(CharSequence characterString) {
         List<Character> characterList = characterString.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
         List<SymbolRange> compactedRanges = new ArrayList<>();
@@ -55,9 +51,19 @@ public class RgxGenCharsDefinition {
         return new RgxGenCharsDefinition(compactedRanges, compactedSymbols);
     }
 
+    public RgxGenCharsDefinition withRanges(SymbolRange... ranges) {
+        rangeList.addAll(Arrays.asList(ranges));
+        return this;
+    }
+
+    public RgxGenCharsDefinition withCharacters(Character... characters) {
+        this.characters.addAll(Arrays.asList(characters));
+        return this;
+    }
+
     private RgxGenCharsDefinition(List<SymbolRange> rangeList, List<Character> characters) {
-        this.rangeList = rangeList;
-        this.characters = characters;
+        this.rangeList = new ArrayList<>(rangeList);
+        this.characters = new ArrayList<>(characters);
     }
 
     public List<SymbolRange> getRangeList() {
