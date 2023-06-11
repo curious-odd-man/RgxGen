@@ -1,14 +1,14 @@
 package com.github.curiousoddman.rgxgen.data;
 
+import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import com.github.curiousoddman.rgxgen.model.MatchType;
-import com.github.curiousoddman.rgxgen.model.SymbolRange;
-
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;

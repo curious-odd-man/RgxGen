@@ -2,12 +2,13 @@ package com.github.curiousoddman.rgxgen.model;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;

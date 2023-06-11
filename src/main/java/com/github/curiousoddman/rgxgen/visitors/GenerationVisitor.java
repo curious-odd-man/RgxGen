@@ -32,8 +32,8 @@ public class GenerationVisitor implements NodeVisitor {
 
     protected final StringBuilder        aStringBuilder = new StringBuilder();
     protected final Map<Integer, String> aGroupValues;
-    protected final Random           aRandom;
-    protected final RgxGenProperties properties;
+    protected final Random               aRandom;
+    protected final RgxGenProperties     properties;
 
     protected GenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         aRandom = random;

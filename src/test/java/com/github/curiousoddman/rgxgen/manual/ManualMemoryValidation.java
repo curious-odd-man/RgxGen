@@ -36,7 +36,7 @@ public class ManualMemoryValidation {
                                             .collect(Collectors.toList());
         Future<?> submit = executorService.submit(() -> {
             RgxGen rgxGen = RgxGen.parse(data.get(2)
-                                           .toString());
+                                             .toString());
             while (!Thread.currentThread()
                           .isInterrupted()) {
                 rgxGen.generate();

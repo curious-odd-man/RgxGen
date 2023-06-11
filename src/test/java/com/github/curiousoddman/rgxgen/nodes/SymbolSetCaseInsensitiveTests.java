@@ -1,7 +1,6 @@
 package com.github.curiousoddman.rgxgen.nodes;
 
 import com.github.curiousoddman.rgxgen.model.MatchType;
-
 import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
