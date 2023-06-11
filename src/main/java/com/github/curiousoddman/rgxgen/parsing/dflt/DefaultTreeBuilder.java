@@ -34,9 +34,7 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZER
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private static final Character[] SINGLETON_UNDERSCORE_ARRAY = {'_'};
-    private static final int         HEX_RADIX                  = 16;
-    private static final Node[]      EMPTY_NODES_ARR            = new Node[0];
+
 
     private final CharIterator       aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
@@ -335,7 +333,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             hexValue = aCharIterator.next(2);
         }
-        return Integer.parseInt(hexValue, HEX_RADIX);
+        return Integer.parseInt(hexValue, ConstantsProvider.HEX_RADIX);
     }
 
     /**
@@ -346,7 +344,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private int parseUnicode() {
         String hexValue = aCharIterator.next(4);
-        return Integer.parseInt(hexValue, HEX_RADIX);
+        return Integer.parseInt(hexValue, ConstantsProvider.HEX_RADIX);
     }
 
     /**
@@ -401,7 +399,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, properties, ConstantsProvider.getAsciiWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, properties, ConstantsProvider.getAsciiWordCharRanges(), ConstantsProvider.SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -578,12 +576,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 if (choices.isEmpty()) {
                     throw new RgxGenParseException("Empty nodes");
                 }
-                resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(EMPTY_NODES_ARR));
+                resultNode = new Choice(aCharIterator.substringToCurrPos(startPos), choices.toArray(ConstantsProvider.EMPTY_NODES_ARR));
             } else {
                 if (nodes.isEmpty()) {
                     throw new RgxGenParseException("Empty nodes");
                 }
-                resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(EMPTY_NODES_ARR));
+                resultNode = new Sequence(aCharIterator.substringToCurrPos(startPos), nodes.toArray(ConstantsProvider.EMPTY_NODES_ARR));
             }
         }
 
