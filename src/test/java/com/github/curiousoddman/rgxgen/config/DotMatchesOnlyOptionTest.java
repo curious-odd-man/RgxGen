@@ -19,15 +19,19 @@ package com.github.curiousoddman.rgxgen.config;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.config.model.RgxGenCharsDefinition;
+import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class DotMatchesOnlyOptionTest {
 
+
+    public static final int COUNT_OF_ITERATIONS = 1000;
 
     @Test
     void doesNotFailWithoutPropertySet() {
@@ -43,10 +47,36 @@ class DotMatchesOnlyOptionTest {
         String permittedCharacters = "abc";
         RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(permittedCharacters));
         Random random = new Random(100500);
-        RgxGen rgxGen = RgxGen.parse(".");
-        for (int i = 0; i < 100; i++) {
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generatedValue = rgxGen.generate(random);
             assertTrue(permittedCharacters.contains(generatedValue));
+        }
+    }
+
+    @Test
+    void verifyUnicodeGenerationTest() {
+        RgxGenProperties properties = new RgxGenProperties();
+        Pattern pattern = Pattern.compile("\\p{InCyrillic}");
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(UnicodeCategory.IN_CYRILLIC));
+        Random random = new Random(100500);
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
+            String generatedValue = rgxGen.generate(random);
+            assertTrue(pattern.matcher(generatedValue).matches());
+        }
+    }
+
+    @Test
+    void verifyUnicodeGenerationNotMatchingTest() {
+        RgxGenProperties properties = new RgxGenProperties();
+        Pattern pattern = Pattern.compile("\\p{InCyrillic}");
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(UnicodeCategory.IN_CYRILLIC));
+        Random random = new Random(100500);
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
+            String generatedValue = rgxGen.generateNotMatching(random);
+            assertFalse(pattern.matcher(generatedValue).matches());
         }
     }
 
@@ -57,8 +87,8 @@ class DotMatchesOnlyOptionTest {
         RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of("abc"));
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         Random random = new Random(100500);
-        RgxGen rgxGen = RgxGen.parse(".");
-        for (int i = 0; i < 100; i++) {
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generatedValue = rgxGen.generate(random);
             assertTrue(permittedCharacters.contains(generatedValue));
         }
@@ -69,7 +99,17 @@ class DotMatchesOnlyOptionTest {
         RgxGenProperties properties = new RgxGenProperties();
         String permittedCharacters = "abc";
         RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(permittedCharacters));
-        RgxGen rgxGen = RgxGen.parse(".");
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
         assertEquals(BigInteger.valueOf(3), rgxGen.getUniqueEstimation().get());
+    }
+
+    @Test
+    void verifyCorrectlyEstimatesCaseInsensitiveCountTest() {
+        RgxGenProperties properties = new RgxGenProperties();
+        String permittedCharacters = "abc";
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(permittedCharacters));
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        assertEquals(BigInteger.valueOf(6), rgxGen.getUniqueEstimation().get());
     }
 }

@@ -270,7 +270,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern(properties);
+        SymbolSet symbolSet = SymbolSet.ofDotPattern(properties);
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }

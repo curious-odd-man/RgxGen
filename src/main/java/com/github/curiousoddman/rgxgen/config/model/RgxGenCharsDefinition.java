@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.config.model;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.ArrayList;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class RgxGenCharsDefinition {
     private final List<SymbolRange> rangeList;
@@ -64,6 +66,14 @@ public class RgxGenCharsDefinition {
     private RgxGenCharsDefinition(List<SymbolRange> rangeList, List<Character> characters) {
         this.rangeList = new ArrayList<>(rangeList);
         this.characters = new ArrayList<>(characters);
+    }
+
+    public boolean isAsciiOnly() {
+        return Stream.concat(
+                             rangeList.stream().map(SymbolRange::getTo),
+                             characters.stream().map(c -> (int) c)
+                     )
+                     .noneMatch(i -> i >= ConstantsProvider.DEL_ASCII_CODE);
     }
 
     public List<SymbolRange> getRangeList() {

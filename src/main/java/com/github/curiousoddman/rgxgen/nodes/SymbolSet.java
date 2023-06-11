@@ -41,9 +41,9 @@ import static java.util.Collections.singletonList;
 public class SymbolSet extends Node {
     private final   MatchType         originalMatchType;
     private final   boolean           isAscii;
-    private final   List<SymbolRange> originalSymbolRanges;
-    private final   List<Character>   originalSymbols;
-    private final   SymbolRange       allCharactersRange;
+    protected final List<SymbolRange> originalSymbolRanges;
+    protected final List<Character>   originalSymbols;
+    protected final SymbolRange       allCharactersRange;
     private final   List<SymbolRange> symbolRanges;
     private final   List<Character>   symbols;
     protected final RgxGenProperties  properties;
@@ -51,16 +51,22 @@ public class SymbolSet extends Node {
     private SymbolSetIndexer symbolSetIndexer;
     private SymbolSetIndexer caseInsensitiveSymbolSetIndexer;
 
-    public static SymbolSet ofAsciiDotPattern(RgxGenProperties properties) {
-        return new DotSymbolSet(properties);
+    public static SymbolSet ofDotPattern(RgxGenProperties properties) {
+        RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromProperties(properties);
+        if (charsDefinition != null) {
+            boolean isAscii = charsDefinition.isAsciiOnly();
+            if (isAscii) {
+                return ofAscii(".", properties, charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
+            } else {
+                return ofUnicode(".", properties, charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
+            }
+        } else {
+            return ofAscii(".", properties, singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
+        }
     }
 
     public static SymbolSet ofAsciiCharacters(String pattern, RgxGenProperties properties, Character[] symbols, MatchType type) {
         return new SymbolSet(pattern, emptyList(), symbols, type, ASCII_SYMBOL_RANGE, properties);
-    }
-
-    public static SymbolSet ofAsciiRanges(String pattern, RgxGenProperties properties, List<SymbolRange> symbolRanges, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, ASCII_SYMBOL_RANGE, properties);
     }
 
     public static SymbolSet ofUnicodeCharacterClass(String pattern, RgxGenProperties properties, UnicodeCategory unicodeCategory, MatchType type) {
@@ -73,33 +79,6 @@ public class SymbolSet extends Node {
 
     public static SymbolSet ofAscii(String pattern, RgxGenProperties properties, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
         return new SymbolSet(pattern, symbolRanges, symbols, type, ASCII_SYMBOL_RANGE, properties);
-    }
-
-    public static class DotSymbolSet extends SymbolSet {
-
-        public DotSymbolSet(RgxGenProperties properties) {
-            super(".", emptyList(), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE, SymbolRange.range(0, 0), properties);
-        }
-
-        @Override
-        public List<SymbolRange> getSymbolRanges() {
-            RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromProperties(properties);
-            if (charsDefinition != null) {
-                return charsDefinition.getRangeList();
-            } else {
-                return singletonList(ASCII_SYMBOL_RANGE);
-            }
-        }
-
-        @Override
-        public List<Character> getSymbols() {
-            RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromProperties(properties);
-            if (charsDefinition != null) {
-                return charsDefinition.getCharacters();
-            } else {
-                return emptyList();
-            }
-        }
     }
 
     /**
@@ -131,6 +110,14 @@ public class SymbolSet extends Node {
         }
         originalMatchType = type;
         this.properties = properties;
+    }
+
+    public SymbolSet getInvertedNode() {
+        if (isAscii) {
+            return ofAscii("[^" + getPattern().substring(1), properties, symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+        } else {
+            return ofUnicode("[^" + getPattern().substring(1), properties, symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+        }
     }
 
     @Override

@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.util;
 
-import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
@@ -14,7 +13,7 @@ import static java.util.Collections.emptyList;
 public class SymbolSetTestUtils {
 
     public static SymbolSet ofAsciiDotPattern() {
-        return new SymbolSet.DotSymbolSet(null);
+        return SymbolSet.ofDotPattern(null);
     }
 
     public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
