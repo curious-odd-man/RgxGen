@@ -41,9 +41,8 @@ public class ConstantsProvider {
     public static final int         MAX_UNICODE_CHARACTER       = 0xD800 - 1;       // The start of IN_HIGH_SURROGATES - which cause errors when trying to write those values to file
     public static final SymbolRange ASCII_SYMBOL_RANGE          = SymbolRange.range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 1);  // -1 because we exclude DEL symbol
     public static final SymbolRange UNICODE_SYMBOL_RANGE        = SymbolRange.range(SPACE_ASCII_CODE, MAX_UNICODE_CHARACTER);
-    static final        Character[] SINGLETON_UNDERSCORE_ARRAY  = {'_'};
-    static final        int         HEX_RADIX                   = 16;
-    static final        Node[]      EMPTY_NODES_ARR             = new Node[0];
+    public static final int         HEX_RADIX                   = 16;
+    public static final Node[]      EMPTY_NODES_ARR             = new Node[0];
 
     public static Character[] getDigits() {
         return IntStream.rangeClosed('0', '9')
