@@ -38,7 +38,7 @@ public class TmpCompleteTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void generateTest(String name, boolean useFind, String pattern, int seed) {
-        RgxGen rgxGen = new RgxGen(pattern);
+        RgxGen rgxGen = RgxGen.parse(pattern);
         String s = rgxGen.generate(TestingUtilities.newRandom(seed));
         System.out.println("Matching: '" + s + "'");
         assertTrue(matches(s, pattern, useFind), "Text: '" + s + "' does not match pattern " + pattern);
@@ -47,7 +47,7 @@ public class TmpCompleteTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void generateNotMatchingTest(String name, boolean useFind, String pattern, int seed) {
-        RgxGen rgxGen = new RgxGen(pattern);
+        RgxGen rgxGen = RgxGen.parse(pattern);
         String s = rgxGen.generateNotMatching(TestingUtilities.newRandom(seed));
         System.out.println("Not Matching: '" + s + "'");
         assertFalse(matches(s, pattern, useFind), "Text: '" + s + "' does not match pattern " + pattern);

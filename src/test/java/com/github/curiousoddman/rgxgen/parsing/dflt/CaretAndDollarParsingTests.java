@@ -168,7 +168,7 @@ public class CaretAndDollarParsingTests {
     @ParameterizedTest
     @MethodSource("data")
     public void parseTest(TestCase aTestCase) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.getPattern());
+        NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.getPattern(), null);
         Exception expectedException = aTestCase.getException();
 
         if (expectedException == null) {

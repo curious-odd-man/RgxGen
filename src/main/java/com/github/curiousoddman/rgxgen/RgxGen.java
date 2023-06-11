@@ -19,7 +19,6 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
@@ -35,72 +34,35 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-    private static RgxGenProperties aGlobalProperties;
 
-    private final Node aNode;
+    private final Node node;
 
-    private RgxGenProperties aLocalProperties = aGlobalProperties;
-
-    /**
-     * Set default properties for RgxGen.
-     * Each new instance of RgxGen will use these properties as a backup, if property is not set per instance.
-     *
-     * @param properties configuration properties. Set {@code null} to reset.
-     * @apiNote Existing instances will not be affected. Only those, that will be created after this call.
-     * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
-     */
-    public static void setDefaultProperties(RgxGenProperties properties) {
-        aGlobalProperties = properties;
-    }
+    private final RgxGenProperties properties;
 
     /**
      * Parse pattern using DefaultTreeBuilder.
      *
      * @param pattern regex pattern for values generation
      */
-    public RgxGen(CharSequence pattern) {
-        this(new DefaultTreeBuilder(pattern.toString()));
+    public static RgxGen parse(CharSequence pattern) {
+        return RgxGen.parse(null, pattern);
     }
 
     /**
-     * Parse regex pattern using provided builder and prepare to generate values
+     * Set properties to be used in parsing and generation.
      *
-     * @param builder node tree builder implementation
-     */
-    public RgxGen(NodeTreeBuilder builder) {
-        aNode = builder.get();
-    }
-
-    /**
-     * Set properties for the instance of RgxGen.
-     * These options will override default values set by either {@code setDefaultProperties} or default hardcoded.
-     *
-     * @param properties configuration properties. Set {@code null} to reset.
+     * @param rgxGenProperties configuration properties.
+     * @param pattern          regex pattern for values generation
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
-    public void setProperties(RgxGenProperties properties) {
-        aLocalProperties = properties;
-        if (aLocalProperties == null) {
-            aLocalProperties = aGlobalProperties;
-        } else {
-            aLocalProperties.setDefaults(aGlobalProperties);
-        }
+    public static RgxGen parse(RgxGenProperties rgxGenProperties, CharSequence pattern) {
+        return new RgxGen(rgxGenProperties, pattern);
     }
 
-    /**
-     * Returns estimation of unique values that can be generated with the pattern.
-     *
-     * @return number of unique values or null, if infinite
-     * @apiNote This might not be accurate! For example the pattern "(a{0,2}|b{0,2})" will estimate to 6,
-     * though actual count is only 5, because right and left part of group can yield same value
-     * @deprecated use {@link #getUniqueEstimation()} instead
-     */
-    @Deprecated
-    public BigInteger numUnique() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
-        aNode.visit(v);
-        return v.getEstimation()
-                .orElse(null);
+    private RgxGen(RgxGenProperties properties, CharSequence pattern) {
+        this.properties = properties;
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern.toString(), this.properties);
+        node = defaultTreeBuilder.get();
     }
 
     /**
@@ -111,8 +73,8 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public Optional<BigInteger> getUniqueEstimation() {
-        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(aLocalProperties);
-        aNode.visit(v);
+        UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(properties);
+        node.visit(v);
         return v.getEstimation();
     }
 
@@ -132,8 +94,8 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
-        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(aLocalProperties);
-        aNode.visit(ugv);
+        UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(properties);
+        node.visit(ugv);
         return ugv.getUniqueStrings();
     }
 
@@ -156,9 +118,9 @@ public class RgxGen {
     public String generate(Random random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
-                                                .withProperties(aLocalProperties)
+                                                .withProperties(properties)
                                                 .get();
-        aNode.visit(gv);
+        node.visit(gv);
         return gv.getString();
     }
 
@@ -182,7 +144,7 @@ public class RgxGen {
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
                                                              .withRandom(random)
                                                              .get();
-        aNode.visit(nmgv);
+        node.visit(nmgv);
         return nmgv.getString();
     }
 }

@@ -27,7 +27,7 @@ public class LookaroundTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void generateTest(String name, String pattern) {
-        RgxGen rgxGen = new RgxGen(pattern);
+        RgxGen rgxGen = RgxGen.parse(pattern);
         for (int i = 0; i < 100; i++) {
             String s = rgxGen.generate();
             assertTrue(Pattern.compile(pattern)
@@ -39,7 +39,7 @@ public class LookaroundTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void generateInfiniteTest(String name, String pattern) {
-        RgxGen rgxGen = new RgxGen(pattern);
+        RgxGen rgxGen = RgxGen.parse(pattern);
         StringIterator stringIterator = rgxGen.iterateUnique();
         for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             String s = stringIterator.next();

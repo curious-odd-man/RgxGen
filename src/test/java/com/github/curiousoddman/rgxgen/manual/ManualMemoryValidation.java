@@ -35,7 +35,7 @@ public class ManualMemoryValidation {
         List<Arguments> data = CompleteTests.getData()
                                             .collect(Collectors.toList());
         Future<?> submit = executorService.submit(() -> {
-            RgxGen rgxGen = new RgxGen(data.get(2)
+            RgxGen rgxGen = RgxGen.parse(data.get(2)
                                            .toString());
             while (!Thread.currentThread()
                           .isInterrupted()) {
@@ -51,7 +51,7 @@ public class ManualMemoryValidation {
         System.out.println("Test 2: Verify that memory grows slowly. Press enter to start test.");
         scanner.nextLine();
         submit = executorService.submit(() -> {
-            RgxGen rgxGen = new RgxGen("(a|b|c)*");
+            RgxGen rgxGen = RgxGen.parse("(a|b|c)*");
             StringIterator stringIterator = rgxGen.iterateUnique();
             while (!Thread.currentThread()
                           .isInterrupted()) {
@@ -76,7 +76,7 @@ public class ManualMemoryValidation {
                 }
                 pattern = iterator.next()
                                   .toString();
-                RgxGen rgxGen = new RgxGen(pattern);
+                RgxGen rgxGen = RgxGen.parse(pattern);
             }
             System.out.println("Test 3 ended;");
         });
