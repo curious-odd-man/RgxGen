@@ -16,6 +16,8 @@ package com.github.curiousoddman.rgxgen.config;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.config.model.RgxGenCharsDefinition;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -36,6 +38,13 @@ public class RgxGenOption<T> {
      * @defaultValue false
      */
     public static final RgxGenOption<Boolean> CASE_INSENSITIVE = new RgxGenOption<>("matching.case.insensitive", false);
+
+    /**
+     * Choose which characters dot pattern could generate.
+     *
+     * @defaultValue null
+     */
+    public static final RgxGenOption<RgxGenCharsDefinition> DOT_MATCHES_ONLY = new RgxGenOption<>("dot.matches.only", null);
 
     private final String key;
     private final T      defaultValue;
@@ -86,7 +95,6 @@ public class RgxGenOption<T> {
      *
      * @param properties properties to add to
      * @param value      a value
-     * @param <T>        type of value
      */
     public void setInProperties(RgxGenProperties properties, T value) {
         Objects.requireNonNull(value);

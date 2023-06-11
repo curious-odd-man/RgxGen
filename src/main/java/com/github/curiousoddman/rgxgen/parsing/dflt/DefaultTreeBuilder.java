@@ -18,11 +18,11 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.GroupType;
-import com.github.curiousoddman.rgxgen.nodes.*;
-import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
@@ -270,7 +270,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern();
+        SymbolSet symbolSet = SymbolSet.ofDotPattern(properties);
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
@@ -397,7 +397,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), ConstantsProvider.SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), new Character[]{'_'}, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -691,7 +691,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
         List<Character> characters = new ArrayList<>();
         List<SymbolRange> symbolRanges = new ArrayList<>(externalRanges);
         if (sb.length() > 0) {

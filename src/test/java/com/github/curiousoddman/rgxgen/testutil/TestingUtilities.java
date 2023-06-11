@@ -2,10 +2,14 @@ package com.github.curiousoddman.rgxgen.testutil;
 
 
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.IntStream;
 
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.MAX_UNICODE_CHARACTER;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.SPACE_ASCII_CODE;
 
 public final class TestingUtilities {
     public static final BigInteger BIG_INTEGER_MINUS_ONE = BigInteger.valueOf(-1);

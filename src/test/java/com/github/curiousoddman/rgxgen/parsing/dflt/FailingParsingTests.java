@@ -79,7 +79,7 @@ public class FailingParsingTests {
             assertEquals("Unknown repetition character 'x'\n" +
                                  "'a{1,'\n" +
                                  "^", cause.getMessage());
-          //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);
+            //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
             fail("Unexpected exception: " + e);

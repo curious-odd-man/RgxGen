@@ -8,7 +8,6 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import com.github.curiousoddman.rgxgen.util.SymbolSetTestUtils;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -30,14 +29,14 @@ public class NotMatchingGenerationTests {
 
     private static Collection<Object[]> initialData() {
         return Arrays.asList(new Object[][]{
-                {"[a-z0-5]", SymbolSetTestUtils.ofAsciiRanges("[a-z0-5]", Arrays.asList(SymbolRange.range('a', 'z'), SymbolRange.range('0', '5')), MatchType.POSITIVE)},
+                {"[a-z0-5]", SymbolSet.ofAsciiRanges("[a-z0-5]", Arrays.asList(SymbolRange.range('a', 'z'), SymbolRange.range('0', '5')), MatchType.POSITIVE)},
                 {"abc|def", new Choice("abc|def", new FinalSymbol("abc"), new FinalSymbol("def"))},
                 {"helloworld", new FinalSymbol("helloworld")},
                 {"a{2,3}", new Repeat("a{2,3}", new FinalSymbol("a"), 2, 3)},
                 {"a[a-z]", new Sequence("a[a-z]", new FinalSymbol("a"),
-                                        SymbolSetTestUtils.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
+                                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
                 {"([a-z])\\1", new Sequence("([a-z])\\1", new Group("([a-z])", 1,
-                                                                    SymbolSetTestUtils.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
+                                                                    SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
                                             new GroupRef("\\1", 1)
                 )},
                 {"foo(?!bar)", new Sequence("foo(?!bar)",

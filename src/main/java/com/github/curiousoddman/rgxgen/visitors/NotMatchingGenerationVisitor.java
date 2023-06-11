@@ -17,7 +17,6 @@ package com.github.curiousoddman.rgxgen.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
-import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
@@ -30,7 +29,6 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZERO_LENGTH_CHARACTER_ARRAY;
 
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
@@ -50,14 +48,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, SymbolSetIndexer> indexerFunction) {
-        String pattern = node.getPattern();
-
-        SymbolSet invertedNode;
-        if (node.isAscii()) {
-            invertedNode = SymbolSet.ofAscii("[^" + pattern.substring(1), node.getSymbolRanges(), node.getSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
-        } else {
-            invertedNode = SymbolSet.ofUnicode("[^" + pattern.substring(1), node.getSymbolRanges(), node.getSymbols().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
-        }
+        SymbolSet invertedNode = node.getInvertedNode();
         SymbolSetIndexer indexer = indexerFunction.apply(invertedNode);
         // There is only one way to generate not matching for any character - is to not generate anything
         if (indexer.size() != 0) {

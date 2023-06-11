@@ -76,9 +76,11 @@ Changes in snapshot:
 
 - Support for Character Classes `\p{...}` and `\P{...}`
   patterns. [#76](https://github.com/curious-odd-man/RgxGen/issues/73)
+- Configurable any character (dot) pattern [#83](https://github.com/curious-odd-man/RgxGen/issues/83)
 - API changed:
-  - No global configuration properties
-  - Factory methods to create instance of RgxGen - see examples
+    - No global configuration properties
+    - Factory methods to create instance of RgxGen - see examples
+
 ---
 
 ### Code:
@@ -116,7 +118,7 @@ public class Main {
 
 |                        Pattern | Description                                                                                                                                                                                |
 |-------------------------------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|                            `.` | Any symbol                                                                                                                                                                                 |
+|                            `.` | Any symbol. See below details - `Dot pattern generated symbols` section.                                                                                                                   |
 |                            `?` | One or zero occurrences                                                                                                                                                                    |
 |                            `+` | One or more occurrences                                                                                                                                                                    |
 |                            `*` | Zero or more occurrences                                                                                                                                                                   |
@@ -180,6 +182,28 @@ public class Main {
 
 ## Limitations
 
+### Dot pattern generated symbols
+
+In regex dot `.` means any symbol.
+
+By default, this would generate any value in a range defined in `ASCII_SYMBOL_RANGE`
+here [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+i.e.: any character starting from `space` to `~`.
+
+You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
+
+For example:  
+```java
+public class Main {
+    public static void main(String[] args) {
+        RgxGenProperties properties = new RgxGenProperties();
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of("abc"));
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        String generatedValue = rgxGen.generate();      // Will produce either "a" or "b" or "c".
+    }
+}
+```
+
 ### Lookahead and Lookbehind
 
 Currently, these two have very limited support. Please refer
@@ -223,7 +247,7 @@ I chose these approaches because they seem predictable and easier to implement.
 
 #### Which values are used in non-matching generation
 
-Whenever non-matching result is requested, with either `new RgxGen(".").generateNotMatching()` method or with pattern,
+Whenever non-matching result is requested, with either `RgxGen.parse(".").generateNotMatching()` method or with pattern,
 like `"[^a-z]"` - there is a choice in generator which are characters that do not match mentioned characters.
 For example - for `"[^a-z]"` - any unicode character except the ones in a range `a-z` would be ok. Though that would
 include non-printable, all kinds of blank characters and all the different wierd unicode characters. I expect that this
@@ -242,7 +266,7 @@ By default `ASCII_SYMBOL_RANGE` is used.
 
 To generate not matching characters I take one of the aforementioned constant ranges and subtract characters provided in
 pattern - resulting range is the one that is used for non-matching generation.
-For example for pattern `"[^a-z]"` `ASCII_SYMBOL_RANGE` will be used as a universe. 
+For example for pattern `"[^a-z]"` `ASCII_SYMBOL_RANGE` will be used as a universe.
 The result then will be `ASCII_SYMBOL_RANGE` except `A-z` = `space - @` union `{ - ~`
 
 ### Unicode Categories
