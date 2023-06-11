@@ -46,39 +46,41 @@ public class SymbolSet extends Node {
     protected final SymbolRange       allCharactersRange;
     private final   List<SymbolRange> symbolRanges;
     private final   List<Character>   symbols;
-    protected final RgxGenProperties  properties;
-
-    private SymbolSetIndexer symbolSetIndexer;
-    private SymbolSetIndexer caseInsensitiveSymbolSetIndexer;
+    private         SymbolSetIndexer  symbolSetIndexer;
+    private         SymbolSetIndexer  caseInsensitiveSymbolSetIndexer;
 
     public static SymbolSet ofDotPattern(RgxGenProperties properties) {
         RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromProperties(properties);
         if (charsDefinition != null) {
             boolean isAscii = charsDefinition.isAsciiOnly();
             if (isAscii) {
-                return ofAscii(".", properties, charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
+                return ofAscii(".", charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
             } else {
-                return ofUnicode(".", properties, charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
+                return ofUnicode(".", charsDefinition.getRangeList(), charsDefinition.getCharacters().toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.POSITIVE);
             }
         } else {
-            return ofAscii(".", properties, singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
+            return ofAscii(".", singletonList(ASCII_SYMBOL_RANGE), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
         }
     }
 
-    public static SymbolSet ofAsciiCharacters(String pattern, RgxGenProperties properties, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, emptyList(), symbols, type, ASCII_SYMBOL_RANGE, properties);
+    public static SymbolSet ofAsciiCharacters(String pattern, Character[] symbols, MatchType type) {
+        return new SymbolSet(pattern, emptyList(), symbols, type, ASCII_SYMBOL_RANGE);
     }
 
-    public static SymbolSet ofUnicodeCharacterClass(String pattern, RgxGenProperties properties, UnicodeCategory unicodeCategory, MatchType type) {
-        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, UNICODE_SYMBOL_RANGE, properties);
+    public static SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType type) {
+        return new SymbolSet(pattern, unicodeCategory.getSymbolRanges(), unicodeCategory.getSymbols(), type, UNICODE_SYMBOL_RANGE);
     }
 
-    public static SymbolSet ofUnicode(String pattern, RgxGenProperties properties, List<SymbolRange> symbolRanges, Character[] characters, MatchType matchType) {
-        return new SymbolSet(pattern, symbolRanges, characters, matchType, UNICODE_SYMBOL_RANGE, properties);
+    public static SymbolSet ofUnicode(String pattern, List<SymbolRange> symbolRanges, Character[] characters, MatchType matchType) {
+        return new SymbolSet(pattern, symbolRanges, characters, matchType, UNICODE_SYMBOL_RANGE);
     }
 
-    public static SymbolSet ofAscii(String pattern, RgxGenProperties properties, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
-        return new SymbolSet(pattern, symbolRanges, symbols, type, ASCII_SYMBOL_RANGE, properties);
+    public static SymbolSet ofAscii(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, symbols, type, ASCII_SYMBOL_RANGE);
+    }
+
+    public static SymbolSet ofAsciiRanges(String pattern, List<SymbolRange> symbolRanges, MatchType type) {
+        return new SymbolSet(pattern, symbolRanges, ZERO_LENGTH_CHARACTER_ARRAY, type, ASCII_SYMBOL_RANGE);
     }
 
     /**
@@ -89,7 +91,7 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    public SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange, RgxGenProperties properties) {
+    public SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
         super(pattern);
 
         isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;
@@ -109,14 +111,13 @@ public class SymbolSet extends Node {
             Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, allCharactersRange, this.symbolRanges, this.symbols);
         }
         originalMatchType = type;
-        this.properties = properties;
     }
 
     public SymbolSet getInvertedNode() {
         if (isAscii) {
-            return ofAscii("[^" + getPattern().substring(1), properties, symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+            return ofAscii("[^" + getPattern().substring(1), symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         } else {
-            return ofUnicode("[^" + getPattern().substring(1), properties, symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
+            return ofUnicode("[^" + getPattern().substring(1), symbolRanges, symbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), MatchType.NEGATIVE);
         }
     }
 
@@ -144,7 +145,7 @@ public class SymbolSet extends Node {
                 }
             }
             caseInsensitiveSymbolSetIndexer = new SymbolSetIndexer(
-                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), originalMatchType, allCharactersRange, properties)
+                    new SymbolSet(getPattern(), originalSymbolRanges, caseInsensitiveSymbols.toArray(ZERO_LENGTH_CHARACTER_ARRAY), originalMatchType, allCharactersRange)
             );
         }
         return caseInsensitiveSymbolSetIndexer;

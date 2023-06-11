@@ -385,19 +385,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, properties, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, properties, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, properties, ConstantsProvider.getAsciiWordCharRanges(), ConstantsProvider.SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), ConstantsProvider.SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -456,7 +456,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
         String pattern = "\\" + c + '{' + characterClassKey + '}';
-        return SymbolSet.ofUnicodeCharacterClass(pattern, properties, unicodeCategory, matchType);
+        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, matchType);
     }
 
     private String getCharacterClassKey() {
@@ -691,7 +691,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
         List<Character> characters = new ArrayList<>();
         List<SymbolRange> symbolRanges = new ArrayList<>(externalRanges);
         if (sb.length() > 0) {
@@ -707,9 +707,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (isAscii) {
-            return SymbolSet.ofAscii(pattern, properties, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+            return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
         } else {
-            return SymbolSet.ofUnicode(pattern, properties, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+            return SymbolSet.ofUnicode(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
         }
     }
 

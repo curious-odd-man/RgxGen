@@ -3,7 +3,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
-import com.github.curiousoddman.rgxgen.util.SymbolSetTestUtils;
+
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SquareBracketsParsingTests {
 
     private static SymbolSet mkSS(Character... chars) {
-        return SymbolSetTestUtils.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
+        return SymbolSet.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
     }
 
     public static Stream<Arguments> data() {
