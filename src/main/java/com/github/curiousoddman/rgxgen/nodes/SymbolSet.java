@@ -16,8 +16,6 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.config.RgxGenOption;
-import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
