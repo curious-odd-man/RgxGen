@@ -59,4 +59,12 @@ public class RgxGenCharsDefinition {
         this.rangeList = rangeList;
         this.characters = characters;
     }
+
+    public List<SymbolRange> getRangeList() {
+        return rangeList;
+    }
+
+    public List<Character> getCharacters() {
+        return characters;
+    }
 }

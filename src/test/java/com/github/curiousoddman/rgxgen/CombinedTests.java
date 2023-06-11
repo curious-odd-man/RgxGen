@@ -32,7 +32,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void parseTest(TestPattern testPattern) {
-        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern());
+        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), null);
         Node node = defaultTreeBuilder.get();
         assertEquals(testPattern.getResultNode().toString(), node.toString());
         NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(testPattern.getResultNode());
@@ -53,7 +53,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @MethodSource("getPatterns")
     public void countUniqueTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
+        RgxGen rgxGen = RgxGen.parse(testPattern.getPattern());
         assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
@@ -70,7 +70,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void classRgxGenTest(TestPattern testPattern) {
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
+        RgxGen rgxGen = RgxGen.parse(testPattern.getPattern());
         if (testPattern.hasEstimatedCount()) {
             assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
         }
@@ -87,10 +87,9 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void classRgxGenCaseInsensitiveTest(TestPattern testPattern) {
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
 
         for (int i = 0; i < 100; i++) {
             Random random = TestingUtilities.newRandom(i);

@@ -51,10 +51,9 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
-        RgxGen rgxGen = new RgxGen(data.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
@@ -68,10 +67,9 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
-        RgxGen rgxGen = new RgxGen(data.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
@@ -88,7 +86,7 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
-        RgxGen rgxGen = new RgxGen(data.getPattern());
+        RgxGen rgxGen = RgxGen.parse(data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
@@ -103,7 +101,7 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);
-        RgxGen rgxGen = new RgxGen(data.getPattern());
+        RgxGen rgxGen = RgxGen.parse(data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);

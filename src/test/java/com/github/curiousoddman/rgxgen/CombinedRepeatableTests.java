@@ -41,8 +41,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         Random rnd1 = TestingUtilities.newRandom(aSeed);
         Random rnd2 = TestingUtilities.newRandom(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(testPattern.getPattern());
-        RgxGen rgxGen_2 = new RgxGen(testPattern.getPattern());
+        RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
+        RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());
         assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
     }
 
@@ -66,8 +66,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         Random rnd1 = TestingUtilities.newRandom(aSeed);
         Random rnd2 = TestingUtilities.newRandom(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(testPattern.getPattern());
-        RgxGen rgxGen_2 = new RgxGen(testPattern.getPattern());
+        RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
+        RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());
         assertEquals(rgxGen_1.generateNotMatching(rnd1), rgxGen_2.generateNotMatching(rnd2));
     }
 }

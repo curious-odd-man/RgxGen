@@ -55,7 +55,7 @@ public class FailingParsingTests {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getData")
     void incorrectPatternTest(String name, String pattern, String expectedExceptionText) {
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
         RgxGenParseException exception = assertThrows(RgxGenParseException.class, defaultTreeBuilder::build);
         assertEquals(expectedExceptionText, exception.getMessage());
     }
@@ -65,7 +65,7 @@ public class FailingParsingTests {
 
         Node dummyNode = new FinalSymbol("");
         String pattern = "a{1,2";
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
         try {
             Field aNodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
             aNodesStartPos.setAccessible(true);
@@ -88,7 +88,7 @@ public class FailingParsingTests {
 
     @Test
     public void escapeCharacterInCurvyBracesTest() {
-        RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> new RgxGen("a{\\"));
+        RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> RgxGen.parse("a{\\"));
         assertEquals("Escape character inside curvy repetition is not supported. \n" +
                              "'a{\\'\n" +
                              "   ^", exception.getMessage());
@@ -96,7 +96,7 @@ public class FailingParsingTests {
 
     @Test
     public void nothingToRepeatTest() {
-        RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> new RgxGen("+asdfqwer"));
+        RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> RgxGen.parse("+asdfqwer"));
         assertEquals("Cannot repeat nothing at\n" +
                              "'+asdf'\n" +
                              " ^", exception.getMessage());

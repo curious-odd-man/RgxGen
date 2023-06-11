@@ -67,7 +67,7 @@ Enter your pattern and see the results.
     <dependency>
         <groupId>com.github.curious-odd-man</groupId>
         <artifactId>rgxgen</artifactId>
-        <version>1.5-SNAPSHOT</version>
+        <version>2.0-SNAPSHOT</version>
     </dependency>
 </project>
 ```
@@ -76,6 +76,10 @@ Changes in snapshot:
 
 - Support for Character Classes `\p{...}` and `\P{...}`
   patterns. [#76](https://github.com/curious-odd-man/RgxGen/issues/73)
+- Configurable any character (dot) pattern [#83](https://github.com/curious-odd-man/RgxGen/issues/83)
+- API changed:
+  - No global configuration properties
+  - Factory methods to create instance of RgxGen - see examples
 
 ---
 
@@ -84,7 +88,7 @@ Changes in snapshot:
 ```java
 public class Main {
     public static void main(String[] args) {
-        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        RgxGen rgxGen = RgxGen.parse("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");       // Create generator
         String s = rgxGen.generate();                                        // Generate new random value
         Optional<BigInteger> estimation = rgxGen.getUniqueEstimation();      // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
         StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
@@ -96,7 +100,7 @@ public class Main {
 ```java
 public class Main {
     public static void main(String[] args) {
-        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+        RgxGen rgxGen = RgxGen.parse("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");       // Create generator
         Random rnd = new Random(1234);
         String s = rgxGen.generate(rnd);                                     // Generate first value
         String s1 = rgxGen.generate(rnd);                                    // Generate second value
@@ -149,24 +153,17 @@ RgxGen treats any other characters as literals - those are generated as is.
 
 ## Configuration
 
-RgxGen can be configured on global or instance level.
+RgxGen can be configured per instance.
 
 Please refer to the following enum for all available
 properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
 
-Each property value will be looked up in this order:
-
-1. Local RgxGen instance config
-2. Global RgxGen config
-3. Default values
-
-### Create Configuration
+### Create and Use Configuration Properties
 
 Use `new RgxGenProperties()` to create properties object.
-`RgxGenProperties` extends `java.util.Properties` and can be used in all the same ways.
 
 <details>
-<summary><b>Code</b></summary>
+<summary><b>Code example</b></summary>
 
 ```java
 public class Main {
@@ -176,56 +173,7 @@ public class Main {
         // Set value "20" for INFINITE_PATTERN_REPETITION option in properties
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, 20);
         // ... now properties can be passed to RgxGen
-    }
-}
-```
-
-</details>
-
-### Set Global Configuration
-
-Set a global configuration using `RgxGen.setDefaultProperties(properties);`
-
-<details>
-<summary><b>Code</b></summary>
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        RgxGenProperties properties = createAndConfigureProperitesObject();
-
-        RgxGen rgxGen_1 = new RgxGen("xxx");        // Created for example purposes
-        // Set default properties. 
-        // NOTE! only instances created after setDefaultProperties are affected.
-        // e.g. rgxGen_1 will have default value of INFINITE_PATTERN_REPETITION option
-        // and rgxGen_2 will have value "20" for the property, unless local config specified.
-        RgxGen.setDefaultProperties(properties);
-        RgxGen rgxGen_2 = new RgxGen("xxx");
-    }
-}
-```
-
-</details>
-
-### Set Local Configuration
-
-Set a local configuration using `rgxGen.setProperties(localProperties);` on existing RgxGen instance.
-
-<details>
-<summary><b>Code</b></summary>
-
-```java
-public class Main {
-    public static void main(String[] args) {
-        RgxGenProperties properties = createAndConfigureProperitesObject();
-        RgxGen.setDefaultProperties(properties);
-
-        // Create properties object (RgxGenProperties extends java.util.Properties)
-        RgxGenProperties localProperties = createAndConfigureLocalProperitesObject();
-        RgxGen rgxGen_3 = new RgxGen("xxx");
-        // Set local configuration for rgxGen_3
-        // Note, for options that are not defined in localProperties, will try find option inside properties, since these are set globally prior creation of rgxGen_3 instance creation 
-        rgxGen_3.setProperties(localProperties);
+        RgxGen rgxGen_3 = RgxGen.parse(properties, "my-cool-pattern");
     }
 }
 ```
@@ -277,7 +225,7 @@ I chose these approaches because they seem predictable and easier to implement.
 
 #### Which values are used in non-matching generation
 
-Whenever non-matching result is requested, with either `new RgxGen(".").generateNotMatching()` method or with pattern,
+Whenever non-matching result is requested, with either `RgxGen.parse(".").generateNotMatching()` method or with pattern,
 like `"[^a-z]"` - there is a choice in generator which are characters that do not match mentioned characters.
 For example - for `"[^a-z]"` - any unicode character except the ones in a range `a-z` would be ok. Though that would
 include non-printable, all kinds of blank characters and all the different wierd unicode characters. I expect that this

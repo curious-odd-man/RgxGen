@@ -16,6 +16,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.GroupType;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
@@ -33,11 +34,13 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ZER
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private static final Character[]        SINGLETON_UNDERSCORE_ARRAY = {'_'};
-    private static final int                HEX_RADIX                  = 16;
-    private static final Node[]             EMPTY_NODES_ARR            = new Node[0];
-    private final        CharIterator       aCharIterator;
-    private final        Map<Node, Integer> aNodesStartPos             = new IdentityHashMap<>();
+    private static final Character[] SINGLETON_UNDERSCORE_ARRAY = {'_'};
+    private static final int         HEX_RADIX                  = 16;
+    private static final Node[]      EMPTY_NODES_ARR            = new Node[0];
+
+    private final CharIterator       aCharIterator;
+    private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
+    private final RgxGenProperties   properties;
 
     private Node aNode;
     private int  aNextGroupIndex = 1;
@@ -46,10 +49,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * Default implementation of parser and NodeTreeBuilder.
      * It reads expression and creates a hierarchy of {@code com.github.curiousoddman.rgxgen.generator.nodes.Node}.
      *
-     * @param expr expression to parse
+     * @param expr       expression to parse
+     * @param properties configuration properties
      */
-    public DefaultTreeBuilder(String expr) {
+    public DefaultTreeBuilder(String expr, RgxGenProperties properties) {
         aCharIterator = new CharIterator(expr);
+        this.properties = properties;
     }
 
     /**
@@ -62,8 +67,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void sbToFinal(StringBuilder sb, Collection<Node> nodes) {
         if (sb.length() != 0) {
             FinalSymbol finalSymbol = new FinalSymbol(sb.toString());
-            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue()
-                                                                                 .length());
+            aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue().length());
             nodes.add(finalSymbol);
             sb.delete(0, Integer.MAX_VALUE);
         }
@@ -270,7 +274,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
         sbToFinal(sb, nodes);
-        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern();
+        SymbolSet symbolSet = SymbolSet.ofAsciiDotPattern(properties);
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
@@ -385,19 +389,19 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, properties, ConstantsProvider.getDigits(), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
+                createdNode = SymbolSet.ofAsciiCharacters("\\" + c, properties, ConstantsProvider.getAsciiWhitespaces(), getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, properties, ConstantsProvider.getAsciiWordCharRanges(), SINGLETON_UNDERSCORE_ARRAY, getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -456,7 +460,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         String characterClassKey = getCharacterClassKey();
         UnicodeCategory unicodeCategory = UnicodeCategory.ALL_CATEGORIES.get(characterClassKey);
         String pattern = "\\" + c + '{' + characterClassKey + '}';
-        return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, matchType);
+        return SymbolSet.ofUnicodeCharacterClass(pattern, properties, unicodeCategory, matchType);
     }
 
     private String getCharacterClassKey() {
@@ -691,7 +695,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
+    private SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Iterable<SymbolSet> externalSets) {
         List<Character> characters = new ArrayList<>();
         List<SymbolRange> symbolRanges = new ArrayList<>(externalRanges);
         if (sb.length() > 0) {
@@ -707,9 +711,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
 
         if (isAscii) {
-            return SymbolSet.ofAscii(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+            return SymbolSet.ofAscii(pattern, properties, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
         } else {
-            return SymbolSet.ofUnicode(pattern, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
+            return SymbolSet.ofUnicode(pattern, properties, symbolRanges, characters.toArray(ZERO_LENGTH_CHARACTER_ARRAY), matchType);
         }
     }
 

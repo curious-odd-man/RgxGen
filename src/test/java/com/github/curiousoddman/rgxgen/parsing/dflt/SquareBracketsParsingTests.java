@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.util.SymbolSetTestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -17,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SquareBracketsParsingTests {
 
     private static SymbolSet mkSS(Character... chars) {
-        return SymbolSet.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
+        return SymbolSetTestUtils.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
     }
 
     public static Stream<Arguments> data() {
@@ -41,7 +42,7 @@ public class SquareBracketsParsingTests {
     @MethodSource("data")
     public void parsingTest(String aPattern, Object aExpected) {
         try {
-            DefaultTreeBuilder builder = new DefaultTreeBuilder(aPattern);
+            DefaultTreeBuilder builder = new DefaultTreeBuilder(aPattern, null);
             Node node = builder.get();
             assertEquals(aExpected.toString(), node.toString());
         } catch (RgxGenParseException e) {

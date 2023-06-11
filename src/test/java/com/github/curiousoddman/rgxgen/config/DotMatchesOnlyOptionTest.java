@@ -31,19 +31,19 @@ class DotMatchesOnlyOptionTest {
 
     @Test
     void doesNotFailWithoutPropertySet() {
-        RgxGen rgxGen = assertDoesNotThrow(() -> new RgxGen("."));
+        RgxGen rgxGen = assertDoesNotThrow(() -> RgxGen.parse("."));
         assertDoesNotThrow(() -> rgxGen.generate());
         assertDoesNotThrow(() -> rgxGen.generateNotMatching());
         assertDoesNotThrow(rgxGen::getUniqueEstimation);
     }
 
     @Test
-    void verifyOptionMatters() {
+    void verifyGenerationTest() {
         RgxGenProperties properties = new RgxGenProperties();
         String permittedCharacters = "abc";
         RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(permittedCharacters));
         Random random = new Random(100500);
-        RgxGen rgxGen = new RgxGen(".");
+        RgxGen rgxGen = RgxGen.parse(".");
         for (int i = 0; i < 100; i++) {
             String generatedValue = rgxGen.generate(random);
             assertTrue(permittedCharacters.contains(generatedValue));
@@ -51,11 +51,25 @@ class DotMatchesOnlyOptionTest {
     }
 
     @Test
-    void verifyCorrectlyEstimatesCount() {
+    void verifyCaseInsensitiveGenerationOptionMattersTest() {
+        RgxGenProperties properties = new RgxGenProperties();
+        String permittedCharacters = "abcABC";
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of("abc"));
+        RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
+        Random random = new Random(100500);
+        RgxGen rgxGen = RgxGen.parse(".");
+        for (int i = 0; i < 100; i++) {
+            String generatedValue = rgxGen.generate(random);
+            assertTrue(permittedCharacters.contains(generatedValue));
+        }
+    }
+
+    @Test
+    void verifyCorrectlyEstimatesCountTest() {
         RgxGenProperties properties = new RgxGenProperties();
         String permittedCharacters = "abc";
         RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of(permittedCharacters));
-        RgxGen rgxGen = new RgxGen(".");
+        RgxGen rgxGen = RgxGen.parse(".");
         assertEquals(BigInteger.valueOf(3), rgxGen.getUniqueEstimation().get());
     }
 }
