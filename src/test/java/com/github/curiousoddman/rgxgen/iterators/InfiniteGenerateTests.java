@@ -35,7 +35,7 @@ public class InfiniteGenerateTests {
     public void generateTest(String aRegex,
                              boolean aUseFind) {
         Pattern p = Pattern.compile(aRegex);
-        RgxGen rgxGen = new RgxGen(aRegex);
+        RgxGen rgxGen = RgxGen.parse(aRegex);
         for (int i = 0; i < ITERATIONS; i++) {
             String s = rgxGen.generate();
             if (aUseFind) {
@@ -53,7 +53,7 @@ public class InfiniteGenerateTests {
     public void aLotOfValuesAvailableTest(String aRegex,
                                           boolean aUseFind) {
         Pattern p = Pattern.compile(aRegex);
-        RgxGen rgxGen = new RgxGen(aRegex);
+        RgxGen rgxGen = RgxGen.parse(aRegex);
         StringIterator stringIterator = rgxGen.iterateUnique();
         Set<String> set = new HashSet<>();
 

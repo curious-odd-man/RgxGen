@@ -73,7 +73,7 @@ public class CompleteTests {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getData")
     public void generateTest(String aName, boolean aUseFind, String aRegex, int aSeed) {
-        RgxGen rgxGen = new RgxGen(aRegex);
+        RgxGen rgxGen = RgxGen.parse(aRegex);
         String s = rgxGen.generate(TestingUtilities.newRandom(aSeed));
         assertTrue(matches(aRegex, s, aUseFind), "Text: '" + s + "'does not match pattern " + aRegex);
     }
@@ -81,7 +81,7 @@ public class CompleteTests {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getData")
     public void generateNotMatchingTest(String aName, boolean aUseFind, String aRegex, int aSeed) {
-        RgxGen rgxGen = new RgxGen(aRegex);
+        RgxGen rgxGen = RgxGen.parse(aRegex);
         String s = rgxGen.generateNotMatching(TestingUtilities.newRandom(aSeed));
         assertFalse(matches(aRegex, s, aUseFind), "Text: '" + s + "'does not match pattern " + aRegex);
     }

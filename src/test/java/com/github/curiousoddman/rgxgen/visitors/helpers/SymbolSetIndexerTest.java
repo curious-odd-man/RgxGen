@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.visitors.helpers;
 import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.util.SymbolSetTestUtils;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -35,19 +36,19 @@ class SymbolSetIndexerTest {
     }
 
     private static SymbolSet symbolSet(SymbolRange... symbolRanges) {
-        return SymbolSet.ofAscii("", asList(symbolRanges), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
+        return SymbolSetTestUtils.ofAscii("", asList(symbolRanges), ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE);
     }
 
     private static SymbolSet symbolSet(Character... characters) {
-        return SymbolSet.ofAscii("", emptyList(), characters, MatchType.POSITIVE);
+        return SymbolSetTestUtils.ofAscii("", emptyList(), characters, MatchType.POSITIVE);
     }
 
     private static SymbolSet symbolSet(List<SymbolRange> ranges, Character... characters) {
-        return SymbolSet.ofAscii("", ranges, characters, MatchType.POSITIVE);
+        return SymbolSetTestUtils.ofAscii("", ranges, characters, MatchType.POSITIVE);
     }
 
     private static SymbolSet negativeSymbolSet(List<SymbolRange> ranges) {
-        return SymbolSet.ofAscii("", ranges, ZERO_LENGTH_CHARACTER_ARRAY, MatchType.NEGATIVE);
+        return SymbolSetTestUtils.ofAscii("", ranges, ZERO_LENGTH_CHARACTER_ARRAY, MatchType.NEGATIVE);
     }
 
     @ParameterizedTest(name = "{index}: {0}")

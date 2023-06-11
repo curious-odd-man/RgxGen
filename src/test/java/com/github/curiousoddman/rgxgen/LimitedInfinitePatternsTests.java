@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
+import com.github.curiousoddman.rgxgen.util.SymbolSetTestUtils;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -47,7 +48,7 @@ public class LimitedInfinitePatternsTests {
                 ),
                 arguments(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSet.ofAsciiDotPattern(), 0, 2)),
+                        new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSetTestUtils.ofAsciiDotPattern(), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(makeAsciiCharacterArray()),
                                                                    Arrays.stream(makeAsciiCharacterArray())
                                                                          .flatMap(symbol -> Arrays.stream(makeAsciiCharacterArray())

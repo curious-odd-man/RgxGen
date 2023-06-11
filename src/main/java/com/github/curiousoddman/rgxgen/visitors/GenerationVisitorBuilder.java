@@ -50,13 +50,13 @@ public class GenerationVisitorBuilder {
         }
 
         if (aGenerateMatching) {
-            if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+            if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
                 return new GenerationVisitorCaseInsensitive(aRandom, aGroupsValues, aProperties);
             } else {
                 return new GenerationVisitor(aRandom, aGroupsValues, aProperties);
             }
         } else {
-            if (RgxGenOption.CASE_INSENSITIVE.getBooleanFromProperties(aProperties)) {
+            if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
                 return new NotMatchingCaseInsensitiveGenerationVisitor(aRandom, aGroupsValues, aProperties);
             } else {
                 return new NotMatchingGenerationVisitor(aRandom, aGroupsValues, aProperties);

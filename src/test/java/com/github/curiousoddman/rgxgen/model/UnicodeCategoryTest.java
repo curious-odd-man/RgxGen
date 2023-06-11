@@ -45,7 +45,7 @@ class UnicodeCategoryTest {
         @MethodSource("getKeyAndCategory")
         void generateInCategoryTest(String key, UnicodeCategory category) {
             String pattern = "\\p" + key + "{5,20}";
-            RgxGen rgxGen = new RgxGen(pattern);
+            RgxGen rgxGen = RgxGen.parse(pattern);
             Random random = newRandom(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
@@ -64,7 +64,7 @@ class UnicodeCategoryTest {
         @MethodSource("getKeyAndCategory")
         void generateInCategoryNotMatchingTest(String key, UnicodeCategory category) {
             String pattern = "\\p" + key + "{5,20}";
-            RgxGen rgxGen = new RgxGen(pattern);
+            RgxGen rgxGen = RgxGen.parse(pattern);
             Random random = newRandom(pattern.hashCode());
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, false);
@@ -82,7 +82,7 @@ class UnicodeCategoryTest {
         @MethodSource("getKeyAndCategory")
         void generateUniqueTest(String key, UnicodeCategory category) {
             String pattern = "\\p" + key + "{5,20}";
-            RgxGen rgxGen = new RgxGen(pattern);
+            RgxGen rgxGen = RgxGen.parse(pattern);
             StringIterator stringIterator = rgxGen.iterateUnique();
             Optional<Pattern> compiled = compile(pattern, category);
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);
@@ -100,7 +100,7 @@ class UnicodeCategoryTest {
         @MethodSource("getKeyAndCategory")
         void generateNotInCategoryTest(String key, UnicodeCategory category) {
             String pattern = "\\P" + key + "{5,20}";
-            RgxGen rgxGen = new RgxGen(pattern);
+            RgxGen rgxGen = RgxGen.parse(pattern);
             Optional<Pattern> compiled = compile(pattern, category);
             Random random = newRandom(pattern.hashCode());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, compiled, category, true);

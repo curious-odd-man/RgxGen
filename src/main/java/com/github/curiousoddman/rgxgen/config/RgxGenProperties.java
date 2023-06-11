@@ -16,17 +16,22 @@ package com.github.curiousoddman.rgxgen.config;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Configuration object for RgxGen.
  *
  * @see com.github.curiousoddman.rgxgen.config.RgxGenOption for available options
  */
-public class RgxGenProperties extends Properties {
-    private static final long serialVersionUID = 3352045589564244181L;
+public class RgxGenProperties {
+    private final Map<String, Object> properties = new HashMap<>();
 
-    public void setDefaults(Properties properties) {
-        defaults = properties;
+    public void put(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    public Object get(String key) {
+        return properties.get(key);
     }
 }

@@ -79,7 +79,7 @@ public class SymbolSet extends Node {
      * @param symbols      symbols to include/exclude
      * @param type         POSITIVE - include, NEGATIVE - exclude
      */
-    private SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
+    public SymbolSet(String pattern, List<SymbolRange> symbolRanges, Character[] symbols, MatchType type, SymbolRange allCharactersRange) {
         super(pattern);
 
         isAscii = allCharactersRange == ASCII_SYMBOL_RANGE;

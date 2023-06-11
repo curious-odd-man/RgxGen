@@ -26,10 +26,9 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
     @MethodSource("getAllPatterns")
     public void countTest(TestPatternCaseInsensitive testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
         assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
@@ -37,20 +36,18 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
     @MethodSource("getAllPatterns")
     public void generateUniqueTest(TestPatternCaseInsensitive testPattern) {
         assumeTrue(testPattern.hasAllUniqueValues());
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
         assertEquals(testPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(rgxGen.iterateUnique()));
     }
 
     @ParameterizedTest
     @MethodSource("getAllPatterns")
     public void classRgxGenCaseInsensitiveTest(TestPatternCaseInsensitive testPattern) {
-        RgxGen rgxGen = new RgxGen(testPattern.getPattern());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
         List<String> strings = rgxGen.stream()
                                      .limit(1000)
                                      .collect(Collectors.toList());
