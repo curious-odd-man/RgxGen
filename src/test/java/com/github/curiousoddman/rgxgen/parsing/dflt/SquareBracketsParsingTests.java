@@ -9,7 +9,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
@@ -32,8 +31,9 @@ public class SquareBracketsParsingTests {
     }
 
     private static SymbolSet mkWhitespaceAnd(Character... chars) {
-        RgxGenCharsDefinition negativeMatchDefinitions = RgxGenCharsDefinition.of('\r', '\n', '\t', '\f', '\u000B', ' ');
-        negativeMatchDefinitions.getCharacters().sort(Comparator.naturalOrder());
+        RgxGenCharsDefinition negativeMatchDefinitions = RgxGenCharsDefinition
+                .of(chars)
+                .withCharacters('\t', '\n', '\u000B', '\f', '\r', ' ');
         return SymbolSet.ofAscii("",
                                  RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
                                  negativeMatchDefinitions,

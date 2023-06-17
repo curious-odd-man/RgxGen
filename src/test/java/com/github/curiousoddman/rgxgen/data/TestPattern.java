@@ -1,24 +1,27 @@
 package com.github.curiousoddman.rgxgen.data;
 
 import com.github.curiousoddman.rgxgen.model.MatchType;
+import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.DECIMAL_DIGIT_NUMBER;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.LATIN_LOWERCASE;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
-import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.getAllDigits;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Collections.singletonList;
 
 
 // CAUTION! Double braced initialization is used.
@@ -35,24 +38,24 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_DIGIT("\\d",
-              SymbolSet.ofAsciiCharacters("\\d",
-                                          getAllDigits(), MatchType.POSITIVE)) {{
+              SymbolSet.ofAsciiRanges("\\d",
+                                      singletonList(range('0', '9')), MatchType.POSITIVE)) {{
         setAllUniqueValues("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A_DIGIT("\\D",      // Any non-digit
-                SymbolSet.ofAsciiCharacters("\\D",
-                                            getAllDigits(), MatchType.NEGATIVE)
+                SymbolSet.ofAsciiRanges("\\D",
+                                        singletonList(range('0', '9')), MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_DIGIT_RANGE("[0-9]",
-                    SymbolSet.ofAsciiCharacters("[0-9]",
-                                                getAllDigits(), MatchType.POSITIVE)) {{
+                    SymbolSet.ofAsciiRanges("[0-9]",
+                                            singletonList(range('0', '9')), MatchType.POSITIVE)) {{
         setAllUniqueValues("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
     }},
     LETTER_RANGE("[a-cA-C]",
                  SymbolSet.ofAsciiRanges("[a-cA-C]",
-                                         asList(SymbolRange.range('a', 'c'), SymbolRange.range('A', 'C')), MatchType.POSITIVE)
+                                         asList(range('a', 'c'), range('A', 'C')), MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     ANY_WORD_CHARACTER("\\w",      // Any word character  [a-zA-Z0-9_]
@@ -182,17 +185,22 @@ public enum TestPattern implements DataInterface {
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_LETTER_RANGE("[^a-dE-F]",
-                     SymbolSet.ofAsciiCharacters("[^a-dE-F]", new Character[]{'E', 'F', 'a', 'b', 'c', 'd'}, MatchType.NEGATIVE)
+                     SymbolSet.ofAsciiRanges("[^a-dE-F]", Arrays.asList(range('a', 'd'), range('E', 'F')), MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
+
     ANY_WHITESPACE("\\s",      // Any White Space
-                   SymbolSet.ofAsciiCharacters("\\s", new Character[]{'\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)
+                   SymbolSet.ofAscii("\\s",
+                                     RgxGenCharsDefinition.of(' ', '\t'),
+                                     RgxGenCharsDefinition.of('\t', '\n', '\u000B', '\f', '\r', ' '),
+                                     MatchType.POSITIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A_WHITESPACE("\\S",      // Any Non White Space
-                     SymbolSet.ofAsciiCharacters("\\S", new Character[]{
-                             '\r', '\f', '\u000B', ' ', '\t', '\n'
-                     }, MatchType.NEGATIVE)
+                     SymbolSet.ofAscii("\\S",
+                                       RgxGenCharsDefinition.of(' ', '\t'),
+                                       RgxGenCharsDefinition.of('\t', '\n', '\u000B', '\f', '\r', ' '),
+                                       MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_A_OR_NOT("aa?",
@@ -319,8 +327,11 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     METASEQUENCE_IN_SQUARE_BRACKETS("['\\-/\\.\\s]",
-                                    SymbolSet.ofAsciiCharacters("['\\-/\\.\\s]", new Character[]{'\'', '-', '/', '.', '\r', '\f', '\u000B', ' ', '\t', '\n'}, MatchType.POSITIVE)) {{
-        setAllUniqueValues(" ", "'", "\t", "\n", "\u000B", "\f", "\r", "-", ".", "/");
+                                    SymbolSet.ofAscii("['\\-/\\.\\s]",
+                                                      RgxGenCharsDefinition.of('\'', '-', '/', '.', '\t', ' '),
+                                                      RgxGenCharsDefinition.of('\'', '-', '/', '.', '\t', '\n', '\u000B', '\f', '\r', ' '),
+                                                      MatchType.POSITIVE)) {{
+        setAllUniqueValues("\t", " ", "'", "-", ".", "/");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
