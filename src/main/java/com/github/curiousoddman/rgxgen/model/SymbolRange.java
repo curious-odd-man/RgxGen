@@ -85,4 +85,12 @@ public class SymbolRange {
         result = 31 * result + to;
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "SymbolRange{" +
+                "from=" + from +
+                ", to=" + to +
+                '}';
+    }
 }

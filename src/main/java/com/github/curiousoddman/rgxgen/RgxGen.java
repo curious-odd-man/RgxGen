@@ -45,7 +45,7 @@ public class RgxGen {
      * @param pattern regex pattern for values generation
      */
     public static RgxGen parse(CharSequence pattern) {
-        return RgxGen.parse(null, pattern);
+        return parse(null, pattern);
     }
 
     /**

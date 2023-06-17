@@ -29,8 +29,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
                                                                .withRandom(TestingUtilities.newRandom(aSeed))
                                                                .get();
-        testPattern.getResultNode()
-                   .visit(generationVisitor);
+        testPattern.getResultNode().visit(generationVisitor);
         boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
         assertTrue(result, "Text: '" + generationVisitor.getString() + "'does not match pattern " + testPattern.getPattern());
     }

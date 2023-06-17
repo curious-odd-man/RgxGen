@@ -44,11 +44,7 @@ public class ConstantsProvider {
     public static final int         HEX_RADIX                   = 16;
     public static final Node[]      EMPTY_NODES_ARR             = new Node[0];
 
-    public static Character[] getDigits() {
-        return IntStream.rangeClosed('0', '9')
-                        .mapToObj(i -> (char) i)
-                        .toArray(Character[]::new);
-    }
+    public static final SymbolRange ASCII_DIGITS = SymbolRange.range('0', '9');
 
     public static Character[] getAsciiWhitespaces() {
         return new Character[]{'\r', '\f', '\u000B', ' ', '\t', '\n'};

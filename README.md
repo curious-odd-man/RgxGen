@@ -127,7 +127,7 @@ public class Main {
 |                           `\n` | Line feed `LF` character.                                                                                                                                                                  |
 |                           `\d` | A digit. Equivalent to `[0-9]`                                                                                                                                                             |
 |                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                                                                                                                        |
-|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                              |
+|                           `\s` | Configurable. By default: Space or Tab                                                                                                                                                     |
 |                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                |
 |                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                                                                                                                           |
 |                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                                                                                                               |
@@ -192,7 +192,8 @@ i.e.: any character starting from `space` to `~`.
 
 You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
 
-For example:  
+For example:
+
 ```java
 public class Main {
     public static void main(String[] args) {
