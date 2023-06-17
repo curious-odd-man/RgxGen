@@ -198,7 +198,7 @@ public class SymbolSet extends Node {
                 ", isAscii=" + isAscii +
                 ", symbolRanges=" + symbolRanges +
                 ", symbols=" + symbols +
-                "} " + super.toString();
+                "} ";
     }
 
     public boolean hasModifiedExclusionChars() {

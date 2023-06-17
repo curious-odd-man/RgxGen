@@ -24,7 +24,6 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.IntStream;
 
 /**
  * Helper class for lazy initialization and reuse of some constants that are re-used.
@@ -47,7 +46,7 @@ public class ConstantsProvider {
     public static final SymbolRange ASCII_DIGITS = SymbolRange.range('0', '9');
 
     public static Character[] getAsciiWhitespaces() {
-        return new Character[]{'\r', '\f', '\u000B', ' ', '\t', '\n'};
+        return new Character[]{'\t', '\n', '\u000B', '\f', '\r', ' '};
     }
 
     public static List<SymbolRange> getAsciiWordCharRanges() {
