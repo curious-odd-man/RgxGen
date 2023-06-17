@@ -702,7 +702,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
         boolean isAscii = true;
         boolean hasModifiedExclusionChars = externalSets.stream().anyMatch(SymbolSet::hasModifiedExclusionChars);
-        RgxGenCharsDefinition negativeMatchDefinitions = hasModifiedExclusionChars ? RgxGenCharsDefinition.of(emptyList(), emptyList()) : null;
+        RgxGenCharsDefinition negativeMatchDefinitions = hasModifiedExclusionChars ? RgxGenCharsDefinition.of(positiveMatchDefinitions) : null;
 
         for (SymbolSet symbolSet : externalSets) {
             isAscii = isAscii && symbolSet.isAscii();

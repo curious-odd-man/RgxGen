@@ -59,6 +59,10 @@ public class RgxGenCharsDefinition {
         return new RgxGenCharsDefinition(symbolRanges, symbols);
     }
 
+    public static RgxGenCharsDefinition of(RgxGenCharsDefinition other) {
+        return of(other.rangeList, other.characters);
+    }
+
     public RgxGenCharsDefinition withRanges(SymbolRange... ranges) {
         rangeList.addAll(Arrays.asList(ranges));
         return this;
