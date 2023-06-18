@@ -1,7 +1,7 @@
-| :exclamation:  Documentation in this branch matches latest SNAPSHOT version |
-|-----------------------------------------------------------------------------|
+| :exclamation:  Documentation in this branch matches latest SNAPSHOT version <br/>Please look in [master](https://github.com/curious-odd-man/RgxGen/tree/master) branch docs for latest release. |
+|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 
-Please look in [master](https://github.com/curious-odd-man/RgxGen/tree/master) branch docs for latest release.
+-------------------------------------------------------------------------------------------------------
 
 # Regex: generate matching and non-matching strings
 
