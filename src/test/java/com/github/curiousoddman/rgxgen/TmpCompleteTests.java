@@ -35,7 +35,7 @@ public class TmpCompleteTests {
                                               .mapToObj(index -> Arguments.of(arr[0], arr[1], arr[2], index)));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getTestData")
     public void generateTest(String name, boolean useFind, String pattern, int seed) {
         RgxGen rgxGen = RgxGen.parse(pattern);
@@ -44,7 +44,7 @@ public class TmpCompleteTests {
         assertTrue(matches(s, pattern, useFind), "Text: '" + s + "' does not match pattern " + pattern);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getTestData")
     public void generateNotMatchingTest(String name, boolean useFind, String pattern, int seed) {
         RgxGen rgxGen = RgxGen.parse(pattern);
@@ -53,7 +53,7 @@ public class TmpCompleteTests {
         assertFalse(matches(s, pattern, useFind), "Text: '" + s + "' does not match pattern " + pattern);
     }
 
-    private boolean matches(String text, String pattern, boolean useFind) {
+    private static boolean matches(String text, String pattern, boolean useFind) {
         Matcher matcher = Pattern.compile(pattern)
                                  .matcher(text);
         return useFind ? matcher.find() : matcher.matches();

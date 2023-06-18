@@ -80,9 +80,6 @@ public class GenerationConsistencyTests {
     @ParameterizedTest
     @MethodSource("getPatterns")
     void verifyThatAllCaseSensitivePatternsStaysTheSameTest(TestPattern data) throws IOException {
-        assumeFalse(
-                data == TestPattern.ANY_WHITESPACE || data == TestPattern.METASEQUENCE_IN_SQUARE_BRACKETS
-        );
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
         Files.deleteIfExists(fileName);

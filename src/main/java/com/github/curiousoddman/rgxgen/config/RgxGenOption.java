@@ -16,8 +16,11 @@ package com.github.curiousoddman.rgxgen.config;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.config.model.RgxGenCharsDefinition;
+import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
+import com.github.curiousoddman.rgxgen.model.WhitespaceChar;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -45,6 +48,13 @@ public class RgxGenOption<T> {
      * @defaultValue null
      */
     public static final RgxGenOption<RgxGenCharsDefinition> DOT_MATCHES_ONLY = new RgxGenOption<>("dot.matches.only", null);
+
+    /**
+     * Choose which characters \s pattern could generate.
+     *
+     * @defaultValue SPACE, TAB
+     */
+    public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
 
     private final String key;
     private final T      defaultValue;

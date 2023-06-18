@@ -1,3 +1,8 @@
+| :exclamation:  Documentation in this branch matches latest SNAPSHOT version <br/>Please look in [master](https://github.com/curious-odd-man/RgxGen/tree/master) branch docs for latest release documentation. |
+|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
+-------------------------------------------------------------------------------------------------------
+
 # Regex: generate matching and non-matching strings
 
 This is a java library that, given a regex pattern, allows to:
@@ -77,6 +82,8 @@ Changes in snapshot:
 - Support for Character Classes `\p{...}` and `\P{...}`
   patterns. [#76](https://github.com/curious-odd-man/RgxGen/issues/73)
 - Configurable any character (dot) pattern [#83](https://github.com/curious-odd-man/RgxGen/issues/83)
+- Configurable `\s` characters. By default, it generates only spaces and
+  tabs. [#77](https://github.com/curious-odd-man/RgxGen/issues/77)
 - API changed:
     - No global configuration properties
     - Factory methods to create instance of RgxGen - see examples
@@ -127,7 +134,7 @@ public class Main {
 |                           `\n` | Line feed `LF` character.                                                                                                                                                                  |
 |                           `\d` | A digit. Equivalent to `[0-9]`                                                                                                                                                             |
 |                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                                                                                                                        |
-|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                              |
+|                           `\s` | Configurable. By default: Space or Tab. See `WHITESPACE_DEFINITION` property.                                                                                                              |
 |                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                                                                                |
 |                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                                                                                                                           |
 |                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                                                                                                               |
@@ -192,7 +199,8 @@ i.e.: any character starting from `space` to `~`.
 
 You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
 
-For example:  
+For example:
+
 ```java
 public class Main {
     public static void main(String[] args) {

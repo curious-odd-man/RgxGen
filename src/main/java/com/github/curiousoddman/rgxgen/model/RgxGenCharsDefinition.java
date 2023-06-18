@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.config.model;
+package com.github.curiousoddman.rgxgen.model;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -17,8 +17,6 @@ package com.github.curiousoddman.rgxgen.config.model;
 /* **************************************************************************/
 
 
-import com.github.curiousoddman.rgxgen.model.SymbolRange;
-import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.Util;
 
@@ -53,13 +51,35 @@ public class RgxGenCharsDefinition {
         return new RgxGenCharsDefinition(compactedRanges, compactedSymbols);
     }
 
+    public static RgxGenCharsDefinition of(List<SymbolRange> symbolRanges, Character[] symbols) {
+        return of(symbolRanges, Arrays.asList(symbols));
+    }
+
+    public static RgxGenCharsDefinition of(List<SymbolRange> symbolRanges, List<Character> symbols) {
+        return new RgxGenCharsDefinition(symbolRanges, symbols);
+    }
+
+    public static RgxGenCharsDefinition of(RgxGenCharsDefinition other) {
+        return of(other.rangeList, other.characters);
+    }
+
     public RgxGenCharsDefinition withRanges(SymbolRange... ranges) {
         rangeList.addAll(Arrays.asList(ranges));
         return this;
     }
 
+    public RgxGenCharsDefinition withRanges(List<SymbolRange> ranges) {
+        rangeList.addAll(ranges);
+        return this;
+    }
+
     public RgxGenCharsDefinition withCharacters(Character... characters) {
         this.characters.addAll(Arrays.asList(characters));
+        return this;
+    }
+
+    public RgxGenCharsDefinition withCharacters(List<Character> characters) {
+        this.characters.addAll(characters);
         return this;
     }
 
@@ -82,5 +102,18 @@ public class RgxGenCharsDefinition {
 
     public List<Character> getCharacters() {
         return characters;
+    }
+
+    public void addAll(RgxGenCharsDefinition other) {
+        rangeList.addAll(other.rangeList);
+        characters.addAll(other.characters);
+    }
+
+    @Override
+    public String toString() {
+        return "RgxGenCharsDefinition{" +
+                "rangeList=" + rangeList +
+                ", characters=" + characters +
+                '}';
     }
 }
