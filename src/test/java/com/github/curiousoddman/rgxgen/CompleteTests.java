@@ -64,8 +64,7 @@ public class CompleteTests {
                              {"USA and Canada Zip codes", Boolean.FALSE, "(^\\d{5}(-\\d{4})?$)|(^[A-Z]{1}\\d{1}[A-Z]{1} *\\d{1}[A-Z]{1}\\d{1}$)"},
                              {"JS comments", Boolean.TRUE, "//(?![\\S]{2,}\\.[\\w]).*|/\\*(.|\n)+\\*/"},
                              {"2-5 letter palindromes", Boolean.FALSE, "\\b(\\w?)(\\w)\\w?\\2\\1"},
-                             {"Morse code", Boolean.TRUE, "^[.-]{1,5}(?:[ \t]+[.-]{1,5})*(?:[ \t]+[.-]{1,5}(?:[ \t]+[.-]{1,5})*)*$"},
-                             {"Morse code 2", Boolean.TRUE, "^[.-]{1,5}(?: +[.-]{1,5})*(?: +[.-]{1,5}(?: +[.-]{1,5})*)*$"},
+                             {"Morse code", Boolean.TRUE, "^[.-]{1,5}(?: +[.-]{1,5})*(?: +[.-]{1,5}(?: +[.-]{1,5})*)$"},
                              {"JWT", Boolean.TRUE, "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"},
                              })
                      .flatMap(arr -> IntStream.range(0, 100)

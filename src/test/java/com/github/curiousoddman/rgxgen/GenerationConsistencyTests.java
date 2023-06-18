@@ -146,6 +146,7 @@ public class GenerationConsistencyTests {
     void verifyCompletePatternsHaveDifferentNames() {
         assertDoesNotThrow(() -> {
             getCompleteTestsPatterns()
+                    .filter(arguments -> (int) arguments.get()[3] == 0)   // Seed is 0
                     .map(arguments -> arguments.get()[0])
                     .map(Object::toString)
                     .collect(Collectors.toMap(Function.identity(), Function.identity()));
