@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -88,8 +90,11 @@ public class CompleteTests {
         assertFalse(matches(aRegex, s, aUseFind), "Text: '" + s + "'does not match pattern " + aRegex);
     }
 
-    private boolean matches(String aRegex, String text, boolean aUseFind) {
-        Matcher matcher = Pattern.compile(aRegex).matcher(text);
+    private static Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+
+    private static boolean matches(String pattern, String text, boolean aUseFind) {
+        Pattern compiledPattern = PATTERN_CACHE.computeIfAbsent(pattern, k -> Pattern.compile(pattern));
+        Matcher matcher = compiledPattern.matcher(text);
         return aUseFind ? matcher.find() : matcher.matches();
     }
 }

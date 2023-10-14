@@ -72,8 +72,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
             int i = aRandom.nextInt(nodes.length);
             nodes[i].visit(this);
             // To match group values along with generated values - we need to prepend groups values before the generated
-        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos))
-                        .matches());
+        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos)).matches());
     }
 
     /**
