@@ -77,11 +77,11 @@ public class UnicodeCategoryGeneration {
         Map<UnicodeCategory, List<Character>> matchedMap = new HashMap<>();
         List<Character> characters = new ArrayList<>(result);
         characters.sort(Comparator.naturalOrder());
-        matchedMap.put(UnicodeCategory.CASED_LETTER, characters);
+        //matchedMap.put(UnicodeCategory.CASED_LETTER, characters);
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         Map<UnicodeCategory, LineDescriptor> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
-        String text = textPerPattern.get(UnicodeCategory.CASED_LETTER).formatToText(new HashMap<>());
-        System.out.println(text);
+        //String text = textPerPattern.get(UnicodeCategory.CASED_LETTER).formatToText(new HashMap<>());
+        //System.out.println(text);
     }
 
     private static List<Character> createCharactersList(List<SymbolRange> symbolRanges, Character[] symbols) {

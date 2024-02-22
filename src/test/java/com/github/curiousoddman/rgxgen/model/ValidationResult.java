@@ -21,10 +21,4 @@ public class ValidationResult {
             fail("Not matched " + countNotMatched + " vs matched " + countMatched);
         }
     }
-
-    public void assertPassed_90_percent() {
-        if (((double) countNotMatched) / (countMatched + countNotMatched) > 0.1) {
-            fail("Not matched " + countNotMatched + " vs matched " + countMatched);
-        }
-    }
 }

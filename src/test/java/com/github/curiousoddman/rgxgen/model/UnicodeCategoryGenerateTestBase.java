@@ -18,20 +18,20 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UnicodeCategoryGenerateTestBase {
 
-    protected static final List<UnicodeCategory> UNCOMPILABLE_KEYS = unmodifiableList(asList(
-            CASED_LETTER,
-            IN_LATIN_1_SUPPLEMENT,
-            IN_LATIN_EXTENDED_A,
-            IN_LATIN_EXTENDED_B,
-            IN_GREEK_AND_COPTIC,
-            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
-            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
-            IN_SUPPLEMENTAL_ARROWS_A,
-            IN_SUPPLEMENTAL_ARROWS_B,
-            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
-            IN_ARABIC_PRESENTATION_FORMS_A,
-            IN_ARABIC_PRESENTATION_FORMS_B
-    ));
+//    protected static final List<UnicodeCategory> UNCOMPILABLE_KEYS = unmodifiableList(asList(
+//            CASED_LETTER,
+//            IN_LATIN_1_SUPPLEMENT,
+//            IN_LATIN_EXTENDED_A,
+//            IN_LATIN_EXTENDED_B,
+//            IN_GREEK_AND_COPTIC,
+//            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
+//            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
+//            IN_SUPPLEMENTAL_ARROWS_A,
+//            IN_SUPPLEMENTAL_ARROWS_B,
+//            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
+//            IN_ARABIC_PRESENTATION_FORMS_A,
+//            IN_ARABIC_PRESENTATION_FORMS_B
+//    ));
 
     public static Stream<Arguments> getKeyAndCategory() {
         return Arrays.stream(values())
@@ -87,17 +87,21 @@ class UnicodeCategoryGenerateTestBase {
             for (int i = 0; i < generatedTextCharArray.length; i++) {
                 matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
             }
+            System.out.println("Failed for text '" + generatedText + '\'');
             System.out.println("Match debug:");
             System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
+            StringBuilder lettersBuilder = new StringBuilder("\t");
+            StringBuilder matchesBuilder = new StringBuilder("\t");
+            StringBuilder unmatchedCodes = new StringBuilder("\t");
             for (int i = 0; i < generatedText.length(); i++) {
-                System.out.print("'" + generatedText.charAt(i) + "' ");
+                lettersBuilder.append('\'').append(generatedText.charAt(i)).append("' ");
+                boolean isOk = matches[i] == testPattern.isExpectToMatch();
+                matchesBuilder.append(' ').append(isOk ? "." : '!').append("  ");
+                unmatchedCodes.append(' ').append(isOk ? " " : ((int) generatedText.charAt(i))).append("  ");
             }
-            System.out.println();
-            System.out.print('\t');
-            for (int i = 0; i < generatedTextCharArray.length; i++) {
-                System.out.print(matches[i] == testPattern.isExpectToMatch() ? " " : '!');
-            }
-            System.out.println("Failed for text '" + generatedText + '\'');
+            System.out.println(lettersBuilder);
+            System.out.println(matchesBuilder);
+            System.out.println(unmatchedCodes);
             return validationResult.addNotMatched();
         }
 
@@ -121,9 +125,28 @@ class UnicodeCategoryGenerateTestBase {
     @AfterAll
     void verifyAllCategoriesTestedWithPatternCompile() {
         List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
-        notTestedCategories.removeAll(UNCOMPILABLE_KEYS);
+        //notTestedCategories.removeAll(UNCOMPILABLE_KEYS);
         if (!notTestedCategories.isEmpty()) {
             fail("Pattern.compile() failed for - " + notTestedCategories);
+        }
+    }
+
+    public static class CategoryFinder {
+        public static void main(String[] args) {
+            int minChar = 4341;
+            int maxChar = 4341;
+            List<Character> characters = asList(OTHER_LETTER.getSymbols());
+            for (int i = minChar; i <= maxChar; i++) {
+                if (characters.contains((char) i)) {
+                    System.out.println(i + " found in individual characters");
+                }
+
+                for (SymbolRange symbolRange : OTHER_LETTER.getSymbolRanges()) {
+                    if (symbolRange.getFrom() <= i && symbolRange.getTo() >= i) {
+                        System.out.println(i + " found in a range: " + symbolRange);
+                    }
+                }
+            }
         }
     }
 }

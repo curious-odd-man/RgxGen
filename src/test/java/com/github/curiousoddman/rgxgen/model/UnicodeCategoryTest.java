@@ -11,9 +11,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.regex.Pattern;
 
-import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class UnicodeCategoryTest {
@@ -109,11 +107,7 @@ class UnicodeCategoryTest {
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {
                 validateGeneratedText(rgxGenTestPattern, () -> rgxGen.generate(random), validationResult);
             }
-            if (asList(ANY_LETTER, OTHER_LETTER, IN_BASIC_LATIN).contains(category)) {
-                validationResult.assertPassed_90_percent();
-            } else {
-                validationResult.assertPassed();
-            }
+            validationResult.assertPassed();
         }
     }
 }
