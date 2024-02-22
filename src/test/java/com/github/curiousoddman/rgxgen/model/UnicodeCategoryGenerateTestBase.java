@@ -1,7 +1,8 @@
 package com.github.curiousoddman.rgxgen.model;
 
+import com.github.curiousoddman.rgxgen.model.data.CategoryLetterTestData;
+import com.github.curiousoddman.rgxgen.model.data.CategoryTestData;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.params.provider.Arguments;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -17,37 +18,26 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class UnicodeCategoryGenerateTestBase {
+public class UnicodeCategoryGenerateTestBase {
 
-    public static Stream<Arguments> getKeyAndCategory() {
-        return Arrays.stream(values())
-                     .flatMap(uc -> uc
-                             .getKeys()
-                             .stream()
-                             .flatMap(k -> k.length() == 1 ? Stream.of(k, wrapInCurvy(k)) : Stream.of(wrapInCurvy(k)))
-                             .map(k -> Arguments.of(k, uc)));
+    public static Stream<CategoryTestData> getCategoryTestData() {
+        return Arrays.stream(values()).map(CategoryTestData::create);
     }
 
-    public static Stream<Arguments> getKeyAndCategoryAndSingleSymbol() {
-        return Arrays.stream(values())
-                     .flatMap(unicodeCategory -> unicodeCategory
-                             .getKeys()
-                             .stream()
-                             .flatMap(key -> key.length() == 1 ? Stream.of(key, wrapInCurvy(key)) : Stream.of(wrapInCurvy(key)))
-                             .flatMap(key -> Stream.concat(
-                                     Arrays.stream(unicodeCategory.getSymbols()),
-                                     unicodeCategory.getSymbolRanges().stream().flatMap(SymbolRange::chars)
-                             ).map(character -> Arguments.of(key + ":" + (int) character, key, unicodeCategory, character))));
+    public static Stream<CategoryLetterTestData> getKeyAndCategoryAndSingleSymbol() {
+        return getCategoryTestData()
+                .flatMap(categoryTestData ->
+                                 categoryTestData
+                                         .getCategoryCharacters()
+                                         .map(character -> new CategoryLetterTestData(categoryTestData, character)));
     }
 
-    public static Stream<Arguments> getKeyAndCategoryAndSingleSymbolNotInCategory() {
-        return Arrays.stream(values())
-                     .flatMap(unicodeCategory -> unicodeCategory
-                             .getKeys()
-                             .stream()
-                             .flatMap(key -> key.length() == 1 ? Stream.of(key, wrapInCurvy(key)) : Stream.of(wrapInCurvy(key)))
-                             .flatMap(key -> UNICODE_SYMBOL_RANGE.chars().filter(c -> !unicodeCategory.contains(c))
-                                                                 .map(character -> Arguments.of(key + ":" + (int) character, key, unicodeCategory, character))));
+    public static Stream<CategoryLetterTestData> getKeyAndCategoryAndSingleSymbolNotInCategory() {
+        return getCategoryTestData()
+                .flatMap(categoryTestData -> UNICODE_SYMBOL_RANGE
+                        .chars()
+                        .filter(c -> !categoryTestData.getCategory().contains(c))
+                        .map(character -> new CategoryLetterTestData(categoryTestData, character)));
     }
 
     public static String wrapInCurvy(String s) {
@@ -67,18 +57,8 @@ class UnicodeCategoryGenerateTestBase {
         generatedCharacters = new EnumMap<>(UnicodeCategory.class);
     }
 
-    Optional<Pattern> compile(String pattern, UnicodeCategory category) {
-        if (testedCategories.contains(category)) {
-            return Optional.empty();
-        }
-
-        try {
-            Optional<Pattern> compiledPattern = Optional.of(Pattern.compile(pattern));
-            testedCategories.add(category);
-            return compiledPattern;
-        } catch (Exception e) {
-            return Optional.empty();
-        }
+    void registerTestedCategory(UnicodeCategory category) {
+        testedCategories.add(category);
     }
 
     ValidationResult validateGeneratedText(RgxGenTestPattern testPattern, Supplier<String> generateFunction, ValidationResult validationResult) {
@@ -89,35 +69,31 @@ class UnicodeCategoryGenerateTestBase {
             generatedCharactersForCategory.add(c);
         }
 
-        if (testPattern.getCompiled().isPresent()) {
-            if (testPattern.getCompiled().get().matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
-                return validationResult.addMatched();
-            }
-
-            Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + "*");
-            boolean[] matches = new boolean[generatedText.length()];
-            for (int i = 0; i < generatedTextCharArray.length; i++) {
-                matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
-            }
-            System.out.println("Failed for text '" + generatedText + '\'');
-            System.out.println("Match debug:");
-            System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
-            StringBuilder lettersBuilder = new StringBuilder("\t");
-            StringBuilder matchesBuilder = new StringBuilder("\t");
-            StringBuilder unmatchedCodes = new StringBuilder("\t");
-            for (int i = 0; i < generatedText.length(); i++) {
-                lettersBuilder.append('\'').append(generatedText.charAt(i)).append("' ");
-                boolean isOk = matches[i] == testPattern.isExpectToMatch();
-                matchesBuilder.append(' ').append(isOk ? "." : '!').append("  ");
-                unmatchedCodes.append(' ').append(isOk ? " " : ((int) generatedText.charAt(i))).append("  ");
-            }
-            System.out.println(lettersBuilder);
-            System.out.println(matchesBuilder);
-            System.out.println(unmatchedCodes);
-            return validationResult.addNotMatched();
+        if (testPattern.getCompiled().matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
+            return validationResult.addMatched();
         }
 
-        return validationResult.addMatched();
+        Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + "*");
+        boolean[] matches = new boolean[generatedText.length()];
+        for (int i = 0; i < generatedTextCharArray.length; i++) {
+            matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
+        }
+        System.out.println("Failed for text '" + generatedText + '\'');
+        System.out.println("Match debug:");
+        System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
+        StringBuilder lettersBuilder = new StringBuilder("\t");
+        StringBuilder matchesBuilder = new StringBuilder("\t");
+        StringBuilder unmatchedCodes = new StringBuilder("\t");
+        for (int i = 0; i < generatedText.length(); i++) {
+            lettersBuilder.append('\'').append(generatedText.charAt(i)).append("' ");
+            boolean isOk = matches[i] == testPattern.isExpectToMatch();
+            matchesBuilder.append(' ').append(isOk ? "." : '!').append("  ");
+            unmatchedCodes.append(' ').append(isOk ? " " : ((int) generatedText.charAt(i))).append("  ");
+        }
+        System.out.println(lettersBuilder);
+        System.out.println(matchesBuilder);
+        System.out.println(unmatchedCodes);
+        return validationResult.addNotMatched();
     }
 
     @AfterEach

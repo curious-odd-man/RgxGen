@@ -1,18 +1,17 @@
 package com.github.curiousoddman.rgxgen.model;
 
 
-import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class RgxGenTestPattern {
-    private static final Pattern COMPILE = Pattern.compile("\\{\\d+,\\d+}");
+    private static final Pattern COMPILE = Pattern.compile("\\{\\d+}");
 
-    private final String            pattern;
-    private final Optional<Pattern> compiled;
-    private final UnicodeCategory   unicodeCategory;
-    private final boolean           expectToMatch;
+    private final String          pattern;
+    private final Pattern         compiled;
+    private final UnicodeCategory unicodeCategory;
+    private final boolean         expectToMatch;
 
-    public RgxGenTestPattern(String pattern, Optional<Pattern> compiled, UnicodeCategory unicodeCategory, boolean expectToMatch) {
+    public RgxGenTestPattern(String pattern, Pattern compiled, UnicodeCategory unicodeCategory, boolean expectToMatch) {
         this.pattern = pattern;
         this.compiled = compiled;
         this.unicodeCategory = unicodeCategory;
@@ -23,7 +22,7 @@ public class RgxGenTestPattern {
         return pattern;
     }
 
-    public Optional<Pattern> getCompiled() {
+    public Pattern getCompiled() {
         return compiled;
     }
 
