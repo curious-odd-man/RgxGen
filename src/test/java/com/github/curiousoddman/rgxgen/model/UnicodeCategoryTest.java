@@ -2,16 +2,20 @@ package com.github.curiousoddman.rgxgen.model;
 
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import com.github.curiousoddman.rgxgen.model.data.CategoryLetterTestData;
 import com.github.curiousoddman.rgxgen.model.data.CategoryTestData;
+import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -42,22 +46,72 @@ class UnicodeCategoryTest {
     @Nested
     public class SymbolsInCategoryTest extends UnicodeCategoryGenerateTestBase {
         @ParameterizedTest(name = "{index}: {0}")
-        @MethodSource("getKeyAndCategoryAndSingleSymbol")
-        void correctSymbolsInCategoryTest(CategoryLetterTestData testData) {
-            String pattern = "\\p" + testData.getCategoryTestData().getKey();
-            registerTestedCategory(testData.getCategoryTestData().getCategory());
-            assertTrue(Pattern.compile(pattern).matcher("" + testData.getChar()).matches());
+        @MethodSource("getCategoryTestData")
+        void correctSymbolsInCategoryTest(CategoryTestData categoryTestData) {
+            List<Character> characters = categoryTestData.getCategoryCharacters().collect(Collectors.toList());
+            List<Character> wrongCharacters = new ArrayList<>();
+            for (Character character : characters) {
+                String pattern = "\\p" + categoryTestData.getKey();
+                registerTestedCategory(categoryTestData.getCategory());
+                if (!Pattern.compile(pattern).matcher("" + character).matches()) {
+                    wrongCharacters.add(character);
+                }
+            }
+
+            if (!wrongCharacters.isEmpty()) {
+                printWrongCharacters(wrongCharacters);
+                fail("There are multiple characters that do not belong to a category");
+            }
+        }
+    }
+
+    private static void printWrongCharacters(List<Character> wrongCharacters) {
+        List<SymbolRange> compactedRanges = new ArrayList<>();
+        List<Character> compactedCharacters = new ArrayList<>();
+        Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
+        StringBuilder sb = new StringBuilder();
+        for (Character compactedCharacter : compactedCharacters) {
+            sb.append("'").append(compactedCharacter).append("'").append(',');
+        }
+        if (sb.length() != 0) {
+            System.out.println(sb);
+            sb = new StringBuilder();
+        }
+
+        for (SymbolRange compactedRange : compactedRanges) {
+            sb.append("range(").append(compactedRange.getFrom()).append(", ").append(compactedRange.getTo()).append("), ");
+        }
+
+        if (sb.length() != 0) {
+            System.out.println(sb);
         }
     }
 
     @Nested
     public class SymbolsNotInCategoryTest extends UnicodeCategoryGenerateTestBase {
         @ParameterizedTest(name = "{index}: {0}")
-        @MethodSource("getKeyAndCategoryAndSingleSymbolNotInCategory")
-        void correctSymbolsInCategoryTest(CategoryLetterTestData testData) {
-            String pattern = "\\P" + testData.getCategoryTestData().getKey();
-            registerTestedCategory(testData.getCategoryTestData().getCategory());
-            assertTrue(Pattern.compile(pattern).matcher("" + testData.getChar()).matches());
+        @MethodSource("getCategoryTestData")
+        void correctSymbolsInCategoryTest(CategoryTestData categoryTestData) {
+            List<Character> characters = UNICODE_SYMBOL_RANGE
+                    .chars()
+                    .filter(c -> !categoryTestData.getCategory().contains(c))
+                    .collect(Collectors.toList());
+
+            List<Character> wrongCharacters = new ArrayList<>();
+
+            registerTestedCategory(categoryTestData.getCategory());
+            for (Character character : characters) {
+                String pattern = "\\P" + categoryTestData.getKey();
+                registerTestedCategory(categoryTestData.getCategory());
+                if (!Pattern.compile(pattern).matcher("" + character).matches()) {
+                    wrongCharacters.add(character);
+                }
+            }
+
+            if (!wrongCharacters.isEmpty()) {
+                printWrongCharacters(wrongCharacters);
+                fail("There are multiple characters that do not belong to a category");
+            }
         }
     }
 

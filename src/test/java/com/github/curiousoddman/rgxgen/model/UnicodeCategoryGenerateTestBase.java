@@ -1,6 +1,5 @@
 package com.github.curiousoddman.rgxgen.model;
 
-import com.github.curiousoddman.rgxgen.model.data.CategoryLetterTestData;
 import com.github.curiousoddman.rgxgen.model.data.CategoryTestData;
 import org.junit.jupiter.api.*;
 
@@ -12,7 +11,6 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.OTHER_LETTER;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.values;
-import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -22,22 +20,6 @@ public class UnicodeCategoryGenerateTestBase {
 
     public static Stream<CategoryTestData> getCategoryTestData() {
         return Arrays.stream(values()).map(CategoryTestData::create);
-    }
-
-    public static Stream<CategoryLetterTestData> getKeyAndCategoryAndSingleSymbol() {
-        return getCategoryTestData()
-                .flatMap(categoryTestData ->
-                                 categoryTestData
-                                         .getCategoryCharacters()
-                                         .map(character -> new CategoryLetterTestData(categoryTestData, character)));
-    }
-
-    public static Stream<CategoryLetterTestData> getKeyAndCategoryAndSingleSymbolNotInCategory() {
-        return getCategoryTestData()
-                .flatMap(categoryTestData -> UNICODE_SYMBOL_RANGE
-                        .chars()
-                        .filter(c -> !categoryTestData.getCategory().contains(c))
-                        .map(character -> new CategoryLetterTestData(categoryTestData, character)));
     }
 
     public static String wrapInCurvy(String s) {
@@ -113,7 +95,6 @@ public class UnicodeCategoryGenerateTestBase {
     @AfterAll
     void verifyAllCategoriesTestedWithPatternCompile() {
         List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
-        //notTestedCategories.removeAll(UNCOMPILABLE_KEYS);
         if (!notTestedCategories.isEmpty()) {
             fail("Pattern.compile() failed for - " + notTestedCategories);
         }
