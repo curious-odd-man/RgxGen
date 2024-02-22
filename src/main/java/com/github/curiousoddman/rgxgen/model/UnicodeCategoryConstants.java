@@ -535,6 +535,7 @@ public class UnicodeCategoryConstants {
     public static final SymbolRange RANGE_98                  = SymbolRange.range('ⶨ', 'ⶮ');  // 0x2da8 - 0x2dae
     public static final SymbolRange RANGE_99                  = SymbolRange.range('꠰', '꠵');  // 0xa830 - 0xa835
     public static final SymbolRange RANGE_146                 = SymbolRange.range('꞉', '꞊');  // 0xa789 - 0xa78a
+    public static final SymbolRange GEORGIAN_EXTENDED         = SymbolRange.range(0X1C90, 0x1CBF);
 
     /* UNUSED CONSTANTS
     public static final SymbolRange RANGE_80    = SymbolRange.range('੒', '੘');  // 0xa52 - 0xa58

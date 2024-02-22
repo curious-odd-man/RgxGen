@@ -9,29 +9,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.*;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.OTHER_LETTER;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.values;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
 import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class UnicodeCategoryGenerateTestBase {
-
-//    protected static final List<UnicodeCategory> UNCOMPILABLE_KEYS = unmodifiableList(asList(
-//            CASED_LETTER,
-//            IN_LATIN_1_SUPPLEMENT,
-//            IN_LATIN_EXTENDED_A,
-//            IN_LATIN_EXTENDED_B,
-//            IN_GREEK_AND_COPTIC,
-//            IN_COMBINING_DIACRITICAL_MARKS_FOR_SYMBOLS,
-//            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_A,
-//            IN_SUPPLEMENTAL_ARROWS_A,
-//            IN_SUPPLEMENTAL_ARROWS_B,
-//            IN_MISCELLANEOUS_MATHEMATICAL_SYMBOLS_B,
-//            IN_ARABIC_PRESENTATION_FORMS_A,
-//            IN_ARABIC_PRESENTATION_FORMS_B
-//    ));
 
     public static Stream<Arguments> getKeyAndCategory() {
         return Arrays.stream(values())
@@ -42,7 +28,29 @@ class UnicodeCategoryGenerateTestBase {
                              .map(k -> Arguments.of(k, uc)));
     }
 
-    private static String wrapInCurvy(String s) {
+    public static Stream<Arguments> getKeyAndCategoryAndSingleSymbol() {
+        return Arrays.stream(values())
+                     .flatMap(unicodeCategory -> unicodeCategory
+                             .getKeys()
+                             .stream()
+                             .flatMap(key -> key.length() == 1 ? Stream.of(key, wrapInCurvy(key)) : Stream.of(wrapInCurvy(key)))
+                             .flatMap(key -> Stream.concat(
+                                     Arrays.stream(unicodeCategory.getSymbols()),
+                                     unicodeCategory.getSymbolRanges().stream().flatMap(SymbolRange::chars)
+                             ).map(character -> Arguments.of(key + ":" + (int) character, key, unicodeCategory, character))));
+    }
+
+    public static Stream<Arguments> getKeyAndCategoryAndSingleSymbolNotInCategory() {
+        return Arrays.stream(values())
+                     .flatMap(unicodeCategory -> unicodeCategory
+                             .getKeys()
+                             .stream()
+                             .flatMap(key -> key.length() == 1 ? Stream.of(key, wrapInCurvy(key)) : Stream.of(wrapInCurvy(key)))
+                             .flatMap(key -> UNICODE_SYMBOL_RANGE.chars().filter(c -> !unicodeCategory.contains(c))
+                                                                 .map(character -> Arguments.of(key + ":" + (int) character, key, unicodeCategory, character))));
+    }
+
+    public static String wrapInCurvy(String s) {
         return '{' + s + '}';
     }
 
@@ -51,15 +59,19 @@ class UnicodeCategoryGenerateTestBase {
 
     @BeforeAll
     void beforeAll() {
-        testedCategories = new HashSet<>();
+        testedCategories = EnumSet.noneOf(UnicodeCategory.class);
     }
 
     @BeforeEach
     void beforeEach() {
-        generatedCharacters = new HashMap<>();
+        generatedCharacters = new EnumMap<>(UnicodeCategory.class);
     }
 
     Optional<Pattern> compile(String pattern, UnicodeCategory category) {
+        if (testedCategories.contains(category)) {
+            return Optional.empty();
+        }
+
         try {
             Optional<Pattern> compiledPattern = Optional.of(Pattern.compile(pattern));
             testedCategories.add(category);

@@ -39,6 +39,36 @@ class UnicodeCategoryTest {
     }
 
     @Nested
+    public class SymbolsInCategoryTest extends UnicodeCategoryGenerateTestBase {
+        @ParameterizedTest(name = "{index}: {0}")
+        @MethodSource("getKeyAndCategoryAndSingleSymbol")
+        void correctSymbolsInCategoryTest(String name, String key, UnicodeCategory category, char symbol) {
+            String pattern = "\\p" + key;
+            Optional<Pattern> compiled = compile(pattern, category);
+            if (!compiled.isPresent()) {
+                return;
+            }
+
+            assertTrue(compiled.get().matcher("" + symbol).matches());
+        }
+    }
+
+    @Nested
+    public class SymbolsNotInCategoryTest extends UnicodeCategoryGenerateTestBase {
+        @ParameterizedTest(name = "{index}: {0}")
+        @MethodSource("getKeyAndCategoryAndSingleSymbolNotInCategory")
+        void correctSymbolsInCategoryTest(String name, String key, UnicodeCategory category, char symbol) {
+            String pattern = "\\P" + key;
+            Optional<Pattern> compiled = compile(pattern, category);
+            if (!compiled.isPresent()) {
+                return;
+            }
+
+            assertTrue(compiled.get().matcher("" + symbol).matches());
+        }
+    }
+
+    @Nested
     public class GenerateInCategoryTest extends UnicodeCategoryGenerateTestBase {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getKeyAndCategory")

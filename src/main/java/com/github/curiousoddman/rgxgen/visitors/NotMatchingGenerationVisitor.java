@@ -76,7 +76,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     /**
-     * We need to add existing group values, so that we could later use it in a matching pattern
+     * Need to add existing group values, so that we could later use it in a matching pattern
      *
      * @param groupsBuilder
      * @param valuePrefixBuilder
