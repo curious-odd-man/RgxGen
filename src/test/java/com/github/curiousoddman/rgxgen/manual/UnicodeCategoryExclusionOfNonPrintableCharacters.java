@@ -30,7 +30,7 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
                                                                                     return Stream.concat(
                                                                                             Arrays.stream(symbols).map(c -> new Pair(unicodeCategory, c)),
                                                                                             unicodeCategory.getSymbolRanges().stream()
-                                                                                                           .flatMap(UnicodeCategoryExclusionOfNonPrintableCharacters::getCharacterStream)
+                                                                                                           .flatMap(SymbolRange::chars)
                                                                                                            .map(c -> new Pair(unicodeCategory, c)));
                                                                                 }
                                                                        )
@@ -48,10 +48,6 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
                 System.out.println("Present in categories: " + entry.getValue());
             }
         }
-    }
-
-    private static Stream<Character> getCharacterStream(SymbolRange range) {
-        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj((int c1) -> (char) c1);
     }
 
     private static class Pair {
