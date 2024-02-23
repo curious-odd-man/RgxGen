@@ -109,8 +109,8 @@ public class UnicodeCategoryGeneration {
     }
 
     private static Map<SymbolRange, String> assignNamesToRanges(Set<SymbolRange> allRanges) throws IOException {
-        Map<SymbolRange, String> rangesConstantsNames = new LinkedHashMap<>();
-        int constantIndex = 0;
+        TreeMap<SymbolRange, String> rangesConstantsNames = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
+        Set<String> usedRangeNames = new HashSet<>();
         TreeMap<SymbolRange, String> namedRanges = getNamedRanges();
         for (SymbolRange range : allRanges) {
             String name;
@@ -118,11 +118,28 @@ public class UnicodeCategoryGeneration {
             if (rangePredefinedName != null) {
                 name = rangePredefinedName.replace(' ', '_').toUpperCase(Locale.ROOT);
             } else {
-                name = "RANGE_" + constantIndex++;
+                Map.Entry<SymbolRange, String> floorEntry = namedRanges.floorEntry(range);
+                if (floorEntry.getKey().getTo() >= range.getTo()) {
+                    name = floorEntry.getValue() + "_SUBSET";
+                } else {
+                    name = "RANGE";
+                }
             }
+            name = ensureNameIsUnique(usedRangeNames, name);
             rangesConstantsNames.put(range, name);
         }
         return rangesConstantsNames;
+    }
+
+    private static String ensureNameIsUnique(Set<String> usedNames, String name) {
+        int index = 0;
+        String finalName = name;
+        while (usedNames.contains(finalName)) {
+            finalName = name + '_' + index;
+            index++;
+        }
+        usedNames.add(finalName);
+        return finalName;
     }
 
     private static Set<SymbolRange> getAllRanges(Map<UnicodeCategory, LineDescriptor> textPerPattern) {
