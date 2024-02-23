@@ -86,22 +86,22 @@ public class UnicodeCategoryGeneration {
         return ranges;
     }
 
-    private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) throws IOException {
+    private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerCategory) throws IOException {
         cleanupDirectoryWithRangeTextFiles();
-        Set<SymbolRange> allRanges = getAllRanges(textPerPattern);
+        Set<SymbolRange> allRanges = getAllRanges(textPerCategory);
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
         Map<SymbolRange, String> rangesConstantsNames = assignNamesToRanges(allRanges);
-        TreeMap<SymbolRange, String> sortedRanges = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
-        sortedRanges.putAll(rangesConstantsNames);
+        List<SymbolRange> sortedRanges = new ArrayList<>(rangesConstantsNames.keySet());
+        sortedRanges.sort(Comparator.comparingInt(SymbolRange::getFrom));
 
         List<String> lines = new ArrayList<>();
         lines.add("package com.github.curiousoddman.rgxgen.model;");
         lines.add("");
         lines.add("public class UnicodeCategoryConstants {");
-        for (Map.Entry<SymbolRange, String> entry : sortedRanges.entrySet()) {
-            String name = entry.getValue();
-            int from = entry.getKey().getFrom();
-            int to = entry.getKey().getTo();
+        for (SymbolRange range : sortedRanges) {
+            String name = rangesConstantsNames.get(range);
+            int from = range.getFrom();
+            int to = range.getTo();
             lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, Utils.charAsString(from), Utils.charAsString(to), from, to));
             createSymbolRangeFile(name, from, to);
         }
@@ -215,11 +215,11 @@ public class UnicodeCategoryGeneration {
     }
 
     private static Map<UnicodeCategory, LineDescriptor> formatDescriptorsIntoJavaCode(Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap) {
-        Map<UnicodeCategory, LineDescriptor> textPerPattern = new EnumMap<>(UnicodeCategory.class);
+        Map<UnicodeCategory, LineDescriptor> textPerCategory = new EnumMap<>(UnicodeCategory.class);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
             UnicodeCategory key = entry.getKey();
             UnicodeCategoryDescriptor value = entry.getValue();
-            textPerPattern.put(key, new LineDescriptor(
+            textPerCategory.put(key, new LineDescriptor(
                     key,
                     key.getKeys(),
                     key.getDescription(),
@@ -227,7 +227,7 @@ public class UnicodeCategoryGeneration {
                     value.getCharacters()
             ));
         }
-        return textPerPattern;
+        return textPerCategory;
     }
 
     private static Map<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Pattern> categoryPerPattern) {
