@@ -37,6 +37,8 @@ import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnic
 //@Disabled("Generator - not a test")
 public class UnicodeCategoryGeneration {
 
+    public static final Path SYMBOL_RANGE_DUMP_PATH = Paths.get("data/symbols");
+
     @Test
     void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
         Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
@@ -53,31 +55,43 @@ public class UnicodeCategoryGeneration {
         Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
 
         Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
+        // Alert!! Tree map comparison with SymbolRange!!!!
 
-        modifySourceJavaFile(textPerCategory, rangesConstantNames);
+        // modifySourceJavaFile(textPerCategory, rangesConstantNames);
     }
 
-    private static TreeMap<SymbolRange, String> getNamedRanges() throws IOException {
-        TreeMap<SymbolRange, String> ranges = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
+    private static TreeMap<Integer, NamedSymbolRange> getNamedRanges() throws IOException {
+        TreeMap<Integer, NamedSymbolRange> ranges = new TreeMap<>(Comparator.naturalOrder());
         List<String> allLines = Files.readAllLines(Paths.get("data/ranges/input-ranges-description-refined.txt"));
+        Set<String> usedNames = new TreeSet<>();
+        String sectionName = null;
         String prevName = null;
-        int prevRangeStart = 0;
+        int prevRangeStart = -1;
         for (String line : allLines) {
             String[] parts = line.split("\t");
             int rangeStart = Integer.parseInt(parts[0], 16);
-            if (prevName != null) {
-                ranges.put(SymbolRange.range(prevRangeStart, rangeStart - 1), prevName);
+
+            if (rangeStart == prevRangeStart) {
+                sectionName = prevName;
+            } else if (prevName != null) {
+                RangeName upperCaseValidName = new RangeName(sectionName, prevName);
+                upperCaseValidName = ensureNameIsUnique(usedNames, upperCaseValidName);
+                SymbolRange range = SymbolRange.range(prevRangeStart, rangeStart - 1);
+                ranges.put(range.getFrom(), new NamedSymbolRange(range, upperCaseValidName));
             }
+
             prevName = parts[1];
             prevRangeStart = rangeStart;
         }
-
-        ranges.put(SymbolRange.range(prevRangeStart, 0xFFFF), prevName);
+        RangeName upperCaseValidName = new RangeName(sectionName, prevName);
+        upperCaseValidName = ensureNameIsUnique(usedNames, upperCaseValidName);
+        SymbolRange range = SymbolRange.range(prevRangeStart, 0xFFFF);
+        ranges.put(range.getFrom(), new NamedSymbolRange(range, upperCaseValidName));
         return ranges;
     }
 
     private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) throws IOException {
-
+        cleanupDirectoryWithRangeTextFiles();
         Set<SymbolRange> allRanges = getAllRanges(textPerPattern);
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
         Map<SymbolRange, String> rangesConstantsNames = assignNamesToRanges(allRanges);
@@ -94,16 +108,30 @@ public class UnicodeCategoryGeneration {
             createSymbolRangeFile(name, from, to);
         }
         lines.add("}");
-        Files.write(path, lines);
+        // Files.write(path, lines);
 
         return rangesConstantsNames;
     }
 
+    private static void cleanupDirectoryWithRangeTextFiles() throws IOException {
+        Files.walk(SYMBOL_RANGE_DUMP_PATH)
+             .filter(Files::isRegularFile)
+             .forEach(UnicodeCategoryGeneration::silentDeleteFile);
+    }
+
+    private static void silentDeleteFile(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static void createSymbolRangeFile(String name, int from, int to) throws IOException {
-        Path rangeSymbolsFilePath = Paths.get("data/symbols").resolve(name + ".txt");
+        Path rangeSymbolsFilePath = SYMBOL_RANGE_DUMP_PATH.resolve(name + ".txt");
         List<String> symbolFileLines = new ArrayList<>();
         for (int i = from; i <= to; i++) {
-            symbolFileLines.add(String.format("%d\t0x%x\t%s", i, i, charAsString(i)));
+            symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, charAsString(i)));
         }
         Files.write(rangeSymbolsFilePath, symbolFileLines);
     }
@@ -111,34 +139,45 @@ public class UnicodeCategoryGeneration {
     private static Map<SymbolRange, String> assignNamesToRanges(Set<SymbolRange> allRanges) throws IOException {
         TreeMap<SymbolRange, String> rangesConstantsNames = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
         Set<String> usedRangeNames = new HashSet<>();
-        TreeMap<SymbolRange, String> namedRanges = getNamedRanges();
+        TreeMap<Integer, NamedSymbolRange> namedRanges = getNamedRanges();
         for (SymbolRange range : allRanges) {
-            String name;
-            String rangePredefinedName = namedRanges.get(range);
-            if (rangePredefinedName != null) {
-                name = rangePredefinedName.replace(' ', '_').toUpperCase(Locale.ROOT);
+            RangeName name;
+            Map.Entry<Integer, NamedSymbolRange> floorEntry = namedRanges.floorEntry(range.getFrom());
+            NamedSymbolRange namedSymbolRange = floorEntry.getValue();
+            if (namedSymbolRange.range.equals(range)) {
+                name = namedSymbolRange.name;
             } else {
-                Map.Entry<SymbolRange, String> floorEntry = namedRanges.floorEntry(range);
-                if (floorEntry.getKey().getTo() >= range.getTo()) {
-                    name = floorEntry.getValue() + "_SUBSET";
+                if (namedSymbolRange.range.getTo() >= range.getTo()) {
+                    name = new RangeName(namedSymbolRange.name.sectionName, namedSymbolRange.name.subrangeName + "_SUBSET", -1);
                 } else {
-                    name = "RANGE";
+                    int nextAfterThisRangeEnd = namedRanges.ceilingKey(range.getTo());
+                    Map.Entry<Integer, NamedSymbolRange> lastRange = namedRanges.lowerEntry(nextAfterThisRangeEnd);
+
+                    String lastRangeSection = lastRange.getValue().name.sectionName;
+                    String floorRangeSection = floorEntry.getValue().name.sectionName;
+                    String lastRangeSubrange = lastRange.getValue().name.subrangeName;
+                    String floorRangeSubrange = floorEntry.getValue().name.subrangeName;
+                    if (lastRangeSection.equals(floorRangeSection)) {
+                        name = new RangeName(lastRangeSection, floorRangeSubrange + "_TO_" + lastRangeSubrange, -1);
+                    } else {
+                        name = new RangeName(floorRangeSection, "TO_" + lastRangeSection, -1);
+                    }
                 }
             }
             name = ensureNameIsUnique(usedRangeNames, name);
-            rangesConstantsNames.put(range, name);
+            rangesConstantsNames.put(range, name.combinedName);
         }
         return rangesConstantsNames;
     }
 
-    private static String ensureNameIsUnique(Set<String> usedNames, String name) {
-        int index = 0;
-        String finalName = name;
-        while (usedNames.contains(finalName)) {
-            finalName = name + '_' + index;
+    private static RangeName ensureNameIsUnique(Set<String> usedNames, RangeName name) {
+        int index = 1;
+        RangeName finalName = name;
+        while (usedNames.contains(finalName.combinedName)) {
+            finalName = new RangeName(name.sectionName, name.subrangeName, index);
             index++;
         }
-        usedNames.add(finalName);
+        usedNames.add(finalName.combinedName);
         return finalName;
     }
 
@@ -400,5 +439,35 @@ public class UnicodeCategoryGeneration {
             }
         }
         return Optional.empty();
+    }
+
+    public static class RangeName {
+        public final String sectionName;
+        public final String subrangeName;
+        public final String combinedName;
+
+        public RangeName(String sectionName, String subrangeName, int index) {
+            this.sectionName = sectionName.replace(' ', '_').toUpperCase(Locale.ROOT);
+            this.subrangeName = subrangeName.replace(' ', '_').toUpperCase(Locale.ROOT);
+            if (index > 0) {
+                combinedName = this.sectionName + '_' + this.subrangeName + '_' + index;
+            } else {
+                combinedName = this.sectionName + '_' + this.subrangeName;
+            }
+        }
+
+        public RangeName(String sectionName, String subrangeName) {
+            this(sectionName, subrangeName, -1);
+        }
+    }
+
+    public static class NamedSymbolRange {
+        public final SymbolRange range;
+        public final RangeName   name;
+
+        public NamedSymbolRange(SymbolRange range, RangeName name) {
+            this.range = range;
+            this.name = name;
+        }
     }
 }
