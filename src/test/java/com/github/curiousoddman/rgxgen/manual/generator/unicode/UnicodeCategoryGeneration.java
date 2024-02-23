@@ -44,12 +44,9 @@ public class UnicodeCategoryGeneration {
         Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
         Map<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
 
-        System.out.println("Sorting all characters in groups");
         for (List<Character> value : matchedMap.values()) {
             value.sort(Comparator.naturalOrder());
         }
-
-        System.out.println("Transforming to symbols and groups");
 
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
@@ -108,7 +105,7 @@ public class UnicodeCategoryGeneration {
             createSymbolRangeFile(name, from, to);
         }
         lines.add("}");
-        // Files.write(path, lines);
+        Files.write(path, lines);
 
         return rangesConstantsNames;
     }
