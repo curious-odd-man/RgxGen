@@ -19,10 +19,7 @@ package com.github.curiousoddman.rgxgen.manual;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,73 +30,17 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
-import static java.lang.Character.*;
 
 @SuppressWarnings({"TestMethodWithoutAssertion", "NewClassNamingConvention"})
-@Disabled("Generator - not a test")
+//@Disabled("Generator - not a test")
 public class UnicodeCategoryGeneration {
-
-    public static Stream<Character> getAllUnicodes() {
-        return Arrays.stream(makeUnicodeCharacterArray());
-    }
-
-    @ParameterizedTest
-    @MethodSource("getAllUnicodes")
-    void allCharactersTest(Character c) {
-        System.out.println((int) c + " ' " + c + "' is letter " + isLetter(c) + " is digit " + isDigit(c) + " is uppercase " + isUpperCase(c) + " is lowercase " + isLowerCase(c) + " is defined " + isDefined(c) + " is title " + isTitleCase(c));
-    }
-
-    @Test
-    void generateCasedLetters() {
-        List<SymbolRange> symbolRanges = UnicodeCategory.UPPERCASE_LETTER.getSymbolRanges();
-        Character[] symbols = UnicodeCategory.UPPERCASE_LETTER.getSymbols();
-
-        List<Character> allUppercaseCharacters = createCharactersList(symbolRanges, symbols);
-
-        List<SymbolRange> lowercaseRanges = UnicodeCategory.LOWERCASE_LETTER.getSymbolRanges();
-        Character[] lowercaseSymbols = UnicodeCategory.LOWERCASE_LETTER.getSymbols();
-
-        Set<Character> allLowercaseCharacters = new HashSet<>(createCharactersList(lowercaseRanges, lowercaseSymbols));
-
-        Set<Character> result = new HashSet<>();
-        for (Character uppercaseChar : allUppercaseCharacters) {
-            char lowerCase = toLowerCase(uppercaseChar);
-            if (allLowercaseCharacters.contains(lowerCase)) {
-                result.add(lowerCase);
-                result.add(uppercaseChar);
-            }
-        }
-
-        Map<UnicodeCategory, List<Character>> matchedMap = new HashMap<>();
-        List<Character> characters = new ArrayList<>(result);
-        characters.sort(Comparator.naturalOrder());
-        //matchedMap.put(UnicodeCategory.CASED_LETTER, characters);
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        Map<UnicodeCategory, LineDescriptor> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
-        //String text = textPerPattern.get(UnicodeCategory.CASED_LETTER).formatToText(new HashMap<>());
-        //System.out.println(text);
-    }
-
-    private static List<Character> createCharactersList(List<SymbolRange> symbolRanges, Character[] symbols) {
-        return Stream.concat(
-                             Arrays.stream(symbols),
-                             symbolRanges
-                                     .stream()
-                                     .flatMap(range -> IntStream.range(range.getFrom(), range.getTo() + 1)
-                                                                .mapToObj(i -> (char) i))
-                     )
-                     .collect(Collectors.toList());
-    }
 
     @Test
     void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
-        Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern = compiledAllPatterns();
+        Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
         Map<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
-        Set<UnicodeCategory> failedToCompile = categoryPerPattern.entrySet().stream().filter(entry -> !entry.getValue().isPresent()).map(Map.Entry::getKey).collect(Collectors.toSet());
 
         System.out.println("Sorting all characters in groups");
         for (List<Character> value : matchedMap.values()) {
@@ -109,25 +50,37 @@ public class UnicodeCategoryGeneration {
         System.out.println("Transforming to symbols and groups");
 
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        Map<UnicodeCategory, LineDescriptor> textPerPattern = formatDescriptorsIntoJavaCode(descriptorMap);
+        Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
 
-        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerPattern);
+        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
 
-        modifySourceJavaFile(failedToCompile, textPerPattern, rangesConstantNames);
+        modifySourceJavaFile(textPerCategory, rangesConstantNames);
+    }
+
+    private static TreeMap<SymbolRange, String> getNamedRanges() throws IOException {
+        TreeMap<SymbolRange, String> ranges = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
+        List<String> allLines = Files.readAllLines(Paths.get("data/ranges/input-ranges-description-refined.txt"));
+        String prevName = null;
+        int prevRangeStart = 0;
+        for (String line : allLines) {
+            String[] parts = line.split("\t");
+            int rangeStart = Integer.parseInt(parts[0], 16);
+            if (prevName != null) {
+                ranges.put(SymbolRange.range(prevRangeStart, rangeStart - 1), prevName);
+            }
+            prevName = parts[1];
+            prevRangeStart = rangeStart;
+        }
+
+        ranges.put(SymbolRange.range(prevRangeStart, 0xFFFF), prevName);
+        return ranges;
     }
 
     private static Map<SymbolRange, String> writeConstants(Map<UnicodeCategory, LineDescriptor> textPerPattern) throws IOException {
-        Map<SymbolRange, Long> countPerRange = textPerPattern.values().stream().map(LineDescriptor::getRanges).flatMap(Collection::stream)
-                                                             .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+        Set<SymbolRange> allRanges = getAllRanges(textPerPattern);
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
-        Map<SymbolRange, String> rangesConstantsNames = new LinkedHashMap<>();
-        int constantIndex = 0;
-        for (Map.Entry<SymbolRange, Long> entry : countPerRange.entrySet()) {
-            if (entry.getValue() >= 2) {
-                String name = "RANGE_" + constantIndex++;
-                rangesConstantsNames.put(entry.getKey(), name);
-            }
-        }
+        Map<SymbolRange, String> rangesConstantsNames = assignNamesToRanges(allRanges);
 
         List<String> lines = new ArrayList<>();
         lines.add("package com.github.curiousoddman.rgxgen.model;");
@@ -138,6 +91,7 @@ public class UnicodeCategoryGeneration {
             int from = entry.getKey().getFrom();
             int to = entry.getKey().getTo();
             lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, charAsString(from), charAsString(to), from, to));
+            createSymbolRangeFile(name, from, to);
         }
         lines.add("}");
         Files.write(path, lines);
@@ -145,7 +99,42 @@ public class UnicodeCategoryGeneration {
         return rangesConstantsNames;
     }
 
-    private static void modifySourceJavaFile(Set<UnicodeCategory> failedToCompile, Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) throws IOException {
+    private static void createSymbolRangeFile(String name, int from, int to) throws IOException {
+        Path rangeSymbolsFilePath = Paths.get("data/symbols").resolve(name + ".txt");
+        List<String> symbolFileLines = new ArrayList<>();
+        for (int i = from; i <= to; i++) {
+            symbolFileLines.add(String.format("%d\t0x%x\t%s", i, i, charAsString(i)));
+        }
+        Files.write(rangeSymbolsFilePath, symbolFileLines);
+    }
+
+    private static Map<SymbolRange, String> assignNamesToRanges(Set<SymbolRange> allRanges) throws IOException {
+        Map<SymbolRange, String> rangesConstantsNames = new LinkedHashMap<>();
+        int constantIndex = 0;
+        TreeMap<SymbolRange, String> namedRanges = getNamedRanges();
+        for (SymbolRange range : allRanges) {
+            String name;
+            String rangePredefinedName = namedRanges.get(range);
+            if (rangePredefinedName != null) {
+                name = rangePredefinedName.replace(' ', '_').toUpperCase(Locale.ROOT);
+            } else {
+                name = "RANGE_" + constantIndex++;
+            }
+            rangesConstantsNames.put(range, name);
+        }
+        return rangesConstantsNames;
+    }
+
+    private static Set<SymbolRange> getAllRanges(Map<UnicodeCategory, LineDescriptor> textPerPattern) {
+        return textPerPattern
+                .values()
+                .stream()
+                .map(LineDescriptor::getRanges)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+    }
+
+    private static void modifySourceJavaFile(Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) throws IOException {
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java").toAbsolutePath();
         List<String> lines = Files.readAllLines(path);
         List<String> transformedLines = new ArrayList<>(lines.size());
@@ -163,17 +152,7 @@ public class UnicodeCategoryGeneration {
             if (found != null) {
                 transformedLines.add(found.getValue().formatToText(constantNames));
             } else {
-                try {
-                    UnicodeCategory unicodeCategory = UnicodeCategory.valueOf(getKeyFromLine(line));
-
-                    if (failedToCompile.contains(unicodeCategory)) {
-                        transformedLines.add("/*COMPILED_ERR*/" + line);
-                    } else {
-                        transformedLines.add("/*NO_CHANGE*/" + line);
-                    }
-                } catch (Exception e) {
-                    transformedLines.add(line);
-                }
+                transformedLines.add("/*NO_CHANGE*/" + line);
             }
         }
 
@@ -256,10 +235,6 @@ public class UnicodeCategoryGeneration {
 
         private static String makeKeysText(UnicodeCategory key) {
             List<String> keys = key.getKeys();
-            if (keys.size() == 1) {
-                return q(keys.get(0));
-            }
-
             return "keys(" + keys.stream().map(LineDescriptor::q).collect(Collectors.joining(",")) + ")";
         }
 
@@ -276,30 +251,20 @@ public class UnicodeCategoryGeneration {
         }
     }
 
-    private static Map<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Optional<Pattern>> categoryPerPattern) {
+    private static Map<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Pattern> categoryPerPattern) {
         EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
-        List<UnicodeCategory> errorCategories = new ArrayList<>();
-        for (Map.Entry<UnicodeCategory, Optional<Pattern>> entry : categoryPerPattern.entrySet()) {
-            if (!entry.getValue()
-                      .isPresent()) {
-                errorCategories.add(entry.getKey());
-            }
-        }
-
         Character[] characters = makeUnicodeCharacterArray();
-
         for (Character character : characters) {
             String str = String.valueOf(character);
-            for (Map.Entry<UnicodeCategory, Optional<Pattern>> entry : categoryPerPattern.entrySet()) {
-                Optional<Pattern> value = entry.getValue();
+            for (Map.Entry<UnicodeCategory, Pattern> entry : categoryPerPattern.entrySet()) {
+                Pattern value = entry.getValue();
                 UnicodeCategory category = entry.getKey();
-                if (value.isPresent() && value.get().matcher(str).matches()) {
+                if (value.matcher(str).matches()) {
                     matchedMap.computeIfAbsent(category, k -> new ArrayList<>())
                               .add(character);
                 }
             }
         }
-        System.out.println("Total errors : " + errorCategories.size() + " of " + UnicodeCategory.values().length);
         return matchedMap;
     }
 
@@ -310,21 +275,18 @@ public class UnicodeCategoryGeneration {
         return String.valueOf((char) c);
     }
 
-    private static Map<UnicodeCategory, Optional<Pattern>> compiledAllPatterns() {
-        return Arrays.stream(UnicodeCategory.values())
-                     .filter(unicodeCategory -> !unicodeCategory.isConfigured())
-                     .collect(Collectors.toMap(
-                             Function.identity(),
-                             unicodeCategory -> {
-                                 for (String key : unicodeCategory.getKeys()) {
-                                     try {
-                                         return Optional.of(Pattern.compile("\\p{" + key + "}+"));      // , Pattern.UNICODE_CHARACTER_CLASS
-                                     } catch (Exception ignore) {
-                                     }
-                                 }
-                                 return Optional.empty();
-                             }
-                     ));
+    private static Map<UnicodeCategory, Pattern> compiledAllPatterns() {
+        return Arrays
+                .stream(UnicodeCategory.values())
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        UnicodeCategoryGeneration::getOptionalPattern
+                ))
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().isPresent())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
+
     }
 
 
@@ -351,7 +313,8 @@ public class UnicodeCategoryGeneration {
     private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, List<Character>> matchedMap) {
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = new EnumMap<>(UnicodeCategory.class);
         for (Map.Entry<UnicodeCategory, List<Character>> entry : matchedMap.entrySet()) {
-            UnicodeCategoryDescriptor descriptor = descriptorMap.computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), new ArrayList<>()));
+            UnicodeCategoryDescriptor descriptor = descriptorMap
+                    .computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), new ArrayList<>()));
 
             Character lastCharacter = null;
             SymbolRange lastSymbolRange = null;
@@ -410,5 +373,15 @@ public class UnicodeCategoryGeneration {
                     ", characters=" + characters +
                     '}';
         }
+    }
+
+    private static Optional<Pattern> getOptionalPattern(UnicodeCategory unicodeCategory) {
+        for (String key : unicodeCategory.getKeys()) {
+            try {
+                return Optional.of(Pattern.compile("\\p{" + key + "}+"));
+            } catch (Exception ignore) {
+            }
+        }
+        return Optional.empty();
     }
 }
