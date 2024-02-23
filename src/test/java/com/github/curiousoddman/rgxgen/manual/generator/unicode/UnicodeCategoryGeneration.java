@@ -52,9 +52,8 @@ public class UnicodeCategoryGeneration {
         Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
 
         Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
-        // Alert!! Tree map comparison with SymbolRange!!!!
 
-        // modifySourceJavaFile(textPerCategory, rangesConstantNames);
+        modifySourceJavaFile(textPerCategory, rangesConstantNames);
     }
 
     private static TreeMap<Integer, NamedSymbolRange> getNamedRanges() throws IOException {
@@ -92,12 +91,14 @@ public class UnicodeCategoryGeneration {
         Set<SymbolRange> allRanges = getAllRanges(textPerPattern);
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
         Map<SymbolRange, String> rangesConstantsNames = assignNamesToRanges(allRanges);
+        TreeMap<SymbolRange, String> sortedRanges = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
+        sortedRanges.putAll(rangesConstantsNames);
 
         List<String> lines = new ArrayList<>();
         lines.add("package com.github.curiousoddman.rgxgen.model;");
         lines.add("");
         lines.add("public class UnicodeCategoryConstants {");
-        for (Map.Entry<SymbolRange, String> entry : rangesConstantsNames.entrySet()) {
+        for (Map.Entry<SymbolRange, String> entry : sortedRanges.entrySet()) {
             String name = entry.getValue();
             int from = entry.getKey().getFrom();
             int to = entry.getKey().getTo();
@@ -126,7 +127,7 @@ public class UnicodeCategoryGeneration {
     }
 
     private static Map<SymbolRange, String> assignNamesToRanges(Set<SymbolRange> allRanges) throws IOException {
-        TreeMap<SymbolRange, String> rangesConstantsNames = new TreeMap<>(Comparator.comparingInt(SymbolRange::getFrom));
+        Map<SymbolRange, String> rangesConstantsNames = new HashMap<>();
         Set<String> usedRangeNames = new HashSet<>();
         TreeMap<Integer, NamedSymbolRange> namedRanges = getNamedRanges();
         for (SymbolRange range : allRanges) {
@@ -179,14 +180,14 @@ public class UnicodeCategoryGeneration {
                 .collect(Collectors.toSet());
     }
 
-    private static void modifySourceJavaFile(Map<UnicodeCategory, LineDescriptor> textPerPattern, Map<SymbolRange, String> constantNames) throws IOException {
+    private static void modifySourceJavaFile(Map<UnicodeCategory, LineDescriptor> textPerCategory, Map<SymbolRange, String> constantNames) throws IOException {
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java").toAbsolutePath();
         List<String> lines = Files.readAllLines(path);
         List<String> transformedLines = new ArrayList<>(lines.size());
 
         for (String line : lines) {
             Map.Entry<UnicodeCategory, LineDescriptor> found = null;
-            for (Map.Entry<UnicodeCategory, LineDescriptor> entry : textPerPattern.entrySet()) {
+            for (Map.Entry<UnicodeCategory, LineDescriptor> entry : textPerCategory.entrySet()) {
                 String name = entry.getKey().name();
                 String trim = getKeyFromLine(line);
                 if (trim.equals(name)) {
@@ -197,7 +198,12 @@ public class UnicodeCategoryGeneration {
             if (found != null) {
                 transformedLines.add(found.getValue().formatToText(constantNames));
             } else {
-                transformedLines.add("/*NO_CHANGE*/" + line);
+                try {
+                    UnicodeCategory.valueOf(getKeyFromLine(line));
+                    transformedLines.add("/*NO_CHANGE*/" + line);
+                } catch (Exception e) {
+                    transformedLines.add(line);
+                }
             }
         }
 

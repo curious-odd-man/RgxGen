@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class LineDescriptor {
-    private static final String pattern = "    %s(%s, %s, %s, %s),";
+    private static final String S_S_S_S_S = "    %s(%s, %s, %s, %s),";
+    private static final String S_S_S_S   = "    %s(%s, %s, %s),";
 
     public UnicodeCategory   unicodeCategory;
     public List<String>      keys;
@@ -16,7 +17,7 @@ public class LineDescriptor {
     public List<SymbolRange> ranges;
     public List<Character>   characters;
 
-    LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, List<Character> characters) {
+    public LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, List<Character> characters) {
         this.unicodeCategory = unicodeCategory;
         this.keys = keys;
         this.description = description;
@@ -25,7 +26,23 @@ public class LineDescriptor {
     }
 
     public String formatToText(Map<SymbolRange, String> constantNames) {
-        return String.format(pattern, unicodeCategory.name(), makeKeysText(unicodeCategory), makeDescription(unicodeCategory), makeRanges(ranges, constantNames), makeCharacters(characters));
+        String keysText = makeKeysText(unicodeCategory);
+        String descriptionText = makeDescription(unicodeCategory);
+        String rangesText = makeRanges(ranges, constantNames);
+        String charactersText = makeCharacters(characters);
+        if (ranges.isEmpty()) {
+            return String.format(
+                    S_S_S_S,
+                    unicodeCategory.name(), keysText, descriptionText, charactersText
+            );
+        } else if (characters.isEmpty()) {
+            return String.format(
+                    S_S_S_S,
+                    unicodeCategory.name(), keysText, descriptionText, rangesText
+            );
+        }
+
+        return String.format(S_S_S_S_S, unicodeCategory.name(), keysText, descriptionText, rangesText, charactersText);
     }
 
     private static String makeCharacters(List<Character> characters) {
@@ -43,7 +60,7 @@ public class LineDescriptor {
         }
         if (ranges.size() == 1) {
             SymbolRange range = ranges.get(0);
-            return "singletonList(" + rangeOrConstant(constantNames, range) + ')';
+            return rangeOrConstant(constantNames, range);
         }
         return "asList(" + ranges
                 .stream()
