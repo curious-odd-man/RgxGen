@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.DECIMAL_DIGIT_NUMBER;
-import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.LATIN_LOWERCASE;
+import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryConstants.BASIC_LATIN_LOWERCASE_LATIN_ALPHABET;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
@@ -408,18 +408,18 @@ public enum TestPattern implements DataInterface {
     CATEGORY_WITHIN_SQUART_BRACKETS("[a-z\\p{Nd}]{2}", new Repeat("[a-z\\p{Nd}]{2}",
                                                                   SymbolSet.ofUnicode("\\p{Decimal_Digit_Number}",
                                                                                       Stream.concat(
-                                                                                                    Stream.of(LATIN_LOWERCASE),
+                                                                                                    Stream.of(BASIC_LATIN_LOWERCASE_LATIN_ALPHABET),
                                                                                                     DECIMAL_DIGIT_NUMBER.getSymbolRanges().stream())
                                                                                             .collect(Collectors.toList()),
                                                                                       ZERO_LENGTH_CHARACTER_ARRAY, MatchType.POSITIVE), 2)) {{
         setAllUniqueValues(
                 Stream.concat(
-                              getRangeSymbolStream(LATIN_LOWERCASE),
+                              getRangeSymbolStream(BASIC_LATIN_LOWERCASE_LATIN_ALPHABET),
                               getSymbolStream(DECIMAL_DIGIT_NUMBER)
                       )
                       .sorted(Comparator.naturalOrder())
                       .flatMap(c -> Stream
-                              .concat(getRangeSymbolStream(LATIN_LOWERCASE), getSymbolStream(DECIMAL_DIGIT_NUMBER))
+                              .concat(getRangeSymbolStream(BASIC_LATIN_LOWERCASE_LATIN_ALPHABET), getSymbolStream(DECIMAL_DIGIT_NUMBER))
                               .sorted(Comparator.naturalOrder())
                               .map(cc -> c + cc))
                       .collect(Collectors.toList()));

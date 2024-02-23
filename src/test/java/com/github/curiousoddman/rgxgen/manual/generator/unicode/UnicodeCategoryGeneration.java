@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
 
 @SuppressWarnings({"TestMethodWithoutAssertion", "NewClassNamingConvention"})
-//@Disabled("Generator - not a test")
+@Disabled("Generator - not a test")
 public class UnicodeCategoryGeneration {
 
     public static final Path SYMBOL_RANGE_DUMP_PATH = Paths.get("data/symbols");
