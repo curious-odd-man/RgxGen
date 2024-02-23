@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.manual;
+package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -104,7 +104,7 @@ public class UnicodeCategoryGeneration {
             String name = entry.getValue();
             int from = entry.getKey().getFrom();
             int to = entry.getKey().getTo();
-            lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, charAsString(from), charAsString(to), from, to));
+            lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, Utils.charAsString(from), Utils.charAsString(to), from, to));
             createSymbolRangeFile(name, from, to);
         }
         lines.add("}");
@@ -116,22 +116,14 @@ public class UnicodeCategoryGeneration {
     private static void cleanupDirectoryWithRangeTextFiles() throws IOException {
         Files.walk(SYMBOL_RANGE_DUMP_PATH)
              .filter(Files::isRegularFile)
-             .forEach(UnicodeCategoryGeneration::silentDeleteFile);
-    }
-
-    private static void silentDeleteFile(Path path) {
-        try {
-            Files.deleteIfExists(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+             .forEach(Utils::silentDeleteFile);
     }
 
     private static void createSymbolRangeFile(String name, int from, int to) throws IOException {
         Path rangeSymbolsFilePath = SYMBOL_RANGE_DUMP_PATH.resolve(name + ".txt");
         List<String> symbolFileLines = new ArrayList<>();
         for (int i = from; i <= to; i++) {
-            symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, charAsString(i)));
+            symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
         }
         Files.write(rangeSymbolsFilePath, symbolFileLines);
     }
@@ -235,78 +227,6 @@ public class UnicodeCategoryGeneration {
         return textPerPattern;
     }
 
-    private static class LineDescriptor {
-        private static final String pattern = "    %s(%s, %s, %s, %s),";
-        UnicodeCategory   unicodeCategory;
-        List<String>      keys;
-        String            description;
-        List<SymbolRange> ranges;
-        List<Character>   characters;
-
-        LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, List<Character> characters) {
-            this.unicodeCategory = unicodeCategory;
-            this.keys = keys;
-            this.description = description;
-            this.ranges = ranges;
-            this.characters = characters;
-        }
-
-        public String formatToText(Map<SymbolRange, String> constantNames) {
-            return String.format(pattern, unicodeCategory.name(), makeKeysText(unicodeCategory), makeDescription(unicodeCategory), makeRanges(ranges, constantNames), makeCharacters(characters));
-        }
-
-        private static String makeCharacters(List<Character> characters) {
-            if (characters.isEmpty()) {
-                return "null";
-            }
-            return String.format("new Character[]{%s}",
-                                 characters.stream().map(UnicodeCategoryGeneration::charAsString).map(LineDescriptor::sq).collect(Collectors.joining(","))
-            );
-        }
-
-        private static String makeRanges(List<SymbolRange> ranges, Map<SymbolRange, String> constantNames) {
-            if (ranges.isEmpty()) {
-                return "null";
-            }
-            if (ranges.size() == 1) {
-                SymbolRange range = ranges.get(0);
-                return "singletonList(" + rangeOrConstant(constantNames, range) + ')';
-            }
-            return "asList(" + ranges
-                    .stream()
-                    .map(range -> rangeOrConstant(constantNames, range))
-                    .collect(Collectors.joining(",")) + ')';
-        }
-
-        private static String rangeOrConstant(Map<SymbolRange, String> constantNames, SymbolRange range) {
-            return constantNames.getOrDefault(range, String.format("range('%s', '%s')", charAsString(range.getFrom()), charAsString(range.getTo())));
-        }
-
-        private static String makeDescription(UnicodeCategory key) {
-            if (key.getDescription() == null) {
-                return "";
-            }
-            return q(key.getDescription());
-        }
-
-        private static String makeKeysText(UnicodeCategory key) {
-            List<String> keys = key.getKeys();
-            return "keys(" + keys.stream().map(LineDescriptor::q).collect(Collectors.joining(",")) + ")";
-        }
-
-        private static String q(String text) {
-            return '"' + text + '"';
-        }
-
-        private static String sq(String text) {
-            return '\'' + text + '\'';
-        }
-
-        public List<SymbolRange> getRanges() {
-            return ranges;
-        }
-    }
-
     private static Map<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Pattern> categoryPerPattern) {
         EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
         Character[] characters = makeUnicodeCharacterArray();
@@ -322,13 +242,6 @@ public class UnicodeCategoryGeneration {
             }
         }
         return matchedMap;
-    }
-
-    private static String charAsString(int c) {
-        if (c == '\\' || c == '\'') {
-            return "\\" + (char) c;
-        }
-        return String.valueOf((char) c);
     }
 
     private static Map<UnicodeCategory, Pattern> compiledAllPatterns() {
@@ -381,13 +294,13 @@ public class UnicodeCategoryGeneration {
                         if (lastCharacter == next - 1) {
                             lastSymbolRange = SymbolRange.range(lastCharacter, next);
                         } else {
-                            descriptor.characters.add(lastCharacter);
+                            descriptor.getCharacters().add(lastCharacter);
                         }
                     } else {
                         if (lastCharacter == next - 1) {
                             lastSymbolRange = SymbolRange.range(lastSymbolRange.getFrom(), next);
                         } else {
-                            descriptor.ranges.add(lastSymbolRange);
+                            descriptor.getRanges().add(lastSymbolRange);
                             lastSymbolRange = null;
                         }
                     }
@@ -396,39 +309,13 @@ public class UnicodeCategoryGeneration {
             }
 
             if (lastSymbolRange == null) {
-                descriptor.characters.add(lastCharacter);
+                descriptor.getCharacters().add(lastCharacter);
             } else {
-                descriptor.ranges.add(lastSymbolRange);
+                descriptor.getRanges().add(lastSymbolRange);
             }
 
         }
         return descriptorMap;
-    }
-
-    private static class UnicodeCategoryDescriptor {
-        private final List<SymbolRange> ranges;
-        private final List<Character>   characters;
-
-        UnicodeCategoryDescriptor(List<SymbolRange> ranges, List<Character> characters) {
-            this.ranges = ranges;
-            this.characters = characters;
-        }
-
-        public List<SymbolRange> getRanges() {
-            return ranges;
-        }
-
-        public List<Character> getCharacters() {
-            return characters;
-        }
-
-        @Override
-        public String toString() {
-            return "UnicodeCategoryDescriptor{" +
-                    "ranges=" + ranges +
-                    ", characters=" + characters +
-                    '}';
-        }
     }
 
     private static Optional<Pattern> getOptionalPattern(UnicodeCategory unicodeCategory) {
@@ -439,35 +326,5 @@ public class UnicodeCategoryGeneration {
             }
         }
         return Optional.empty();
-    }
-
-    public static class RangeName {
-        public final String sectionName;
-        public final String subrangeName;
-        public final String combinedName;
-
-        public RangeName(String sectionName, String subrangeName, int index) {
-            this.sectionName = sectionName.replace(' ', '_').toUpperCase(Locale.ROOT);
-            this.subrangeName = subrangeName.replace(' ', '_').toUpperCase(Locale.ROOT);
-            if (index > 0) {
-                combinedName = this.sectionName + '_' + this.subrangeName + '_' + index;
-            } else {
-                combinedName = this.sectionName + '_' + this.subrangeName;
-            }
-        }
-
-        public RangeName(String sectionName, String subrangeName) {
-            this(sectionName, subrangeName, -1);
-        }
-    }
-
-    public static class NamedSymbolRange {
-        public final SymbolRange range;
-        public final RangeName   name;
-
-        public NamedSymbolRange(SymbolRange range, RangeName name) {
-            this.range = range;
-            this.name = name;
-        }
     }
 }
