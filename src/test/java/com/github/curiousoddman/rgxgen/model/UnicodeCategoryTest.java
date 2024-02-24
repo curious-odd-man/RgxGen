@@ -91,7 +91,7 @@ class UnicodeCategoryTest {
     public class SymbolsNotInCategoryTest extends UnicodeCategoryGenerateTestBase {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getCategoryTestData")
-        void correctSymbolsInCategoryTest(CategoryTestData categoryTestData) {
+        void correctSymbolsNotInCategoryTest(CategoryTestData categoryTestData) {
             List<Character> characters = UNICODE_SYMBOL_RANGE
                     .chars()
                     .filter(c -> !categoryTestData.getCategory().contains(c))

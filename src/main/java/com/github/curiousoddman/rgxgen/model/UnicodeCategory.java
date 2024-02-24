@@ -286,7 +286,7 @@ public enum UnicodeCategory {
         }
 
         for (Character symbol : symbols) {
-            if (symbol == c) {
+            if (symbol.equals(c)) {
                 return true;
             }
         }
