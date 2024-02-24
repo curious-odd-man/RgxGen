@@ -149,8 +149,8 @@ public class Main {
 |                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported                                                                                                      |
 |                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                                                                                                               |
 |                           `()` | To group multiple characters for the repetitions                                                                                                                                           |
-| `foo(?=bar)` and `(?<=foo)bar` | Positive lookahead and lookbehind. These are equivalent to `foobar`                                                                                                                        |
-| `foo(?!bar)` and `(?<!foo)bar` | Negative lookahead and lookbehind.                                                                                                                                                         |
+| `foo(?=bar)` and `(?<=foo)bar` | Limited support. Positive lookahead and lookbehind. These are equivalent to `foobar`. Please see `Lookahead and Lookbehind` section.                                                       |
+| `foo(?!bar)` and `(?<!foo)bar` | Limited support. Negative lookahead and lookbehind. Please see `Lookahead and Lookbehind` section.                                                                                         |
 |        <code>(a&#124;b)</code> | Alternatives                                                                                                                                                                               |
 |                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                                                                                                              |
 

@@ -6,6 +6,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
@@ -61,9 +63,11 @@ public class CompleteTests {
                              {"Periodic Table Elements", Boolean.FALSE, "\\b(?:A[cglmr-u]|B[aehikr]?|C[adefl-orsu]?|D[bsy]|E[rsu]|F[elmr]?|G[ade]|H[efgos]?|I[nr]?|Kr?|L[airuv]|M[dgont]|N[abdeiop]?|Os?|P[abdmortu]?|R[abe-hnu]|S[bcegimnr]?|T[abcehilm]|U(?:u[opst])?|V|W|Xe|Yb?|Z[nr])\\b"},
                              {"Russia Phone Number", Boolean.FALSE, "^((\\+7|7|8)+([0-9]){10})$|\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b"},
                              {"Brainfuck code", Boolean.FALSE, "^[+-<>.,\\[\\] \t\n\r]+$"},
-                             {"USA/Canada Zip codes", Boolean.FALSE, "(^\\d{5}(-\\d{4})?$)|(^[A-Z]{1}\\d{1}[A-Z]{1} *\\d{1}[A-Z]{1}\\d{1}$)"},
+                             {"USA and Canada Zip codes", Boolean.FALSE, "(^\\d{5}(-\\d{4})?$)|(^[A-Z]{1}\\d{1}[A-Z]{1} *\\d{1}[A-Z]{1}\\d{1}$)"},
                              {"JS comments", Boolean.TRUE, "//(?![\\S]{2,}\\.[\\w]).*|/\\*(.|\n)+\\*/"},
                              {"2-5 letter palindromes", Boolean.FALSE, "\\b(\\w?)(\\w)\\w?\\2\\1"},
+                             {"Morse code", Boolean.TRUE, "^[.-]{1,5}(?: +[.-]{1,5})*(?: +[.-]{1,5}(?: +[.-]{1,5})*)$"},
+                             {"JWT", Boolean.TRUE, "^[A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+/=]*$"},
                              })
                      .flatMap(arr -> IntStream.range(0, 100)
                                               .mapToObj(index -> Arguments.of(arr[0], arr[1], arr[2], index)));
@@ -86,8 +90,11 @@ public class CompleteTests {
         assertFalse(matches(aRegex, s, aUseFind), "Text: '" + s + "'does not match pattern " + aRegex);
     }
 
-    private boolean matches(String aRegex, String text, boolean aUseFind) {
-        Matcher matcher = Pattern.compile(aRegex).matcher(text);
+    private static Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+
+    private static boolean matches(String pattern, String text, boolean aUseFind) {
+        Pattern compiledPattern = PATTERN_CACHE.computeIfAbsent(pattern, k -> Pattern.compile(pattern));
+        Matcher matcher = compiledPattern.matcher(text);
         return aUseFind ? matcher.find() : matcher.matches();
     }
 }
