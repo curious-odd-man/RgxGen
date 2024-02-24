@@ -78,7 +78,7 @@ public class FailingParsingTests {
             assertSame(RgxGenParseException.class, cause.getClass());
             assertEquals("Unknown repetition character 'x'\n" +
                                  "'a{1,'\n" +
-                                 "^", cause.getMessage());
+                                 '^', cause.getMessage());
             //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();

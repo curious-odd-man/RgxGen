@@ -384,7 +384,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAsciiRanges("\\" + c, Arrays.asList(ASCII_DIGITS), getMatchType(c, 'd'));
+                createdNode = SymbolSet.ofAsciiRanges("\\" + c, Collections.singletonList(ASCII_DIGITS), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space

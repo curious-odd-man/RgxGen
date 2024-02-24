@@ -90,7 +90,9 @@ public class CharIterator implements Iterator<Character> {
     @Override
     public Character next() {
         try {
-            return aValue.charAt(aCurrentIndex++);
+            char c = aValue.charAt(aCurrentIndex);
+            aCurrentIndex++;
+            return c;
         } catch (StringIndexOutOfBoundsException e) {
             NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
             noSuchElementException.initCause(e);
