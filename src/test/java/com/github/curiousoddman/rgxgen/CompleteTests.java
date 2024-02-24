@@ -90,7 +90,7 @@ public class CompleteTests {
         assertFalse(matches(aRegex, s, aUseFind), "Text: '" + s + "'does not match pattern " + aRegex);
     }
 
-    private static Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
+    private static final Map<String, Pattern> PATTERN_CACHE = new HashMap<>();
 
     private static boolean matches(String pattern, String text, boolean aUseFind) {
         Pattern compiledPattern = PATTERN_CACHE.computeIfAbsent(pattern, k -> Pattern.compile(pattern));

@@ -43,7 +43,7 @@ public class SymbolSetCaseInsensitiveTests {
         SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
         Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
         Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
-        assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
+        assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + '\n');
     }
 
     @ParameterizedTest
@@ -52,7 +52,7 @@ public class SymbolSetCaseInsensitiveTests {
         SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
         Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
         Character[] expected = excluding(aExpectedCaseInsensitive);
-        assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + "\n");
+        assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + '\n');
 
     }
 }

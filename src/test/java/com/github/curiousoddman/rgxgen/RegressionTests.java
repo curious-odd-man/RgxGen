@@ -59,7 +59,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), "'" + generated + "' for pattern '" + pattern + "'");
+                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 
@@ -72,7 +72,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), "'" + generated + "' for pattern '" + pattern + "'");
+                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 
@@ -86,7 +86,7 @@ public class RegressionTests {
             assertTrue(withGroupIterator.hasNext());
             String next = noGroupIterator.next();
             String next1 = withGroupIterator.next();
-            System.out.println("'" + next + "' : '" + next1 + "'");
+            System.out.println('\'' + next + "' : '" + next1 + '\'');
             assertEquals(next, next1);
         }
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
@@ -23,11 +24,11 @@ public class SquareBracketsParsingTests {
     }
 
     private static SymbolSet mkRange(Character start, Character end) {
-        return SymbolSet.ofAsciiRanges(start + ":" + end, Arrays.asList(range(start, end)), MatchType.POSITIVE);
+        return SymbolSet.ofAsciiRanges(start + ":" + end, Collections.singletonList(range(start, end)), MatchType.POSITIVE);
     }
 
     private static SymbolSet mkRangeAndChars(Character start, Character end, Character... chars) {
-        return SymbolSet.ofAscii(start + ":" + end, Arrays.asList(range(start, end)), chars, MatchType.POSITIVE);
+        return SymbolSet.ofAscii(start + ":" + end, Collections.singletonList(range(start, end)), chars, MatchType.POSITIVE);
     }
 
     private static SymbolSet mkWhitespaceAnd(Character... chars) {

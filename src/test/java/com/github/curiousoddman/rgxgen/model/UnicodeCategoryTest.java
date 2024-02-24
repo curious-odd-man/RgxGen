@@ -71,7 +71,7 @@ class UnicodeCategoryTest {
         Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
         StringBuilder sb = new StringBuilder();
         for (Character compactedCharacter : compactedCharacters) {
-            sb.append("'").append(compactedCharacter).append("'").append(',');
+            sb.append('\'').append(compactedCharacter).append('\'').append(',');
         }
         if (sb.length() != 0) {
             System.out.println(categoryTestData.getCategory() + ": " + sb);

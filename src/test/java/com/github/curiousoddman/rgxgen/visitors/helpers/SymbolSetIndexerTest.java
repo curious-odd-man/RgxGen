@@ -8,6 +8,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,7 +31,7 @@ class SymbolSetIndexerTest {
                 arguments("Several Ranges", symbolSet(range('a', 'd'), range('k', 'l'), range('x', 'z')), 9, asList('a', 'b', 'c', 'd', 'k', 'l', 'x', 'y', 'z')),
                 arguments("Several characters", symbolSet('a', 'd', 'k', 't', 'x', 'z'), 6, asList('a', 'd', 'k', 't', 'x', 'z')),
                 arguments("Characters and ranges", symbolSet(asList(range('a', 'd'), range('x', 'z')), '1', '2', '3', '4'), 11, asList('1', '2', '3', '4', 'a', 'b', 'c', 'd', 'x', 'y', 'z')),
-                arguments("Negative Ranges", negativeSymbolSet(asList(range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 2), RANGE_OUTSIDE_OF_SYMBOLS)), 1, asList((char) (DEL_ASCII_CODE - 1)))
+                arguments("Negative Ranges", negativeSymbolSet(asList(range(SPACE_ASCII_CODE, DEL_ASCII_CODE - 2), RANGE_OUTSIDE_OF_SYMBOLS)), 1, Collections.singletonList((char) (DEL_ASCII_CODE - 1)))
         );
     }
 

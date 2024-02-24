@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Stream;
@@ -17,7 +18,7 @@ public class CaseVariationIteratorTests {
         return Stream.of(
                 Arguments.of("A", Arrays.asList("a", "A")),
                 Arguments.of("a", Arrays.asList("a", "A")),
-                Arguments.of("1", Arrays.asList("1")),
+                Arguments.of("1", Collections.singletonList("1")),
                 Arguments.of("1a", Arrays.asList("1a", "1A")),
                 Arguments.of("1ab", Arrays.asList("1ab", "1Ab", "1aB", "1AB")),
                 Arguments.of("a1b", Arrays.asList("a1b", "A1b", "a1B", "A1B")),

@@ -185,7 +185,7 @@ public enum TestPattern implements DataInterface {
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_LETTER_RANGE("[^a-dE-F]",
-                     SymbolSet.ofAsciiRanges("[^a-dE-F]", Arrays.asList(range('a', 'd'), range('E', 'F')), MatchType.NEGATIVE)
+                     SymbolSet.ofAsciiRanges("[^a-dE-F]", asList(range('a', 'd'), range('E', 'F')), MatchType.NEGATIVE)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
 

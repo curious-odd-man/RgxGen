@@ -22,7 +22,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("[ \t]");
         for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("\\s").generate(random);
-            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -34,7 +34,7 @@ public class WhitespaceConfigurationTests {
         Random random = newRandom(100500);
         for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse(properties, "\\s").generate(random);
-            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -44,7 +44,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("\\s");
         for (int i = 0; i < LARGE_COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("\\s").generateNotMatching(random);
-            assertFalse(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertFalse(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -54,7 +54,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("\\s");
         for (int i = 0; i < LARGE_COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("\\S").generate(random);
-            assertFalse(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertFalse(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -64,7 +64,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("[a \t]");
         for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("[a\\s]").generate(random);
-            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -74,7 +74,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("[^a\\s]");
         for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("[a\\s]").generateNotMatching(random);
-            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 
@@ -84,7 +84,7 @@ public class WhitespaceConfigurationTests {
         Pattern pattern = Pattern.compile("[^a\\s]");
         for (int i = 0; i < COUNT_OF_ITERATIONS; i++) {
             String generated = RgxGen.parse("[^a\\s]").generate(random);
-            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + "'");
+            assertTrue(pattern.matcher(generated).matches(), "Failed for value '" + generated + '\'');
         }
     }
 }

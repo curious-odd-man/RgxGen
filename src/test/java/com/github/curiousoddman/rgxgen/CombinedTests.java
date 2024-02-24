@@ -102,6 +102,6 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     private static String createMessage(String generated, DataInterface pattern, int i, int j) {
-        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + "," + j;
+        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
     }
 }

@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * 1. Change generation algorithm so that the values stay the same
  * 2. When the change goes to release - make a note, that the generation algorithm changed and the expected values may change as well.
  */
-@SuppressWarnings({"TestMethodWithoutAssertion"})
+@SuppressWarnings("TestMethodWithoutAssertion")
 
 public class GenerationConsistencyTests {
     private static final int  NUM_ITERATIONS      = 100;

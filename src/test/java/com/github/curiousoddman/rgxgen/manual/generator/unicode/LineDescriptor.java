@@ -81,7 +81,7 @@ public class LineDescriptor {
 
     private static String makeKeysText(UnicodeCategory key) {
         List<String> keys = key.getKeys();
-        return "keys(" + keys.stream().map(LineDescriptor::q).collect(Collectors.joining(",")) + ")";
+        return "keys(" + keys.stream().map(LineDescriptor::q).collect(Collectors.joining(",")) + ')';
     }
 
     private static String q(String text) {
