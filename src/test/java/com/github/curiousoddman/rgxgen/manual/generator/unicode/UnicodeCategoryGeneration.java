@@ -31,6 +31,7 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
 
@@ -55,6 +56,24 @@ public class UnicodeCategoryGeneration {
         Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
 
         modifySourceJavaFile(textPerCategory, rangesConstantNames);
+    }
+
+    @Test
+    void generateUnicodeCategoryDumps() throws IOException {
+        for (UnicodeCategory category : UnicodeCategory.values()) {
+            List<String> symbolFileLines = new ArrayList<>();
+
+            IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.getFrom(), range.getTo()));
+            IntStream intStream1 = Arrays.stream(category.getSymbols()).mapToInt(Character::charValue);
+            List<Integer> sortedCharacters = IntStream.concat(intStream, intStream1)
+                                                      .sorted()
+                                                      .boxed()
+                                                      .collect(Collectors.toList());
+            for (Integer i : sortedCharacters) {
+                symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
+            }
+            Files.write(Paths.get("data/categories").resolve(category.name() + ".txt"), symbolFileLines);
+        }
     }
 
     private static TreeMap<Integer, NamedSymbolRange> getNamedRanges() throws IOException {
