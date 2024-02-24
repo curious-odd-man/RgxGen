@@ -4,7 +4,10 @@ import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.data.TestPatternCaseInsensitive;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
@@ -15,13 +18,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
 /**
  * The aim of these test is to show that the result of generation was changed by writing values generated with same seed into a text file.
@@ -45,12 +49,40 @@ public class GenerationConsistencyTests {
         return Arrays.stream(TestPattern.values());
     }
 
+    public static Stream<Arguments> getCompleteTestsPatterns() {
+        return CompleteTests.getData();
+    }
+
+    @BeforeAll
+    static void cleanupFiles() throws IOException {
+        try (Stream<Path> pathStream = Files.walk(caseInsensitivePath)) {
+            pathStream.filter(Files::isRegularFile)
+                      .forEach(path -> {
+                          try {
+                              Files.delete(path);
+                          } catch (IOException e) {
+                              throw new RuntimeException(e);
+                          }
+                      });
+        }
+
+        try (Stream<Path> pathStream = Files.walk(caseSensitivePath)) {
+            pathStream.filter(Files::isRegularFile)
+                      .forEach(path -> {
+                          try {
+                              Files.delete(path);
+                          } catch (IOException e) {
+                              throw new RuntimeException(e);
+                          }
+                      });
+        }
+    }
+
     @ParameterizedTest
     @MethodSource("getCaseInsensitivePatterns")
     void verifyThatAllCaseInsensitivePatternsStaysTheSameTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
-        Path fileName = caseInsensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
-        Files.deleteIfExists(fileName);
+        Path fileName = caseInsensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
@@ -65,8 +97,7 @@ public class GenerationConsistencyTests {
     @MethodSource("getCaseInsensitivePatterns")
     void verifyThatAllCaseInsensitivePatternsStaysTheSameNotMatchingTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
-        Path fileName = caseInsensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
-        Files.deleteIfExists(fileName);
+        Path fileName = caseInsensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
@@ -81,8 +112,7 @@ public class GenerationConsistencyTests {
     @MethodSource("getPatterns")
     void verifyThatAllCaseSensitivePatternsStaysTheSameTest(TestPattern data) throws IOException {
         String name = data.name();
-        Path fileName = caseSensitivePath.resolve("matching").resolve(name + ".txt").toAbsolutePath();
-        Files.deleteIfExists(fileName);
+        Path fileName = caseSensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
         RgxGen rgxGen = RgxGen.parse(data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
@@ -96,8 +126,7 @@ public class GenerationConsistencyTests {
     @MethodSource("getPatterns")
     void verifyThatAllCaseSensitivePatternsStaysTheSameNotMatchingTest(TestPattern data) throws IOException {
         String name = data.name();
-        Path fileName = caseSensitivePath.resolve("notmatching").resolve(name + ".txt").toAbsolutePath();
-        Files.deleteIfExists(fileName);
+        Path fileName = caseSensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
         RgxGen rgxGen = RgxGen.parse(data.getPattern());
         Random random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
@@ -111,5 +140,52 @@ public class GenerationConsistencyTests {
                 fail(e);
             }
         }
+    }
+
+    @Test
+    void verifyCompletePatternsHaveDifferentNames() {
+        assertDoesNotThrow(() -> {
+            getCompleteTestsPatterns()
+                    .filter(arguments -> (int) arguments.get()[3] == 0)   // Seed is 0
+                    .map(arguments -> arguments.get()[0])
+                    .map(Object::toString)
+                    .collect(Collectors.toMap(Function.identity(), Function.identity()));
+        });
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("getCompleteTestsPatterns")
+    public void generateTest(String name, boolean aUseFind, String aRegex, int aSeed) throws IOException {
+        Path fileName = caseSensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
+        RgxGen rgxGen = RgxGen.parse(aRegex);
+        String generated = rgxGen.generate(newRandom(aSeed));
+        try {
+            Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (MalformedInputException e) {
+            System.out.println("Failed to write a text " + e.getMessage());
+            System.out.println(generated.chars().mapToObj(String::valueOf).collect(Collectors.toList()));
+            System.out.println(generated);
+            fail(e);
+        }
+    }
+
+    @ParameterizedTest(name = "{index}: {0}")
+    @MethodSource("getCompleteTestsPatterns")
+    public void generateNotMatchingTest(String name, boolean aUseFind, String aRegex, int aSeed) throws IOException {
+        Path fileName = caseSensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
+        RgxGen rgxGen = RgxGen.parse(aRegex);
+        String generated = rgxGen.generateNotMatching(newRandom(aSeed));
+        try {
+            Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        } catch (MalformedInputException e) {
+            System.out.println("Failed to write a text " + e.getMessage());
+            System.out.println(generated.chars().mapToObj(String::valueOf).collect(Collectors.toList()));
+            System.out.println(generated);
+            fail(e);
+        }
+    }
+
+    private static String createFileName(String name) {
+        return name.replace('/', '_').replace('\\', '_') + ".txt";
     }
 }
