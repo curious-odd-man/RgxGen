@@ -20,7 +20,7 @@ import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRando
 import static org.junit.jupiter.api.Assertions.*;
 
 class UnicodeCategoryTest {
-    public static final int GENERATE_ITERATIONS = 100;
+    public static final int GENERATE_ITERATIONS = 1000;
 
     @ParameterizedTest
     @EnumSource(UnicodeCategory.class)
@@ -59,13 +59,13 @@ class UnicodeCategoryTest {
             }
 
             if (!wrongCharacters.isEmpty()) {
-                printWrongCharacters(wrongCharacters);
+                printWrongCharacters(categoryTestData, wrongCharacters);
                 fail("There are multiple characters that do not belong to a category");
             }
         }
     }
 
-    private static void printWrongCharacters(List<Character> wrongCharacters) {
+    private static void printWrongCharacters(CategoryTestData categoryTestData, List<Character> wrongCharacters) {
         List<SymbolRange> compactedRanges = new ArrayList<>();
         List<Character> compactedCharacters = new ArrayList<>();
         Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
@@ -74,7 +74,7 @@ class UnicodeCategoryTest {
             sb.append("'").append(compactedCharacter).append("'").append(',');
         }
         if (sb.length() != 0) {
-            System.out.println(sb);
+            System.out.println(categoryTestData.getCategory() + ": " + sb);
             sb = new StringBuilder();
         }
 
@@ -83,7 +83,7 @@ class UnicodeCategoryTest {
         }
 
         if (sb.length() != 0) {
-            System.out.println(sb);
+            System.out.println(categoryTestData.getCategory() + ": " + sb);
         }
     }
 
@@ -109,7 +109,7 @@ class UnicodeCategoryTest {
             }
 
             if (!wrongCharacters.isEmpty()) {
-                printWrongCharacters(wrongCharacters);
+                printWrongCharacters(categoryTestData, wrongCharacters);
                 fail("There are multiple characters that do not belong to a category");
             }
         }

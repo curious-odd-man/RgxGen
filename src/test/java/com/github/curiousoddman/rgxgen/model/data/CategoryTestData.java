@@ -28,8 +28,8 @@ public class CategoryTestData {
                 return new CategoryTestData(
                         key,
                         category,
-                        Pattern.compile("\\p" + key + "{30}"),
-                        Pattern.compile("\\P" + key + "{30}"));
+                        Pattern.compile("\\p" + key + "{100}"),
+                        Pattern.compile("\\P" + key + "{100}"));
             } catch (Exception ignored) {
             }
         }

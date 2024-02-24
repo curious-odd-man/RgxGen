@@ -61,7 +61,7 @@ public class UnicodeCategoryGenerateTestBase {
             matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
         }
         System.out.println("Failed for text '" + generatedText + '\'');
-        System.out.println("Match debug:");
+        System.out.println("Match debug: " + testPattern.getUnicodeCategory());
         System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
         StringBuilder lettersBuilder = new StringBuilder("\t");
         StringBuilder matchesBuilder = new StringBuilder("\t");
@@ -81,14 +81,15 @@ public class UnicodeCategoryGenerateTestBase {
     @AfterEach
     void printGenerationStatistics() {
         for (Map.Entry<UnicodeCategory, Set<Character>> entry : generatedCharacters.entrySet()) {
-            Set<Character> value = entry.getValue();
-            IntSummaryStatistics intSummaryStatistics = value.stream().mapToInt(i -> (int) i).summaryStatistics();
+            Set<Character> charactersPresentInGroup = entry.getValue();
+            IntSummaryStatistics intSummaryStatistics = charactersPresentInGroup.stream().mapToInt(i -> (int) i).summaryStatistics();
             UnicodeCategory category = entry.getKey();
             System.out.println("Category " + category + " with keys " + category.getKeys() + " character stats: ");
             System.out.println("\tMin: " + intSummaryStatistics.getMin() + "; '" + (char) intSummaryStatistics.getMin() + '\'');
             System.out.println("\tMax: " + intSummaryStatistics.getMax() + "; '" + (char) intSummaryStatistics.getMax() + '\'');
             double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.getTo() - range.getFrom() + 1).sum();
-            System.out.println("\tCovered: " + (value.size() / totalValueCount));
+            double coveredRate = charactersPresentInGroup.size() / totalValueCount;
+            System.out.println("\tCovered: " + coveredRate);
         }
     }
 
