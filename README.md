@@ -1,8 +1,3 @@
-| :exclamation:  Documentation in this branch matches latest SNAPSHOT version <br/>Please look in [master](https://github.com/curious-odd-man/RgxGen/tree/master) branch docs for latest release documentation. |
-|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-
--------------------------------------------------------------------------------------------------------
-
 # Regex: generate matching and non-matching strings
 
 This is a java library that, given a regex pattern, allows to:
