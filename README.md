@@ -32,7 +32,7 @@ Build status:
 
 ## Try it now!!!
 
-Follow the link to Online IDE with created project: [JDoodle](https://www.jdoodle.com/a/2Q6T).
+Follow the link to Online IDE with created project: [JDoodle](https://www.jdoodle.com/ia/X63).
 Enter your pattern and see the results.
 
 ## Usage
