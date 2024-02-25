@@ -137,7 +137,7 @@ public final class Util {
         int firstCharInRange = allCharactersRange.getFrom();
         int lastCharInRange = allCharactersRange.getTo();
 
-        TreeSet<SymbolRange> sortedRanges = getApplicableSortedUniqueRanges(symbolRanges, symbols, allCharactersRange);
+        List<SymbolRange> sortedRanges = getApplicableSortedUniqueRanges(symbolRanges, symbols, allCharactersRange);
 
         int start = firstCharInRange;
         for (SymbolRange range : sortedRanges) {
@@ -164,20 +164,23 @@ public final class Util {
         }
     }
 
-    private static TreeSet<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, CharList symbols, SymbolRange allowedRange) {
+    private static List<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, CharList symbols, SymbolRange allowedRange) {
         int firstCharInRange = allowedRange.getFrom();
         int lastCharInRange = allowedRange.getTo();
+        List<SymbolRange> list = new ArrayList<>(symbolRanges.size() + symbolRanges.size());
 
-        Stream<SymbolRange> matchingRanges = symbolRanges
+        symbolRanges
                 .stream()
-                .filter(range -> range.getTo() >= firstCharInRange && range.getFrom() <= lastCharInRange);
-        Stream<SymbolRange> matchingCharactersAsRanges = symbols
+                .filter(range -> range.getTo() >= firstCharInRange && range.getFrom() <= lastCharInRange)
+                .forEach(list::add);
+        symbols
                 .stream()
                 .filter(c -> firstCharInRange <= c && c <= lastCharInRange)
-                .map(symbol -> range(symbol, symbol));
-        return Stream
-                .concat(matchingRanges, matchingCharactersAsRanges)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
+                .map(symbol -> range(symbol, symbol))
+                .forEach(list::add);
+
+        list.sort(Comparator.comparing(SymbolRange::getFrom));
+        return list;
     }
 
     public static void compactOverlappingRangesAndSymbols(List<SymbolRange> originalSymbolRanges, CharList originalSymbols,
