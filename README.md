@@ -53,44 +53,9 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.4</version>
+    <version>2.0</version>
 </dependency>
 ```
-
-#### The Latest SNAPSHOT:
-
-```xml
-
-<project>
-    <repositories>
-        <repository>
-            <id>snapshots-repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-
-    <!--  .... -->
-
-    <dependency>
-        <groupId>com.github.curious-odd-man</groupId>
-        <artifactId>rgxgen</artifactId>
-        <version>2.0-SNAPSHOT</version>
-    </dependency>
-</project>
-```
-
-Changes in snapshot:
-
-- Support for Character Classes `\p{...}` and `\P{...}`
-  patterns. [#76](https://github.com/curious-odd-man/RgxGen/issues/73)
-- Configurable any character (dot) pattern [#83](https://github.com/curious-odd-man/RgxGen/issues/83)
-- Configurable `\s` characters. By default, it generates only spaces and
-  tabs. [#77](https://github.com/curious-odd-man/RgxGen/issues/77)
-- API changed:
-    - No global configuration properties
-    - Factory methods to create instance of RgxGen - see examples
-
----
 
 ### Code:
 
