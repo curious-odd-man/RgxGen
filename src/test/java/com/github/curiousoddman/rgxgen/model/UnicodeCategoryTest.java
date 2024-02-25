@@ -4,6 +4,7 @@ import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.model.data.CategoryTestData;
 import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -13,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.newRandom;
@@ -48,9 +48,10 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getCategoryTestData")
         void correctSymbolsInCategoryTest(CategoryTestData categoryTestData) {
-            List<Character> characters = categoryTestData.getCategoryCharacters().collect(Collectors.toList());
-            List<Character> wrongCharacters = new ArrayList<>();
-            for (Character character : characters) {
+            CharList characters = categoryTestData.getCategoryCharacters();
+            CharList wrongCharacters = CharList.empty();
+            for (int i = 0; i < characters.size(); i++) {
+                char character = characters.get(i);
                 String pattern = "\\p" + categoryTestData.getKey();
                 registerTestedCategory(categoryTestData.getCategory());
                 if (!Pattern.compile(pattern).matcher("" + character).matches()) {
@@ -65,12 +66,13 @@ class UnicodeCategoryTest {
         }
     }
 
-    private static void printWrongCharacters(CategoryTestData categoryTestData, List<Character> wrongCharacters) {
+    private static void printWrongCharacters(CategoryTestData categoryTestData, CharList wrongCharacters) {
         List<SymbolRange> compactedRanges = new ArrayList<>();
-        List<Character> compactedCharacters = new ArrayList<>();
+        CharList compactedCharacters = CharList.empty();
         Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
         StringBuilder sb = new StringBuilder();
-        for (Character compactedCharacter : compactedCharacters) {
+        for (int i = 0; i < compactedCharacters.size(); i++) {
+            char compactedCharacter = compactedCharacters.get(i);
             sb.append('\'').append(compactedCharacter).append('\'').append(',');
         }
         if (sb.length() != 0) {
@@ -92,15 +94,15 @@ class UnicodeCategoryTest {
         @ParameterizedTest(name = "{index}: {0}")
         @MethodSource("getCategoryTestData")
         void correctSymbolsNotInCategoryTest(CategoryTestData categoryTestData) {
-            List<Character> characters = UNICODE_SYMBOL_RANGE
+            CharList characters = UNICODE_SYMBOL_RANGE
                     .chars()
-                    .filter(c -> !categoryTestData.getCategory().contains(c))
-                    .collect(Collectors.toList());
+                    .except(c -> categoryTestData.getCategory().contains(c));
 
-            List<Character> wrongCharacters = new ArrayList<>();
+            CharList wrongCharacters = CharList.empty();
 
             registerTestedCategory(categoryTestData.getCategory());
-            for (Character character : characters) {
+            for (int i = 0; i < characters.size(); i++) {
+                char character = characters.get(i);
                 String pattern = "\\P" + categoryTestData.getKey();
                 registerTestedCategory(categoryTestData.getCategory());
                 if (!Pattern.compile(pattern).matcher("" + character).matches()) {

@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -52,13 +53,13 @@ public class InvertRangesTests {
     @MethodSource("getInvertRangesAndCharactersTestData")
     void invertRangesAndCharactersTest(Args args) {
         List<SymbolRange> ranges = args.getRanges();
-        List<Character> characters = args.getCharacters();
+        CharList characters = args.getCharacters();
         SymbolRange allCharacters = args.getAllCharacters();
         List<SymbolRange> expectedRanges = args.getExpectRanges();
-        List<Character> expectedCharacters = args.getExpectCharacters();
+        CharList expectedCharacters = args.getExpectCharacters();
 
         List<SymbolRange> actualRanges = new ArrayList<>();
-        List<Character> actualCharacters = new ArrayList<>();
+        CharList actualCharacters = CharList.empty();
         invertSymbolsAndRanges(ranges, characters, allCharacters, actualRanges, actualCharacters);
         assertEquals(expectedRanges, actualRanges);
         assertEquals(expectedCharacters, actualCharacters);
@@ -71,16 +72,16 @@ public class InvertRangesTests {
     public static class Args {
         String            description;
         List<SymbolRange> ranges           = new ArrayList<>();
-        List<Character>   characters       = new ArrayList<>();
+        CharList          characters       = CharList.empty();
         SymbolRange       allCharacters;
         List<SymbolRange> expectRanges     = new ArrayList<>();
-        List<Character>   expectCharacters = new ArrayList<>();
+        CharList          expectCharacters = CharList.empty();
 
         public List<SymbolRange> getRanges() {
             return ranges;
         }
 
-        public List<Character> getCharacters() {
+        public CharList getCharacters() {
             return characters;
         }
 
@@ -92,7 +93,7 @@ public class InvertRangesTests {
             return expectRanges;
         }
 
-        public List<Character> getExpectCharacters() {
+        public CharList getExpectCharacters() {
             return expectCharacters;
         }
 

@@ -2,6 +2,7 @@ package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,9 @@ public class LineDescriptor {
     public List<String>      keys;
     public String            description;
     public List<SymbolRange> ranges;
-    public List<Character>   characters;
+    public CharList          characters;
 
-    public LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, List<Character> characters) {
+    public LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, CharList characters) {
         this.unicodeCategory = unicodeCategory;
         this.keys = keys;
         this.description = description;
@@ -45,7 +46,7 @@ public class LineDescriptor {
         return String.format(S_S_S_S_S, unicodeCategory.name(), keysText, descriptionText, rangesText, charactersText);
     }
 
-    private static String makeCharacters(List<Character> characters) {
+    private static String makeCharacters(CharList characters) {
         if (characters.isEmpty()) {
             return "null";
         }

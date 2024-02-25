@@ -11,6 +11,7 @@ import java.util.NoSuchElementException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 
 public class IteratorResettingTests {
@@ -106,36 +107,36 @@ public class IteratorResettingTests {
 
     public static Stream<Arguments> data() {
         return Stream.of(
-                Arguments.of("Arr", new ArrayIterator(new Character[]{'a', 'b'}), 1, Arrays.asList("a", "a", "a", "a")),
-                Arguments.of("Arr", new ArrayIterator(new Character[]{'a', 'b'}), 3, Arrays.asList("a", "b", null)),
-                Arguments.of("Arr", new ArrayIterator(new Character[]{'a', 'b'}), 2, Arrays.asList("a", "b", "a", "b")),
+                arguments("Arr", new ArrayIterator(new char[]{'a', 'b'}), 1, Arrays.asList("a", "a", "a", "a")),
+                arguments("Arr", new ArrayIterator(new char[]{'a', 'b'}), 3, Arrays.asList("a", "b", null)),
+                arguments("Arr", new ArrayIterator(new char[]{'a', 'b'}), 2, Arrays.asList("a", "b", "a", "b")),
 
-                Arguments.of("Single", new SingleValueIterator(), 1, Arrays.asList("", "")),
-                Arguments.of("Single", new SingleValueIterator(), 2, Arrays.asList("", null)),
-                Arguments.of("Single", new SingleValueIterator("s"), 1, Arrays.asList("s", "s")),
-                Arguments.of("Single", new SingleValueIterator("s"), 2, Arrays.asList("s", null, "s")),
+                arguments("Single", new SingleValueIterator(), 1, Arrays.asList("", "")),
+                arguments("Single", new SingleValueIterator(), 2, Arrays.asList("", null)),
+                arguments("Single", new SingleValueIterator("s"), 1, Arrays.asList("s", "s")),
+                arguments("Single", new SingleValueIterator("s"), 2, Arrays.asList("s", null, "s")),
 
-                Arguments.of("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 1, Arrays.asList("a", "a", "a")),
-                Arguments.of("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 2, Arrays.asList("a", "aa", "a")),
-                Arguments.of("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 3, Arrays.asList("a", "aa", null)),
+                arguments("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 1, Arrays.asList("a", "a", "a")),
+                arguments("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 2, Arrays.asList("a", "aa", "a")),
+                arguments("IncSingle", new IncrementalLengthIterator(TestIterator::new, 1, 2), 3, Arrays.asList("a", "aa", null)),
 
-                Arguments.of("IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 3, Arrays.asList("x", "y", "xx", "x")),
-                Arguments.of("IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 10, Arrays.asList("x", "y", "xx", "xy", "yx", "yy", null)),
+                arguments("IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 3, Arrays.asList("x", "y", "xx", "x")),
+                arguments("IncBi", new IncrementalLengthIterator(TestBiIterator::new, 1, 2), 10, Arrays.asList("x", "y", "xx", "xy", "yx", "yy", null)),
 
-                Arguments.of("Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 1, Arrays.asList("ab", "ab", "ab")),
-                Arguments.of("Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 2, Arrays.asList("ab", null, "ab")),
-                Arguments.of("Perm", new PermutationsIterator(Arrays.asList(TestBiIterator::new, TestBiIterator::new)), 5, Arrays.asList("xx", "xy", "yx", "yy", null, "xx")),
+                arguments("Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 1, Arrays.asList("ab", "ab", "ab")),
+                arguments("Perm", new PermutationsIterator(Arrays.asList(TestIterator::new, () -> new TestIterator("b"))), 2, Arrays.asList("ab", null, "ab")),
+                arguments("Perm", new PermutationsIterator(Arrays.asList(TestBiIterator::new, TestBiIterator::new)), 5, Arrays.asList("xx", "xy", "yx", "yy", null, "xx")),
 
-                Arguments.of("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 1, Arrays.asList("a", "a", "a")),
-                Arguments.of("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 2, Arrays.asList("a", "x", "a")),
-                Arguments.of("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 3, Arrays.asList("a", "x", "y")),
-                Arguments.of("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null)),
-                Arguments.of("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null, "a")),
+                arguments("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 1, Arrays.asList("a", "a", "a")),
+                arguments("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 2, Arrays.asList("a", "x", "a")),
+                arguments("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 3, Arrays.asList("a", "x", "y")),
+                arguments("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null)),
+                arguments("Choice", new ChoiceIterator(new StringIterator[]{new TestIterator(), new TestBiIterator()}), 4, Arrays.asList("a", "x", "y", null, "a")),
 
-                Arguments.of("Case Variations", new CaseVariationIterator("a"), 1, Arrays.asList("a", "a", "a", "a")),
-                Arguments.of("Case Variations", new CaseVariationIterator("a"), 2, Arrays.asList("a", "A", "a", "A")),
-                Arguments.of("Case Variations", new CaseVariationIterator("a"), 3, Arrays.asList("a", "A", null, "a")),
-                Arguments.of("Case Variations", new CaseVariationIterator("ab"), 3, Arrays.asList("ab", "Ab", "aB", "ab"))
+                arguments("Case Variations", new CaseVariationIterator("a"), 1, Arrays.asList("a", "a", "a", "a")),
+                arguments("Case Variations", new CaseVariationIterator("a"), 2, Arrays.asList("a", "A", "a", "A")),
+                arguments("Case Variations", new CaseVariationIterator("a"), 3, Arrays.asList("a", "A", null, "a")),
+                arguments("Case Variations", new CaseVariationIterator("ab"), 3, Arrays.asList("ab", "Ab", "aB", "ab"))
         );
     }
 

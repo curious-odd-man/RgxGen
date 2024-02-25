@@ -9,13 +9,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.data.TestPattern.stream;
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -48,10 +48,10 @@ public class LimitedInfinitePatternsTests {
                 arguments(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSet.ofDotPattern(null), 0, 2)),
-                        Stream.concat(Stream.of(""), Stream.concat(Arrays.stream(makeAsciiCharacterArray()),
-                                                                   Arrays.stream(makeAsciiCharacterArray())
-                                                                         .flatMap(symbol -> Arrays.stream(makeAsciiCharacterArray())
-                                                                                                  .map(v -> String.valueOf(symbol) + v))))
+                        Stream.concat(Stream.of(""), Stream.concat(stream(makeAsciiCharacterArray()),
+                                                                   stream(makeAsciiCharacterArray())
+                                                                           .flatMap(symbol -> stream(makeAsciiCharacterArray())
+                                                                                   .map(v -> String.valueOf(symbol) + v))))
                               .map(v -> "" + 'a' + v)
                               .collect(Collectors.toList())
                 )

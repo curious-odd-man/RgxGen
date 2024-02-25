@@ -2,6 +2,7 @@ package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.data.TestPattern.stream;
 import static java.util.stream.Collectors.*;
 
 @Disabled("Manual test")
@@ -25,11 +27,12 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
                                                                                        .values())
                                                                        .flatMap(unicodeCategory ->
                                                                                 {
-                                                                                    Character[] symbols = unicodeCategory.getSymbols();
+                                                                                    char[] symbols = unicodeCategory.getSymbols();
                                                                                     return Stream.concat(
-                                                                                            Arrays.stream(symbols).map(c -> new Pair(unicodeCategory, c)),
+                                                                                            stream(symbols).map(c -> new Pair(unicodeCategory, c)),
                                                                                             unicodeCategory.getSymbolRanges().stream()
-                                                                                                           .flatMap(SymbolRange::chars)
+                                                                                                           .map(SymbolRange::chars)
+                                                                                                           .flatMap(CharList::stream)
                                                                                                            .map(c -> new Pair(unicodeCategory, c)));
                                                                                 }
                                                                        )
@@ -51,9 +54,9 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
 
     private static class Pair {
         private final UnicodeCategory category;
-        private final Character       character;
+        private final char            character;
 
-        Pair(UnicodeCategory category, Character character) {
+        Pair(UnicodeCategory category, char character) {
             this.category = category;
             this.character = character;
         }

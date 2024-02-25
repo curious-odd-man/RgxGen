@@ -1,7 +1,6 @@
 package com.github.curiousoddman.rgxgen.nodes;
 
 import com.github.curiousoddman.rgxgen.model.MatchType;
-import com.github.curiousoddman.rgxgen.util.Util;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,11 +12,11 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.mak
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class SymbolSetCaseInsensitiveTests {
-    public static Character[] excluding(String chars) {
-        Character[] allSymbols = makeAsciiCharacterArray();
-        Character[] result = new Character[allSymbols.length - chars.length()];
+    public static char[] excluding(String chars) {
+        char[] allSymbols = makeAsciiCharacterArray();
+        char[] result = new char[allSymbols.length - chars.length()];
         int target = 0;
-        for (Character sym : allSymbols) {
+        for (char sym : allSymbols) {
             if (chars.indexOf(sym) == -1) {
                 result[target] = sym;
                 ++target;
@@ -40,18 +39,18 @@ public class SymbolSetCaseInsensitiveTests {
     @ParameterizedTest
     @MethodSource("parameters")
     public void positiveSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.POSITIVE);
-        Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
-        Character[] expected = Util.stringToChars(aExpectedCaseInsensitive);
+        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, aOriginalString.toCharArray(), MatchType.POSITIVE);
+        char[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
+        char[] expected = aExpectedCaseInsensitive.toCharArray();
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + '\n');
     }
 
     @ParameterizedTest
     @MethodSource("parameters")
     public void negativeSetTest(String aOriginalString, String aExpectedCaseInsensitive) {
-        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, Util.stringToChars(aOriginalString), MatchType.NEGATIVE);
-        Character[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
-        Character[] expected = excluding(aExpectedCaseInsensitive);
+        SymbolSet symbolSet = SymbolSet.ofAsciiCharacters(aOriginalString, aOriginalString.toCharArray(), MatchType.NEGATIVE);
+        char[] actual = symbolSet.getCaseInsensitiveSymbolSetIndexer().getAll();
+        char[] expected = excluding(aExpectedCaseInsensitive);
         assertArrayEquals(expected, actual, "\n" + Arrays.asList(expected) + "\nexpected vs got\n" + Arrays.asList(actual) + '\n');
 
     }

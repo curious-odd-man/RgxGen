@@ -16,8 +16,7 @@ package com.github.curiousoddman.rgxgen.model;
    limitations under the License.
 /* **************************************************************************/
 
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 /**
  * Range of symbols
@@ -65,8 +64,8 @@ public class SymbolRange {
         return to - from + 1;
     }
 
-    public Stream<Character> chars() {
-        return IntStream.rangeClosed(from, to).mapToObj(i -> (char) i);
+    public CharList chars() {
+        return CharList.rangeClosed(from, to);
     }
 
     public boolean contains(int c) {

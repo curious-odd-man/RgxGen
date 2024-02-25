@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.model;
 
 import com.github.curiousoddman.rgxgen.model.data.CategoryTestData;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
@@ -11,7 +12,6 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.OTHER_LETTER;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.values;
-import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -105,7 +105,7 @@ public class UnicodeCategoryGenerateTestBase {
         public static void main(String[] args) {
             int minChar = 4341;
             int maxChar = 4341;
-            List<Character> characters = asList(OTHER_LETTER.getSymbols());
+            CharList characters = CharList.charList(OTHER_LETTER.getSymbols());
             for (int i = minChar; i <= maxChar; i++) {
                 if (characters.contains((char) i)) {
                     System.out.println(i + " found in individual characters");

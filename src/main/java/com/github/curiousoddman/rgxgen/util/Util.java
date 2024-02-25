@@ -18,6 +18,7 @@ package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -27,12 +28,6 @@ import java.util.stream.Stream;
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 
 public final class Util {
-    public static Character[] stringToChars(CharSequence str) {
-        return str.chars()
-                  .mapToObj(i -> (char) i)
-                  .toArray(Character[]::new);
-    }
-
     /**
      * Repeats text multiple times
      *
@@ -57,7 +52,7 @@ public final class Util {
      * @param input input string to randomize
      * @return string with random characters changed case.
      */
-    public static String randomlyChangeCase(Random rnd, CharSequence input) {
+    public static String randomlyChangeCase(Random rnd, String input) {
         StringBuilder sb = new StringBuilder(input);
         for (int i = 0; i < sb.length(); i++) {
             char currentChar = sb.charAt(i);
@@ -80,7 +75,7 @@ public final class Util {
      * @param value word to calculate variations
      * @return number of variations.
      */
-    public static BigInteger countCaseInsensitiveVariations(CharSequence value) {
+    public static BigInteger countCaseInsensitiveVariations(String value) {
         int switchableCase = value.chars()
                                   .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
                                   .sum();
@@ -135,10 +130,10 @@ public final class Util {
      * @param invertedCharacters
      */
     public static void invertSymbolsAndRanges(List<SymbolRange> symbolRanges,
-                                              List<Character> symbols,
+                                              CharList symbols,
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
-                                              List<Character> invertedCharacters) {
+                                              CharList invertedCharacters) {
         int firstCharInRange = allCharactersRange.getFrom();
         int lastCharInRange = allCharactersRange.getTo();
 
@@ -151,7 +146,7 @@ public final class Util {
 
             if (start <= from) {
                 if (start + 1 == from) {
-                    invertedCharacters.add((char) start);
+                    invertedCharacters.add(start);
                 } else if (start != from) {
                     invertedRanges.add(range(start, from - 1));
                 }
@@ -165,11 +160,11 @@ public final class Util {
         if (start < lastCharInRange) {
             invertedRanges.add(range(start, lastCharInRange));
         } else if (start == lastCharInRange) {
-            invertedCharacters.add((char) start);
+            invertedCharacters.add(start);
         }
     }
 
-    private static TreeSet<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, List<Character> symbols, SymbolRange allowedRange) {
+    private static TreeSet<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, CharList symbols, SymbolRange allowedRange) {
         int firstCharInRange = allowedRange.getFrom();
         int lastCharInRange = allowedRange.getTo();
 
@@ -178,14 +173,15 @@ public final class Util {
                 .filter(range -> range.getTo() >= firstCharInRange && range.getFrom() <= lastCharInRange);
         Stream<SymbolRange> matchingCharactersAsRanges = symbols
                 .stream()
-                .filter(c -> firstCharInRange <= c && c <= lastCharInRange).map(symbol -> range(symbol, symbol));
+                .filter(c -> firstCharInRange <= c && c <= lastCharInRange)
+                .map(symbol -> range(symbol, symbol));
         return Stream
                 .concat(matchingRanges, matchingCharactersAsRanges)
                 .collect(Collectors.toCollection(() -> new TreeSet<>(Comparator.comparing(SymbolRange::getFrom))));
     }
 
-    public static void compactOverlappingRangesAndSymbols(List<SymbolRange> originalSymbolRanges, List<Character> originalSymbols,
-                                                          List<SymbolRange> compactedRanges, List<Character> compactedSymbols) {
+    public static void compactOverlappingRangesAndSymbols(List<SymbolRange> originalSymbolRanges, CharList originalSymbols,
+                                                          List<SymbolRange> compactedRanges, CharList compactedSymbols) {
         List<SymbolRange> sortedRanges = Stream
                 .concat(
                         originalSymbolRanges.stream(),

@@ -16,7 +16,7 @@ public class IteratorsLimitTests {
 
     public static Stream<Arguments> data() {
         return Stream.of(
-                Arguments.of("ArrayIterator", new ArrayIterator(new Character[]{'a'})),
+                Arguments.of("ArrayIterator", new ArrayIterator(new char[]{'a'})),
                 Arguments.of("CaseVariationIterator", new CaseVariationIterator("a")),
                 Arguments.of("ChoiceIterator", new ChoiceIterator(new StringIterator[]{new SingleValueIterator("a"), new SingleValueIterator("a")})),
                 Arguments.of("IncrementalLength", new IncrementalLengthIterator(() -> new SingleValueIterator("a"), 0, 1)),

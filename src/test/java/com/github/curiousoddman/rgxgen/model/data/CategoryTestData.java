@@ -1,9 +1,8 @@
 package com.github.curiousoddman.rgxgen.model.data;
 
-import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -59,10 +58,10 @@ public class CategoryTestData {
         return notInCategoryPattern;
     }
 
-    public Stream<Character> getCategoryCharacters() {
-        return Stream.concat(
-                Arrays.stream(category.getSymbols()),
-                category.getSymbolRanges().stream().flatMap(SymbolRange::chars)
+    public CharList getCategoryCharacters() {
+        return CharList.charList(
+                category.getSymbolRanges(),
+                category.getSymbols()
         );
     }
 
