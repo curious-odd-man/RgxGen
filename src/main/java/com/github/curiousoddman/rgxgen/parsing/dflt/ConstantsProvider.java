@@ -33,7 +33,7 @@ public class ConstantsProvider {
     public static final SymbolRange SMALL_LATIN_LETTERS         = SymbolRange.range('a', 'z');
     public static final SymbolRange CAPITAL_LATIN_LETTERS       = SymbolRange.range('A', 'Z');
     public static final SymbolRange DIGITS                      = SymbolRange.range('0', '9');
-    public static final Character[] ZERO_LENGTH_CHARACTER_ARRAY = new Character[0];
+    public static final char[]      ZERO_LENGTH_CHARACTER_ARRAY = new char[0];
     public static final BigInteger  BIG_INTEGER_TWO             = BigInteger.valueOf(2);
     public static final int         SPACE_ASCII_CODE            = 32;     // First printable character in ASCII table
     public static final int         DEL_ASCII_CODE              = 127;    // Bound for printable characters in ASCII table
@@ -45,16 +45,16 @@ public class ConstantsProvider {
 
     public static final SymbolRange ASCII_DIGITS = SymbolRange.range('0', '9');
 
-    public static Character[] getAsciiWhitespaces() {
-        return new Character[]{'\t', '\n', '\u000B', '\f', '\r', ' '};
+    public static char[] getAsciiWhitespaces() {
+        return new char[]{'\t', '\n', '\u000B', '\f', '\r', ' '};
     }
 
     public static List<SymbolRange> getAsciiWordCharRanges() {
         return Collections.unmodifiableList(Arrays.asList(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS));
     }
 
-    public static Character[] makeAsciiCharacterArray() {
-        Character[] characters = new Character[DEL_ASCII_CODE - SPACE_ASCII_CODE];
+    public static char[] makeAsciiCharacterArray() {
+        char[] characters = new char[DEL_ASCII_CODE - SPACE_ASCII_CODE];
         for (int i = SPACE_ASCII_CODE; i < DEL_ASCII_CODE; ++i) {
             characters[i - SPACE_ASCII_CODE] = (char) i;
         }

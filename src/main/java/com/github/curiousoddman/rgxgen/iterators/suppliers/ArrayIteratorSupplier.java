@@ -22,9 +22,9 @@ import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import java.util.function.Supplier;
 
 public class ArrayIteratorSupplier implements Supplier<StringIterator> {
-    private final Character[] aSymbolSet;
+    private final char[] aSymbolSet;
 
-    public ArrayIteratorSupplier(Character[] symbolSet) {
+    public ArrayIteratorSupplier(char[] symbolSet) {
         aSymbolSet = symbolSet;
     }
 

@@ -44,7 +44,7 @@ public class RgxGen {
      *
      * @param pattern regex pattern for values generation
      */
-    public static RgxGen parse(CharSequence pattern) {
+    public static RgxGen parse(String pattern) {
         return parse(null, pattern);
     }
 
@@ -55,13 +55,13 @@ public class RgxGen {
      * @param pattern          regex pattern for values generation
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
-    public static RgxGen parse(RgxGenProperties rgxGenProperties, CharSequence pattern) {
+    public static RgxGen parse(RgxGenProperties rgxGenProperties, String pattern) {
         return new RgxGen(rgxGenProperties, pattern);
     }
 
-    private RgxGen(RgxGenProperties properties, CharSequence pattern) {
+    private RgxGen(RgxGenProperties properties, String pattern) {
         this.properties = properties;
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern.toString(), this.properties);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, this.properties);
         node = defaultTreeBuilder.get();
     }
 

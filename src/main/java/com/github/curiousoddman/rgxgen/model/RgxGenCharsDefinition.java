@@ -19,43 +19,48 @@ package com.github.curiousoddman.rgxgen.model;
 
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RgxGenCharsDefinition {
+
     private final List<SymbolRange> rangeList;
-    private final List<Character>   characters;
+    private final CharList          characters;
+
+    public static RgxGenCharsDefinition of(List<SymbolRange> externalRanges) {
+        return of(externalRanges, CharList.empty());
+    }
 
     public static RgxGenCharsDefinition of(UnicodeCategory category) {
-        return new RgxGenCharsDefinition(category.getSymbolRanges(), Arrays.asList(category.getSymbols()));
+        return new RgxGenCharsDefinition(category.getSymbolRanges(), CharList.charList(category.getSymbols()));
     }
 
     public static RgxGenCharsDefinition of(SymbolRange... ranges) {
-        return new RgxGenCharsDefinition(Arrays.asList(ranges), Collections.emptyList());
+        return new RgxGenCharsDefinition(Arrays.asList(ranges), CharList.empty());
     }
 
-    public static RgxGenCharsDefinition of(Character... characters) {
-        return new RgxGenCharsDefinition(Collections.emptyList(), Arrays.asList(characters));
+    public static RgxGenCharsDefinition of(char... characters) {
+        return new RgxGenCharsDefinition(Collections.emptyList(), CharList.charList(characters));
     }
 
-    public static RgxGenCharsDefinition of(CharSequence characterString) {
-        List<Character> characterList = characterString.chars().mapToObj(c -> (char) c).collect(Collectors.toList());
+    public static RgxGenCharsDefinition of(String characterString) {
+        CharList characterList = CharList.charList(characterString);
         List<SymbolRange> compactedRanges = new ArrayList<>();
-        List<Character> compactedSymbols = new ArrayList<>();
+        CharList compactedSymbols = CharList.empty();
         Util.compactOverlappingRangesAndSymbols(Collections.emptyList(), characterList, compactedRanges, compactedSymbols);
         return new RgxGenCharsDefinition(compactedRanges, compactedSymbols);
     }
 
-    public static RgxGenCharsDefinition of(List<SymbolRange> symbolRanges, Character[] symbols) {
-        return of(symbolRanges, Arrays.asList(symbols));
+    public static RgxGenCharsDefinition of(CharList charList) {
+        return of(Collections.emptyList(), charList);
     }
 
-    public static RgxGenCharsDefinition of(List<SymbolRange> symbolRanges, List<Character> symbols) {
+    public static RgxGenCharsDefinition of(List<SymbolRange> symbolRanges, CharList symbols) {
         return new RgxGenCharsDefinition(symbolRanges, symbols);
     }
 
@@ -73,19 +78,19 @@ public class RgxGenCharsDefinition {
         return this;
     }
 
-    public RgxGenCharsDefinition withCharacters(Character... characters) {
-        this.characters.addAll(Arrays.asList(characters));
-        return this;
-    }
-
-    public RgxGenCharsDefinition withCharacters(List<Character> characters) {
+    public RgxGenCharsDefinition withCharacters(char... characters) {
         this.characters.addAll(characters);
         return this;
     }
 
-    private RgxGenCharsDefinition(List<SymbolRange> rangeList, List<Character> characters) {
+    public RgxGenCharsDefinition withCharacters(CharList characters) {
+        this.characters.addAll(characters);
+        return this;
+    }
+
+    private RgxGenCharsDefinition(List<SymbolRange> rangeList, CharList characters) {
         this.rangeList = new ArrayList<>(rangeList);
-        this.characters = new ArrayList<>(characters);
+        this.characters = characters.copy();
     }
 
     public boolean isAsciiOnly() {
@@ -100,7 +105,7 @@ public class RgxGenCharsDefinition {
         return rangeList;
     }
 
-    public List<Character> getCharacters() {
+    public CharList getCharacters() {
         return characters;
     }
 

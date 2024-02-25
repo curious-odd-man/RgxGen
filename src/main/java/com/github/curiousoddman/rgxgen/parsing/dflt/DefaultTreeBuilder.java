@@ -21,12 +21,12 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.*;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
-import com.github.curiousoddman.rgxgen.util.Util;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
+import com.github.curiousoddman.rgxgen.util.chars.CharListCollector;
 
 import java.util.*;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_DIGITS;
-import static java.util.Collections.emptyList;
 
 /**
  * Default implementation of parser and NodeTreeBuilder.
@@ -391,8 +391,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
                 List<WhitespaceChar> whitespaceChars = RgxGenOption.WHITESPACE_DEFINITION.getFromProperties(properties);
+                CharList whitespaceCharsList = whitespaceChars.stream().map(WhitespaceChar::get).collect(new CharListCollector());
                 createdNode = SymbolSet.ofAscii("\\" + c,
-                                                RgxGenCharsDefinition.of(whitespaceChars.stream().map(WhitespaceChar::get).toArray(Character[]::new)),
+                                                RgxGenCharsDefinition.of(whitespaceCharsList),
                                                 RgxGenCharsDefinition.of(ConstantsProvider.getAsciiWhitespaces()),
                                                 getMatchType(c, 's'));
                 break;
@@ -400,7 +401,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
                 sbToFinal(sb, nodes);
-                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), new Character[]{'_'}, getMatchType(c, 'w'));
+                createdNode = SymbolSet.ofAscii("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), CharList.charList('_'), getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
@@ -614,7 +615,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             switch (c) {
                 case ']':
                     String pattern = aCharIterator.substringToCurrPos(openSquareBraceIndex);
-                    SymbolSet finalSymbolSet = createSymbolSetFromSquareBrackets(pattern, matchType, characters, symbolRanges, symbolSets);
+                    SymbolSet finalSymbolSet = createSymbolSetFromSquareBrackets(pattern, matchType, characters.toString(), symbolRanges, symbolSets);
                     aNodesStartPos.put(finalSymbolSet, openSquareBraceIndex);
                     return finalSymbolSet;
 
@@ -664,9 +665,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
     private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
         // Skip backslash and add next symbol to characters
-        List<Node> nodes = new ArrayList<>(5);
+        List<Node> nodes = new ArrayList<>();
 
-        StringBuilder sb = new StringBuilder(0);
+        StringBuilder sb = new StringBuilder();
         handleEscapedCharacter(sb, nodes, false);
         characters.append(sb);
 
@@ -694,10 +695,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         }
     }
 
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, CharSequence sb, List<SymbolRange> externalRanges, Collection<SymbolSet> externalSets) {
-        RgxGenCharsDefinition positiveMatchDefinitions = RgxGenCharsDefinition.of(externalRanges, emptyList());
-        if (sb.length() > 0) {
-            positiveMatchDefinitions.withCharacters(Util.stringToChars(sb));
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, String sb, List<SymbolRange> externalRanges, Collection<SymbolSet> externalSets) {
+        RgxGenCharsDefinition positiveMatchDefinitions = RgxGenCharsDefinition.of(externalRanges);
+        if (!sb.isEmpty()) {
+            positiveMatchDefinitions.withCharacters(sb.toCharArray());
         }
 
         boolean isAscii = true;

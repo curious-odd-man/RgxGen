@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -44,10 +45,10 @@ public class UnicodeCategoryGeneration {
     @Test
     void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
         Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
-        Map<UnicodeCategory, List<Character>> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+        Map<UnicodeCategory, CharList> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
 
-        for (List<Character> value : matchedMap.values()) {
-            value.sort(Comparator.naturalOrder());
+        for (CharList value : matchedMap.values()) {
+            value.sort();
         }
 
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
@@ -64,8 +65,11 @@ public class UnicodeCategoryGeneration {
             List<String> symbolFileLines = new ArrayList<>();
 
             IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.getFrom(), range.getTo()));
-            IntStream intStream1 = Arrays.stream(category.getSymbols()).mapToInt(Character::charValue);
-            List<Integer> sortedCharacters = IntStream.concat(intStream, intStream1)
+            IntStream.Builder streamBuilder = IntStream.builder();
+            for (char symbol : category.getSymbols()) {
+                streamBuilder.add(symbol);
+            }
+            List<Integer> sortedCharacters = IntStream.concat(intStream, streamBuilder.build())
                                                       .sorted()
                                                       .boxed()
                                                       .collect(Collectors.toList());
@@ -250,8 +254,8 @@ public class UnicodeCategoryGeneration {
         return textPerCategory;
     }
 
-    private static Map<UnicodeCategory, List<Character>> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Pattern> categoryPerPattern) {
-        EnumMap<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
+    private static Map<UnicodeCategory, CharList> findMatchingSymbolsPerPattern(Map<UnicodeCategory, Pattern> categoryPerPattern) {
+        EnumMap<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
         Character[] characters = makeUnicodeCharacterArray();
         for (Character character : characters) {
             String str = String.valueOf(character);
@@ -259,7 +263,7 @@ public class UnicodeCategoryGeneration {
                 Pattern value = entry.getValue();
                 UnicodeCategory category = entry.getKey();
                 if (value.matcher(str).matches()) {
-                    matchedMap.computeIfAbsent(category, k -> new ArrayList<>())
+                    matchedMap.computeIfAbsent(category, k -> CharList.empty())
                               .add(character);
                 }
             }
@@ -284,8 +288,8 @@ public class UnicodeCategoryGeneration {
 
     @Test
     void testCreateDescriptorMap() {
-        Map<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
-        matchedMap.put(UnicodeCategory.ANY_LETTER, Arrays.asList('t', 'f', 'g', 'h', 'k'));
+        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('t', 'f', 'g', 'h', 'k'));
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
             System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
@@ -294,24 +298,25 @@ public class UnicodeCategoryGeneration {
 
     @Test
     void testCreateDescriptorMap2() {
-        Map<UnicodeCategory, List<Character>> matchedMap = new EnumMap<>(UnicodeCategory.class);
-        matchedMap.put(UnicodeCategory.ANY_LETTER, Arrays.asList('a', 'b', 'c', 'x', 'y', 'z'));
+        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('a', 'b', 'c', 'x', 'y', 'z'));
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
             System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
         }
     }
 
-    private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, List<Character>> matchedMap) {
+    private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, CharList> matchedMap) {
         Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = new EnumMap<>(UnicodeCategory.class);
-        for (Map.Entry<UnicodeCategory, List<Character>> entry : matchedMap.entrySet()) {
+        for (Map.Entry<UnicodeCategory, CharList> entry : matchedMap.entrySet()) {
             UnicodeCategoryDescriptor descriptor = descriptorMap
-                    .computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), new ArrayList<>()));
+                    .computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), CharList.empty()));
 
             Character lastCharacter = null;
             SymbolRange lastSymbolRange = null;
-
-            for (Character next : entry.getValue()) {
+            CharList value = entry.getValue();
+            for (int i = 0; i < value.size(); i++) {
+                char next = value.get(i);
                 if (lastCharacter != null) {
                     if (lastSymbolRange == null) {
                         if (lastCharacter == next - 1) {

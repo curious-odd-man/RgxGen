@@ -1,14 +1,15 @@
 package com.github.curiousoddman.rgxgen.manual.generator.unicode;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.List;
 
 public class UnicodeCategoryDescriptor {
     private final List<SymbolRange> ranges;
-    private final List<Character>   characters;
+    private final CharList   characters;
 
-    public UnicodeCategoryDescriptor(List<SymbolRange> ranges, List<Character> characters) {
+    public UnicodeCategoryDescriptor(List<SymbolRange> ranges, CharList characters) {
         this.ranges = ranges;
         this.characters = characters;
     }
@@ -17,7 +18,7 @@ public class UnicodeCategoryDescriptor {
         return ranges;
     }
 
-    public List<Character> getCharacters() {
+    public CharList getCharacters() {
         return characters;
     }
 

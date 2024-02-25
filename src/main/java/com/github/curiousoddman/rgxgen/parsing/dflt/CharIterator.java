@@ -18,7 +18,6 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -26,7 +25,7 @@ import java.util.function.Predicate;
 /**
  * Class incorporates functionality to iterate String char by char
  */
-public class CharIterator implements Iterator<Character> {
+public class CharIterator {
 
     private final String aValue;
 
@@ -39,7 +38,6 @@ public class CharIterator implements Iterator<Character> {
         aCurrentIndex = 0;
     }
 
-    @Override
     public boolean hasNext() {
         return aCurrentIndex < aBoundIndex;
     }
@@ -87,8 +85,7 @@ public class CharIterator implements Iterator<Character> {
     /**
      * Returns next character and advances the cursor
      */
-    @Override
-    public Character next() {
+    public char next() {
         try {
             char c = aValue.charAt(aCurrentIndex);
             aCurrentIndex++;

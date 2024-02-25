@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.model;
+package com.github.curiousoddman.rgxgen.util.chars;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,21 +16,7 @@ package com.github.curiousoddman.rgxgen.model;
    limitations under the License.
 /* **************************************************************************/
 
-public enum WhitespaceChar {
-    SPACE(' '),
-    TAB('\t'),
-    CARRIAGE_RETUR('\r'),
-    LINE_FEED('\n'),
-    VERTICAL_TAB('\u000B'),
-    FORM_FEED('\f');
-
-    private final char c;
-
-    WhitespaceChar(char c) {
-        this.c = c;
-    }
-
-    public char get() {
-        return c;
-    }
+@FunctionalInterface
+public interface CharPredicate {
+    boolean test(char c);
 }

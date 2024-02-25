@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.util;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,40 +22,40 @@ public class RangesCompactionTests {
 
     public static Stream<Arguments> getCompactionTestData() {
         return Stream.of(
-                arguments("single range", ranges("a-z"), emptyList(), ranges("a-z"), emptyList()),
+                arguments("single range", ranges("a-z"), CharList.emptyUnmodifiable(), ranges("a-z"), CharList.emptyUnmodifiable()),
                 arguments("single character", ranges(), chars("a"), emptyList(), chars("a")),
                 // ranges tests
-                arguments("non overlapping unordered ranges", ranges("x-z", "a-c"), emptyList(), ranges("a-c", "x-z"), emptyList()),
-                arguments("start/end matching ranges", ranges("a-c", "c-e"), emptyList(), ranges("a-e"), emptyList()),
-                arguments("start on next after end ranges", ranges("a-c", "d-e"), emptyList(), ranges("a-e"), emptyList()),
-                arguments("partially overlapping ranges", ranges("a-c", "b-e"), emptyList(), ranges("a-e"), emptyList()),
-                arguments("matching ranges", ranges("a-c", "a-c"), emptyList(), ranges("a-c"), emptyList()),
-                arguments("one within another", ranges("a-e", "c-d"), emptyList(), ranges("a-e"), emptyList()),
-                arguments("one within another - matching boundary", ranges("a-e", "b-e"), emptyList(), ranges("a-e"), emptyList()),
+                arguments("non overlapping unordered ranges", ranges("x-z", "a-c"), CharList.emptyUnmodifiable(), ranges("a-c", "x-z"), CharList.emptyUnmodifiable()),
+                arguments("start/end matching ranges", ranges("a-c", "c-e"), CharList.emptyUnmodifiable(), ranges("a-e"), CharList.emptyUnmodifiable()),
+                arguments("start on next after end ranges", ranges("a-c", "d-e"), CharList.emptyUnmodifiable(), ranges("a-e"), CharList.emptyUnmodifiable()),
+                arguments("partially overlapping ranges", ranges("a-c", "b-e"), CharList.emptyUnmodifiable(), ranges("a-e"), CharList.emptyUnmodifiable()),
+                arguments("matching ranges", ranges("a-c", "a-c"), CharList.emptyUnmodifiable(), ranges("a-c"), CharList.emptyUnmodifiable()),
+                arguments("one within another", ranges("a-e", "c-d"), CharList.emptyUnmodifiable(), ranges("a-e"), CharList.emptyUnmodifiable()),
+                arguments("one within another - matching boundary", ranges("a-e", "b-e"), CharList.emptyUnmodifiable(), ranges("a-e"), CharList.emptyUnmodifiable()),
                 // characters test
                 arguments("independent characters", ranges(), chars("ac"), ranges(), chars("ac")),
                 arguments("matching characters", ranges(), chars("aaaacaa"), ranges(), chars("ac")),
-                arguments("continuous characters", ranges(), chars("abc"), ranges("a-c"), emptyList()),
+                arguments("continuous characters", ranges(), chars("abc"), ranges("a-c"), CharList.emptyUnmodifiable()),
                 // mixed tests
-                arguments("range that should consume character and another range", ranges("a-z", "c-d"), chars("fls"), ranges("a-z"), emptyList()),
+                arguments("range that should consume character and another range", ranges("a-z", "c-d"), chars("fls"), ranges("a-z"), CharList.emptyUnmodifiable()),
                 arguments("range and independent character", ranges("a-c"), chars("x"), ranges("a-c"), chars("x")),
-                arguments("range that consumes character (within)", ranges("a-z"), chars("x"), ranges("a-z"), emptyList()),
-                arguments("range that consumes character (on start edge)", ranges("a-c"), chars("a"), ranges("a-c"), emptyList()),
-                arguments("range that consumes character (on end edge)", ranges("a-c"), chars("c"), ranges("a-c"), emptyList()),
-                arguments("character follows range", ranges("a-c"), chars("d"), ranges("a-d"), emptyList()),
-                arguments("range follows character", ranges("b-c"), chars("a"), ranges("a-c"), emptyList()),
-                arguments("several characters makes up a range that is then joined to another range", ranges("b-d"), chars("aefg"), ranges("a-g"), emptyList()),
-                arguments("a-cA-C + A,B,C", ranges("a-c", "A-C"), chars("ABCabc"), ranges("A-C", "a-c"), emptyList())
+                arguments("range that consumes character (within)", ranges("a-z"), chars("x"), ranges("a-z"), CharList.emptyUnmodifiable()),
+                arguments("range that consumes character (on start edge)", ranges("a-c"), chars("a"), ranges("a-c"), CharList.emptyUnmodifiable()),
+                arguments("range that consumes character (on end edge)", ranges("a-c"), chars("c"), ranges("a-c"), CharList.emptyUnmodifiable()),
+                arguments("character follows range", ranges("a-c"), chars("d"), ranges("a-d"), CharList.emptyUnmodifiable()),
+                arguments("range follows character", ranges("b-c"), chars("a"), ranges("a-c"), CharList.emptyUnmodifiable()),
+                arguments("several characters makes up a range that is then joined to another range", ranges("b-d"), chars("aefg"), ranges("a-g"), CharList.emptyUnmodifiable()),
+                arguments("a-cA-C + A,B,C", ranges("a-c", "A-C"), chars("ABCabc"), ranges("A-C", "a-c"), CharList.emptyUnmodifiable())
         );
     }
 
     @ParameterizedTest
     @MethodSource("getCompactionTestData")
     void compactOverlappingRangesAndSymbolsTest(String name,
-                                                List<SymbolRange> originalSymbolRanges, List<Character> originalSymbols,
-                                                List<SymbolRange> expectedCompactedRanges, List<Character> expectedCompactedSymbols) {
+                                                List<SymbolRange> originalSymbolRanges, CharList originalSymbols,
+                                                List<SymbolRange> expectedCompactedRanges, CharList expectedCompactedSymbols) {
         List<SymbolRange> actualRanges = new ArrayList<>();
-        List<Character> actualSymbols = new ArrayList<>();
+        CharList actualSymbols = CharList.empty();
         compactOverlappingRangesAndSymbols(originalSymbolRanges, originalSymbols, actualRanges, actualSymbols);
 
         assertEquals(expectedCompactedRanges, actualRanges);
@@ -69,8 +70,7 @@ public class RangesCompactionTests {
                 .collect(Collectors.toList());
     }
 
-    private static List<Character> chars(String text) {
-        return text.chars().boxed().map(i -> (char) i.intValue()).collect(Collectors.toList());
+    private static CharList chars(String text) {
+        return CharList.charList(text);
     }
-
 }

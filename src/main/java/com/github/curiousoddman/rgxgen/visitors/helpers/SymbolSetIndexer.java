@@ -19,12 +19,13 @@ package com.github.curiousoddman.rgxgen.visitors.helpers;
 
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
+import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.Arrays;
 import java.util.List;
 
 public class SymbolSetIndexer {
-    private final List<Character>   symbols;
+    private final CharList          symbols;
     private final List<SymbolRange> symbolRanges;
     private final int[]             rangeOffsets;
     private final int               size;
@@ -59,8 +60,8 @@ public class SymbolSetIndexer {
         return size;
     }
 
-    public Character[] getAll() {
-        Character[] chars = new Character[size];
+    public char[] getAll() {
+        char[] chars = new char[size];
         for (int i = 0; i < size; i++) {
             chars[i] = get(i);
         }
