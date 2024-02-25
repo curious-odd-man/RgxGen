@@ -19,6 +19,7 @@ package com.github.curiousoddman.rgxgen.visitors;
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
 import java.util.Random;
@@ -32,19 +33,19 @@ public class GenerationVisitor implements NodeVisitor {
     protected final StringBuilder        aStringBuilder = new StringBuilder();
     protected final Map<Integer, String> aGroupValues;
     protected final Random               aRandom;
-    protected final RgxGenProperties     aProperties;
+    protected final RgxGenProperties     properties;
 
     protected GenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         aRandom = random;
         aGroupValues = groupValues;
-        aProperties = properties;
+        this.properties = properties;
     }
 
     @Override
     public void visit(SymbolSet node) {
-        Character[] allSymbols = node.getSymbols();
-        int idx = aRandom.nextInt(allSymbols.length);
-        aStringBuilder.append(allSymbols[idx]);
+        SymbolSetIndexer indexer = node.getSymbolSetIndexer();
+        int idx = aRandom.nextInt(indexer.size());
+        aStringBuilder.append(indexer.get(idx));
     }
 
     @Override
@@ -61,14 +62,13 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        int max = node.getMax() == -1 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getIntFromProperties(aProperties) : node.getMax();
+        int max = node.getMax() == -1 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(properties) : node.getMax();
         int repeat = node.getMin() >= max ?
                      node.getMin() :
                      node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
 
         for (int i = 0; i < repeat; ++i) {
-            node.getNode()
-                .visit(this);
+            node.getNode().visit(this);
         }
     }
 
@@ -81,9 +81,8 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues, aProperties);
-        node.getNode()
-            .visit(nmgv);
+        GenerationVisitor nmgv = new NotMatchingGenerationVisitor(aRandom, aGroupValues, properties);
+        node.getNode().visit(nmgv);
         aStringBuilder.append(nmgv.aStringBuilder);
     }
 
@@ -95,8 +94,7 @@ public class GenerationVisitor implements NodeVisitor {
     @Override
     public void visit(Group node) {
         int start = aStringBuilder.length();
-        node.getNode()
-            .visit(this);
+        node.getNode().visit(this);
         aGroupValues.put(node.getIndex(), aStringBuilder.substring(start));
     }
 

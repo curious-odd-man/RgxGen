@@ -4,71 +4,60 @@ import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.data.TestPatternCaseInsensitive;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-@RunWith(Parameterized.class)
 public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatternCaseInsensitive> {
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object> data() {
-        return Arrays.asList(TestPatternCaseInsensitive.values());
+    public static Stream<TestPatternCaseInsensitive> getAllPatterns() {
+        return Arrays.stream(TestPatternCaseInsensitive.values());
     }
 
-    @Before
-    @Override
-    public void setUp() {
-        setCompiledPattern(Pattern.CASE_INSENSITIVE);
-    }
-
-    @Test
-    public void countTest() {
-        assumeTrue(aTestPattern.hasEstimatedCount());
-        RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
+    @ParameterizedTest
+    @MethodSource("getAllPatterns")
+    public void countTest(TestPatternCaseInsensitive testPattern) {
+        assumeTrue(testPattern.hasEstimatedCount());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
-        assertEquals(aTestPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
+        assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
     }
 
-    @Test
-    public void generateUniqueTest() {
-        assumeTrue(aTestPattern.hasAllUniqueValues());
-        RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
+    @ParameterizedTest
+    @MethodSource("getAllPatterns")
+    public void generateUniqueTest(TestPatternCaseInsensitive testPattern) {
+        assumeTrue(testPattern.hasAllUniqueValues());
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
-        assertEquals(aTestPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(rgxGen.iterateUnique()));
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
+        assertEquals(testPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(rgxGen.iterateUnique()));
     }
 
-    @Test
-    public void classRgxGenCaseInsensitiveTest() {
-        RgxGen rgxGen = new RgxGen(aTestPattern.getPattern());
+    @ParameterizedTest
+    @MethodSource("getAllPatterns")
+    public void classRgxGenCaseInsensitiveTest(TestPatternCaseInsensitive testPattern) {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
-        rgxGen.setProperties(properties);
+        RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
         List<String> strings = rgxGen.stream()
                                      .limit(1000)
                                      .collect(Collectors.toList());
-        Pattern caseSensitivePattern = Pattern.compile(aTestPattern.getPattern());
+        Pattern caseSensitivePattern = Pattern.compile(testPattern.getPattern());
         boolean atLeastOneCaseSensitiveMismatch = false;
         for (String generated : strings) {
-            boolean result = isValidGenerated(generated);
-            boolean caseSensitiveMatches = !caseSensitivePattern.matcher(generated)
-                                                                .matches();
-            assertTrue("Text: '" + generated + "' does not match pattern " + aTestPattern.getPattern(), result);
-            atLeastOneCaseSensitiveMismatch |= caseSensitiveMatches;
+            boolean result = isValidGenerated(testPattern, generated, Pattern.CASE_INSENSITIVE);
+            boolean caseSensitiveMatches = !caseSensitivePattern.matcher(generated).matches();
+            assertTrue(result, "Text: '" + generated + "' does not match pattern " + testPattern.getPattern());
+            atLeastOneCaseSensitiveMismatch = atLeastOneCaseSensitiveMismatch || caseSensitiveMatches;
         }
 
         assertTrue(atLeastOneCaseSensitiveMismatch);

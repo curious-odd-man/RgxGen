@@ -16,39 +16,58 @@ package com.github.curiousoddman.rgxgen.config;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
+import com.github.curiousoddman.rgxgen.model.WhitespaceChar;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 /**
  * Enum of keys for available configuration options.
  */
-public enum RgxGenOption {
+public class RgxGenOption<T> {
     /**
      * For infinite patterns, such as {@code a+}, {@code a*} and {@code a{n,}}, defines limit for the repetitions.
      *
      * @defaultValue 100
      */
-    INFINITE_PATTERN_REPETITION("generation.infinite.repeat", "100"),
+    public static final RgxGenOption<Integer> INFINITE_PATTERN_REPETITION = new RgxGenOption<>("generation.infinite.repeat", 100);
 
     /**
-     * Flag to use case insensitive matching.
+     * Flag to use case-insensitive matching.
      *
      * @defaultValue false
      */
-    CASE_INSENSITIVE("matching.case.insensitive", "false");
+    public static final RgxGenOption<Boolean> CASE_INSENSITIVE = new RgxGenOption<>("matching.case.insensitive", false);
 
-    private final String aKey;
-    private final String aDefault;
+    /**
+     * Choose which characters dot pattern could generate.
+     *
+     * @defaultValue null
+     */
+    public static final RgxGenOption<RgxGenCharsDefinition> DOT_MATCHES_ONLY = new RgxGenOption<>("dot.matches.only", null);
+
+    /**
+     * Choose which characters \s pattern could generate.
+     *
+     * @defaultValue SPACE, TAB
+     */
+    public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
+
+    private final String key;
+    private final T      defaultValue;
 
     /**
      * Create an option with specific key and default value
      *
-     * @param key           unique identifier of the option
-     * @param default_value default value
+     * @param key          unique identifier of the option
+     * @param defaultValue default value
      */
-    RgxGenOption(String key, String default_value) {
-        aKey = key;
-        aDefault = default_value;
+    public RgxGenOption(String key, T defaultValue) {
+        this.key = key;
+        this.defaultValue = defaultValue;
     }
 
     /**
@@ -57,7 +76,7 @@ public enum RgxGenOption {
      * @return unique key
      */
     public String getKey() {
-        return aKey;
+        return key;
     }
 
     /**
@@ -65,8 +84,8 @@ public enum RgxGenOption {
      *
      * @return default value
      */
-    public String getDefault() {
-        return aDefault;
+    public T getDefault() {
+        return defaultValue;
     }
 
     /**
@@ -75,10 +94,10 @@ public enum RgxGenOption {
      * @param properties object to get value from
      * @return value from properties, if present. Default otherwise.
      */
-    public String getFromProperties(RgxGenProperties properties) {
+    public T getFromProperties(RgxGenProperties properties) {
         return Optional.ofNullable(properties)
-                       .map(p -> p.getProperty(aKey))
-                       .orElse(aDefault);
+                       .map(props -> (T) props.get(key))
+                       .orElse(defaultValue);
     }
 
     /**
@@ -86,35 +105,14 @@ public enum RgxGenOption {
      *
      * @param properties properties to add to
      * @param value      a value
-     * @param <T>        type of value
      */
-    public <T> void setInProperties(RgxGenProperties properties, T value) {
+    public void setInProperties(RgxGenProperties properties, T value) {
         Objects.requireNonNull(value);
-        properties.setProperty(aKey, Objects.toString(value));
-    }
-
-    /**
-     * Convenience method. Returns value of the property transformed to an integer
-     *
-     * @param properties properties to get value from
-     * @return integer value associated with property, or default.
-     */
-    public int getIntFromProperties(RgxGenProperties properties) {
-        return Integer.parseInt(getFromProperties(properties));
-    }
-
-    /**
-     * Convenience method. Returns value of the property transformed to an integer
-     *
-     * @param properties properties to get value from
-     * @return boolean value associated with property, or default.
-     */
-    public boolean getBooleanFromProperties(RgxGenProperties properties) {
-        return Boolean.parseBoolean(getFromProperties(properties));
+        properties.put(key, value);
     }
 
     @Override
     public String toString() {
-        return aKey;
+        return key;
     }
 }

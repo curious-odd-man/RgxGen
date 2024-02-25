@@ -17,23 +17,26 @@ package com.github.curiousoddman.rgxgen.visitors;
 /* **************************************************************************/
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
 import java.util.Random;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
+
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
-
     public static GenerationVisitorBuilder builder() {
         return new GenerationVisitorBuilder(false);
     }
 
-    private static final Character[] allSymbols = SymbolSet.getAllSymbols();
+    private static final SymbolRange ALL_SYMBOLS = ASCII_SYMBOL_RANGE;
 
     public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
@@ -41,15 +44,16 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        visitSymbolSet(node, SymbolSet::getSymbols);
+        visitSymbolSet(node, SymbolSet::getSymbolSetIndexer);
     }
 
-    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, Character[]> getSymbols) {
+    protected void visitSymbolSet(SymbolSet node, Function<SymbolSet, SymbolSetIndexer> indexerFunction) {
+        SymbolSet invertedNode = node.getInvertedNode();
+        SymbolSetIndexer indexer = indexerFunction.apply(invertedNode);
         // There is only one way to generate not matching for any character - is to not generate anything
-        String pattern = node.getPattern();
-        SymbolSet symbolSet = new SymbolSet("[^" + pattern.substring(1), getSymbols.apply(node), SymbolSet.TYPE.NEGATIVE);
-        if (!symbolSet.isEmpty()) {
-            super.visit(symbolSet);
+        if (indexer.size() != 0) {
+            int idx = aRandom.nextInt(indexer.size());
+            aStringBuilder.append(indexer.get(idx));
         }
     }
 
@@ -68,12 +72,11 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
             int i = aRandom.nextInt(nodes.length);
             nodes[i].visit(this);
             // To match group values along with generated values - we need to prepend groups values before the generated
-        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos))
-                        .matches());
+        } while (pattern.matcher(valuePrefixBuilder + aStringBuilder.substring(pos)).matches());
     }
 
     /**
-     * We need to add existing group values, so that we could later use it in matching pattern
+     * Need to add existing group values, so that we could later use it in a matching pattern
      *
      * @param groupsBuilder
      * @param valuePrefixBuilder
@@ -98,17 +101,21 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     public void visit(FinalSymbol node) {
         String nodeValue = node.getValue();
         if (nodeValue.isEmpty()) {
-            aStringBuilder.append(allSymbols[aRandom.nextInt(allSymbols.length)]);
+            aStringBuilder.append(getRandomCharacter(aRandom.nextInt(ALL_SYMBOLS.size())));
         } else {
             StringBuilder builder = new StringBuilder(nodeValue.length());
             do {
                 builder.delete(0, Integer.MAX_VALUE);
                 nodeValue.chars()
-                         .map(c -> allSymbols[aRandom.nextInt(allSymbols.length)])
+                         .map(c -> getRandomCharacter(aRandom.nextInt(ALL_SYMBOLS.size())))
                          .forEachOrdered(c -> builder.append((char) c));
             } while (equalsFinalSymbolRandomString(nodeValue, builder.toString()));
             aStringBuilder.append(builder);
         }
+    }
+
+    private static char getRandomCharacter(int index) {
+        return (char) (ALL_SYMBOLS.getFrom() + index);
     }
 
     protected boolean equalsFinalSymbolRandomString(String s1, String s2) {
@@ -127,9 +134,9 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern());
+        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern(), properties);
         Node subNode = builder.get();
-        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues, aProperties);
+        GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues, properties);
         subNode.visit(generationVisitor);
         aStringBuilder.append(generationVisitor.getString());
     }

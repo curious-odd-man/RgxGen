@@ -1,58 +1,51 @@
 package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * These tests are the tests which require find() instead of matches() to verify the generated patter.
  * Apparently lookahead and lookbehind does not match
  */
-@RunWith(Parameterized.class)
 public class LookaroundTests {
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Positive lookahead", "foo(?=b)"},
-                {"Negative lookahead", "foo(?!bab)"},
-                {"Positive lookbehind", "(?<=foo)bar"},
-                {"Negative lookbehind", "(?<!not)fof"}
-        });
+    public static Stream<Arguments> getTestData() {
+        return Stream.of(
+                Arguments.of("Positive lookahead", "foo(?=b)"),
+                Arguments.of("Negative lookahead", "foo(?!bab)"),
+                Arguments.of("Positive lookbehind", "(?<=foo)bar"),
+                Arguments.of("Negative lookbehind", "(?<!not)fof")
+        );
     }
 
-    @Parameterized.Parameter
-    public String aName;
-
-    @Parameterized.Parameter(1)
-    public String aRegex;
-
-    @Test
-    public void generateTest() {
-        RgxGen rgxGen = new RgxGen(aRegex);
+    @ParameterizedTest
+    @MethodSource("getTestData")
+    public void generateTest(String name, String pattern) {
+        RgxGen rgxGen = RgxGen.parse(pattern);
         for (int i = 0; i < 100; i++) {
             String s = rgxGen.generate();
-            assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
-                                                                                   .matcher(s)
-                                                                                   .find());
+            assertTrue(Pattern.compile(pattern)
+                              .matcher(s)
+                              .find(), "Text: '" + s + "'does not match pattern " + pattern);
         }
     }
 
-    @Test
-    public void generateInfiniteTest() {
-        RgxGen rgxGen = new RgxGen(aRegex);
+    @ParameterizedTest
+    @MethodSource("getTestData")
+    public void generateInfiniteTest(String name, String pattern) {
+        RgxGen rgxGen = RgxGen.parse(pattern);
         StringIterator stringIterator = rgxGen.iterateUnique();
         for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             String s = stringIterator.next();
-            assertTrue("Text: '" + s + "'does not match pattern " + aRegex, Pattern.compile(aRegex)
-                                                                                   .matcher(s)
-                                                                                   .find());
+            assertTrue(Pattern.compile(pattern)
+                              .matcher(s)
+                              .find(), "Text: '" + s + "'does not match pattern " + pattern);
         }
     }
 }

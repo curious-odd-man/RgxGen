@@ -33,8 +33,7 @@ public class NegativeStringIterator implements StringIterator {
     public String next() {
         do {
             aValue = aIterator.next();
-        } while (aPattern.matcher(aValue)
-                         .find());
+        } while (aPattern.matcher(aValue).find());
         return aValue;
     }
 

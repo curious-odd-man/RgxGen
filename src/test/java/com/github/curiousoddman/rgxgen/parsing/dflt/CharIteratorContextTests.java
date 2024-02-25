@@ -1,46 +1,37 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.hamcrest.core.IsNot.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeFalse;
 
-@RunWith(Parameterized.class)
 public class CharIteratorContextTests {
 
-    private static Stream<Object[]> shorterContext() {
+    private static Stream<Arguments> shorterContext() {
         String inputText = "01234";
         return IntStream.rangeClosed(1, inputText.length())
-                        .mapToObj(i -> new Object[]{inputText, i});
+                        .mapToObj(i -> Arguments.of(inputText, i));
     }
 
-    private static Stream<Object[]> longerContext() {
+    private static Stream<Arguments> longerContext() {
         String inputText = "0123456789ABCDEF";
         return IntStream.rangeClosed(1, inputText.length())
-                        .mapToObj(i -> new Object[]{inputText, i});
+                        .mapToObj(i -> Arguments.of(inputText, i));
     }
 
-    @Parameterized.Parameters(name = "{0}:{1}")
-    public static Collection<Object[]> data() {
-        return Stream.concat(shorterContext(), longerContext())
-                     .collect(Collectors.toList());
+    public static Stream<Arguments> data() {
+        return Stream.concat(shorterContext(), longerContext());
     }
 
-    @Parameterized.Parameter
-    public String aInitialText;
-    @Parameterized.Parameter(1)
-    public int    aOffset;
-
-    @Test
-    public void verifyContextTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void verifyContextTest(String aInitialText, int aOffset) {
         CharIterator iterator = new CharIterator(aInitialText);
         iterator.skip(aOffset);
         String context = iterator.context();
@@ -51,9 +42,10 @@ public class CharIteratorContextTests {
         assertEquals(String.format("%X", aOffset - 1), split[1].substring(i, i + 1));
     }
 
-    @Test
-    public void verifyContextWithPosTest() {
-        assumeThat(aOffset, not(aInitialText.length()));
+    @ParameterizedTest
+    @MethodSource("data")
+    public void verifyContextWithPosTest(String aInitialText, int aOffset) {
+        assumeFalse(aOffset == aInitialText.length());
 
         CharIterator iterator = new CharIterator(aInitialText);
         String context = iterator.context(aOffset);
@@ -63,8 +55,9 @@ public class CharIteratorContextTests {
         assertEquals(String.format("%X", aOffset), split[1].substring(i, i + 1));
     }
 
-    @Test
-    public void verifyPos() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void verifyPos(String aInitialText, int aOffset) {
         CharIterator iterator = new CharIterator(aInitialText);
         iterator.skip(aOffset);
         assertEquals(aOffset - 1, iterator.prevPos());

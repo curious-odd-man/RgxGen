@@ -4,70 +4,68 @@ import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(Parameterized.class)
 public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
-    @Parameterized.Parameters(name = "{1}: {0}")
-    public static Collection<Object[]> data() {
+    public static Stream<Arguments> getPatterns() {
         return Arrays.stream(TestPattern.values())
                      .flatMap(testPattern -> IntStream.range(0, 100)
-                                                      .mapToObj(index -> new Object[]{testPattern, index}))
-                     .collect(Collectors.toList());
+                                                      .mapToObj(index -> Arguments.of(index, testPattern)));
     }
 
-    @Parameterized.Parameter(1)
-    public int aSeed;
-
-    @Test
-    public void generateTest() {
+    @ParameterizedTest(name = "{1}: {0}")
+    @MethodSource("getPatterns")
+    public void generateTest(int aSeed, TestPattern testPattern) {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
                                                                .withRandom(TestingUtilities.newRandom(aSeed))
                                                                .get();
-        aTestPattern.getResultNode()
-                    .visit(generationVisitor);
-        boolean result = isValidGenerated(generationVisitor.getString());
-        assertTrue("Text: '" + generationVisitor.getString() + "'does not match pattern " + aTestPattern.getPattern(), result);
+        testPattern.getResultNode().visit(generationVisitor);
+        boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
+        assertTrue(result, "Text: '" + generationVisitor.getString() + "'does not match pattern " + testPattern.getPattern());
     }
 
-    @Test
-    public void repeatableGenerationTest() {
+    @ParameterizedTest(name = "{1}: {0}")
+    @MethodSource("getPatterns")
+    public void repeatableGenerationTest(int aSeed, TestPattern testPattern) {
         Random rnd1 = TestingUtilities.newRandom(aSeed);
         Random rnd2 = TestingUtilities.newRandom(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
-        RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
+        RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
+        RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());
         assertEquals(rgxGen_1.generate(rnd1), rgxGen_2.generate(rnd2));
     }
 
-    @Test(timeout = 5000)
-    public void generateNotMatchingTest() {
+    @ParameterizedTest(name = "{1}: {0}")
+    @MethodSource("getPatterns")
+    @Timeout(5000)
+    public void generateNotMatchingTest(int aSeed, TestPattern testPattern) {
         GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
                                                                           .withRandom(TestingUtilities.newRandom(aSeed))
                                                                           .get();
-        aTestPattern.getResultNode()
-                    .visit(generationVisitor);
-        boolean result = isValidGenerated(generationVisitor.getString());
-        assertFalse("Text: '" + generationVisitor.getString() + "' matches pattern " + aTestPattern.getPattern(), result);
+        testPattern.getResultNode().visit(generationVisitor);
+        boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
+        assertFalse(result, "Text: '" + generationVisitor.getString() + "' matches pattern " + testPattern.getPattern());
     }
 
-    @Test(timeout = 5000)
-    public void repeatableNotMatchingGenerationTest() {
+    @ParameterizedTest(name = "{1}: {0}")
+    @MethodSource("getPatterns")
+    @Timeout(5000)
+    public void repeatableNotMatchingGenerationTest(int aSeed, TestPattern testPattern) {
         Random rnd1 = TestingUtilities.newRandom(aSeed);
         Random rnd2 = TestingUtilities.newRandom(aSeed);
 
-        RgxGen rgxGen_1 = new RgxGen(aTestPattern.getPattern());
-        RgxGen rgxGen_2 = new RgxGen(aTestPattern.getPattern());
+        RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
+        RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());
         assertEquals(rgxGen_1.generateNotMatching(rnd1), rgxGen_2.generateNotMatching(rnd2));
     }
 }

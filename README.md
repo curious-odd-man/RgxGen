@@ -1,6 +1,7 @@
 # Regex: generate matching and non-matching strings
 
 This is a java library that, given a regex pattern, allows to:
+
 1. Generate matching strings
 1. Iterate through unique matching strings
 1. Generate not matching strings
@@ -22,12 +23,11 @@ This is a java library that, given a regex pattern, allows to:
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
 [![javadoc](https://javadoc.io/badge2/com.github.curious-odd-man/rgxgen/javadoc.svg?style=plastic)](https://javadoc.io/doc/com.github.curious-odd-man/rgxgen)
 
-
 Build status:
 
-| Latest Release   | Latest snapshot  |
-| :---------: | :---------: |
-| [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen) | [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen) |
+|                                                             Latest Release                                                             |                                                           Latest snapshot                                                           |
+|:--------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------:|
+|    [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen)     |    [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen)     |
 | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
 
 ## Try it now!!!
@@ -40,44 +40,24 @@ Enter your pattern and see the results.
 ### Maven dependency
 
 #### The Latest RELEASE:
+
+[mvnrepository.com](https://mvnrepository.com/artifact/com.github.curious-odd-man/rgxgen)
+
 ```xml
+
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>1.4</version>
+    <version>2.0</version>
 </dependency>
 ```
 
-#### The Latest SNAPSHOT:
-```xml
-<project>
-    <repositories>
-        <repository>
-            <id>snapshots-repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-    
-    <!--  .... -->
-    
-    <dependency>
-        <groupId>com.github.curious-odd-man</groupId>
-        <artifactId>rgxgen</artifactId>
-        <version>1.5-SNAPSHOT</version>
-    </dependency>
-</project>
-```
+### Code:
 
-Changes in snapshot:
-
-None at the moment.
-
----
-### Code: 
 ```java
 public class Main {
-    public static void main(String[] args){
-        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+    public static void main(String[] args) {
+        RgxGen rgxGen = RgxGen.parse("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");       // Create generator
         String s = rgxGen.generate();                                        // Generate new random value
         Optional<BigInteger> estimation = rgxGen.getUniqueEstimation();      // The estimation (not accurate, see Limitations) how much unique values can be generated with that pattern.
         StringIterator uniqueStrings = rgxGen.iterateUnique();               // Iterate over unique values (not accurate, see Limitations)
@@ -88,8 +68,8 @@ public class Main {
 
 ```java
 public class Main {
-    public static void main(String[] args){
-        RgxGen rgxGen = new RgxGen("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");         // Create generator
+    public static void main(String[] args) {
+        RgxGen rgxGen = RgxGen.parse("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");       // Create generator
         Random rnd = new Random(1234);
         String s = rgxGen.generate(rnd);                                     // Generate first value
         String s1 = rgxGen.generate(rnd);                                    // Generate second value
@@ -105,34 +85,36 @@ public class Main {
 <details>
 <summary><b>Supported syntax</b></summary>
 
-|                        Pattern | Description                                                                                  |
-|-------------------------------:|----------------------------------------------------------------------------------------------|
-|                            `.` | Any symbol                                                                                   |
-|                            `?` | One or zero occurrences                                                                      |
-|                            `+` | One or more occurrences                                                                      |
-|                            `*` | Zero or more occurrences                                                                     |
-|                           `\r` | Carriage return `CR` character                                                               |
-|                           `\t` | Tab `	` character                                                                            |
-|                           `\n` | Line feed `LF` character.                                                                    |
-|                           `\d` | A digit. Equivalent to `[0-9]`                                                               |
-|                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                          |
-|                           `\s` | Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                |
-|                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                  |
-|                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                             |
-|                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                 |
-|                           `\i` | Places same value as capture group with index `i`. `i` is any integer number.                |
-|                  `\Q` and `\E` | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals. |
-|                  `\b` and `\B` | These characters are ignored. No validation is performed!                                    |
-|          `\xXX` and `\x{XXXX}` | Hexadecimal value of unicode characters 2 or 4 hexadecimal digits                            |
-|        `\uXXXX` | Hexadecimal value of unicode characters 4 hexadecimal digits                                 |
-|              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                         |
-|                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported        |
-|                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                 |
-|                           `()` | To group multiple characters for the repetitions                                             |
-| `foo(?=bar)` and `(?<=foo)bar` | Positive lookahead and lookbehind. These are equivalent to `foobar`                          |
-| `foo(?!bar)` and `(?<!foo)bar` | Negative lookahead and lookbehind.                                                           |
-|        <code>(a&#124;b)</code> | Alternatives                                                                                 |
-|                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                |
+|                        Pattern | Description                                                                                                                          |
+|-------------------------------:|--------------------------------------------------------------------------------------------------------------------------------------|
+|                            `.` | Any symbol. See below details - `Dot pattern generated symbols` section.                                                             |
+|                            `?` | One or zero occurrences                                                                                                              |
+|                            `+` | One or more occurrences                                                                                                              |
+|                            `*` | Zero or more occurrences                                                                                                             |
+|                           `\r` | Carriage return `CR` character                                                                                                       |
+|                           `\t` | Tab `	` character                                                                                                                    |
+|                           `\n` | Line feed `LF` character.                                                                                                            |
+|                           `\d` | A digit. Equivalent to `[0-9]`                                                                                                       |
+|                           `\D` | Not a digit. Equivalent to `[^0-9]`                                                                                                  |
+|                           `\s` | Configurable. By default: Space or Tab. See `WHITESPACE_DEFINITION` property.                                                        |
+|                           `\S` | Anything, but Carriage Return, Space, Tab, Newline, Vertical Tab, Form Feed                                                          |
+|                           `\w` | Any word character. Equivalent to `[a-zA-Z0-9_]`                                                                                     |
+|                           `\W` | Anything but a word character. Equivalent to `[^a-zA-Z0-9_]`                                                                         |
+|                           `\i` | Places same value as capture group with index `i`. `i` is any integer number.                                                        |
+|                  `\Q` and `\E` | Any characters between `\Q` and `\E`, including metacharacters, will be treated as literals.                                         |
+|                  `\b` and `\B` | These characters are ignored. No validation is performed!                                                                            |
+|          `\xXX` and `\x{XXXX}` | Hexadecimal value of unicode characters 2 or 4 hexadecimal digits                                                                    |
+|                       `\uXXXX` | Hexadecimal value of unicode characters 4 hexadecimal digits                                                                         |
+|                      `\p{...}` | Any character in class. See details below before use.                                                                                |
+|                      `\P{...}` | Any character not in class. See details below before use.                                                                            |
+|              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                                                                 |
+|                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported                                                |
+|                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                                                         |
+|                           `()` | To group multiple characters for the repetitions                                                                                     |
+| `foo(?=bar)` and `(?<=foo)bar` | Limited support. Positive lookahead and lookbehind. These are equivalent to `foobar`. Please see `Lookahead and Lookbehind` section. |
+| `foo(?!bar)` and `(?<!foo)bar` | Limited support. Negative lookahead and lookbehind. Please see `Lookahead and Lookbehind` section.                                   |
+|        <code>(a&#124;b)</code> | Alternatives                                                                                                                         |
+|                             \\ | Escape character (use \\\\ (double backslash) to generate single \ character)                                                        |
 
 RgxGen treats any other characters as literals - those are generated as is.
 
@@ -140,109 +122,84 @@ RgxGen treats any other characters as literals - those are generated as is.
 
 ## Configuration
 
-RgxGen can be configured on global or instance level.
+RgxGen can be configured per instance.
 
-Please refer to the following enum for all available properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
+Please refer to the following enum for all available
+properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
 
-Each property value will be looked up in this order:
-
-1. Local RgxGen instance config
-2. Global RgxGen config
-3. Default values
-
-
-### Create Configuration
+### Create and Use Configuration Properties
 
 Use `new RgxGenProperties()` to create properties object.
-`RgxGenProperties` extends `java.util.Properties` and can be used in all the same ways.
 
 <details>
-<summary><b>Code</b></summary>
+<summary><b>Code example</b></summary>
 
 ```java
 public class Main {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         // Create properties object (RgxGenProperties extends java.util.Properties)
         RgxGenProperties properties = new RgxGenProperties();
         // Set value "20" for INFINITE_PATTERN_REPETITION option in properties
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, 20);
         // ... now properties can be passed to RgxGen
+        RgxGen rgxGen_3 = RgxGen.parse(properties, "my-cool-pattern");
     }
 }
 ```
-</details>
 
-### Set Global Configuration
-
-Set a global configuration using `RgxGen.setDefaultProperties(properties);`
-
-<details>
-<summary><b>Code</b></summary>
-
-```java
-public class Main {
-    public static void main(String[] args){
-        RgxGenProperties properties = createAndConfigureProperitesObject();
-    
-        RgxGen rgxGen_1 = new RgxGen("xxx");        // Created for example purposes
-        // Set default properties. 
-        // NOTE! only instances created after setDefaultProperties are affected.
-        // e.g. rgxGen_1 will have default value of INFINITE_PATTERN_REPETITION option
-        // and rgxGen_2 will have value "20" for the property, unless local config specified.
-        RgxGen.setDefaultProperties(properties);
-        RgxGen rgxGen_2 = new RgxGen("xxx");
-    }
-}
-```
-</details>
-
-### Set Local Configuration
-
-Set a local configuration using `rgxGen.setProperties(localProperties);` on existing RgxGen instance.
-
-<details>
-<summary><b>Code</b></summary>
-
-```java
-public class Main {
-    public static void main(String[] args){
-        RgxGenProperties properties = createAndConfigureProperitesObject();
-        RgxGen.setDefaultProperties(properties);
-    
-        // Create properties object (RgxGenProperties extends java.util.Properties)
-        RgxGenProperties localProperties = createAndConfigureLocalProperitesObject();
-        RgxGen rgxGen_3 = new RgxGen("xxx"); 
-        // Set local configuration for rgxGen_3
-        // Note, for options that are not defined in localProperties, will try find option inside properties, since these are set globally prior creation of rgxGen_3 instance creation 
-        rgxGen_3.setProperties(localProperties);
-    }
-}
-```
 </details>
 
 ## Limitations
 
-### Lookahead and Lookbehind 
+### Dot pattern generated symbols
 
-Currently, these two have very limited support. Please refer to [#63](https://github.com/curious-odd-man/RgxGen/issues/63).
+In regex dot `.` means any symbol.
+
+By default, this would generate any value in a range defined in `ASCII_SYMBOL_RANGE`
+here [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+i.e.: any character starting from `space` to `~`.
+
+You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
+
+For example:
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        RgxGenProperties properties = new RgxGenProperties();
+        RgxGenOption.DOT_MATCHES_ONLY.setInProperties(properties, RgxGenCharsDefinition.of("abc"));
+        RgxGen rgxGen = RgxGen.parse(properties, ".");
+        String generatedValue = rgxGen.generate();      // Will produce either "a" or "b" or "c".
+    }
+}
+```
+
+### Lookahead and Lookbehind
+
+Currently, these two have very limited support. Please refer
+to [#63](https://github.com/curious-odd-man/RgxGen/issues/63).
 I'm currently working on the solution, but I cannot say when I come up with something.
 
 ### Estimation
-`rgxGen.getUniqueEstimation()` - might not be accurate, because it does not count actual unique values, but only counts different states of each building block of the expression.
-For example: `"(a{0,2}|b{0,2})"`  will be estimated as 6, though actual number of unique values is 5. 
+
+`rgxGen.getUniqueEstimation()` - might not be accurate, because it does not count actual unique values, but only counts
+different states of each building block of the expression.
+For example: `"(a{0,2}|b{0,2})"`  will be estimated as 6, though actual number of unique values is 5.
 That is because left and right alternative can produce same value.
 At the same time `"(|(a{1,2}|b{1,2}))"` will be correctly estimated to 5, though it will generate same values.
 
 ### Uniqueness
 
-For the similar reasons as with estimations - requested unique values iterator can contain duplicates. 
+For the similar reasons as with estimations - requested unique values iterator can contain duplicates.
 
 ### Infinite patterns
 
 By design `a+`, `a*` and `a{n,}` patterns in regex imply infinite number of characters should be matched.
 When generating data, that would mean values of infinite length might be generated.
-It is highly doubtful anyone would require a string of infinite length, thus I've artificially limited repetitions in such patterns to 100 symbols, when generating random values.
-This value can be changed - please refer to [configuration](https://github.com/curious-odd-man/RgxGen#configuration) section.
+It is highly doubtful anyone would require a string of infinite length, thus I've artificially limited repetitions in
+such patterns to 100 symbols, when generating random values.
+This value can be changed - please refer to [configuration](https://github.com/curious-odd-man/RgxGen#configuration)
+section.
 
 On the contrast, when generating **unique values** - the number of maximum repetitions is Integer.MAX_VALUE.
 
@@ -251,20 +208,68 @@ It is suggested to avoid using such infinite patterns to generate data based on 
 
 ### Not matching values generation
 
-The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though it is not always possible.
-For example pattern `.` - any symbol - would yield empty string as not matching string. 
-Another example `a{0,2}` - this pattern could yield empty string, but for not matching string the resulting strings would be only 1 or 2 symbols long.
-I chose these approaches because they seem predictable and easier to implement.
+The general rule is - I am trying to generate not matching strings of same length as would be matching strings, though
+it is not always possible.
+For example pattern `.` - any symbol - would yield empty string as not matching string.
+Another example `a{0,2}` - for this pattern not matching string would be an empty string, but I would only generate
+the resulting strings of 1 or 2 symbols long.
+I chose these approaches because they are predictable and, probably, desirable for users.
+
+#### Which values are used in non-matching generation
+
+Whenever non-matching result is requested, with either `RgxGen.parse(".").generateNotMatching()` method or with pattern,
+like `"[^a-z]"` - there is a choice in generator which are characters that do not match mentioned characters.
+For example - for `"[^a-z]"` - any unicode character except the ones in a range `a-z` would be ok. Though that would
+include non-printable, all kinds of blank characters and all the different wierd unicode characters. I see that as
+not an expected behavior. Thus, I have defined 2 different universe ranges of characters that are used - one for
+the ASCII only characters and another - for unicode characters.
+
+These ranges are defined here:
+
+- ASCII: `ASCII_SYMBOL_RANGE` constant
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+- Unicode: `UNICODE_SYMBOL_RANGE` constant
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+
+`UNICODE_SYMBOL_RANGE` is currently used ONLY when Character Classes are used `\p{}` ir `\P{}` patterns.
+By default `ASCII_SYMBOL_RANGE` is used.
+
+To generate not matching characters I take one of the aforementioned constant ranges and subtract characters provided in
+pattern - resulting range is the one that is used for non-matching generation.
+For example for pattern `"[^a-z]"` `ASCII_SYMBOL_RANGE` will be used as a universe.
+The result then will be `ASCII_SYMBOL_RANGE` except `A-z` = `space - @` union `{ - ~`
+
+### Unicode Categories
+
+Be warned - unicode categories might provide unexpectedly wrong result depending on Java version used:
+[#99](https://github.com/curious-odd-man/RgxGen/issues/99). To be absolutely sure that on your java version patterns are
+generated correctly I suggest running RgxGen tests with your java version.
+
+To create categories I've used Java (corretto-17.0.10) `Pattern.compile()` to split characters into categories.
+Unfortunately there were several character categories that are not supported by Java `Pattern.compile()` as a result
+these are not currently supported.
+
+For complete list of characters per category please refer to [this](data/categories) directory.
+Each file represents one category. Each line in a file describes one symbol from the category.
+
+Supported keys for categories can be found
+in [`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
 
 ## Other tools to generate values by regex and why this might be better
 
 There are 2 more libraries available to achieve same goal:
+
 1. https://github.com/mifmif/Generex
 1. http://code.google.com/p/xeger
 
-Though I found they have following issues:
-1. All of them build graph which can easily produce OOM exception. For example pattern `a{60000}`, or [IPV6 regex pattern](https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses).
-1. Alternatives - only 2 alternatives gives equal probability of each alternative to appear in generated values. For example: `(a|b)` the probability of a and b is equal. For `(a|b|c)` it would be expected to have a or b or c with probability 33.(3)% each. Though really the probabilities are a=50%, and b=25% and c=25% each. For longer alternatives you might never get the last alternative.
+Though I found they have the following issues:
+
+1. All of them build graph which can easily produce OOM exception. For example pattern `a{60000}`,
+   or [IPV6 regex pattern](https://stackoverflow.com/questions/53497/regular-expression-that-matches-valid-ipv6-addresses).
+1. Alternatives - only 2 alternatives gives equal probability of each alternative to appear in generated values. For
+   example: `(a|b)` the probability of a and b is equal. For `(a|b|c)` it would be expected to have a or b or c with
+   probability 33.(3)% each. Though really the probabilities are a=50%, and b=25% and c=25% each. For longer
+   alternatives you might never get the last alternative.
 1. They are quite slow
 1. Lightweight. This library does not have any dependencies.
 
@@ -273,4 +278,5 @@ Though I found they have following issues:
 I plan to support this library, so you're welcome to open issues or reach me by e-mail in case of any questions.
 Any suggestions, feature requests or bug reports are welcome!
 
-Please vote up my answer on [StackOverflow](https://stackoverflow.com/a/58813696/4174003) to help others find this library.
+Please vote up my answer on [StackOverflow](https://stackoverflow.com/a/58813696/4174003) to help others find this
+library.

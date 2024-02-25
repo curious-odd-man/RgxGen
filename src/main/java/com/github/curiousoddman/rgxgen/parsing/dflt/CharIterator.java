@@ -18,7 +18,6 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.util.Util;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
@@ -26,7 +25,7 @@ import java.util.function.Predicate;
 /**
  * Class incorporates functionality to iterate String char by char
  */
-public class CharIterator implements Iterator<Character> {
+public class CharIterator {
 
     private final String aValue;
 
@@ -39,7 +38,6 @@ public class CharIterator implements Iterator<Character> {
         aCurrentIndex = 0;
     }
 
-    @Override
     public boolean hasNext() {
         return aCurrentIndex < aBoundIndex;
     }
@@ -87,10 +85,11 @@ public class CharIterator implements Iterator<Character> {
     /**
      * Returns next character and advances the cursor
      */
-    @Override
-    public Character next() {
+    public char next() {
         try {
-            return aValue.charAt(aCurrentIndex++);
+            char c = aValue.charAt(aCurrentIndex);
+            aCurrentIndex++;
+            return c;
         } catch (StringIndexOutOfBoundsException e) {
             NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
             noSuchElementException.initCause(e);
@@ -137,7 +136,7 @@ public class CharIterator implements Iterator<Character> {
         int offsetOfPointer = start == 0
                               ? index
                               : 5;
-        return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeat_char(' ', 1 + offsetOfPointer) + '^';
+        return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeatChar(' ', 1 + offsetOfPointer) + '^';
     }
 
     /**
@@ -201,7 +200,7 @@ public class CharIterator implements Iterator<Character> {
                 }
             }
             int cnt = 1;        // One, because we subtract it from aCurrentIndex. Just to avoid extra subtraction
-            // Count how much backslashes there are -
+            // Count how many backslashes there are -
             // Even number means that they all are escaped
             // Odd number means that the {@code c} is escaped
             while (aValue.charAt(aCurrentIndex - cnt) == '\\') {

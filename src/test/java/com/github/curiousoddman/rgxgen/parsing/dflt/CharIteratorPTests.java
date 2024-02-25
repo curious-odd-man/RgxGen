@@ -17,18 +17,17 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 /* **************************************************************************/
 
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(Parameterized.class)
+
 public class CharIteratorPTests {
     private static class TestConsumer implements Consumer<CharIterator> {
         private final Consumer<CharIterator> aConsumer;
@@ -72,91 +71,107 @@ public class CharIteratorPTests {
 
     private static final String TEST_STRING = "0123456789ABCDEF";
 
-    @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
+    public static Stream<Arguments> data() {
+        return Stream.of(
                 // Mod function, hasNext, remaining, last, prevPos, substrToPos
-                {new TestConsumer("Initial"), true, 16, 'F', -1, ""},  // Initial
-                {new TestConsumer("Skip", CharIterator::skip), true, 15, 'F', 0, "0"}, // Skip 1
-                {new TestConsumer("Skip 10", ci -> ci.skip(10)), true, 6, 'F', 9, "0123456789"}, // Skip n
-                {new TestConsumer("Peek", CharIterator::peek), true, 16, 'F', -1, ""}, // peek 0
-                {new TestConsumer("Peek 10", ci -> ci.peek(10)), true, 16, 'F', -1, ""}, // peek n
-                {new TestConsumer("Next", CharIterator::next), true, 15, 'F', 0, "0"}, // next
-                {new TestConsumer("Next 5", ci -> ci.next(5)), true, 11, 'F', 4, "01234"}, // next n
-                {new TestConsumer("Next 16", ci -> ci.next(16)), false, 0, 'F', 15, TEST_STRING}, // next n
-                {new TestConsumer("Context", CharIterator::context), true, 16, 'F', -1, ""},// context
-                {new TestConsumer("Context 10", ci -> ci.context(10)), true, 16, 'F', -1, ""},// context n
-                {new TestConsumer("Next Until A", ci -> ci.nextUntil('A')), true, 5, 'F', 10, "0123456789A"}, // next until char
-                {new TestConsumer("Next Until 89A", ci -> ci.nextUntil("89A")), true, 5, 'F', 10, "0123456789A"},  // next until string
-                {new TestConsumer("Take While Digit", ci -> ci.takeWhile(Character::isDigit)), true, 6, 'F', 9, "0123456789"}, // take while
+                Arguments.of(new TestConsumer("Initial"), true, 16, 'F', -1, ""),  // Initial
+                Arguments.of(new TestConsumer("Skip", CharIterator::skip), true, 15, 'F', 0, "0"), // Skip 1
+                Arguments.of(new TestConsumer("Skip 10", ci -> ci.skip(10)), true, 6, 'F', 9, "0123456789"), // Skip n
+                Arguments.of(new TestConsumer("Peek", CharIterator::peek), true, 16, 'F', -1, ""), // peek 0
+                Arguments.of(new TestConsumer("Peek 10", ci -> ci.peek(10)), true, 16, 'F', -1, ""), // peek n
+                Arguments.of(new TestConsumer("Next", CharIterator::next), true, 15, 'F', 0, "0"), // next
+                Arguments.of(new TestConsumer("Next 5", ci -> ci.next(5)), true, 11, 'F', 4, "01234"), // next n
+                Arguments.of(new TestConsumer("Next 16", ci -> ci.next(16)), false, 0, 'F', 15, TEST_STRING), // next n
+                Arguments.of(new TestConsumer("Context", CharIterator::context), true, 16, 'F', -1, ""),// context
+                Arguments.of(new TestConsumer("Context 10", ci -> ci.context(10)), true, 16, 'F', -1, ""),// context n
+                Arguments.of(new TestConsumer("Next Until A", ci -> ci.nextUntil('A')), true, 5, 'F', 10, "0123456789A"), // next until char
+                Arguments.of(new TestConsumer("Next Until 89A", ci -> ci.nextUntil("89A")), true, 5, 'F', 10, "0123456789A"),  // next until string
+                Arguments.of(new TestConsumer("Take While Digit", ci -> ci.takeWhile(Character::isDigit)), true, 6, 'F', 9, "0123456789"), // take while
 
                 // With ModifyBound
                 // Mod function, hasNext, remaining, last, prevPos, substrToPos
-                {new TestConsumer("Initial", -6), true, 10, '9', -1, ""},  // Initial
-                {new TestConsumer("[-6]Skip", CharIterator::skip, -6), true, 9, '9', 0, "0"}, // Skip 1
-                {new TestConsumer("[-6]Skip 10", ci -> ci.skip(10), -6), false, 0, '9', 9, "0123456789"}, // Skip n
-                {new TestConsumer("[-6]Peek", CharIterator::peek, -6), true, 10, '9', -1, ""}, // peek 0
-                {new TestConsumer("[-6]Peek 10", ci -> ci.peek(10), -6), true, 10, '9', -1, ""}, // peek n
-                {new TestConsumer("[-6]Next", CharIterator::next, -6), true, 9, '9', 0, "0"}, // next
-                {new TestConsumer("[-6]Next 5", ci -> ci.next(5), -6), true, 5, '9', 4, "01234"}, // next n
-                {new TestConsumer("[-6]Next 16", ci -> ci.next(16), -6), false, 0, '9', 9, "0123456789"}, // next n
-                {new TestConsumer("[-6]Context", CharIterator::context, -6), true, 10, '9', -1, ""},// context
-                {new TestConsumer("[-6]Context 10", ci -> ci.context(10), -6), true, 10, '9', -1, ""},// context n
-                {new TestConsumer("[-6]Next Until A", ci -> ci.nextUntil('A'), -6), false, 0, '9', 9, "0123456789"}, // next until char
-                {new TestConsumer("[-6]Next Until 89", ci -> ci.nextUntil("89"), -6), false, 0, '9', 9, "0123456789"},  // next until string
-                {new TestConsumer("[-6]Next Until 89A", ci -> ci.nextUntil("89A"), -6), false, 0, '9', 9, "0123456789"},  // next until string
-                {new TestConsumer("[-6]Take While Digit", ci -> ci.takeWhile(Character::isDigit), -6), false, 0, '9', 9, "0123456789"}, // take while
-        });
+                Arguments.of(new TestConsumer("Initial", -6), true, 10, '9', -1, ""),  // Initial
+                Arguments.of(new TestConsumer("[-6]Skip", CharIterator::skip, -6), true, 9, '9', 0, "0"), // Skip 1
+                Arguments.of(new TestConsumer("[-6]Skip 10", ci -> ci.skip(10), -6), false, 0, '9', 9, "0123456789"), // Skip n
+                Arguments.of(new TestConsumer("[-6]Peek", CharIterator::peek, -6), true, 10, '9', -1, ""), // peek 0
+                Arguments.of(new TestConsumer("[-6]Peek 10", ci -> ci.peek(10), -6), true, 10, '9', -1, ""), // peek n
+                Arguments.of(new TestConsumer("[-6]Next", CharIterator::next, -6), true, 9, '9', 0, "0"), // next
+                Arguments.of(new TestConsumer("[-6]Next 5", ci -> ci.next(5), -6), true, 5, '9', 4, "01234"), // next n
+                Arguments.of(new TestConsumer("[-6]Next 16", ci -> ci.next(16), -6), false, 0, '9', 9, "0123456789"), // next n
+                Arguments.of(new TestConsumer("[-6]Context", CharIterator::context, -6), true, 10, '9', -1, ""),// context
+                Arguments.of(new TestConsumer("[-6]Context 10", ci -> ci.context(10), -6), true, 10, '9', -1, ""),// context n
+                Arguments.of(new TestConsumer("[-6]Next Until A", ci -> ci.nextUntil('A'), -6), false, 0, '9', 9, "0123456789"), // next until char
+                Arguments.of(new TestConsumer("[-6]Next Until 89", ci -> ci.nextUntil("89"), -6), false, 0, '9', 9, "0123456789"),  // next until string
+                Arguments.of(new TestConsumer("[-6]Next Until 89A", ci -> ci.nextUntil("89A"), -6), false, 0, '9', 9, "0123456789"),  // next until string
+                Arguments.of(new TestConsumer("[-6]Take While Digit", ci -> ci.takeWhile(Character::isDigit), -6), false, 0, '9', 9, "0123456789") // take while
+        );
     }
 
-    @Parameterized.Parameter(0)
-    public Consumer<CharIterator> aModFunction;
-
-    @Parameterized.Parameter(1)
-    public boolean aExpectedHasNext;
-
-    @Parameterized.Parameter(2)
-    public int aExpectedRemaining;
-
-    @Parameterized.Parameter(3)
-    public char aExpectedLast;
-
-    @Parameterized.Parameter(4)
-    public int aExpectedPos;
-
-    @Parameterized.Parameter(5)
-    public String aExpectedSubstringToCurrPos;
 
     private CharIterator aCharIterator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         aCharIterator = new CharIterator(TEST_STRING);
-        aModFunction.accept(aCharIterator);
     }
 
-    @Test
-    public void hasNextTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void hasNextTest(Consumer<CharIterator> aModFunction,
+                            boolean aExpectedHasNext,
+                            int aExpectedRemaining,
+                            char aExpectedLast,
+                            int aExpectedPos,
+                            String aExpectedSubstringToCurrPos) {
+        aModFunction.accept(aCharIterator);
         assertEquals(aExpectedHasNext, aCharIterator.hasNext());
     }
 
-    @Test
-    public void expectedRemainingTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void expectedRemainingTest(Consumer<CharIterator> aModFunction,
+                                      boolean aExpectedHasNext,
+                                      int aExpectedRemaining,
+                                      char aExpectedLast,
+                                      int aExpectedPos,
+                                      String aExpectedSubstringToCurrPos) {
+        aModFunction.accept(aCharIterator);
         assertEquals(aExpectedRemaining, aCharIterator.remaining());
     }
 
-    @Test
-    public void lastTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void lastTest(Consumer<CharIterator> aModFunction,
+                         boolean aExpectedHasNext,
+                         int aExpectedRemaining,
+                         char aExpectedLast,
+                         int aExpectedPos,
+                         String aExpectedSubstringToCurrPos) {
+        aModFunction.accept(aCharIterator);
         assertEquals(aExpectedLast, aCharIterator.lastChar());
     }
 
-    @Test
-    public void prevPosTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void prevPosTest(Consumer<CharIterator> aModFunction,
+                            boolean aExpectedHasNext,
+                            int aExpectedRemaining,
+                            char aExpectedLast,
+                            int aExpectedPos,
+                            String aExpectedSubstringToCurrPos) {
+        aModFunction.accept(aCharIterator);
         assertEquals(aExpectedPos, aCharIterator.prevPos());
     }
 
-    @Test
-    public void substringToCurrPosTest() {
+    @ParameterizedTest
+    @MethodSource("data")
+    public void substringToCurrPosTest(Consumer<CharIterator> aModFunction,
+                                       boolean aExpectedHasNext,
+                                       int aExpectedRemaining,
+                                       char aExpectedLast,
+                                       int aExpectedPos,
+                                       String aExpectedSubstringToCurrPos) {
+        aModFunction.accept(aCharIterator);
         assertEquals(aExpectedSubstringToCurrPos, aCharIterator.substringToCurrPos(0));
     }
 }

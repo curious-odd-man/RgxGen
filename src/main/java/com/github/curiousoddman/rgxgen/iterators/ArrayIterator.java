@@ -20,12 +20,12 @@ import java.util.NoSuchElementException;
 
 public class ArrayIterator implements StringIterator {
 
-    private final int         aMaxIndex;
-    private final Character[] aStrings;
+    private final int    aMaxIndex;
+    private final char[] aStrings;
 
     private int aIndex = -1;
 
-    public ArrayIterator(Character[] strings) {
+    public ArrayIterator(char[] strings) {
         aStrings = strings;
         aMaxIndex = aStrings.length - 1;        // Because of prefix increment in nextImpl()
     }
@@ -41,7 +41,7 @@ public class ArrayIterator implements StringIterator {
         if (aIndex >= aStrings.length) {
             throw new NoSuchElementException("Not enough elements in arrays");
         } else {
-            return aStrings[aIndex].toString();
+            return String.valueOf(aStrings[aIndex]);
         }
     }
 
@@ -52,6 +52,6 @@ public class ArrayIterator implements StringIterator {
 
     @Override
     public String current() {
-        return aStrings[aIndex].toString();
+        return String.valueOf(aStrings[aIndex]);
     }
 }
