@@ -48,7 +48,7 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>2.0</version>
+    <version>3.0</version>
 </dependency>
 ```
 
