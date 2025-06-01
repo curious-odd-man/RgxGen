@@ -22,7 +22,7 @@ import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class GenerationVisitor implements NodeVisitor {
 
@@ -32,10 +32,10 @@ public class GenerationVisitor implements NodeVisitor {
 
     protected final StringBuilder        aStringBuilder = new StringBuilder();
     protected final Map<Integer, String> aGroupValues;
-    protected final Random               aRandom;
+    protected final RandomGenerator      aRandom;
     protected final RgxGenProperties     properties;
 
-    protected GenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+    protected GenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         aRandom = random;
         aGroupValues = groupValues;
         this.properties = properties;

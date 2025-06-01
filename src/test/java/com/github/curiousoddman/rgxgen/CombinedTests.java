@@ -15,7 +15,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -75,7 +75,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
             assertEquals(testPattern.getEstimatedCount(), rgxGen.getUniqueEstimation().orElse(null));
         }
         for (int i = 0; i < 100; i++) {
-            Random rand = TestingUtilities.newRandom(i);
+            RandomGenerator rand = TestingUtilities.newRandom(i);
             for (int j = 0; j < 10; j++) {
                 String generated = rgxGen.generate(rand);
                 boolean result = isValidGenerated(testPattern, generated, 0);
@@ -92,7 +92,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
 
         for (int i = 0; i < 100; i++) {
-            Random random = TestingUtilities.newRandom(i);
+            RandomGenerator random = TestingUtilities.newRandom(i);
             for (int j = 0; j < 10; j++) {
                 String generated = rgxGen.generate(random);
                 boolean result = isValidGenerated(testPattern, generated, Pattern.CASE_INSENSITIVE);
