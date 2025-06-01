@@ -22,11 +22,12 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class GenerationVisitorBuilder {
     private final boolean aGenerateMatching;
 
-    private Random               aRandom;
+    private RandomGenerator      aRandom;
     private Map<Integer, String> aGroupsValues;
     private RgxGenProperties     aProperties;
 
@@ -35,7 +36,7 @@ public class GenerationVisitorBuilder {
         aGenerateMatching = generateMatching;
     }
 
-    public GenerationVisitorBuilder withRandom(Random random) {
+    public GenerationVisitorBuilder withRandom(RandomGenerator random) {
         aRandom = random;
         return this;
     }

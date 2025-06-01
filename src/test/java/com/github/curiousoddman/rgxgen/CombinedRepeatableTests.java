@@ -10,7 +10,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -37,8 +37,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @ParameterizedTest(name = "{1}: {0}")
     @MethodSource("getPatterns")
     public void repeatableGenerationTest(int aSeed, TestPattern testPattern) {
-        Random rnd1 = TestingUtilities.newRandom(aSeed);
-        Random rnd2 = TestingUtilities.newRandom(aSeed);
+        RandomGenerator rnd1 = TestingUtilities.newRandom(aSeed);
+        RandomGenerator rnd2 = TestingUtilities.newRandom(aSeed);
 
         RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
         RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());
@@ -61,8 +61,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @MethodSource("getPatterns")
     @Timeout(5000)
     public void repeatableNotMatchingGenerationTest(int aSeed, TestPattern testPattern) {
-        Random rnd1 = TestingUtilities.newRandom(aSeed);
-        Random rnd2 = TestingUtilities.newRandom(aSeed);
+        RandomGenerator rnd1 = TestingUtilities.newRandom(aSeed);
+        RandomGenerator rnd2 = TestingUtilities.newRandom(aSeed);
 
         RgxGen rgxGen_1 = RgxGen.parse(testPattern.getPattern());
         RgxGen rgxGen_2 = RgxGen.parse(testPattern.getPattern());

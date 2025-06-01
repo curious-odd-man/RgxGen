@@ -17,8 +17,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,7 +86,7 @@ public class GenerationConsistencyTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
-        Random random = newRandom(17);
+        RandomGenerator random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
             Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -101,7 +101,7 @@ public class GenerationConsistencyTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         RgxGen rgxGen = RgxGen.parse(properties, data.getPattern());
-        Random random = newRandom(17);
+        RandomGenerator random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
             Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -114,7 +114,7 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
         RgxGen rgxGen = RgxGen.parse(data.getPattern());
-        Random random = newRandom(17);
+        RandomGenerator random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generate(random);
             Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
@@ -128,7 +128,7 @@ public class GenerationConsistencyTests {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
         RgxGen rgxGen = RgxGen.parse(data.getPattern());
-        Random random = newRandom(17);
+        RandomGenerator random = newRandom(17);
         for (int i = 0; i < NUM_ITERATIONS; i++) {
             String generated = rgxGen.generateNotMatching(random);
             try {
