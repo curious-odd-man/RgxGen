@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.UNICODE_SYMBOL_RANGE;
@@ -125,7 +125,7 @@ class UnicodeCategoryTest {
             Pattern inCategoryPattern = categoryTestData.getInCategoryPattern();
             String pattern = inCategoryPattern.pattern();
             RgxGen rgxGen = RgxGen.parse(pattern);
-            Random random = newRandom(pattern.hashCode());
+            RandomGenerator random = newRandom(pattern.hashCode());
             registerTestedCategory(categoryTestData.getCategory());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, inCategoryPattern, categoryTestData.getCategory(), true);
             ValidationResult validationResult = new ValidationResult();
@@ -145,7 +145,7 @@ class UnicodeCategoryTest {
             Pattern inCategoryPattern = categoryTestData.getInCategoryPattern();
             String pattern = inCategoryPattern.pattern();
             RgxGen rgxGen = RgxGen.parse(pattern);
-            Random random = newRandom(pattern.hashCode());
+            RandomGenerator random = newRandom(pattern.hashCode());
             registerTestedCategory(categoryTestData.getCategory());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, inCategoryPattern, categoryTestData.getCategory(), false);
             ValidationResult validationResult = new ValidationResult();
@@ -184,7 +184,7 @@ class UnicodeCategoryTest {
             String pattern = notInCategoryPattern.pattern();
             RgxGen rgxGen = RgxGen.parse(pattern);
             registerTestedCategory(categoryTestData.getCategory());
-            Random random = newRandom(pattern.hashCode());
+            RandomGenerator random = newRandom(pattern.hashCode());
             RgxGenTestPattern rgxGenTestPattern = new RgxGenTestPattern(pattern, notInCategoryPattern, categoryTestData.getCategory(), true);
             ValidationResult validationResult = new ValidationResult();
             for (int i = 0; i < GENERATE_ITERATIONS; i++) {

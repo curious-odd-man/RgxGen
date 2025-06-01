@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class StrangeBehaviourTests {
 
@@ -16,7 +17,7 @@ public class StrangeBehaviourTests {
         final int LIMIT_VALUE = 32;
         for (int seed = 0; seed < 10; seed++) {
             // Each time have different seed!!!!
-            Random random = new Random(seed);
+            RandomGenerator random = new Random(seed);
             // NOTE: This value will be always the same
             System.out.println(random.nextInt(LIMIT_VALUE));
             random = new Random(seed);

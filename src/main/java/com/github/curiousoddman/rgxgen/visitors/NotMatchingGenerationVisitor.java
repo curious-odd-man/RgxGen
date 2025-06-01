@@ -24,8 +24,8 @@ import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Function;
+import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
@@ -38,7 +38,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     private static final SymbolRange ALL_SYMBOLS = ASCII_SYMBOL_RANGE;
 
-    public NotMatchingGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+    public NotMatchingGenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
     }
 

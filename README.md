@@ -48,11 +48,13 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>2.0</version>
+    <version>3.0</version>
 </dependency>
 ```
 
 ### Code:
+
+Note - RgxGen is not thread safe - there were reports on errors - see [#91](https://github.com/curious-odd-man/RgxGen/issues/91).
 
 ```java
 public class Main {

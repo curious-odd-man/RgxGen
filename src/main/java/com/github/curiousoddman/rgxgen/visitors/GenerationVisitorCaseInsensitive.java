@@ -23,10 +23,10 @@ import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class GenerationVisitorCaseInsensitive extends GenerationVisitor {
-    protected GenerationVisitorCaseInsensitive(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+    protected GenerationVisitorCaseInsensitive(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
     }
 

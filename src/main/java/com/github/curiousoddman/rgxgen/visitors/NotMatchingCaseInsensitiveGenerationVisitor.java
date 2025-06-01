@@ -20,10 +20,10 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
 
 import java.util.Map;
-import java.util.Random;
+import java.util.random.RandomGenerator;
 
 public class NotMatchingCaseInsensitiveGenerationVisitor extends NotMatchingGenerationVisitor {
-    public NotMatchingCaseInsensitiveGenerationVisitor(Random random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+    public NotMatchingCaseInsensitiveGenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
     }
 

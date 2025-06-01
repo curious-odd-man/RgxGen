@@ -22,6 +22,7 @@ import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -52,7 +53,7 @@ public final class Util {
      * @param input input string to randomize
      * @return string with random characters changed case.
      */
-    public static String randomlyChangeCase(Random rnd, String input) {
+    public static String randomlyChangeCase(RandomGenerator rnd, String input) {
         StringBuilder sb = new StringBuilder(input);
         for (int i = 0; i < sb.length(); i++) {
             char currentChar = sb.charAt(i);

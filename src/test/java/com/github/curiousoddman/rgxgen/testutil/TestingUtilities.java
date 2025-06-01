@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.MAX_UNICODE_CHARACTER;
@@ -37,8 +38,8 @@ public final class TestingUtilities {
      * @param seed seed value
      * @return new Random()
      */
-    public static Random newRandom(int seed) {
-        Random random = new Random(seed);
+    public static RandomGenerator newRandom(int seed) {
+        RandomGenerator random = new Random(seed);
         random.nextInt();
         return random;
     }

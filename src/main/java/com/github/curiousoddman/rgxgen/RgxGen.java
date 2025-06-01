@@ -28,6 +28,7 @@ import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.Random;
+import java.util.random.RandomGenerator;
 import java.util.stream.Stream;
 
 /**
@@ -115,7 +116,7 @@ public class RgxGen {
      * @param random random to use for the generation.
      * @return generated string.
      */
-    public String generate(Random random) {
+    public String generate(RandomGenerator random) {
         GenerationVisitor gv = GenerationVisitor.builder()
                                                 .withRandom(random)
                                                 .withProperties(properties)
@@ -140,7 +141,7 @@ public class RgxGen {
      * @param random random to use for the generation.
      * @return generated string.
      */
-    public String generateNotMatching(Random random) {
+    public String generateNotMatching(RandomGenerator random) {
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
                                                              .withRandom(random)
                                                              .get();
