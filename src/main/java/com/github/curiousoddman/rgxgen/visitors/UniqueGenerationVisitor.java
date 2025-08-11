@@ -79,11 +79,36 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
+        String replaceRepeatBlocks = RgxGenOption.REPLACE_REPEAT_BLOCKS.getFromProperties(aProperties);
+        
+        if (replaceRepeatBlocks != null && isWildcardRepeatBlock(node)) {
+            String placeholder = getPlaceholderForRepeatBlock(node);
+            aIterators.add(new SingleValueIteratorSupplier(placeholder));
+            return;
+        }
+        
         // Getting all possible sub node contents
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         node.getNode()
             .visit(v);
         aIterators.add(new IncrementalLengthIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), node.getMin(), node.getMax()));
+    }
+    
+    private boolean isWildcardRepeatBlock(Repeat node) {
+        return (node.getMin() == 0 && node.getMax() == -1) ||  // * pattern
+               (node.getMin() == 1 && node.getMax() == -1);    // + pattern
+    }
+    
+    private String getPlaceholderForRepeatBlock(Repeat node) {
+        String pattern = node.getPattern();
+        String replaceRepeatBlocks = RgxGenOption.REPLACE_REPEAT_BLOCKS.getFromProperties(aProperties);
+        if (pattern.endsWith("*")) {
+            return replaceRepeatBlocks;
+        } else if (pattern.endsWith("+")) {
+            return replaceRepeatBlocks;
+        } else {
+            return "{REPEAT}";
+        }
     }
 
     @Override

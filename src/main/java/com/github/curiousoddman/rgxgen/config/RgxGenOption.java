@@ -56,6 +56,13 @@ public class RgxGenOption<T> {
      */
     public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
 
+    /**
+     * Replace wildcard repeat blocks (* and +) with placeholder text instead of generating all variations.
+     *
+     * @defaultValue false
+     */
+    public static final RgxGenOption<String> REPLACE_REPEAT_BLOCKS = new RgxGenOption<>("generation.replace.repeat.blocks", null);
+
     private final String key;
     private final T      defaultValue;
 

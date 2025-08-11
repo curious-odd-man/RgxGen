@@ -62,6 +62,14 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
+        String replaceRepeatBlocks = RgxGenOption.REPLACE_REPEAT_BLOCKS.getFromProperties(properties);
+        
+        if (replaceRepeatBlocks != null && isWildcardRepeatBlock(node)) {
+            String placeholder = getPlaceholderForRepeatBlock(node);
+            aStringBuilder.append(placeholder);
+            return;
+        }
+        
         int max = node.getMax() == -1 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(properties) : node.getMax();
         int repeat = node.getMin() >= max ?
                      node.getMin() :
@@ -69,6 +77,23 @@ public class GenerationVisitor implements NodeVisitor {
 
         for (int i = 0; i < repeat; ++i) {
             node.getNode().visit(this);
+        }
+    }
+    
+    private boolean isWildcardRepeatBlock(Repeat node) {
+        return (node.getMin() == 0 && node.getMax() == -1) ||  // * pattern
+               (node.getMin() == 1 && node.getMax() == -1);    // + pattern
+    }
+    
+    private String getPlaceholderForRepeatBlock(Repeat node) {
+        String pattern = node.getPattern();
+        String replaceRepeatBlocks = RgxGenOption.REPLACE_REPEAT_BLOCKS.getFromProperties(properties);
+        if (pattern.endsWith("*")) {
+            return replaceRepeatBlocks;
+        } else if (pattern.endsWith("+")) {
+            return replaceRepeatBlocks;
+        } else {
+            return "{REPEAT}";
         }
     }
 
