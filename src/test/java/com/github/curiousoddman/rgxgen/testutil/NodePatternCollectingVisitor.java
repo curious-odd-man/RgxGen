@@ -31,7 +31,7 @@ public class NodePatternCollectingVisitor implements NodeVisitor {
     public void visit(Repeat node) {
         aPatterns.add(node.getPattern());
         node.getNode()
-            .visit(this);
+                .visit(this);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class NodePatternCollectingVisitor implements NodeVisitor {
     public void visit(Group node) {
         aPatterns.add(node.getPattern());
         node.getNode()
-            .visit(this);
+                .visit(this);
     }
 
     public List<String> getPatterns() {

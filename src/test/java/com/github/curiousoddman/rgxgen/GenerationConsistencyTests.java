@@ -37,9 +37,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @SuppressWarnings("TestMethodWithoutAssertion")
 
 public class GenerationConsistencyTests {
-    private static final int  NUM_ITERATIONS      = 100;
+    private static final int NUM_ITERATIONS = 100;
     private static final Path caseInsensitivePath = Paths.get("testdata/caseinsensitive/");
-    private static final Path caseSensitivePath   = Paths.get("testdata/casesensitive/");
+    private static final Path caseSensitivePath = Paths.get("testdata/casesensitive/");
 
     public static Stream<TestPatternCaseInsensitive> getCaseInsensitivePatterns() {
         return Arrays.stream(TestPatternCaseInsensitive.values());
@@ -57,25 +57,29 @@ public class GenerationConsistencyTests {
     static void cleanupFiles() throws IOException {
         try (Stream<Path> pathStream = Files.walk(caseInsensitivePath)) {
             pathStream.filter(Files::isRegularFile)
-                      .forEach(path -> {
-                          try {
-                              Files.delete(path);
-                          } catch (IOException e) {
-                              throw new RuntimeException(e);
-                          }
-                      });
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
 
         try (Stream<Path> pathStream = Files.walk(caseSensitivePath)) {
             pathStream.filter(Files::isRegularFile)
-                      .forEach(path -> {
-                          try {
-                              Files.delete(path);
-                          } catch (IOException e) {
-                              throw new RuntimeException(e);
-                          }
-                      });
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
         }
+    }
+
+    private static String createFileName(String name) {
+        return name.replace('/', '_').replace('\\', '_') + ".txt";
     }
 
     @ParameterizedTest
@@ -120,7 +124,6 @@ public class GenerationConsistencyTests {
             Files.write(fileName, singletonList(generated), StandardOpenOption.CREATE, StandardOpenOption.APPEND);
         }
     }
-
 
     @ParameterizedTest
     @MethodSource("getPatterns")
@@ -183,9 +186,5 @@ public class GenerationConsistencyTests {
             System.out.println(generated);
             fail(e);
         }
-    }
-
-    private static String createFileName(String name) {
-        return name.replace('/', '_').replace('\\', '_') + ".txt";
     }
 }

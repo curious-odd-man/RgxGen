@@ -205,29 +205,16 @@ public enum UnicodeCategory {
                             KeyValue::getKey,
                             KeyValue::getValue
                     )));
-
-    private static List<String> keys(String... keys) {
-        return asList(keys);
-    }
-
-    private static Stream<KeyValue> allowUseOfHyphenOrSpacesOrUnderscores(UnicodeCategory unicodeCategory) {
-        Set<String> keys = Util.makeVariations(unicodeCategory.keys, '_', ' ', '-');
-        return keys.stream()
-                   .map(key -> new KeyValue(key, unicodeCategory));
-    }
-
-    private final List<String>      keys;
-    private final String            description;
+    private final List<String> keys;
+    private final String description;
     private final List<SymbolRange> symbolRanges;
-    private final char[]            symbols;
-
+    private final char[] symbols;
     UnicodeCategory(List<String> keys, String description, List<SymbolRange> symbolRanges, char... symbols) {
         this.keys = keys;
         this.description = description;
         this.symbolRanges = symbolRanges;
         this.symbols = symbols;
     }
-
     UnicodeCategory(List<String> keys, String description, SymbolRange symbolRange, char[] symbols) {
         this(keys, description, singletonList(symbolRange), symbols);
     }
@@ -240,30 +227,22 @@ public enum UnicodeCategory {
         this(keys, description, singletonList(symbolRange), ZERO_LENGTH_CHARACTER_ARRAY);
     }
 
+    private static List<String> keys(String... keys) {
+        return asList(keys);
+    }
+
+    private static Stream<KeyValue> allowUseOfHyphenOrSpacesOrUnderscores(UnicodeCategory unicodeCategory) {
+        Set<String> keys = Util.makeVariations(unicodeCategory.keys, '_', ' ', '-');
+        return keys.stream()
+                .map(key -> new KeyValue(key, unicodeCategory));
+    }
+
     public List<SymbolRange> getSymbolRanges() {
         return symbolRanges;
     }
 
     public char[] getSymbols() {
         return symbols;
-    }
-
-    private static class KeyValue {
-        private final String          key;
-        private final UnicodeCategory value;
-
-        KeyValue(String key, UnicodeCategory value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public UnicodeCategory getValue() {
-            return value;
-        }
     }
 
     public List<String> getKeys() {
@@ -288,5 +267,23 @@ public enum UnicodeCategory {
         }
 
         return false;
+    }
+
+    private static class KeyValue {
+        private final String key;
+        private final UnicodeCategory value;
+
+        KeyValue(String key, UnicodeCategory value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public String getKey() {
+            return key;
+        }
+
+        public UnicodeCategory getValue() {
+            return value;
+        }
     }
 }

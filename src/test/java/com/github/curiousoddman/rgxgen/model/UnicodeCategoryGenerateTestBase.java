@@ -18,6 +18,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UnicodeCategoryGenerateTestBase {
 
+    Set<UnicodeCategory> testedCategories;
+    Map<UnicodeCategory, Set<Character>> generatedCharacters;
+
     public static Stream<CategoryTestData> getCategoryTestData() {
         return Arrays.stream(values()).map(CategoryTestData::create);
     }
@@ -25,9 +28,6 @@ public class UnicodeCategoryGenerateTestBase {
     public static String wrapInCurvy(String s) {
         return '{' + s + '}';
     }
-
-    Set<UnicodeCategory>                 testedCategories;
-    Map<UnicodeCategory, Set<Character>> generatedCharacters;
 
     @BeforeAll
     void beforeAll() {

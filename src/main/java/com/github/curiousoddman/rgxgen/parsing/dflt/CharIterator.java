@@ -134,8 +134,8 @@ public class CharIterator {
         int start = Math.max(0, index - 5);
         int end = Math.min(aBoundIndex, index + 5);
         int offsetOfPointer = start == 0
-                              ? index
-                              : 5;
+                ? index
+                : 5;
         return "\n'" + aValue.substring(start, end) + "'\n" + Util.repeatChar(' ', 1 + offsetOfPointer) + '^';
     }
 

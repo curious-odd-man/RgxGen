@@ -57,7 +57,7 @@ public class RgxGenOption<T> {
     public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
 
     private final String key;
-    private final T      defaultValue;
+    private final T defaultValue;
 
     /**
      * Create an option with specific key and default value
@@ -96,8 +96,8 @@ public class RgxGenOption<T> {
      */
     public T getFromPropertiesOrDefault(RgxGenProperties properties) {
         return Optional.ofNullable(properties)
-                       .map(props -> (T) props.get(key))
-                       .orElse(defaultValue);
+                .map(props -> (T) props.get(key))
+                .orElse(defaultValue);
     }
 
     /**

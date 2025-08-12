@@ -24,7 +24,7 @@ public class RegressionTests {
         StringIterator stringIterator = rgxGen.iterateUnique();
         while (stringIterator.hasNext()) {
             assertTrue(compile.matcher(stringIterator.next())
-                              .matches());
+                    .matches());
         }
     }
 
@@ -35,7 +35,7 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         StringIterator stringIterator = rgxGen.iterateUnique();
         assertEquals(BIG_INTEGER_TWO, rgxGen.getUniqueEstimation()
-                                            .orElse(null));
+                .orElse(null));
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());
         assertFalse(stringIterator.hasNext());
@@ -48,7 +48,7 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         final StringIterator stringIterator = rgxGen.iterateUnique();
         assertEquals(BigInteger.valueOf(2), rgxGen.getUniqueEstimation()
-                                                  .orElse(null));
+                .orElse(null));
         assertEquals("x", stringIterator.next());
         assertEquals("y", stringIterator.next());
         assertFalse(stringIterator.hasNext());
@@ -63,7 +63,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
+                    .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 
@@ -76,7 +76,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
+                    .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 

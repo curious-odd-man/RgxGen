@@ -33,8 +33,7 @@ public class PermutationsIteratorSupplier implements Supplier<StringIterator> {
     @Override
     public StringIterator get() {
         if (aSuppliers.size() == 1) {
-            return aSuppliers.get(0)
-                             .get();
+            return aSuppliers.get(0).get();
         } else {
             return new PermutationsIterator(aSuppliers);
         }

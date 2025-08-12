@@ -22,6 +22,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class UnicodeCategoryTest {
     public static final int GENERATE_ITERATIONS = 1000;
 
+    private static void printWrongCharacters(CategoryTestData categoryTestData, CharList wrongCharacters) {
+        List<SymbolRange> compactedRanges = new ArrayList<>();
+        CharList compactedCharacters = CharList.empty();
+        Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < compactedCharacters.size(); i++) {
+            char compactedCharacter = compactedCharacters.get(i);
+            sb.append('\'').append(compactedCharacter).append('\'').append(',');
+        }
+        if (sb.length() != 0) {
+            System.out.println(categoryTestData.getCategory() + ": " + sb);
+            sb = new StringBuilder();
+        }
+
+        for (SymbolRange compactedRange : compactedRanges) {
+            sb.append("range(").append(compactedRange.getFrom()).append(", ").append(compactedRange.getTo()).append("), ");
+        }
+
+        if (sb.length() != 0) {
+            System.out.println(categoryTestData.getCategory() + ": " + sb);
+        }
+    }
+
     @ParameterizedTest
     @EnumSource(UnicodeCategory.class)
     void keysAreDefinedForEachCategoryTest(UnicodeCategory unicodeCategory) {
@@ -63,29 +86,6 @@ class UnicodeCategoryTest {
                 printWrongCharacters(categoryTestData, wrongCharacters);
                 fail("There are multiple characters that do not belong to a category");
             }
-        }
-    }
-
-    private static void printWrongCharacters(CategoryTestData categoryTestData, CharList wrongCharacters) {
-        List<SymbolRange> compactedRanges = new ArrayList<>();
-        CharList compactedCharacters = CharList.empty();
-        Util.compactOverlappingRangesAndSymbols(new ArrayList<>(), wrongCharacters, compactedRanges, compactedCharacters);
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < compactedCharacters.size(); i++) {
-            char compactedCharacter = compactedCharacters.get(i);
-            sb.append('\'').append(compactedCharacter).append('\'').append(',');
-        }
-        if (sb.length() != 0) {
-            System.out.println(categoryTestData.getCategory() + ": " + sb);
-            sb = new StringBuilder();
-        }
-
-        for (SymbolRange compactedRange : compactedRanges) {
-            sb.append("range(").append(compactedRange.getFrom()).append(", ").append(compactedRange.getTo()).append("), ");
-        }
-
-        if (sb.length() != 0) {
-            System.out.println(categoryTestData.getCategory() + ": " + sb);
         }
     }
 

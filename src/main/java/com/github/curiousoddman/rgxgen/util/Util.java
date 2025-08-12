@@ -78,8 +78,8 @@ public final class Util {
      */
     public static BigInteger countCaseInsensitiveVariations(String value) {
         int switchableCase = value.chars()
-                                  .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
-                                  .sum();
+                .map(c -> Character.isUpperCase(c) || Character.isLowerCase(c) ? 1 : 0)
+                .sum();
         return ConstantsProvider.BIG_INTEGER_TWO.pow(switchableCase);
     }
 

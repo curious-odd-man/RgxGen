@@ -33,12 +33,12 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASC
  * It reads expression and creates a hierarchy of {@code Node}.
  */
 public class DefaultTreeBuilder implements NodeTreeBuilder {
-    private final CharIterator       aCharIterator;
+    private final CharIterator aCharIterator;
     private final Map<Node, Integer> aNodesStartPos = new IdentityHashMap<>();
-    private final RgxGenProperties   properties;
+    private final RgxGenProperties properties;
 
     private Node aNode;
-    private int  aNextGroupIndex = 1;
+    private int aNextGroupIndex = 1;
 
     /**
      * Default implementation of parser and NodeTreeBuilder.
@@ -50,6 +50,71 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     public DefaultTreeBuilder(String expr, RgxGenProperties properties) {
         aCharIterator = new CharIterator(expr);
         this.properties = properties;
+    }
+
+    private static void assertCorrectCharacter(char currentChar) {
+        if (currentChar != '^' && currentChar != '$') {
+            throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
+        }
+    }
+
+    private static MatchType getMatchType(char parsedCharacter, char positiveMatchCharacter) {
+        return parsedCharacter == positiveMatchCharacter ? MatchType.POSITIVE : MatchType.NEGATIVE;
+    }
+
+    private static MatchType determineSymbolSetMatchType(CharIterator charIterator) {
+        if (charIterator.peek() == '^') {
+            charIterator.skip();
+            return MatchType.NEGATIVE;
+        } else {
+            return MatchType.POSITIVE;
+        }
+    }
+
+    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolRange> symbolRanges) {
+        // If we're here, then previous character was '-'.
+        // But dash can be used in such way: [a-c-]. In this case last dash is only a character, not a range start.
+        if (characters.length() < 2) {
+            characters.append('-');
+        } else {
+            char lastChar = characters.charAt(characters.length() - 1);
+            char firstChar = characters.charAt(characters.length() - 2);
+            characters.delete(characters.length() - 2, characters.length());
+            symbolRanges.add(SymbolRange.range(firstChar, lastChar));
+        }
+    }
+
+    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, String sb, List<SymbolRange> externalRanges, Collection<SymbolSet> externalSets) {
+        RgxGenCharsDefinition positiveMatchDefinitions = RgxGenCharsDefinition.of(externalRanges);
+        if (!sb.isEmpty()) {
+            positiveMatchDefinitions.withCharacters(sb.toCharArray());
+        }
+
+        boolean isAscii = true;
+        boolean hasModifiedExclusionChars = externalSets.stream().anyMatch(SymbolSet::hasModifiedExclusionChars);
+        RgxGenCharsDefinition negativeMatchDefinitions = hasModifiedExclusionChars ? RgxGenCharsDefinition.of(positiveMatchDefinitions) : null;
+
+        for (SymbolSet symbolSet : externalSets) {
+            isAscii = isAscii && symbolSet.isAscii();
+            positiveMatchDefinitions
+                    .withCharacters(symbolSet.getSymbols())
+                    .withRanges(symbolSet.getSymbolRanges());
+            if (hasModifiedExclusionChars) {
+                if (symbolSet.hasModifiedExclusionChars()) {
+                    negativeMatchDefinitions.addAll(symbolSet.getNegativeMatchExclusionChars());
+                } else {
+                    negativeMatchDefinitions
+                            .withCharacters(symbolSet.getSymbols())
+                            .withRanges(symbolSet.getSymbolRanges());
+                }
+            }
+        }
+
+        if (isAscii) {
+            return SymbolSet.ofAscii(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
+        } else {
+            return SymbolSet.ofUnicode(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
+        }
     }
 
     /**
@@ -144,12 +209,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return null;
     }
 
-    private static void assertCorrectCharacter(char currentChar) {
-        if (currentChar != '^' && currentChar != '$') {
-            throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
-        }
-    }
-
     /**
      * There is limited numbed of characters that can precede ^ or follow $.
      * This method verifies that the pattern is syntactically correct.
@@ -197,8 +256,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
             default:
                 errorText = currentChar == '^'
-                            ? "Before caret only new line is allowed!"
-                            : "After dollar only new line is allowed!";
+                        ? "Before caret only new line is allowed!"
+                        : "After dollar only new line is allowed!";
                 break;
 
         }
@@ -393,9 +452,9 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 List<WhitespaceChar> whitespaceChars = RgxGenOption.WHITESPACE_DEFINITION.getFromPropertiesOrDefault(properties);
                 CharList whitespaceCharsList = whitespaceChars.stream().map(WhitespaceChar::get).collect(new CharListCollector());
                 createdNode = SymbolSet.ofAscii("\\" + c,
-                                                RgxGenCharsDefinition.of(whitespaceCharsList),
-                                                RgxGenCharsDefinition.of(ConstantsProvider.getAsciiWhitespaces()),
-                                                getMatchType(c, 's'));
+                        RgxGenCharsDefinition.of(whitespaceCharsList),
+                        RgxGenCharsDefinition.of(ConstantsProvider.getAsciiWhitespaces()),
+                        getMatchType(c, 's'));
                 break;
 
             case 'w':  // Any word characters
@@ -470,10 +529,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         } else {
             return aCharIterator.next(1);
         }
-    }
-
-    private static MatchType getMatchType(char parsedCharacter, char positiveMatchCharacter) {
-        return parsedCharacter == positiveMatchCharacter ? MatchType.POSITIVE : MatchType.NEGATIVE;
     }
 
     /**
@@ -654,15 +709,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private static MatchType determineSymbolSetMatchType(CharIterator charIterator) {
-        if (charIterator.peek() == '^') {
-            charIterator.skip();
-            return MatchType.NEGATIVE;
-        } else {
-            return MatchType.POSITIVE;
-        }
-    }
-
     private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
         // Skip backslash and add next symbol to characters
         List<Node> nodes = new ArrayList<>();
@@ -679,52 +725,6 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             throw new RgxGenParseException("Multiple nodes found inside square brackets escape sequence before '" + aCharIterator.context() + '\'');
         } else {
             return Optional.of((SymbolSet) nodes.get(0));
-        }
-    }
-
-    private static void handleSymbolRange(StringBuilder characters, Collection<SymbolRange> symbolRanges) {
-        // If we're here, then previous character was '-'.
-        // But dash can be used in such way: [a-c-]. In this case last dash is only a character, not a range start.
-        if (characters.length() < 2) {
-            characters.append('-');
-        } else {
-            char lastChar = characters.charAt(characters.length() - 1);
-            char firstChar = characters.charAt(characters.length() - 2);
-            characters.delete(characters.length() - 2, characters.length());
-            symbolRanges.add(SymbolRange.range(firstChar, lastChar));
-        }
-    }
-
-    private static SymbolSet createSymbolSetFromSquareBrackets(String pattern, MatchType matchType, String sb, List<SymbolRange> externalRanges, Collection<SymbolSet> externalSets) {
-        RgxGenCharsDefinition positiveMatchDefinitions = RgxGenCharsDefinition.of(externalRanges);
-        if (!sb.isEmpty()) {
-            positiveMatchDefinitions.withCharacters(sb.toCharArray());
-        }
-
-        boolean isAscii = true;
-        boolean hasModifiedExclusionChars = externalSets.stream().anyMatch(SymbolSet::hasModifiedExclusionChars);
-        RgxGenCharsDefinition negativeMatchDefinitions = hasModifiedExclusionChars ? RgxGenCharsDefinition.of(positiveMatchDefinitions) : null;
-
-        for (SymbolSet symbolSet : externalSets) {
-            isAscii = isAscii && symbolSet.isAscii();
-            positiveMatchDefinitions
-                    .withCharacters(symbolSet.getSymbols())
-                    .withRanges(symbolSet.getSymbolRanges());
-            if (hasModifiedExclusionChars) {
-                if (symbolSet.hasModifiedExclusionChars()) {
-                    negativeMatchDefinitions.addAll(symbolSet.getNegativeMatchExclusionChars());
-                } else {
-                    negativeMatchDefinitions
-                            .withCharacters(symbolSet.getSymbols())
-                            .withRanges(symbolSet.getSymbolRanges());
-                }
-            }
-        }
-
-        if (isAscii) {
-            return SymbolSet.ofAscii(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
-        } else {
-            return SymbolSet.ofUnicode(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
         }
     }
 

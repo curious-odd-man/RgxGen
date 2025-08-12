@@ -18,10 +18,10 @@ public abstract class CombinedTestTemplate<T extends DataInterface> {
         Pattern aCompiledPattern = Pattern.compile(testPattern.getPattern(), patternCompilationFlags);
         if (testPattern.useFindForMatching()) {
             return aCompiledPattern.matcher(value)
-                                   .find();
+                    .find();
         } else {
             return aCompiledPattern.matcher(value)
-                                   .matches();
+                    .matches();
         }
     }
 }

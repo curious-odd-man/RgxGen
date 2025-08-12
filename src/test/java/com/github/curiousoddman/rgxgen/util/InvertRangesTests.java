@@ -49,6 +49,10 @@ public class InvertRangesTests {
         );
     }
 
+    private static Args args(String description) {
+        return new Args(description);
+    }
+
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getInvertRangesAndCharactersTestData")
     void invertRangesAndCharactersTest(Args args) {
@@ -65,17 +69,24 @@ public class InvertRangesTests {
         assertEquals(expectedCharacters, actualCharacters);
     }
 
-    private static Args args(String description) {
-        return new Args(description);
-    }
-
     public static class Args {
-        String            description;
-        List<SymbolRange> ranges           = new ArrayList<>();
-        CharList          characters       = CharList.empty();
-        SymbolRange       allCharacters;
-        List<SymbolRange> expectRanges     = new ArrayList<>();
-        CharList          expectCharacters = CharList.empty();
+        String description;
+        List<SymbolRange> ranges = new ArrayList<>();
+        CharList characters = CharList.empty();
+        SymbolRange allCharacters;
+        List<SymbolRange> expectRanges = new ArrayList<>();
+        CharList expectCharacters = CharList.empty();
+
+        public Args(String description) {
+            this.description = description;
+        }
+
+        private static SymbolRange getSymbolRange(String range) {
+            String[] split = range.split("-");
+            char from = split[0].charAt(0);
+            char to = split[1].charAt(0);
+            return SymbolRange.range(from, to);
+        }
 
         public List<SymbolRange> getRanges() {
             return ranges;
@@ -97,10 +108,6 @@ public class InvertRangesTests {
             return expectCharacters;
         }
 
-        public Args(String description) {
-            this.description = description;
-        }
-
         public Args allCharacters(SymbolRange allCharacters) {
             this.allCharacters = allCharacters;
             return this;
@@ -109,13 +116,6 @@ public class InvertRangesTests {
         public Args range(String range) {
             ranges.add(getSymbolRange(range));
             return this;
-        }
-
-        private static SymbolRange getSymbolRange(String range) {
-            String[] split = range.split("-");
-            char from = split[0].charAt(0);
-            char to = split[1].charAt(0);
-            return SymbolRange.range(from, to);
         }
 
         public Args expectRange(SymbolRange expectRange) {

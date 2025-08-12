@@ -63,7 +63,7 @@ public class NodePatternVerifyingVisitor implements NodeVisitor {
     private void compareAndReport(Node node) {
         ++aCurrentIndex;
         if (!node.getPattern()
-                 .equals(aPatterns.get(aCurrentIndex))) {
+                .equals(aPatterns.get(aCurrentIndex))) {
             aErrors.add('\'' + node.getPattern() + "' not equal to '" + aPatterns.get(aCurrentIndex) + '\'');
         }
     }

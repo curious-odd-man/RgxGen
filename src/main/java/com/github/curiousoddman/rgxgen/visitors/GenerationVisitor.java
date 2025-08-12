@@ -26,19 +26,18 @@ import java.util.random.RandomGenerator;
 
 public class GenerationVisitor implements NodeVisitor {
 
-    public static GenerationVisitorBuilder builder() {
-        return new GenerationVisitorBuilder(true);
-    }
-
-    protected final StringBuilder        aStringBuilder = new StringBuilder();
+    protected final StringBuilder aStringBuilder = new StringBuilder();
     protected final Map<Integer, String> aGroupValues;
-    protected final RandomGenerator      aRandom;
-    protected final RgxGenProperties     properties;
-
+    protected final RandomGenerator aRandom;
+    protected final RgxGenProperties properties;
     protected GenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         aRandom = random;
         aGroupValues = groupValues;
         this.properties = properties;
+    }
+
+    public static GenerationVisitorBuilder builder() {
+        return new GenerationVisitorBuilder(true);
     }
 
     @Override
@@ -66,8 +65,8 @@ public class GenerationVisitor implements NodeVisitor {
                 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromPropertiesOrDefault(properties)
                 : node.getMax();
         int repeat = node.getMin() >= max ?
-                     node.getMin() :
-                     node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
+                node.getMin() :
+                node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
 
         for (int i = 0; i < repeat; ++i) {
             node.getNode().visit(this);

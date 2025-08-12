@@ -31,8 +31,8 @@ public class LookaroundTests {
         for (int i = 0; i < 100; i++) {
             String s = rgxGen.generate();
             assertTrue(Pattern.compile(pattern)
-                              .matcher(s)
-                              .find(), "Text: '" + s + "'does not match pattern " + pattern);
+                    .matcher(s)
+                    .find(), "Text: '" + s + "'does not match pattern " + pattern);
         }
     }
 
@@ -44,8 +44,8 @@ public class LookaroundTests {
         for (int i = 0; i < 100 && stringIterator.hasNext(); i++) {
             String s = stringIterator.next();
             assertTrue(Pattern.compile(pattern)
-                              .matcher(s)
-                              .find(), "Text: '" + s + "'does not match pattern " + pattern);
+                    .matcher(s)
+                    .find(), "Text: '" + s + "'does not match pattern " + pattern);
         }
     }
 }

@@ -14,9 +14,9 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 public class RangesComparisonTests {
 
-    public static final  int         REFERENCE_START = 10;
-    public static final  int         REFERENCE_END   = 20;
-    private static final SymbolRange RANGE_10_20     = range(REFERENCE_START, REFERENCE_END);
+    public static final int REFERENCE_START = 10;
+    public static final int REFERENCE_END = 20;
+    private static final SymbolRange RANGE_10_20 = range(REFERENCE_START, REFERENCE_END);
 
     public static Stream<Arguments> getRangeComparisonTestData() {
         int startBefore = 0;

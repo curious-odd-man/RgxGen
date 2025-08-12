@@ -26,8 +26,8 @@ import java.util.function.Supplier;
 
 public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
-    private final Map<Integer, StringIterator>          aGroupIteratorsMap;
-    private final int                                   aIndex;
+    private final Map<Integer, StringIterator> aGroupIteratorsMap;
+    private final int aIndex;
 
     public ReferenceIteratorSupplier(Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIteratorsMap, int index) {
         aReferenceIteratorMap = referenceIteratorMap;
@@ -44,7 +44,7 @@ public class ReferenceIteratorSupplier implements Supplier<StringIterator> {
         }
 
         aReferenceIteratorMap.computeIfAbsent(aIndex, i -> new ArrayList<>())
-                             .add(referenceIterator);
+                .add(referenceIterator);
 
         return referenceIterator;
     }

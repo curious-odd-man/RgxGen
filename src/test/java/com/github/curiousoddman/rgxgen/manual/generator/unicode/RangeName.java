@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 public class RangeName {
     private static final Pattern CHARS_TO_REMOVE = Pattern.compile("[)(,']+");
-    public final         String  sectionName;
-    public final         String  subrangeName;
-    public final         String  combinedName;
+    public final String sectionName;
+    public final String subrangeName;
+    public final String combinedName;
 
     public RangeName(String sectionName, String subrangeName, int index) {
         this.sectionName = makeValidJavaConstantName(sectionName);
@@ -19,6 +19,10 @@ public class RangeName {
         }
     }
 
+    public RangeName(String sectionName, String subrangeName) {
+        this(sectionName, subrangeName, -1);
+    }
+
     private static String makeValidJavaConstantName(String subrangeName) {
         String replaced = subrangeName
                 .replace(' ', '_')
@@ -27,9 +31,5 @@ public class RangeName {
                 .matcher(replaced)
                 .replaceAll("")
                 .toUpperCase(Locale.ROOT);
-    }
-
-    public RangeName(String sectionName, String subrangeName) {
-        this(sectionName, subrangeName, -1);
     }
 }

@@ -28,6 +28,9 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         return Arrays.stream(TestPattern.values());
     }
 
+    private static String createMessage(String generated, DataInterface pattern, int i, int j) {
+        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
+    }
 
     @ParameterizedTest
     @MethodSource("getPatterns")
@@ -99,9 +102,5 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
                 assertTrue(result, createMessage(generated, testPattern, i, j));
             }
         }
-    }
-
-    private static String createMessage(String generated, DataInterface pattern, int i, int j) {
-        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
     }
 }

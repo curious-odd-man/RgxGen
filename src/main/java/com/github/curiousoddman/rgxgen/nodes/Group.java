@@ -20,7 +20,7 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 public class Group extends Node {
     private final Node aNode;
-    private final int  aGroupIndex;
+    private final int aGroupIndex;
 
     public Group(String pattern, int index, Node node) {
         super(pattern);

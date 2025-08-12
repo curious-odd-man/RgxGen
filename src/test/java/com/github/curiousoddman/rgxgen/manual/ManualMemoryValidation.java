@@ -33,12 +33,12 @@ public class ManualMemoryValidation {
         scanner.nextLine();
 
         List<Arguments> data = CompleteTests.getData()
-                                            .collect(Collectors.toList());
+                .collect(Collectors.toList());
         Future<?> submit = executorService.submit(() -> {
             RgxGen rgxGen = RgxGen.parse(data.get(2)
-                                             .toString());
+                    .toString());
             while (!Thread.currentThread()
-                          .isInterrupted()) {
+                    .isInterrupted()) {
                 rgxGen.generate();
             }
             System.out.println("Test 1 ended;");
@@ -54,7 +54,7 @@ public class ManualMemoryValidation {
             RgxGen rgxGen = RgxGen.parse("(a|b|c)*");
             StringIterator stringIterator = rgxGen.iterateUnique();
             while (!Thread.currentThread()
-                          .isInterrupted()) {
+                    .isInterrupted()) {
                 stringIterator.next();
             }
             System.out.println("Test 2 ended;");
@@ -69,13 +69,13 @@ public class ManualMemoryValidation {
         submit = executorService.submit(() -> {
             Iterator<Arguments> iterator = data.iterator();
             while (!Thread.currentThread()
-                          .isInterrupted()) {
+                    .isInterrupted()) {
                 String pattern;
                 if (!iterator.hasNext()) {
                     iterator = data.iterator();
                 }
                 pattern = iterator.next()
-                                  .toString();
+                        .toString();
                 RgxGen rgxGen = RgxGen.parse(pattern);
             }
             System.out.println("Test 3 ended;");

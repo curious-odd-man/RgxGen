@@ -49,6 +49,18 @@ public class RangesCompactionTests {
         );
     }
 
+    private static List<SymbolRange> ranges(String... texts) {
+        return Arrays
+                .stream(texts)
+                .map(t -> t.split("-"))
+                .map(s -> range(s[0].charAt(0), s[1].charAt(0)))
+                .collect(Collectors.toList());
+    }
+
+    private static CharList chars(String text) {
+        return CharList.charList(text);
+    }
+
     @ParameterizedTest
     @MethodSource("getCompactionTestData")
     void compactOverlappingRangesAndSymbolsTest(String name,
@@ -60,17 +72,5 @@ public class RangesCompactionTests {
 
         assertEquals(expectedCompactedRanges, actualRanges);
         assertEquals(expectedCompactedSymbols, actualSymbols);
-    }
-
-    private static List<SymbolRange> ranges(String... texts) {
-        return Arrays
-                .stream(texts)
-                .map(t -> t.split("-"))
-                .map(s -> range(s[0].charAt(0), s[1].charAt(0)))
-                .collect(Collectors.toList());
-    }
-
-    private static CharList chars(String text) {
-        return CharList.charList(text);
     }
 }

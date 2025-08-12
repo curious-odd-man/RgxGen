@@ -37,9 +37,9 @@ public class SquareBracketsParsingTests {
                 .of(chars)
                 .withCharacters('\t', '\n', '\u000B', '\f', '\r', ' ');
         return SymbolSet.ofAscii("",
-                                 RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
-                                 negativeMatchDefinitions,
-                                 MatchType.POSITIVE);
+                RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
+                negativeMatchDefinitions,
+                MatchType.POSITIVE);
     }
 
 
@@ -53,8 +53,8 @@ public class SquareBracketsParsingTests {
                 Arguments.of("[\\s-]", mkWhitespaceAnd('-')),
                 Arguments.of("[-]", mkSS('-')),
                 Arguments.of("[\\s-a-\\s]", new RgxGenParseException("Cannot make range with a shorthand escape sequences before '\n" +
-                                                                             "'s-a-\\s]'\n" +
-                                                                             "      ^'")),
+                        "'s-a-\\s]'\n" +
+                        "      ^'")),
                 Arguments.of("[\\s-a]", mkWhitespaceAnd('a', '-')),
                 Arguments.of("[\\s]", mkWhitespaceAnd()),
                 Arguments.of("[a-]", mkSS('a', '-')));

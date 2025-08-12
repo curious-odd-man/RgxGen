@@ -34,14 +34,14 @@ public class NotMatchingGenerationTests {
                 {"helloworld", new FinalSymbol("helloworld")},
                 {"a{2,3}", new Repeat("a{2,3}", new FinalSymbol("a"), 2, 3)},
                 {"a[a-z]", new Sequence("a[a-z]", new FinalSymbol("a"),
-                                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
+                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
                 {"([a-z])\\1", new Sequence("([a-z])\\1", new Group("([a-z])", 1,
-                                                                    SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
-                                            new GroupRef("\\1", 1)
+                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
+                        new GroupRef("\\1", 1)
                 )},
                 {"foo(?!bar)", new Sequence("foo(?!bar)",
-                                            new FinalSymbol("foo"),
-                                            new NotSymbol("bar", new FinalSymbol("bar"))
+                        new FinalSymbol("foo"),
+                        new NotSymbol("bar", new FinalSymbol("bar"))
                 )}
         });
     }
@@ -50,7 +50,7 @@ public class NotMatchingGenerationTests {
         return initialData()
                 .stream()
                 .flatMap(arr -> IntStream.range(0, 100)
-                                         .mapToObj(i -> Arguments.of(arr[0], arr[1], i)));
+                        .mapToObj(i -> Arguments.of(arr[0], arr[1], i)));
     }
 
     @ParameterizedTest
@@ -62,12 +62,12 @@ public class NotMatchingGenerationTests {
         assertEquals(expectedNode.toString(), node.toString());
 
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(TestingUtilities.newRandom(seed))
-                                                                .get();
+                .withRandom(TestingUtilities.newRandom(seed))
+                .get();
         node.visit(visitor);
         boolean matches = Pattern.compile(pattern)
-                                 .matcher(visitor.getString())
-                                 .matches();
+                .matcher(visitor.getString())
+                .matches();
         assertFalse(matches, "Should not match " + pattern + " got " + visitor.getString());
     }
 
@@ -82,13 +82,13 @@ public class NotMatchingGenerationTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(TestingUtilities.newRandom(seed))
-                                                                .withProperties(properties)
-                                                                .get();
+                .withRandom(TestingUtilities.newRandom(seed))
+                .withProperties(properties)
+                .get();
         node.visit(visitor);
         boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                                 .matcher(visitor.getString())
-                                 .matches();
+                .matcher(visitor.getString())
+                .matches();
         assertFalse(matches, "Should not match " + pattern + " got " + visitor.getString());
     }
 }

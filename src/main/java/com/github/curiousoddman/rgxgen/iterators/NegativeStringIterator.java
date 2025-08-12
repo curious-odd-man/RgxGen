@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 public class NegativeStringIterator implements StringIterator {
     private final StringIterator aIterator;
-    private final Pattern        aPattern;
+    private final Pattern aPattern;
 
     private String aValue;
 

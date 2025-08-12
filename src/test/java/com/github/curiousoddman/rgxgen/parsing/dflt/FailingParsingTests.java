@@ -22,33 +22,33 @@ public class FailingParsingTests {
     public static Stream<Arguments> getData() {
         return Stream.of(
                 Arguments.of("lookbehindIncorrectPatternTest", "(?<xxx)",
-                             "Unexpected symbol in pattern: \n" +
-                                     "'(?<xxx)'\n" +
-                                     "    ^"),
+                        "Unexpected symbol in pattern: \n" +
+                                "'(?<xxx)'\n" +
+                                "    ^"),
                 Arguments.of("lookaheadIncorrectPatternTest", "(?xxx)",
-                             "Unexpected symbol in pattern: \n" +
-                                     "'(?xxx)'\n" +
-                                     "   ^"),
+                        "Unexpected symbol in pattern: \n" +
+                                "'(?xxx)'\n" +
+                                "   ^"),
                 Arguments.of("disallowedGroupReferenceTest", "(asd)[a-\\1]",
-                             "Group ref is not expected here. \n" +
-                                     "')[a-\\1]'\n" +
-                                     "      ^"),
+                        "Group ref is not expected here. \n" +
+                                "')[a-\\1]'\n" +
+                                "      ^"),
                 Arguments.of("malformedUpperBoundNumberTest", "a{1,\t}",
-                             "Malformed upper bound number.\n" +
-                                     "'a{1,\t}'\n" +
-                                     "      ^"),
+                        "Malformed upper bound number.\n" +
+                                "'a{1,\t}'\n" +
+                                "      ^"),
                 Arguments.of("malformedLowerBoundNumberTest", "a{c,3}",
-                             "Malformed lower bound number.\n" +
-                                     "'a{c,3}'\n" +
-                                     "   ^"),
+                        "Malformed lower bound number.\n" +
+                                "'a{c,3}'\n" +
+                                "   ^"),
                 Arguments.of("unbalancedRepetitionCurvyBracesTest", "a{1,2",
-                             "Unbalanced '{' - missing '}' at \n" +
-                                     "'a{1,2'\n" +
-                                     "  ^"),
+                        "Unbalanced '{' - missing '}' at \n" +
+                                "'a{1,2'\n" +
+                                "  ^"),
                 Arguments.of("unbalancedCharacterRepetitionBracesTest", "[asdf",
-                             "Unexpected End Of Expression. Didn't find closing ']'\n" +
-                                     "'[asdf'\n" +
-                                     " ^")
+                        "Unexpected End Of Expression. Didn't find closing ']'\n" +
+                                "'[asdf'\n" +
+                                " ^")
         );
     }
 
@@ -77,8 +77,8 @@ public class FailingParsingTests {
             Throwable cause = exception.getCause();
             assertSame(RgxGenParseException.class, cause.getClass());
             assertEquals("Unknown repetition character 'x'\n" +
-                                 "'a{1,'\n" +
-                                 '^', cause.getMessage());
+                    "'a{1,'\n" +
+                    '^', cause.getMessage());
             //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);
         } catch (NoSuchMethodException | IllegalAccessException e) {
             e.printStackTrace();
@@ -90,15 +90,15 @@ public class FailingParsingTests {
     public void escapeCharacterInCurvyBracesTest() {
         RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> RgxGen.parse("a{\\"));
         assertEquals("Escape character inside curvy repetition is not supported. \n" +
-                             "'a{\\'\n" +
-                             "   ^", exception.getMessage());
+                "'a{\\'\n" +
+                "   ^", exception.getMessage());
     }
 
     @Test
     public void nothingToRepeatTest() {
         RgxGenParseException exception = assertThrows(RgxGenParseException.class, () -> RgxGen.parse("+asdfqwer"));
         assertEquals("Cannot repeat nothing at\n" +
-                             "'+asdf'\n" +
-                             " ^", exception.getMessage());
+                "'+asdf'\n" +
+                " ^", exception.getMessage());
     }
 }

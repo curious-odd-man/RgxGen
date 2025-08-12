@@ -29,31 +29,31 @@ public class LimitedInfinitePatternsTests {
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
-                                 .limit(11)
-                                 .mapToObj(v -> Stream.generate(() -> "a")
-                                                      .limit(v)
-                                                      .reduce("", String::concat))
-                                 .collect(Collectors.toList())
+                                .limit(11)
+                                .mapToObj(v -> Stream.generate(() -> "a")
+                                        .limit(v)
+                                        .reduce("", String::concat))
+                                .collect(Collectors.toList())
                 ),
                 arguments(
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
-                                 .limit(10)
-                                 .mapToObj(v -> 'a' + Stream.generate(() -> "a")
-                                                            .limit(v)
-                                                            .reduce("", String::concat))
-                                 .collect(Collectors.toList())
+                                .limit(10)
+                                .mapToObj(v -> 'a' + Stream.generate(() -> "a")
+                                        .limit(v)
+                                        .reduce("", String::concat))
+                                .collect(Collectors.toList())
                 ),
                 arguments(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
                         new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSet.ofDotPattern(null), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(stream(makeAsciiCharacterArray()),
-                                                                   stream(makeAsciiCharacterArray())
-                                                                           .flatMap(symbol -> stream(makeAsciiCharacterArray())
-                                                                                   .map(v -> String.valueOf(symbol) + v))))
-                              .map(v -> "" + 'a' + v)
-                              .collect(Collectors.toList())
+                                        stream(makeAsciiCharacterArray())
+                                                .flatMap(symbol -> stream(makeAsciiCharacterArray())
+                                                        .map(v -> String.valueOf(symbol) + v))))
+                                .map(v -> "" + 'a' + v)
+                                .collect(Collectors.toList())
                 )
         );
     }
@@ -65,10 +65,10 @@ public class LimitedInfinitePatternsTests {
 
         for (int i = 0; i < 100; i++) {
             GenerationVisitor generationVisitor = GenerationVisitor.builder()
-                                                                   .get();
+                    .get();
             aNode.visit(generationVisitor);
             assertTrue(p.matcher(generationVisitor.getString())
-                        .matches());
+                    .matches());
         }
     }
 

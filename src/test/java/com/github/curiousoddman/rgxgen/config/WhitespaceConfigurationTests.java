@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class WhitespaceConfigurationTests {
-    public static final int COUNT_OF_ITERATIONS       = 1000;
+    public static final int COUNT_OF_ITERATIONS = 1000;
     public static final int LARGE_COUNT_OF_ITERATIONS = 1000;
 
     @Test

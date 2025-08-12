@@ -27,9 +27,9 @@ import java.util.random.RandomGenerator;
 public class GenerationVisitorBuilder {
     private final boolean aGenerateMatching;
 
-    private RandomGenerator      aRandom;
+    private RandomGenerator aRandom;
     private Map<Integer, String> aGroupsValues;
-    private RgxGenProperties     aProperties;
+    private RgxGenProperties aProperties;
 
 
     public GenerationVisitorBuilder(boolean generateMatching) {

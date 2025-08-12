@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  */
 public class CharArrayList extends CharList {
     private char[] elementData;
-    private int    size;
+    private int size;
 
     public CharArrayList(char[] arr) {
         elementData = arr;
@@ -40,6 +40,15 @@ public class CharArrayList extends CharList {
     public CharArrayList(char[] arr, int size) {
         elementData = arr;
         this.size = size;
+    }
+
+    private static int newLength(int oldLength, int minGrowth, int prefGrowth) {
+        int prefLength = oldLength + Math.max(minGrowth, prefGrowth); // might overflow
+        if (prefLength <= Integer.MAX_VALUE - 8) {
+            return prefLength;
+        } else {
+            return oldLength + Math.min(minGrowth, prefLength);
+        }
     }
 
     @Override
@@ -157,15 +166,6 @@ public class CharArrayList extends CharList {
                 return b.append(']').toString();
             }
             b.append(", ");
-        }
-    }
-
-    private static int newLength(int oldLength, int minGrowth, int prefGrowth) {
-        int prefLength = oldLength + Math.max(minGrowth, prefGrowth); // might overflow
-        if (prefLength <= Integer.MAX_VALUE - 8) {
-            return prefLength;
-        } else {
-            return oldLength + Math.min(minGrowth, prefLength);
         }
     }
 }

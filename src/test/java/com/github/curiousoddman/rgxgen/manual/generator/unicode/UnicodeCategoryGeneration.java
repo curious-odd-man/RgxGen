@@ -42,44 +42,6 @@ public class UnicodeCategoryGeneration {
 
     public static final Path SYMBOL_RANGE_DUMP_PATH = Paths.get("data/symbols");
 
-    @Test
-    void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
-        Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
-        Map<UnicodeCategory, CharList> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
-
-        for (CharList value : matchedMap.values()) {
-            value.sort();
-        }
-
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
-
-        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
-
-        modifySourceJavaFile(textPerCategory, rangesConstantNames);
-    }
-
-    @Test
-    void generateUnicodeCategoryDumps() throws IOException {
-        for (UnicodeCategory category : UnicodeCategory.values()) {
-            List<String> symbolFileLines = new ArrayList<>();
-
-            IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.getFrom(), range.getTo()));
-            IntStream.Builder streamBuilder = IntStream.builder();
-            for (char symbol : category.getSymbols()) {
-                streamBuilder.add(symbol);
-            }
-            List<Integer> sortedCharacters = IntStream.concat(intStream, streamBuilder.build())
-                                                      .sorted()
-                                                      .boxed()
-                                                      .collect(Collectors.toList());
-            for (Integer i : sortedCharacters) {
-                symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
-            }
-            Files.write(Paths.get("data/categories").resolve(category.name() + ".txt"), symbolFileLines);
-        }
-    }
-
     private static TreeMap<Integer, NamedSymbolRange> getNamedRanges() throws IOException {
         TreeMap<Integer, NamedSymbolRange> ranges = new TreeMap<>(Comparator.naturalOrder());
         List<String> allLines = Files.readAllLines(Paths.get("data/ranges/input-ranges-description-refined.txt"));
@@ -137,8 +99,8 @@ public class UnicodeCategoryGeneration {
 
     private static void cleanupDirectoryWithRangeTextFiles() throws IOException {
         Files.walk(SYMBOL_RANGE_DUMP_PATH)
-             .filter(Files::isRegularFile)
-             .forEach(Utils::silentDeleteFile);
+                .filter(Files::isRegularFile)
+                .forEach(Utils::silentDeleteFile);
     }
 
     private static void createSymbolRangeFile(String name, int from, int to) throws IOException {
@@ -264,7 +226,7 @@ public class UnicodeCategoryGeneration {
                 UnicodeCategory category = entry.getKey();
                 if (value.matcher(str).matches()) {
                     matchedMap.computeIfAbsent(category, k -> CharList.empty())
-                              .add(character);
+                            .add(character);
                 }
             }
         }
@@ -283,27 +245,6 @@ public class UnicodeCategoryGeneration {
                 .filter(entry -> entry.getValue().isPresent())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
 
-    }
-
-
-    @Test
-    void testCreateDescriptorMap() {
-        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
-        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('t', 'f', 'g', 'h', 'k'));
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
-            System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
-        }
-    }
-
-    @Test
-    void testCreateDescriptorMap2() {
-        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
-        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('a', 'b', 'c', 'x', 'y', 'z'));
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
-            System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
-        }
     }
 
     private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, CharList> matchedMap) {
@@ -354,5 +295,63 @@ public class UnicodeCategoryGeneration {
             }
         }
         return Optional.empty();
+    }
+
+    @Test
+    void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
+        Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
+        Map<UnicodeCategory, CharList> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+
+        for (CharList value : matchedMap.values()) {
+            value.sort();
+        }
+
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
+
+        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
+
+        modifySourceJavaFile(textPerCategory, rangesConstantNames);
+    }
+
+    @Test
+    void generateUnicodeCategoryDumps() throws IOException {
+        for (UnicodeCategory category : UnicodeCategory.values()) {
+            List<String> symbolFileLines = new ArrayList<>();
+
+            IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.getFrom(), range.getTo()));
+            IntStream.Builder streamBuilder = IntStream.builder();
+            for (char symbol : category.getSymbols()) {
+                streamBuilder.add(symbol);
+            }
+            List<Integer> sortedCharacters = IntStream.concat(intStream, streamBuilder.build())
+                    .sorted()
+                    .boxed()
+                    .collect(Collectors.toList());
+            for (Integer i : sortedCharacters) {
+                symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
+            }
+            Files.write(Paths.get("data/categories").resolve(category.name() + ".txt"), symbolFileLines);
+        }
+    }
+
+    @Test
+    void testCreateDescriptorMap() {
+        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('t', 'f', 'g', 'h', 'k'));
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
+            System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
+        }
+    }
+
+    @Test
+    void testCreateDescriptorMap2() {
+        Map<UnicodeCategory, CharList> matchedMap = new EnumMap<>(UnicodeCategory.class);
+        matchedMap.put(UnicodeCategory.ANY_LETTER, CharList.charList('a', 'b', 'c', 'x', 'y', 'z'));
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
+            System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
+        }
     }
 }

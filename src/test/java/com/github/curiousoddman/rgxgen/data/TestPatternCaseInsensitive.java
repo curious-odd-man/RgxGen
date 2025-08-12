@@ -45,7 +45,7 @@ public enum TestPatternCaseInsensitive implements DataInterface {
 
     final String aPattern;
 
-    BigInteger   aEstimatedCount;
+    BigInteger aEstimatedCount;
     List<String> aAllUniqueValues;
 
     TestPatternCaseInsensitive(String pattern) {
@@ -69,10 +69,6 @@ public enum TestPatternCaseInsensitive implements DataInterface {
         return aAllUniqueValues;
     }
 
-    protected final void setInfinite() {
-        aEstimatedCount = null;
-    }
-
     protected final void setAllUniqueValues(String... values) {
         setAllUniqueValues(Arrays.asList(values));
     }
@@ -80,6 +76,10 @@ public enum TestPatternCaseInsensitive implements DataInterface {
     protected final void setAllUniqueValues(List<String> values) {
         aAllUniqueValues = values;
         aEstimatedCount = BigInteger.valueOf(values.size());
+    }
+
+    protected final void setInfinite() {
+        aEstimatedCount = null;
     }
 
     public boolean hasEstimatedCount() {

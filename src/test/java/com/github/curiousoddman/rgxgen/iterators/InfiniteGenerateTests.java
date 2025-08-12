@@ -40,10 +40,10 @@ public class InfiniteGenerateTests {
             String s = rgxGen.generate();
             if (aUseFind) {
                 assertTrue(p.matcher(s)
-                            .find(), s);
+                        .find(), s);
             } else {
                 assertTrue(p.matcher(s)
-                            .matches(), s);
+                        .matches(), s);
             }
         }
     }
@@ -62,10 +62,10 @@ public class InfiniteGenerateTests {
             assertTrue(stringIterator.hasNext());
             if (aUseFind) {
                 assertTrue(p.matcher(next)
-                            .find(), next);
+                        .find(), next);
             } else {
                 assertTrue(p.matcher(next)
-                            .matches(), next);
+                        .matches(), next);
             }
             assertFalse(set.contains(next), "Duplicate value: " + next);
             set.add(next);

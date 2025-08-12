@@ -25,6 +25,11 @@ public class SymbolRange {
     private final int from;
     private final int to;
 
+    private SymbolRange(int from, int to) {
+        this.from = from;
+        this.to = to;
+    }
+
     /**
      * Create inclusive range of symbols.
      *
@@ -45,11 +50,6 @@ public class SymbolRange {
      */
     public static SymbolRange range(char from, char to) {
         return range((int) from, to);
-    }
-
-    private SymbolRange(int from, int to) {
-        this.from = from;
-        this.to = to;
     }
 
     public int getFrom() {

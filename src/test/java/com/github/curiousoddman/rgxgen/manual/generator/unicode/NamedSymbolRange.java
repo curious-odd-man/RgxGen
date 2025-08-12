@@ -4,7 +4,7 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 
 public class NamedSymbolRange {
     public final SymbolRange range;
-    public final RangeName   name;
+    public final RangeName name;
 
     public NamedSymbolRange(SymbolRange range, RangeName name) {
         this.range = range;

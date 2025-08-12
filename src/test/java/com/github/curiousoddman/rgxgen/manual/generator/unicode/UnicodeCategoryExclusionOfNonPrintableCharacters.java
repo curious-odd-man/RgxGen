@@ -24,19 +24,19 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
     @Test
     void tryWritingEachCharacterToFile() throws IOException {
         Map<Character, List<UnicodeCategory>> characterListMap = Arrays.stream(UnicodeCategory
-                                                                                       .values())
-                                                                       .flatMap(unicodeCategory ->
-                                                                                {
-                                                                                    char[] symbols = unicodeCategory.getSymbols();
-                                                                                    return Stream.concat(
-                                                                                            stream(symbols).map(c -> new Pair(unicodeCategory, c)),
-                                                                                            unicodeCategory.getSymbolRanges().stream()
-                                                                                                           .map(SymbolRange::chars)
-                                                                                                           .flatMap(CharList::stream)
-                                                                                                           .map(c -> new Pair(unicodeCategory, c)));
-                                                                                }
-                                                                       )
-                                                                       .collect(groupingBy(Pair::getCharacter, mapping(Pair::getCategory, toList())));
+                        .values())
+                .flatMap(unicodeCategory ->
+                        {
+                            char[] symbols = unicodeCategory.getSymbols();
+                            return Stream.concat(
+                                    stream(symbols).map(c -> new Pair(unicodeCategory, c)),
+                                    unicodeCategory.getSymbolRanges().stream()
+                                            .map(SymbolRange::chars)
+                                            .flatMap(CharList::stream)
+                                            .map(c -> new Pair(unicodeCategory, c)));
+                        }
+                )
+                .collect(groupingBy(Pair::getCharacter, mapping(Pair::getCategory, toList())));
 
         for (Map.Entry<Character, List<UnicodeCategory>> entry : characterListMap.entrySet()) {
             Path tmpFile = Files.createTempFile("rgxgen", String.valueOf((int) entry.getKey()));
@@ -54,7 +54,7 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
 
     private static class Pair {
         private final UnicodeCategory category;
-        private final char            character;
+        private final char character;
 
         Pair(UnicodeCategory category, char character) {
             this.category = category;

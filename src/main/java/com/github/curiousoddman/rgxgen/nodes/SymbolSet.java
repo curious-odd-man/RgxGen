@@ -40,15 +40,56 @@ import static java.util.Collections.singletonList;
  */
 
 public class SymbolSet extends Node {
-    private final   MatchType             originalMatchType;
-    private final   RgxGenCharsDefinition positiveGenerationChars;
-    private final   RgxGenCharsDefinition negativeMatchExclusion;
-    private final   boolean               isAscii;
-    protected final SymbolRange           universeCharacters;
-    private final   List<SymbolRange>     symbolRanges;
-    private final   CharList              symbols;
-    private         SymbolSetIndexer      symbolSetIndexer;
-    private         SymbolSetIndexer      caseInsensitiveSymbolSetIndexer;
+    protected final SymbolRange universeCharacters;
+    private final MatchType originalMatchType;
+    private final RgxGenCharsDefinition positiveGenerationChars;
+    private final RgxGenCharsDefinition negativeMatchExclusion;
+    private final boolean isAscii;
+    private final List<SymbolRange> symbolRanges;
+    private final CharList symbols;
+    private SymbolSetIndexer symbolSetIndexer;
+    private SymbolSetIndexer caseInsensitiveSymbolSetIndexer;
+
+    public SymbolSet(String pattern, List<SymbolRange> symbolRanges, CharList symbols, MatchType type, SymbolRange universeCharacters) {
+        this(pattern, RgxGenCharsDefinition.of(symbolRanges, symbols), null, type, universeCharacters);
+    }
+
+    /**
+     * Create SymbolSet from ranges and symbols according to type
+     *
+     * @param pattern                 original pattern for the reference
+     * @param positiveGenerationChars characters to generate when {@code type} is POSITIVE
+     * @param negativeMatchExclusion  characters to exclude when {@code type} is NEGATIVE; null = use same as {@code positiveGenerationChars}
+     * @param type                    POSITIVE - include, NEGATIVE - exclude
+     * @param universeCharacters      characters to exclude from when {@code type} is NEGATIVE
+     */
+    public SymbolSet(String pattern,
+                     RgxGenCharsDefinition positiveGenerationChars, RgxGenCharsDefinition negativeMatchExclusion,
+                     MatchType type, SymbolRange universeCharacters) {
+        super(pattern);
+        this.positiveGenerationChars = positiveGenerationChars;
+        this.negativeMatchExclusion = negativeMatchExclusion;
+
+        isAscii = universeCharacters == ASCII_SYMBOL_RANGE;
+        this.universeCharacters = universeCharacters;
+
+        if (type == MatchType.POSITIVE) {
+            List<SymbolRange> compactedRanges = new ArrayList<>(positiveGenerationChars.getRangeList().size());
+            CharList compactedCharacters = CharList.ofCapacity(positiveGenerationChars.getCharacters().size());
+            Util.compactOverlappingRangesAndSymbols(positiveGenerationChars.getRangeList(), positiveGenerationChars.getCharacters(), compactedRanges, compactedCharacters);
+            symbolRanges = compactedRanges;
+            symbols = compactedCharacters;
+        } else {
+            symbolRanges = new ArrayList<>();
+            symbols = CharList.empty();
+            RgxGenCharsDefinition defsToUse = negativeMatchExclusion == null ? positiveGenerationChars : negativeMatchExclusion;
+            List<SymbolRange> compactedRanges = new ArrayList<>(defsToUse.getRangeList().size());
+            CharList compactedCharacters = CharList.ofCapacity(defsToUse.getCharacters().size());
+            Util.compactOverlappingRangesAndSymbols(defsToUse.getRangeList(), defsToUse.getCharacters(), compactedRanges, compactedCharacters);
+            Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, universeCharacters, symbolRanges, symbols);
+        }
+        originalMatchType = type;
+    }
 
     public static SymbolSet ofDotPattern(RgxGenProperties properties) {
         RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromPropertiesOrDefault(properties);
@@ -92,45 +133,12 @@ public class SymbolSet extends Node {
         return new SymbolSet(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType, ASCII_SYMBOL_RANGE);
     }
 
-    public SymbolSet(String pattern, List<SymbolRange> symbolRanges, CharList symbols, MatchType type, SymbolRange universeCharacters) {
-        this(pattern, RgxGenCharsDefinition.of(symbolRanges, symbols), null, type, universeCharacters);
-    }
-
-    /**
-     * Create SymbolSet from ranges and symbols according to type
-     *
-     * @param pattern                 original pattern for the reference
-     * @param positiveGenerationChars characters to generate when {@code type} is POSITIVE
-     * @param negativeMatchExclusion  characters to exclude when {@code type} is NEGATIVE; null = use same as {@code positiveGenerationChars}
-     * @param type                    POSITIVE - include, NEGATIVE - exclude
-     * @param universeCharacters      characters to exclude from when {@code type} is NEGATIVE
-     */
-    public SymbolSet(String pattern,
-                     RgxGenCharsDefinition positiveGenerationChars, RgxGenCharsDefinition negativeMatchExclusion,
-                     MatchType type, SymbolRange universeCharacters) {
-        super(pattern);
-        this.positiveGenerationChars = positiveGenerationChars;
-        this.negativeMatchExclusion = negativeMatchExclusion;
-
-        isAscii = universeCharacters == ASCII_SYMBOL_RANGE;
-        this.universeCharacters = universeCharacters;
-
-        if (type == MatchType.POSITIVE) {
-            List<SymbolRange> compactedRanges = new ArrayList<>(positiveGenerationChars.getRangeList().size());
-            CharList compactedCharacters = CharList.ofCapacity(positiveGenerationChars.getCharacters().size());
-            Util.compactOverlappingRangesAndSymbols(positiveGenerationChars.getRangeList(), positiveGenerationChars.getCharacters(), compactedRanges, compactedCharacters);
-            symbolRanges = compactedRanges;
-            symbols = compactedCharacters;
-        } else {
-            symbolRanges = new ArrayList<>();
-            symbols = CharList.empty();
-            RgxGenCharsDefinition defsToUse = negativeMatchExclusion == null ? positiveGenerationChars : negativeMatchExclusion;
-            List<SymbolRange> compactedRanges = new ArrayList<>(defsToUse.getRangeList().size());
-            CharList compactedCharacters = CharList.ofCapacity(defsToUse.getCharacters().size());
-            Util.compactOverlappingRangesAndSymbols(defsToUse.getRangeList(), defsToUse.getCharacters(), compactedRanges, compactedCharacters);
-            Util.invertSymbolsAndRanges(compactedRanges, compactedCharacters, universeCharacters, symbolRanges, symbols);
+    private static void addIfChangedCase(CharList caseInsensitiveSymbols, char c) {
+        if (Character.isUpperCase(c)) {
+            caseInsensitiveSymbols.add(Character.toLowerCase(c));
+        } else if (Character.isLowerCase(c)) {
+            caseInsensitiveSymbols.add(Character.toUpperCase(c));
         }
-        originalMatchType = type;
     }
 
     public SymbolSet getInvertedNode() {
@@ -170,14 +178,6 @@ public class SymbolSet extends Node {
             );
         }
         return caseInsensitiveSymbolSetIndexer;
-    }
-
-    private static void addIfChangedCase(CharList caseInsensitiveSymbols, char c) {
-        if (Character.isUpperCase(c)) {
-            caseInsensitiveSymbols.add(Character.toLowerCase(c));
-        } else if (Character.isLowerCase(c)) {
-            caseInsensitiveSymbols.add(Character.toUpperCase(c));
-        }
     }
 
     public boolean isAscii() {

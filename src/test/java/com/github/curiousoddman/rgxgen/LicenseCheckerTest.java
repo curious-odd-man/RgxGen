@@ -17,14 +17,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 public class LicenseCheckerTest {
     private static final String LICENCE = readLicenceFile();
 
-    @ParameterizedTest
-    @MethodSource("getAllSourceFiles")
-    void checkLicence(Path path) throws IOException {
-        assumeTrue(path.toString().endsWith(".java"));
-        String contents = String.join("\n", Files.readAllLines(path));
-        assertTrue(contents.contains(LICENCE));
-    }
-
     private static String readLicenceFile() {
         try {
             List<String> allLines = Files.readAllLines(Paths.get("LICENSE.txt"));
@@ -46,5 +38,13 @@ public class LicenseCheckerTest {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("getAllSourceFiles")
+    void checkLicence(Path path) throws IOException {
+        assumeTrue(path.toString().endsWith(".java"));
+        String contents = String.join("\n", Files.readAllLines(path));
+        assertTrue(contents.contains(LICENCE));
     }
 }

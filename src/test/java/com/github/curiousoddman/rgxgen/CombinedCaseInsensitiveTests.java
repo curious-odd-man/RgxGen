@@ -49,8 +49,8 @@ public class CombinedCaseInsensitiveTests extends CombinedTestTemplate<TestPatte
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         RgxGen rgxGen = RgxGen.parse(properties, testPattern.getPattern());
         List<String> strings = rgxGen.stream()
-                                     .limit(1000)
-                                     .collect(Collectors.toList());
+                .limit(1000)
+                .collect(Collectors.toList());
         Pattern caseSensitivePattern = Pattern.compile(testPattern.getPattern());
         boolean atLeastOneCaseSensitiveMismatch = false;
         for (String generated : strings) {

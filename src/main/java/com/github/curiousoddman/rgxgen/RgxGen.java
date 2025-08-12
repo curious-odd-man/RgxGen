@@ -40,6 +40,12 @@ public class RgxGen {
 
     private final RgxGenProperties properties;
 
+    private RgxGen(RgxGenProperties properties, String pattern) {
+        this.properties = properties;
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, this.properties);
+        node = defaultTreeBuilder.get();
+    }
+
     /**
      * Parse pattern using DefaultTreeBuilder.
      *
@@ -58,12 +64,6 @@ public class RgxGen {
      */
     public static RgxGen parse(RgxGenProperties rgxGenProperties, String pattern) {
         return new RgxGen(rgxGenProperties, pattern);
-    }
-
-    private RgxGen(RgxGenProperties properties, String pattern) {
-        this.properties = properties;
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, this.properties);
-        node = defaultTreeBuilder.get();
     }
 
     /**
@@ -118,9 +118,9 @@ public class RgxGen {
      */
     public String generate(RandomGenerator random) {
         GenerationVisitor gv = GenerationVisitor.builder()
-                                                .withRandom(random)
-                                                .withProperties(properties)
-                                                .get();
+                .withRandom(random)
+                .withProperties(properties)
+                .get();
         node.visit(gv);
         return gv.getString();
     }
@@ -143,8 +143,8 @@ public class RgxGen {
      */
     public String generateNotMatching(RandomGenerator random) {
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
-                                                             .withRandom(random)
-                                                             .get();
+                .withRandom(random)
+                .get();
         node.visit(nmgv);
         return nmgv.getString();
     }

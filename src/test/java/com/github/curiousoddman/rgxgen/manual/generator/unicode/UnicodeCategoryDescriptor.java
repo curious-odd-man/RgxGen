@@ -7,7 +7,7 @@ import java.util.List;
 
 public class UnicodeCategoryDescriptor {
     private final List<SymbolRange> ranges;
-    private final CharList   characters;
+    private final CharList characters;
 
     public UnicodeCategoryDescriptor(List<SymbolRange> ranges, CharList characters) {
         this.ranges = ranges;

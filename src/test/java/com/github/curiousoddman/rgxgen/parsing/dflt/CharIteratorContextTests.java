@@ -16,13 +16,13 @@ public class CharIteratorContextTests {
     private static Stream<Arguments> shorterContext() {
         String inputText = "01234";
         return IntStream.rangeClosed(1, inputText.length())
-                        .mapToObj(i -> Arguments.of(inputText, i));
+                .mapToObj(i -> Arguments.of(inputText, i));
     }
 
     private static Stream<Arguments> longerContext() {
         String inputText = "0123456789ABCDEF";
         return IntStream.rangeClosed(1, inputText.length())
-                        .mapToObj(i -> Arguments.of(inputText, i));
+                .mapToObj(i -> Arguments.of(inputText, i));
     }
 
     public static Stream<Arguments> data() {

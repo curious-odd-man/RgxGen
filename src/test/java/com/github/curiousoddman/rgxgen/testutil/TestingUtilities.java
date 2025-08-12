@@ -28,8 +28,8 @@ public final class TestingUtilities {
 
     public static Character[] getAllDigits() {
         return IntStream.rangeClosed('0', '9')
-                        .mapToObj(i -> (char) i)
-                        .toArray(Character[]::new);
+                .mapToObj(i -> (char) i)
+                .toArray(Character[]::new);
     }
 
     /**

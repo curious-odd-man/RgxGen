@@ -20,7 +20,7 @@ import java.util.NoSuchElementException;
 
 public class ArrayIterator implements StringIterator {
 
-    private final int    aMaxIndex;
+    private final int aMaxIndex;
     private final char[] aStrings;
 
     private int aIndex = -1;

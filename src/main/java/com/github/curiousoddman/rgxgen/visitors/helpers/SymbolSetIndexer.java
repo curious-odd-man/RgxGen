@@ -25,10 +25,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SymbolSetIndexer {
-    private final CharList          symbols;
+    private final CharList symbols;
     private final List<SymbolRange> symbolRanges;
-    private final int[]             rangeOffsets;
-    private final int               size;
+    private final int[] rangeOffsets;
+    private final int size;
 
     public SymbolSetIndexer(SymbolSet symbolSet) {
         symbols = symbolSet.getSymbols();

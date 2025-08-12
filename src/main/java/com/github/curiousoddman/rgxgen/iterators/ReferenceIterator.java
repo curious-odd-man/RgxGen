@@ -20,8 +20,8 @@ import java.util.NoSuchElementException;
 
 public class ReferenceIterator implements StringIterator {
     private StringIterator aOther;
-    private boolean        hasNext = true;
-    private String         aLast;
+    private boolean hasNext = true;
+    private String aLast;
 
     public void setOther(StringIterator other) {
         aOther = other;
@@ -49,7 +49,6 @@ public class ReferenceIterator implements StringIterator {
 
     @Override
     public boolean hasNext() {
-        return hasNext || !aOther.current()
-                                 .equals(aLast);
+        return hasNext || !aOther.current().equals(aLast);
     }
 }

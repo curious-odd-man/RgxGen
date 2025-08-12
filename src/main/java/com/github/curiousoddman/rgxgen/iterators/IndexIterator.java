@@ -21,7 +21,7 @@ import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 import java.util.NoSuchElementException;
 
 public class IndexIterator implements StringIterator {
-    private final int              maxIndex;
+    private final int maxIndex;
     private final SymbolSetIndexer symbolSetIndexer;
 
     private int index = -1;

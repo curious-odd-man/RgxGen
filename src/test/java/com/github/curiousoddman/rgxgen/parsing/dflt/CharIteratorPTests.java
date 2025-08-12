@@ -29,47 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class CharIteratorPTests {
-    private static class TestConsumer implements Consumer<CharIterator> {
-        private final Consumer<CharIterator> aConsumer;
-        private final String                 aName;
-        private final int                    aBoundOffset;
-
-
-        public TestConsumer(String name) {
-            this(name, x -> {
-            });
-        }
-
-        public TestConsumer(String name, int boundOffset) {
-            this(name, x -> {
-            }, boundOffset);
-        }
-
-        public TestConsumer(String name, Consumer<CharIterator> consumer) {
-            this(name, consumer, 0);
-        }
-
-        public TestConsumer(String name, Consumer<CharIterator> consumer, int boundOffset) {
-            aConsumer = consumer;
-            aName = name;
-            aBoundOffset = boundOffset;
-        }
-
-        @Override
-        public void accept(CharIterator charIterator) {
-            if (aBoundOffset != 0) {
-                charIterator.modifyBound(aBoundOffset);
-            }
-            aConsumer.accept(charIterator);
-        }
-
-        @Override
-        public String toString() {
-            return aName;
-        }
-    }
-
     private static final String TEST_STRING = "0123456789ABCDEF";
+    private CharIterator aCharIterator;
 
     public static Stream<Arguments> data() {
         return Stream.of(
@@ -106,9 +67,6 @@ public class CharIteratorPTests {
                 Arguments.of(new TestConsumer("[-6]Take While Digit", ci -> ci.takeWhile(Character::isDigit), -6), false, 0, '9', 9, "0123456789") // take while
         );
     }
-
-
-    private CharIterator aCharIterator;
 
     @BeforeEach
     public void setUp() {
@@ -173,5 +131,45 @@ public class CharIteratorPTests {
                                        String aExpectedSubstringToCurrPos) {
         aModFunction.accept(aCharIterator);
         assertEquals(aExpectedSubstringToCurrPos, aCharIterator.substringToCurrPos(0));
+    }
+
+    private static class TestConsumer implements Consumer<CharIterator> {
+        private final Consumer<CharIterator> aConsumer;
+        private final String aName;
+        private final int aBoundOffset;
+
+
+        public TestConsumer(String name) {
+            this(name, x -> {
+            });
+        }
+
+        public TestConsumer(String name, int boundOffset) {
+            this(name, x -> {
+            }, boundOffset);
+        }
+
+        public TestConsumer(String name, Consumer<CharIterator> consumer) {
+            this(name, consumer, 0);
+        }
+
+        public TestConsumer(String name, Consumer<CharIterator> consumer, int boundOffset) {
+            aConsumer = consumer;
+            aName = name;
+            aBoundOffset = boundOffset;
+        }
+
+        @Override
+        public void accept(CharIterator charIterator) {
+            if (aBoundOffset != 0) {
+                charIterator.modifyBound(aBoundOffset);
+            }
+            aConsumer.accept(charIterator);
+        }
+
+        @Override
+        public String toString() {
+            return aName;
+        }
     }
 }

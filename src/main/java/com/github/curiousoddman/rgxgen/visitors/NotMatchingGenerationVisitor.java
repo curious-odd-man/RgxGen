@@ -32,14 +32,18 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASC
 
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
-    public static GenerationVisitorBuilder builder() {
-        return new GenerationVisitorBuilder(false);
-    }
-
     private static final SymbolRange ALL_SYMBOLS = ASCII_SYMBOL_RANGE;
 
     public NotMatchingGenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         super(random, groupValues, properties);
+    }
+
+    public static GenerationVisitorBuilder builder() {
+        return new GenerationVisitorBuilder(false);
+    }
+
+    private static char getRandomCharacter(int index) {
+        return (char) (ALL_SYMBOLS.getFrom() + index);
     }
 
     @Override
@@ -107,15 +111,11 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
             do {
                 builder.delete(0, Integer.MAX_VALUE);
                 nodeValue.chars()
-                         .map(c -> getRandomCharacter(aRandom.nextInt(ALL_SYMBOLS.size())))
-                         .forEachOrdered(c -> builder.append((char) c));
+                        .map(c -> getRandomCharacter(aRandom.nextInt(ALL_SYMBOLS.size())))
+                        .forEachOrdered(c -> builder.append((char) c));
             } while (equalsFinalSymbolRandomString(nodeValue, builder.toString()));
             aStringBuilder.append(builder);
         }
-    }
-
-    private static char getRandomCharacter(int index) {
-        return (char) (ALL_SYMBOLS.getFrom() + index);
     }
 
     protected boolean equalsFinalSymbolRandomString(String s1, String s2) {
