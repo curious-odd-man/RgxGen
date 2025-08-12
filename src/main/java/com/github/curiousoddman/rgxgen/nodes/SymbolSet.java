@@ -51,7 +51,7 @@ public class SymbolSet extends Node {
     private         SymbolSetIndexer      caseInsensitiveSymbolSetIndexer;
 
     public static SymbolSet ofDotPattern(RgxGenProperties properties) {
-        RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromProperties(properties);
+        RgxGenCharsDefinition charsDefinition = RgxGenOption.DOT_MATCHES_ONLY.getFromPropertiesOrDefault(properties);
         if (charsDefinition != null) {
             boolean isAscii = charsDefinition.isAsciiOnly();
             if (isAscii) {

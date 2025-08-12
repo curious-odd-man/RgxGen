@@ -49,7 +49,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(SymbolSet node) {
         applyOrSkip(v -> {
-            int size = RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)
+            int size = RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)
                        ? node.getCaseInsensitiveSymbolSetIndexer().size()
                        : node.getSymbolSetIndexer().size();
             return Optional.of(v.add(BigInteger.valueOf(size)));
@@ -65,7 +65,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
             applyOrSkip(v -> Optional.of(v.add(Util.countCaseInsensitiveVariations(node.getValue()))));
         } else {
             applyOrSkip(v -> Optional.of(v.add(BigInteger.ONE)));

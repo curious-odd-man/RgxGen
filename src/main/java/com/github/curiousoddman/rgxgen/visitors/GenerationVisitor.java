@@ -62,7 +62,9 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        int max = node.getMax() == -1 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(properties) : node.getMax();
+        int max = node.getMax() == -1
+                ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromPropertiesOrDefault(properties)
+                : node.getMax();
         int repeat = node.getMin() >= max ?
                      node.getMin() :
                      node.getMin() + aRandom.nextInt(max + 1 - node.getMin());

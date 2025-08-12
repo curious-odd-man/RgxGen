@@ -1,9 +1,13 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.BIG_INTEGER_TWO;
@@ -91,5 +95,25 @@ public class RegressionTests {
         }
 
         assertFalse(withGroupIterator.hasNext());
+    }
+
+    @Test
+    void bug112_infinitePatternRepetitionPropertyDoesNotWorkInGenerateUniqueTest() {
+        RgxGenProperties rgxGenProperties = new RgxGenProperties();
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxGenProperties, 1);
+        RgxGen rgxGen = RgxGen.parse(rgxGenProperties, "[0-9]+");
+
+        StringIterator stringIterator = rgxGen.iterateUnique();
+        List<String> values = new ArrayList<>();
+
+        int count = 0;
+        while (stringIterator.hasNext()) {
+            values.add(stringIterator.next());
+            count++;
+            if (count > 10) {
+                fail("Expected only 10 unique values, due to INFINITE_PATTERN_REPETITION limit");
+            }
+        }
+        assertEquals(List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"), values);
     }
 }
