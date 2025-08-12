@@ -171,12 +171,6 @@ public class RegressionTests {
                 .withNodeCreator(myCustomNodeCreator)
                 .parse();
 
-        for (int i = 0; i < 10; i++) {
-            System.out.println(parse.generate());
-        }
-
-        System.out.println("Unique values");
-
         StringIterator stringIterator = parse.iterateUnique();
         while (stringIterator.hasNext()) {
             System.out.println(stringIterator.next());
