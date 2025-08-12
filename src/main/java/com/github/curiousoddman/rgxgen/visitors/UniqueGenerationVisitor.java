@@ -23,19 +23,16 @@ import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
 import com.github.curiousoddman.rgxgen.nodes.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 
 public class UniqueGenerationVisitor implements NodeVisitor {
-    private final List<Supplier<StringIterator>>        aIterators = new ArrayList<>();
+    private final List<Supplier<StringIterator>> aIterators = new ArrayList<>();
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
-    private final Map<Integer, StringIterator>          aGroupIterators;
-    private final RgxGenProperties                      aProperties;
+    private final Map<Integer, StringIterator> aGroupIterators;
+    private final RgxGenProperties aProperties;
 
     public UniqueGenerationVisitor(RgxGenProperties properties) {
         this(new HashMap<>(), new HashMap<>(), properties);
@@ -49,7 +46,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(SymbolSet node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
             aIterators.add(new IndexIteratorSupplier(node.getCaseInsensitiveSymbolSetIndexer()));
         } else {
             aIterators.add(new IndexIteratorSupplier(node.getSymbolSetIndexer()));
@@ -70,7 +67,7 @@ public class UniqueGenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
             aIterators.add(new SingleCaseInsensitiveValueIteratorSupplier(node.getValue()));
         } else {
             aIterators.add(new SingleValueIteratorSupplier(node.getValue()));
@@ -81,9 +78,23 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     public void visit(Repeat node) {
         // Getting all possible sub node contents
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
-        node.getNode()
-            .visit(v);
-        aIterators.add(new IncrementalLengthIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), node.getMin(), node.getMax()));
+        node.getNode().visit(v);
+        aIterators.add(
+                new IncrementalLengthIteratorSupplier(
+                        new PermutationsIteratorSupplier(v.aIterators),
+                        node.getMin(),
+                        calculateMaxRepetitions(node)
+                )
+        );
+    }
+
+    private int calculateMaxRepetitions(Repeat node) {
+        if (node.getMax() != -1) {
+            return node.getMax();
+        }
+
+        Optional<Integer> fromProperties = RgxGenOption.INFINITE_PATTERN_REPETITION.getFromProperties(aProperties);
+        return fromProperties.orElse(-1);
     }
 
     @Override
@@ -109,13 +120,13 @@ public class UniqueGenerationVisitor implements NodeVisitor {
     public void visit(Group node) {
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         node.getNode()
-            .visit(v);
+                .visit(v);
 
         aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
     public StringIterator getUniqueStrings() {
         return aIterators.get(0)
-                         .get();
+                .get();
     }
 }

@@ -390,7 +390,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case 's':  // Any white space
             case 'S':  // Any non-white space
                 sbToFinal(sb, nodes);
-                List<WhitespaceChar> whitespaceChars = RgxGenOption.WHITESPACE_DEFINITION.getFromProperties(properties);
+                List<WhitespaceChar> whitespaceChars = RgxGenOption.WHITESPACE_DEFINITION.getFromPropertiesOrDefault(properties);
                 CharList whitespaceCharsList = whitespaceChars.stream().map(WhitespaceChar::get).collect(new CharListCollector());
                 createdNode = SymbolSet.ofAscii("\\" + c,
                                                 RgxGenCharsDefinition.of(whitespaceCharsList),

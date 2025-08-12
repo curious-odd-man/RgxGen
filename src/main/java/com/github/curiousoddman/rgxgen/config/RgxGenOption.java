@@ -94,10 +94,21 @@ public class RgxGenOption<T> {
      * @param properties object to get value from
      * @return value from properties, if present. Default otherwise.
      */
-    public T getFromProperties(RgxGenProperties properties) {
+    public T getFromPropertiesOrDefault(RgxGenProperties properties) {
         return Optional.ofNullable(properties)
                        .map(props -> (T) props.get(key))
                        .orElse(defaultValue);
+    }
+
+    /**
+     * Get value from the properties object.
+     *
+     * @param properties object to get value from
+     * @return value from properties, if present
+     */
+    public Optional<T> getFromProperties(RgxGenProperties properties) {
+        return Optional.ofNullable(properties)
+                .map(props -> (T) props.get(key));
     }
 
     /**

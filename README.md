@@ -52,6 +52,34 @@ Enter your pattern and see the results.
 </dependency>
 ```
 
+### The Latest SNAPSHOT:
+
+```xml
+
+<project>
+    <repositories>
+        <repository>
+            <id>snapshots-repository</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
+
+    <!--  .... -->
+
+    <dependency>
+        <groupId>com.github.curious-odd-man</groupId>
+        <artifactId>rgxgen</artifactId>
+        <version>3.1-SNAPSHOT</version>
+    </dependency>
+</project>
+```
+
+Changes in snapshot:
+
+- Support for INFINITE_PATTERN_REPETITION in unique values generation [#112](https://github.com/curious-odd-man/RgxGen/issues/112)
+
+---
+
 ### Code:
 
 Note - RgxGen is not thread safe - there were reports on errors - see [#91](https://github.com/curious-odd-man/RgxGen/issues/91).
