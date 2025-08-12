@@ -19,7 +19,9 @@ package com.github.curiousoddman.rgxgen.visitors;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
@@ -33,9 +35,21 @@ import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASC
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
     private static final SymbolRange ALL_SYMBOLS = ASCII_SYMBOL_RANGE;
+    private final NodeCreator nodeCreator;
 
-    public NotMatchingGenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
+    public NotMatchingGenerationVisitor(RandomGenerator random,
+                                        Map<Integer, String> groupValues,
+                                        RgxGenProperties properties) {
         super(random, groupValues, properties);
+        nodeCreator = new DefaultNodeCreator();
+    }
+
+    public NotMatchingGenerationVisitor(RandomGenerator random,
+                                        Map<Integer, String> groupValues,
+                                        RgxGenProperties properties,
+                                        NodeCreator nodeCreator) {
+        super(random, groupValues, properties);
+        this.nodeCreator = nodeCreator;
     }
 
     public static GenerationVisitorBuilder builder() {
@@ -134,7 +148,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern(), properties);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(node.getPattern(), nodeCreator, properties);
         Node subNode = builder.get();
         GenerationVisitor generationVisitor = new GenerationVisitor(aRandom, aGroupValues, properties);
         subNode.visit(generationVisitor);

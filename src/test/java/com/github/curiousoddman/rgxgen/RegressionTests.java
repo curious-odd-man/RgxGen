@@ -3,6 +3,11 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
+import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.nodes.Repeat;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
@@ -115,5 +120,66 @@ public class RegressionTests {
             }
         }
         assertEquals(List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"), values);
+    }
+
+    @Test
+    void tmpTestExampleTest() {
+        NodeCreator myCustomNodeCreator = new DefaultNodeCreator() {
+            @Override
+            public Repeat makeRepeat(String pattern, Node repeatNode, int repeatTimes) {
+                return new Repeat(pattern, repeatNode, repeatTimes) {
+                    @Override
+                    public Node getNode() {
+                        return new FinalSymbol("y");        // custom value you want to be printed
+                    }
+
+                    @Override
+                    public int getMin() {
+                        return 1;       // force only 1 appearance of the value
+                    }
+
+                    @Override
+                    public int getMax() {
+                        return 1;       // force only 1 appearance of the value
+                    }
+                };
+            }
+
+            @Override
+            public Repeat makeRepeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
+                return new Repeat(pattern, repeatNode, repeatMinTimes, -1) {
+                    @Override
+                    public Node getNode() {
+                        return new FinalSymbol("x");
+                    }
+
+                    @Override
+                    public int getMin() {
+                        return 1;
+                    }
+
+                    @Override
+                    public int getMax() {
+                        return 1;
+                    }
+                };
+            }
+        };
+
+        RgxGen parse = RgxGen
+                .forPattern("^(?:mission/|boss/)?(?:[A-Za-z-]*-[0-9]+/)?([A-Za-z-]*-[0-9]+)$")
+                .withNodeCreator(myCustomNodeCreator)
+                .parse();
+
+        for (int i = 0; i < 10; i++) {
+            System.out.println(parse.generate());
+        }
+
+        System.out.println("Unique values");
+
+        StringIterator stringIterator = parse.iterateUnique();
+        while (stringIterator.hasNext()) {
+            System.out.println(stringIterator.next());
+        }
     }
 }

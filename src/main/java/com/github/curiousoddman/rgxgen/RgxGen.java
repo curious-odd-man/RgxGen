@@ -19,6 +19,8 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
@@ -35,15 +37,20 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-
     private final Node node;
-
     private final RgxGenProperties properties;
 
-    private RgxGen(RgxGenProperties properties, String pattern) {
+    RgxGen(RgxGenProperties properties, NodeCreator nodeCreator, String pattern) {
         this.properties = properties;
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, this.properties);
+        if (nodeCreator == null) {
+            nodeCreator = new DefaultNodeCreator();
+        }
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, nodeCreator, this.properties);
         node = defaultTreeBuilder.get();
+    }
+
+    public static RgxGenBuilder forPattern(String pattern) {
+        return new RgxGenBuilder(pattern);
     }
 
     /**
@@ -63,7 +70,7 @@ public class RgxGen {
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
     public static RgxGen parse(RgxGenProperties rgxGenProperties, String pattern) {
-        return new RgxGen(rgxGenProperties, pattern);
+        return new RgxGen(rgxGenProperties, null, pattern);
     }
 
     /**

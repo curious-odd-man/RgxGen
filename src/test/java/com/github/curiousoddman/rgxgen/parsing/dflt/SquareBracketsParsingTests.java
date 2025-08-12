@@ -64,7 +64,7 @@ public class SquareBracketsParsingTests {
     @MethodSource("data")
     public void parsingTest(String pattern, Object expected) {
         try {
-            DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+            DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
             Node node = builder.get();
             assertEquals(expected.toString(), node.toString());
         } catch (RgxGenParseException e) {

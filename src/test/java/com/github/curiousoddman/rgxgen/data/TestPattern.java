@@ -171,12 +171,12 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_ZERO_OR_MORE("a*",
-            Repeat.minimum("a*", new FinalSymbol("a"), 0)) {{
+            new Repeat("a*", new FinalSymbol("a"), 0, -1)) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_MIN_4("a{4,}",
-            Repeat.minimum("a{4,}", new FinalSymbol("a"), 4)
+            new Repeat("a{4,}", new FinalSymbol("a"), 4, -1)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A("[^a]",
@@ -212,14 +212,14 @@ public enum TestPattern implements DataInterface {
     A_THEN_A_ONE_OR_MORE("aa+",
             new Sequence("aa+",
                     new FinalSymbol("a"),
-                    Repeat.minimum("a+", new FinalSymbol("a"), 1))) {{
+                    new Repeat("a+", new FinalSymbol("a"), 1, -1))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_ANY_REPEAT_INFINITE("a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
             new Sequence("a.*",
                     new FinalSymbol("a"),
-                    Repeat.minimum(".*", SymbolSet.ofDotPattern(null), 0))) {{
+                    new Repeat(".*", SymbolSet.ofDotPattern(null), 0, -1))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------

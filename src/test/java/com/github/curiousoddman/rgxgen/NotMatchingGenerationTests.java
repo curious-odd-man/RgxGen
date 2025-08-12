@@ -6,6 +6,7 @@ import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
@@ -56,7 +57,7 @@ public class NotMatchingGenerationTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void nodeVisitingWorksTest(String pattern, Node expectedNode, int seed) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         Node node = builder.get();
         // Verify that nodes are correct
         assertEquals(expectedNode.toString(), node.toString());
@@ -74,7 +75,7 @@ public class NotMatchingGenerationTests {
     @ParameterizedTest
     @MethodSource("getTestData")
     public void caseInsensitiveVisitingWorksTest(String pattern, Node expectedNode, int seed) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         Node node = builder.get();
         // Verify that nodes are correct
         assertEquals(expectedNode.toString(), node.toString());

@@ -55,7 +55,7 @@ public class FailingParsingTests {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getData")
     void incorrectPatternTest(String name, String pattern, String expectedExceptionText) {
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         RgxGenParseException exception = assertThrows(RgxGenParseException.class, defaultTreeBuilder::build);
         assertEquals(expectedExceptionText, exception.getMessage());
     }
@@ -65,7 +65,7 @@ public class FailingParsingTests {
 
         Node dummyNode = new FinalSymbol("");
         String pattern = "a{1,2";
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         try {
             Field aNodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
             aNodesStartPos.setAccessible(true);
@@ -76,7 +76,7 @@ public class FailingParsingTests {
             InvocationTargetException exception = assertThrows(InvocationTargetException.class, () -> handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode));
             Throwable cause = exception.getCause();
             assertSame(RgxGenParseException.class, cause.getClass());
-            assertEquals("Unknown repetition character 'x'\n" +
+            assertEquals("Unknown repetition with 'x'\n" +
                     "'a{1,'\n" +
                     '^', cause.getMessage());
             //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);
