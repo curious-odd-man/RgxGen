@@ -237,7 +237,7 @@ public class CharIterator {
 
     private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
         String peek = peekUntil(indexOf, len, mustExist);
-        aCurrentIndex += Math.min(peek.length() + len, aBoundIndex);
+        aCurrentIndex = Math.min(aCurrentIndex + peek.length() + len, aBoundIndex);
         return peek;
     }
 
