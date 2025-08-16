@@ -28,14 +28,14 @@
         <!-- Plugins versions -->
         <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
-        <maven.sources.plugin.version>3.3.0</maven.sources.plugin.version>
+        <maven.sources.plugin.version>3.3.1</maven.sources.plugin.version>
         <maven.javadoc.plugin.version>3.11.3</maven.javadoc.plugin.version>
         <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
         <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
         <nexus.staging.maven.plugin.version>1.6.13</nexus.staging.maven.plugin.version>
         <maven.versions.plugin.version>2.18.0</maven.versions.plugin.version>
 
-        <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
     </properties>
 
     <licenses>
@@ -59,17 +59,6 @@
         <developerConnection>scm:git:ssh://github.com/curious-odd-man/RgxGen.git</developerConnection>
         <url>https://github.com/curious-odd-man/RgxGen</url>
     </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>maven-central</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>maven-central</id>
-            <url>https://central.sonatype.com</url>
-        </repository>
-    </distributionManagement>
 
     <profiles>
         <profile>
@@ -130,6 +119,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
             </plugin>
         </plugins>
 
@@ -206,6 +200,7 @@
                     <configuration>
                         <publishingServerId>central</publishingServerId>
                         <autoPublish>true</autoPublish>
+                        <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
                     </configuration>
                 </plugin>
 
