@@ -116,4 +116,10 @@ public class RegressionTests {
         }
         assertEquals(List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"), values);
     }
+
+    @Test
+    void bug116_supportForNamedCaptureGroupTest() {
+        String pattern = "^(?<parliamentaryTerm>[0-9]{1,2})$";
+        assertDoesNotThrow(() -> RgxGen.parse(pattern));
+    }
 }

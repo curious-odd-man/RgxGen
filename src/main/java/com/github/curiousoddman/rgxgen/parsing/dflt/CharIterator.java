@@ -178,24 +178,39 @@ public class CharIterator {
         return nextUntil((str, fromIdx) -> str.indexOf(s, fromIdx), s.length(), false);
     }
 
-    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
-        int startIndex = aCurrentIndex;
+    /**
+     * Returns substring from 'next' character UP TO first not escaped character {@code c}
+     * <p>
+     * Example:
+     * For text {@code '0123456789'}, {@code nextUntil('8')} will return {@code '01234567'}
+     *
+     * @param c character to search for
+     * @return substring from next character up to next not escaped character {@code c}
+     * @throws NoSuchElementException if no such character present after next character
+     */
+    public String peekUntil(char c) {
+        return peekUntil((str, fromIdx) -> str.indexOf(c, fromIdx), 1, true);
+    }
+
+    private String peekUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
+        int tmpCurrentIndex = aCurrentIndex;
+        int startIndex = tmpCurrentIndex;
         int substringEnd;
         while (true) {
             // Find ending character
-            aCurrentIndex = indexOf.apply(aValue, aCurrentIndex);
+            tmpCurrentIndex = indexOf.apply(aValue, tmpCurrentIndex);
             // Found, but outside of the bounds...
-            if (aCurrentIndex + len > aBoundIndex) {
-                aCurrentIndex = aBoundIndex;
-                substringEnd = aCurrentIndex;
+            if (tmpCurrentIndex + len > aBoundIndex) {
+                tmpCurrentIndex = aBoundIndex;
+                substringEnd = tmpCurrentIndex;
                 break;
-            } else if (aCurrentIndex == -1) {
+            } else if (tmpCurrentIndex < 0) {
                 // Not present in text
                 if (mustExist) {
                     throw new NoSuchElementException("Could not find termination sequence/character in string: '" + aValue.substring(startIndex));
                 } else {
-                    aCurrentIndex = aBoundIndex;
-                    substringEnd = aCurrentIndex;
+                    tmpCurrentIndex = aBoundIndex;
+                    substringEnd = tmpCurrentIndex;
                     break;
                 }
             }
@@ -203,22 +218,27 @@ public class CharIterator {
             // Count how many backslashes there are -
             // Even number means that they all are escaped
             // Odd number means that the {@code c} is escaped
-            while (aValue.charAt(aCurrentIndex - cnt) == '\\') {
+            while (aValue.charAt(tmpCurrentIndex - cnt) == '\\') {
                 ++cnt;
             }
 
             // initially count was 1, not 0 - we do != comparison
             if (cnt % 2 != 0) {
-                substringEnd = aCurrentIndex;
-                aCurrentIndex += len;
+                substringEnd = tmpCurrentIndex;
                 break;
             }
 
             // Otherwise we will find the same {@code c} at same position on next iteration
-            ++aCurrentIndex;
+            ++tmpCurrentIndex;
         }
 
         return aValue.substring(startIndex, substringEnd);
+    }
+
+    private String nextUntil(BiFunction<String, Integer, Integer> indexOf, int len, boolean mustExist) {
+        String peek = peekUntil(indexOf, len, mustExist);
+        aCurrentIndex += Math.min(peek.length() + len, aBoundIndex);
+        return peek;
     }
 
     /**
@@ -270,4 +290,21 @@ public class CharIterator {
     public String substringToCurrPos(int pos) {
         return aValue.substring(pos, aCurrentIndex);
     }
+
+    /**
+     * Check if next characters are same as argument
+     *
+     * @param nextChars expected next characters
+     * @return true if next characters match argument
+     */
+    public boolean hasNext(String nextChars) {
+        for (int i = 0; i < nextChars.length(); i++) {
+            if (peek(i) != nextChars.charAt(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+
 }
