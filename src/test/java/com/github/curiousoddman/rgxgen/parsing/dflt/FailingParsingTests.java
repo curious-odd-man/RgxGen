@@ -22,11 +22,11 @@ public class FailingParsingTests {
     public static Stream<Arguments> getData() {
         return Stream.of(
                 Arguments.of("lookbehindIncorrectPatternTest", "(?<xxx)",
-                        "Unexpected symbol in pattern: \n" +
+                        "Incomplete group structure: \n" +
                                 "'(?<xxx)'\n" +
-                                "    ^"),
+                                "   ^"),
                 Arguments.of("lookaheadIncorrectPatternTest", "(?xxx)",
-                        "Unexpected symbol in pattern: \n" +
+                        "Incomplete group structure: \n" +
                                 "'(?xxx)'\n" +
                                 "   ^"),
                 Arguments.of("disallowedGroupReferenceTest", "(asd)[a-\\1]",
