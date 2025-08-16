@@ -169,7 +169,7 @@ public class SymbolSet extends Node {
                 addIfChangedCase(caseInsensitiveSymbols, characters.get(i));
             }
             for (SymbolRange originalSymbolRange : positiveGenerationChars.getRangeList()) {
-                for (char c = (char) originalSymbolRange.getFrom(); c <= originalSymbolRange.getTo(); ++c) {
+                for (char c = (char) originalSymbolRange.from(); c <= originalSymbolRange.to(); ++c) {
                     addIfChangedCase(caseInsensitiveSymbols, c);
                 }
             }

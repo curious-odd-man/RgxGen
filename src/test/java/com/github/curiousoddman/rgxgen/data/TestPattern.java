@@ -447,7 +447,7 @@ public enum TestPattern implements DataInterface {
     }
 
     private static Stream<String> getRangeSymbolStream(SymbolRange range) {
-        return IntStream.range(range.getFrom(), range.getTo() + 1).mapToObj(i -> String.valueOf((char) i));
+        return IntStream.range(range.from(), range.to() + 1).mapToObj(i -> String.valueOf((char) i));
     }
 
     public static Stream<Character> stream(char[] chars) {

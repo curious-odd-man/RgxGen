@@ -28,7 +28,7 @@ public class CategoryTestData {
                 .getKeys()
                 .stream()
                 .flatMap(k -> k.length() == 1 ? Stream.of(k, wrapInCurvy(k)) : Stream.of(wrapInCurvy(k)))
-                .collect(Collectors.toList());
+                .toList();
         for (String key : keys) {
             try {
                 return new CategoryTestData(

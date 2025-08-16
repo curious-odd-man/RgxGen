@@ -70,12 +70,13 @@ public class InvertRangesTests {
     }
 
     public static class Args {
-        String description;
-        List<SymbolRange> ranges = new ArrayList<>();
-        CharList characters = CharList.empty();
+        final String description;
+        final List<SymbolRange> ranges = new ArrayList<>();
+        final CharList characters = CharList.empty();
+        final List<SymbolRange> expectRanges = new ArrayList<>();
+        final CharList expectCharacters = CharList.empty();
+
         SymbolRange allCharacters;
-        List<SymbolRange> expectRanges = new ArrayList<>();
-        CharList expectCharacters = CharList.empty();
 
         public Args(String description) {
             this.description = description;

@@ -36,7 +36,7 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
                                             .map(c -> new Pair(unicodeCategory, c)));
                         }
                 )
-                .collect(groupingBy(Pair::getCharacter, mapping(Pair::getCategory, toList())));
+                .collect(groupingBy(Pair::character, mapping(Pair::category, toList())));
 
         for (Map.Entry<Character, List<UnicodeCategory>> entry : characterListMap.entrySet()) {
             Path tmpFile = Files.createTempFile("rgxgen", String.valueOf((int) entry.getKey()));
@@ -52,21 +52,6 @@ class UnicodeCategoryExclusionOfNonPrintableCharacters {
         }
     }
 
-    private static class Pair {
-        private final UnicodeCategory category;
-        private final char character;
-
-        Pair(UnicodeCategory category, char character) {
-            this.category = category;
-            this.character = character;
-        }
-
-        public UnicodeCategory getCategory() {
-            return category;
-        }
-
-        public Character getCharacter() {
-            return character;
-        }
+    private record Pair(UnicodeCategory category, char character) {
     }
 }

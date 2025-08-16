@@ -22,7 +22,7 @@ public class ManualMemoryValidation {
 
         scanner.nextLine();
 
-        /**
+        /*
          * Tests:
          * 1. One pattern infinite generation of matching values. Test that memory does not grow.
          * 2. One pattern unique values generation. Memory may grow, but should be freed after end of test.
@@ -76,7 +76,7 @@ public class ManualMemoryValidation {
                 }
                 pattern = iterator.next()
                         .toString();
-                RgxGen rgxGen = RgxGen.parse(pattern);
+                RgxGen.parse(pattern);
             }
             System.out.println("Test 3 ended;");
         });

@@ -38,7 +38,7 @@ public abstract class CharList {
         System.arraycopy(symbols, 0, arr, 0, symbols.length);
         int index = symbols.length;
         for (SymbolRange symbolRange : symbolRanges) {
-            for (int i = symbolRange.getFrom(); i <= symbolRange.getTo(); i++) {
+            for (int i = symbolRange.from(); i <= symbolRange.to(); i++) {
                 arr[index] = (char) (i);
                 index += 1;
             }

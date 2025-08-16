@@ -343,7 +343,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     }
 
     private int handlePipeCharacter(List<Node> choices, List<Node> nodes, StringBuilder sb, int choicesStartPos) {
-        if (sb.length() == 0 && nodes.isEmpty()) {
+        if (sb.isEmpty() && nodes.isEmpty()) {
             // Special case when '(|a)' is used - like empty or something
             FinalSymbol finalSymbol = new FinalSymbol("");
             aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() + 1);
@@ -360,7 +360,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
     private void handleRepeatCharacter(List<Node> nodes, StringBuilder sb, char c) {
         // We had separate characters before
         Node repeatNode;
-        if (sb.length() == 0) {
+        if (sb.isEmpty()) {
             // Repetition for the last node
             if (nodes.isEmpty()) {
                 char previousChar = aCharIterator.peek(-2);
@@ -600,24 +600,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private Repeat handleRepeat(char c, Node repeatNode) {
         int startPos = aNodesStartPos.get(repeatNode);
-        Repeat node;
-        switch (c) {
-            case '*':
-                node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 0);
-                break;
-            case '?':
-                node = new Repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, 0, 1);
-                break;
-            case '+':
-                node = Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 1);
-                break;
-            case '{':
-                node = handleRepeatInCurvyBraces(startPos, repeatNode);
-                break;
-
-            default:
-                throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
-        }
+        Repeat node = switch (c) {
+            case '*' -> Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 0);
+            case '?' -> new Repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, 0, 1);
+            case '+' -> Repeat.minimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 1);
+            case '{' -> handleRepeatInCurvyBraces(startPos, repeatNode);
+            default -> throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
+        };
 
         aNodesStartPos.put(node, startPos);
         return node;

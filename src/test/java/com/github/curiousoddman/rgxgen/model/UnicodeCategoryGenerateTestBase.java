@@ -87,7 +87,7 @@ public class UnicodeCategoryGenerateTestBase {
             System.out.println("Category " + category + " with keys " + category.getKeys() + " character stats: ");
             System.out.println("\tMin: " + intSummaryStatistics.getMin() + "; '" + (char) intSummaryStatistics.getMin() + '\'');
             System.out.println("\tMax: " + intSummaryStatistics.getMax() + "; '" + (char) intSummaryStatistics.getMax() + '\'');
-            double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.getTo() - range.getFrom() + 1).sum();
+            double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.to() - range.from() + 1).sum();
             double coveredRate = charactersPresentInGroup.size() / totalValueCount;
             System.out.println("\tCovered: " + coveredRate);
         }
@@ -95,7 +95,7 @@ public class UnicodeCategoryGenerateTestBase {
 
     @AfterAll
     void verifyAllCategoriesTestedWithPatternCompile() {
-        List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).collect(Collectors.toList());
+        List<UnicodeCategory> notTestedCategories = Arrays.stream(values()).filter(category -> !testedCategories.contains(category)).toList();
         if (!notTestedCategories.isEmpty()) {
             fail("Pattern.compile() failed for - " + notTestedCategories);
         }
@@ -112,7 +112,7 @@ public class UnicodeCategoryGenerateTestBase {
                 }
 
                 for (SymbolRange symbolRange : OTHER_LETTER.getSymbolRanges()) {
-                    if (symbolRange.getFrom() <= i && symbolRange.getTo() >= i) {
+                    if (symbolRange.from() <= i && symbolRange.to() >= i) {
                         System.out.println(i + " found in a range: " + symbolRange);
                     }
                 }

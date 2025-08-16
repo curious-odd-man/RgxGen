@@ -40,8 +40,7 @@ public class GroupParsingTests {
             if (expected instanceof Throwable) {
                 assertEquals(e.getMessage(), ((Throwable) expected).getMessage(), e.getMessage());
             } else {
-                e.printStackTrace();
-                fail("Got exception when not expected. " + e.getMessage());
+                fail("Got exception when not expected. ", e);
             }
         }
     }

@@ -31,16 +31,16 @@ class UnicodeCategoryTest {
             char compactedCharacter = compactedCharacters.get(i);
             sb.append('\'').append(compactedCharacter).append('\'').append(',');
         }
-        if (sb.length() != 0) {
+        if (!sb.isEmpty()) {
             System.out.println(categoryTestData.getCategory() + ": " + sb);
             sb = new StringBuilder();
         }
 
         for (SymbolRange compactedRange : compactedRanges) {
-            sb.append("range(").append(compactedRange.getFrom()).append(", ").append(compactedRange.getTo()).append("), ");
+            sb.append("range(").append(compactedRange.from()).append(", ").append(compactedRange.to()).append("), ");
         }
 
-        if (sb.length() != 0) {
+        if (!sb.isEmpty()) {
             System.out.println(categoryTestData.getCategory() + ": " + sb);
         }
     }

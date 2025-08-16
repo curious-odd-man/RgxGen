@@ -50,7 +50,7 @@ public class ConstantsProvider {
     }
 
     public static List<SymbolRange> getAsciiWordCharRanges() {
-        return Collections.unmodifiableList(Arrays.asList(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS));
+        return List.of(SMALL_LATIN_LETTERS, CAPITAL_LATIN_LETTERS, DIGITS);
     }
 
     public static char[] makeAsciiCharacterArray() {

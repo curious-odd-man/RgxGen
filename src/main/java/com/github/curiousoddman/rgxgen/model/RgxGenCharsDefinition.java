@@ -95,7 +95,7 @@ public class RgxGenCharsDefinition {
 
     public boolean isAsciiOnly() {
         return Stream.concat(
-                        rangeList.stream().map(SymbolRange::getTo),
+                        rangeList.stream().map(SymbolRange::to),
                         characters.stream().map(c -> (int) c)
                 )
                 .noneMatch(i -> i >= ConstantsProvider.DEL_ASCII_CODE);

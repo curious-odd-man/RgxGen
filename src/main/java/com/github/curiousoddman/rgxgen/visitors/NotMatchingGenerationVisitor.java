@@ -43,7 +43,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     }
 
     private static char getRandomCharacter(int index) {
-        return (char) (ALL_SYMBOLS.getFrom() + index);
+        return (char) (ALL_SYMBOLS.from() + index);
     }
 
     @Override
