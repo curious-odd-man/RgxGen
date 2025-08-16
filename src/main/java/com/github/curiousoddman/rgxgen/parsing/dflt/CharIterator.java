@@ -91,8 +91,7 @@ public class CharIterator {
             aCurrentIndex++;
             return c;
         } catch (StringIndexOutOfBoundsException e) {
-            NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage());
-            noSuchElementException.initCause(e);
+            NoSuchElementException noSuchElementException = new NoSuchElementException(e.getMessage(), e);
             throw noSuchElementException;
         }
     }

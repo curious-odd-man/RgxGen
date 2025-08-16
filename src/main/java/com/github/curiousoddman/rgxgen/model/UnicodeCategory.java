@@ -202,19 +202,21 @@ public enum UnicodeCategory {
             stream(values())
                     .flatMap(UnicodeCategory::allowUseOfHyphenOrSpacesOrUnderscores)
                     .collect(Collectors.toMap(
-                            KeyValue::getKey,
-                            KeyValue::getValue
+                            KeyValue::key,
+                            KeyValue::value
                     )));
     private final List<String> keys;
     private final String description;
     private final List<SymbolRange> symbolRanges;
     private final char[] symbols;
+
     UnicodeCategory(List<String> keys, String description, List<SymbolRange> symbolRanges, char... symbols) {
         this.keys = keys;
         this.description = description;
         this.symbolRanges = symbolRanges;
         this.symbols = symbols;
     }
+
     UnicodeCategory(List<String> keys, String description, SymbolRange symbolRange, char[] symbols) {
         this(keys, description, singletonList(symbolRange), symbols);
     }
@@ -269,21 +271,6 @@ public enum UnicodeCategory {
         return false;
     }
 
-    private static class KeyValue {
-        private final String key;
-        private final UnicodeCategory value;
-
-        KeyValue(String key, UnicodeCategory value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public String getKey() {
-            return key;
-        }
-
-        public UnicodeCategory getValue() {
-            return value;
-        }
+    private record KeyValue(String key, UnicodeCategory value) {
     }
 }

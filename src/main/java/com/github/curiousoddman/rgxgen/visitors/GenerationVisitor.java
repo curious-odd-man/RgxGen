@@ -30,6 +30,7 @@ public class GenerationVisitor implements NodeVisitor {
     protected final Map<Integer, String> aGroupValues;
     protected final RandomGenerator aRandom;
     protected final RgxGenProperties properties;
+
     protected GenerationVisitor(RandomGenerator random, Map<Integer, String> groupValues, RgxGenProperties properties) {
         aRandom = random;
         aGroupValues = groupValues;

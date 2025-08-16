@@ -102,11 +102,9 @@ public abstract class CharList {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof CharList)) {
+        if (!(o instanceof CharList that)) {
             return false;
         }
-
-        CharList that = (CharList) o;
 
         if (size() != that.size()) {
             return false;
