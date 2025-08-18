@@ -48,37 +48,9 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
 </dependency>
 ```
-
-### The Latest SNAPSHOT:
-
-```xml
-
-<project>
-    <repositories>
-        <repository>
-            <id>snapshots-repository</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-        </repository>
-    </repositories>
-
-    <!--  .... -->
-
-    <dependency>
-        <groupId>com.github.curious-odd-man</groupId>
-        <artifactId>rgxgen</artifactId>
-        <version>3.1-SNAPSHOT</version>
-    </dependency>
-</project>
-```
-
-Changes in snapshot:
-
-- Support for INFINITE_PATTERN_REPETITION in unique values
-  generation [#112](https://github.com/curious-odd-man/RgxGen/issues/112)
-- Support for named capture groups [#116](https://github.com/curious-odd-man/RgxGen/issues/116)
 
 ---
 
@@ -144,7 +116,7 @@ public class Main {
 |                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported                                                |
 |                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                                                         |
 |                        `(...)` | To group multiple characters for the repetitions                                                                                     |
-|                 `(?<name>...)` | Named group (version 3.1)                                                                                                            |
+|                 `(?<name>...)` | Named group                                                                                                                          |
 | `foo(?=bar)` and `(?<=foo)bar` | Limited support. Positive lookahead and lookbehind. These are equivalent to `foobar`. Please see `Lookahead and Lookbehind` section. |
 | `foo(?!bar)` and `(?<!foo)bar` | Limited support. Negative lookahead and lookbehind. Please see `Lookahead and Lookbehind` section.                                   |
 |        <code>(a&#124;b)</code> | Alternatives                                                                                                                         |
@@ -159,8 +131,7 @@ RgxGen treats any other characters as literals - those are generated as is.
 RgxGen can be configured per instance.
 
 Please refer to the following enum for all available
-properties: [
-`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
+properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
 
 ### Create and Use Configuration Properties
 
