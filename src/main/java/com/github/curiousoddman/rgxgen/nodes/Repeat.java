@@ -34,10 +34,6 @@ public class Repeat extends Node {
         aMax = max;
     }
 
-    public static Repeat minimum(String pattern, Node node, int times) {
-        return new Repeat(pattern, node, times, -1);
-    }
-
     @Override
     public void visit(NodeVisitor visitor) {
         visitor.visit(this);

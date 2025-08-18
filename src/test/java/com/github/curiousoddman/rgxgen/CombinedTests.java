@@ -6,6 +6,7 @@ import com.github.curiousoddman.rgxgen.data.DataInterface;
 import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.NodePatternVerifyingVisitor;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
@@ -35,7 +36,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void parseTest(TestPattern testPattern) {
-        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), null);
+        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
         Node node = defaultTreeBuilder.get();
         assertEquals(testPattern.getResultNode().toString(), node.toString());
         NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(testPattern.getResultNode());

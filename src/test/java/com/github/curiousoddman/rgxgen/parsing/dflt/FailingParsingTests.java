@@ -62,21 +62,20 @@ public class FailingParsingTests {
     @ParameterizedTest(name = "{index}: {0}")
     @MethodSource("getData")
     void incorrectPatternTest(String name, String pattern, String expectedExceptionText) {
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         RgxGenParseException exception = assertThrows(RgxGenParseException.class, defaultTreeBuilder::build);
         assertEquals(expectedExceptionText, exception.getMessage());
     }
 
     @Test
     public void unexpectedRepetitionCharacterTest() throws Throwable {
-
         Node dummyNode = new FinalSymbol("");
         String pattern = "a{1,2";
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, null);
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         try {
-            Field aNodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
-            aNodesStartPos.setAccessible(true);
-            Map<Node, Integer> o = (Map<Node, Integer>) aNodesStartPos.get(defaultTreeBuilder);
+            Field nodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
+            nodesStartPos.setAccessible(true);
+            Map<Node, Integer> o = (Map<Node, Integer>) nodesStartPos.get(defaultTreeBuilder);
             o.put(dummyNode, 0);
             Method handleRepeat = DefaultTreeBuilder.class.getDeclaredMethod("handleRepeat", char.class, Node.class);
             handleRepeat.setAccessible(true);

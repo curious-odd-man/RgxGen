@@ -39,8 +39,8 @@ public class CaretAndDollarParsingTests {
                                         new Choice("(^a|^b)",
                                                 new FinalSymbol("a"),
                                                 new FinalSymbol("b")))))),
-                new TestCase("(^a)+", Repeat.minimum("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1)), // Correctly matches first 'a' in string "aaaa"
-                new TestCase("(b$)+", Repeat.minimum("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1)), // Correctly matches last b letter in "bbbb"
+                new TestCase("(^a)+", new Repeat("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1, -1)), // Correctly matches first 'a' in string "aaaa"
+                new TestCase("(b$)+", new Repeat("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1, -1)), // Correctly matches last b letter in "bbbb"
                 new TestCase("a$\n^b", new FinalSymbol("a\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
                 new TestCase("a\n^b", new FinalSymbol("a\nb")),
                 new TestCase("a$\nb", new FinalSymbol("a\nb")),
@@ -150,7 +150,7 @@ public class CaretAndDollarParsingTests {
     @ParameterizedTest
     @MethodSource("data")
     public void parseTest(TestCase aTestCase) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.pattern(), null);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.pattern(), new DefaultNodeCreator(), null);
         Exception expectedException = aTestCase.exception();
 
         if (expectedException == null) {
