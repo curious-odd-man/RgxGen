@@ -162,8 +162,7 @@ public class Main {
 In regex dot `.` means any symbol.
 
 By default, this would generate any value in a range defined in `ASCII_SYMBOL_RANGE`
-here [
-`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+here [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 i.e.: any character starting from `space` to `~`.
 
 You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
@@ -234,11 +233,9 @@ the ASCII only characters and another - for unicode characters.
 These ranges are defined here:
 
 - ASCII: `ASCII_SYMBOL_RANGE` constant
-  in [
-  `com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 - Unicode: `UNICODE_SYMBOL_RANGE` constant
-  in [
-  `com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 
 `UNICODE_SYMBOL_RANGE` is currently used ONLY when Character Classes are used `\p{}` ir `\P{}` patterns.
 By default `ASCII_SYMBOL_RANGE` is used.
@@ -262,8 +259,7 @@ For complete list of characters per category please refer to [this](data/categor
 Each file represents one category. Each line in a file describes one symbol from the category.
 
 Supported keys for categories can be found
-in [
-`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
+in [`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
 
 ## Other tools to generate values by regex and why this might be better
 
