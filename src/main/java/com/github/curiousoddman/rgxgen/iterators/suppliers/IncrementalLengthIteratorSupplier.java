@@ -23,8 +23,8 @@ import java.util.function.Supplier;
 
 public class IncrementalLengthIteratorSupplier implements Supplier<StringIterator> {
 
-    private final int                      aMin;
-    private final int                      aMax;
+    private final int aMin;
+    private final int aMax;
     private final Supplier<StringIterator> aIteratorSupplier;
 
     public IncrementalLengthIteratorSupplier(Supplier<StringIterator> iteratorSupplier, int min, int max) {

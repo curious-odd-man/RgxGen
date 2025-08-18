@@ -27,9 +27,9 @@ import java.util.random.RandomGenerator;
 public class GenerationVisitorBuilder {
     private final boolean aGenerateMatching;
 
-    private RandomGenerator      aRandom;
+    private RandomGenerator aRandom;
     private Map<Integer, String> aGroupsValues;
-    private RgxGenProperties     aProperties;
+    private RgxGenProperties aProperties;
 
 
     public GenerationVisitorBuilder(boolean generateMatching) {
@@ -51,13 +51,13 @@ public class GenerationVisitorBuilder {
         }
 
         if (aGenerateMatching) {
-            if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+            if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
                 return new GenerationVisitorCaseInsensitive(aRandom, aGroupsValues, aProperties);
             } else {
                 return new GenerationVisitor(aRandom, aGroupsValues, aProperties);
             }
         } else {
-            if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+            if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
                 return new NotMatchingCaseInsensitiveGenerationVisitor(aRandom, aGroupsValues, aProperties);
             } else {
                 return new NotMatchingGenerationVisitor(aRandom, aGroupsValues, aProperties);

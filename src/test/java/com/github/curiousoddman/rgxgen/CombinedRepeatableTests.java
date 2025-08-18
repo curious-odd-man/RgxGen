@@ -19,16 +19,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     public static Stream<Arguments> getPatterns() {
         return Arrays.stream(TestPattern.values())
-                     .flatMap(testPattern -> IntStream.range(0, 100)
-                                                      .mapToObj(index -> Arguments.of(index, testPattern)));
+                .flatMap(testPattern -> IntStream.range(0, 100)
+                        .mapToObj(index -> Arguments.of(index, testPattern)));
     }
 
     @ParameterizedTest(name = "{1}: {0}")
     @MethodSource("getPatterns")
     public void generateTest(int aSeed, TestPattern testPattern) {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
-                                                               .withRandom(TestingUtilities.newRandom(aSeed))
-                                                               .get();
+                .withRandom(TestingUtilities.newRandom(aSeed))
+                .get();
         testPattern.getResultNode().visit(generationVisitor);
         boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
         assertTrue(result, "Text: '" + generationVisitor.getString() + "'does not match pattern " + testPattern.getPattern());
@@ -50,8 +50,8 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
     @Timeout(5000)
     public void generateNotMatchingTest(int aSeed, TestPattern testPattern) {
         GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
-                                                                          .withRandom(TestingUtilities.newRandom(aSeed))
-                                                                          .get();
+                .withRandom(TestingUtilities.newRandom(aSeed))
+                .get();
         testPattern.getResultNode().visit(generationVisitor);
         boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
         assertFalse(result, "Text: '" + generationVisitor.getString() + "' matches pattern " + testPattern.getPattern());

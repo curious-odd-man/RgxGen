@@ -23,12 +23,12 @@ import java.util.function.Supplier;
 
 public class IncrementalLengthIterator implements StringIterator {
     private final Supplier<StringIterator> aSupplier;
-    private final int                      aMin;
-    private final int                      aMax;
+    private final int aMin;
+    private final int aMax;
 
-    private int              aCurrentLength;
+    private int aCurrentLength;
     private StringIterator[] aCurrentIterators;
-    private boolean          aInit = true;
+    private boolean aInit = true;
 
 
     // (a|b){1} -> "a", "b" --> "a", "b"
@@ -56,7 +56,7 @@ public class IncrementalLengthIterator implements StringIterator {
 
     private boolean hasMoreForCurrentLength() {
         return Arrays.stream(aCurrentIterators)
-                     .anyMatch(Iterator::hasNext);
+                .anyMatch(Iterator::hasNext);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class IncrementalLengthIterator implements StringIterator {
     @Override
     public String current() {
         return Arrays.stream(aCurrentIterators)
-                     .map(StringIterator::current)
-                     .reduce("", String::concat);
+                .map(StringIterator::current)
+                .reduce("", String::concat);
     }
 }

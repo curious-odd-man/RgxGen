@@ -12,6 +12,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
+
 1. With regex pattern '...'
 2. Use code/API
 3. See error
@@ -23,9 +24,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - OS: [e.g. iOS]
- - JDK/JRE version 
- - RgxGen Version or commit id
+
+- OS: [e.g. iOS]
+- JDK/JRE version
+- RgxGen Version or commit id
 
 **Additional context**
 Add any other context about the problem here.

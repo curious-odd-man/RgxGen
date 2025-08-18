@@ -20,12 +20,8 @@ import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 public class Repeat extends Node {
     private final Node aNode;
-    private final int  aMin;
-    private final int  aMax;
-
-    public static Repeat minimum(String pattern, Node node, int times) {
-        return new Repeat(pattern, node, times, -1);
-    }
+    private final int aMin;
+    private final int aMax;
 
     public Repeat(String pattern, Node node, int times) {
         this(pattern, node, times, times);

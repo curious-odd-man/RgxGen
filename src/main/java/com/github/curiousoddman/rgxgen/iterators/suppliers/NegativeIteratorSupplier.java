@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public class NegativeIteratorSupplier implements Supplier<StringIterator> {
-    private final Pattern                  aPattern;
+    private final Pattern aPattern;
     private final Supplier<StringIterator> aIteratorSupplier;
 
     public NegativeIteratorSupplier(String pattern, Supplier<StringIterator> iteratorSupplier) {

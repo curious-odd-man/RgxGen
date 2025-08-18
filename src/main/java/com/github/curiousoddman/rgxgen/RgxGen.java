@@ -19,11 +19,10 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
-import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.visitors.*;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -35,10 +34,21 @@ import java.util.stream.Stream;
  * String values generator based on regular expression pattern
  */
 public class RgxGen {
-
     private final Node node;
-
     private final RgxGenProperties properties;
+
+    RgxGen(RgxGenProperties properties, NodeCreator nodeCreator, String pattern) {
+        this.properties = properties;
+        if (nodeCreator == null) {
+            nodeCreator = new DefaultNodeCreator();
+        }
+        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, nodeCreator, this.properties);
+        node = defaultTreeBuilder.get();
+    }
+
+    public static RgxGenBuilder forPattern(String pattern) {
+        return new RgxGenBuilder(pattern);
+    }
 
     /**
      * Parse pattern using DefaultTreeBuilder.
@@ -57,13 +67,7 @@ public class RgxGen {
      * @see com.github.curiousoddman.rgxgen.config.RgxGenOption
      */
     public static RgxGen parse(RgxGenProperties rgxGenProperties, String pattern) {
-        return new RgxGen(rgxGenProperties, pattern);
-    }
-
-    private RgxGen(RgxGenProperties properties, String pattern) {
-        this.properties = properties;
-        DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, this.properties);
-        node = defaultTreeBuilder.get();
+        return new RgxGen(rgxGenProperties, null, pattern);
     }
 
     /**
@@ -118,9 +122,9 @@ public class RgxGen {
      */
     public String generate(RandomGenerator random) {
         GenerationVisitor gv = GenerationVisitor.builder()
-                                                .withRandom(random)
-                                                .withProperties(properties)
-                                                .get();
+                .withRandom(random)
+                .withProperties(properties)
+                .get();
         node.visit(gv);
         return gv.getString();
     }
@@ -143,9 +147,13 @@ public class RgxGen {
      */
     public String generateNotMatching(RandomGenerator random) {
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
-                                                             .withRandom(random)
-                                                             .get();
+                .withRandom(random)
+                .get();
         node.visit(nmgv);
         return nmgv.getString();
+    }
+
+    public void visit(NodeVisitor customVisitor) {
+        node.visit(customVisitor);
     }
 }

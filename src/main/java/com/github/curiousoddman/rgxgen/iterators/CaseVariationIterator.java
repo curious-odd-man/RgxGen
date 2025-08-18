@@ -23,11 +23,11 @@ import java.util.OptionalInt;
 import java.util.TreeMap;
 
 public class CaseVariationIterator implements StringIterator {
-    private final String                    aOriginalValue;
-    private final StringBuilder             aValue;
+    private final String aOriginalValue;
+    private final StringBuilder aValue;
     private final TreeMap<Integer, Boolean> aSwitchableCharPositions;       // true - lower, false - upper case
 
-    private int     aCurrentPos;
+    private int aCurrentPos;
     private boolean hasNext;
 
 
@@ -62,8 +62,8 @@ public class CaseVariationIterator implements StringIterator {
                 aSwitchableCharPositions.put(aCurrentPos, false);
 
                 hasNext = aSwitchableCharPositions.values()
-                                                  .stream()
-                                                  .anyMatch(v -> v);
+                        .stream()
+                        .anyMatch(v -> v);
 
             } else {
                 while (Character.isUpperCase(aValue.charAt(aCurrentPos))) {

@@ -1,9 +1,18 @@
 package com.github.curiousoddman.rgxgen;
 
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
+import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.nodes.Repeat;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.BIG_INTEGER_TWO;
@@ -20,7 +29,7 @@ public class RegressionTests {
         StringIterator stringIterator = rgxGen.iterateUnique();
         while (stringIterator.hasNext()) {
             assertTrue(compile.matcher(stringIterator.next())
-                              .matches());
+                    .matches());
         }
     }
 
@@ -31,7 +40,7 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         StringIterator stringIterator = rgxGen.iterateUnique();
         assertEquals(BIG_INTEGER_TWO, rgxGen.getUniqueEstimation()
-                                            .orElse(null));
+                .orElse(null));
         assertEquals("1", stringIterator.next());
         assertEquals("2", stringIterator.next());
         assertFalse(stringIterator.hasNext());
@@ -44,7 +53,7 @@ public class RegressionTests {
         assertNotNull(rgxGen); // Not throwing an exception is a success
         final StringIterator stringIterator = rgxGen.iterateUnique();
         assertEquals(BigInteger.valueOf(2), rgxGen.getUniqueEstimation()
-                                                  .orElse(null));
+                .orElse(null));
         assertEquals("x", stringIterator.next());
         assertEquals("y", stringIterator.next());
         assertFalse(stringIterator.hasNext());
@@ -59,7 +68,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
+                    .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 
@@ -72,7 +81,7 @@ public class RegressionTests {
         for (int i = 0; i < 100; i++) {
             String generated = rgxGen.generate();
             assertTrue(compile.matcher(generated)
-                              .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
+                    .matches(), '\'' + generated + "' for pattern '" + pattern + '\'');
         }
     }
 
@@ -91,5 +100,31 @@ public class RegressionTests {
         }
 
         assertFalse(withGroupIterator.hasNext());
+    }
+
+    @Test
+    void bug112_infinitePatternRepetitionPropertyDoesNotWorkInGenerateUniqueTest() {
+        RgxGenProperties rgxGenProperties = new RgxGenProperties();
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxGenProperties, 1);
+        RgxGen rgxGen = RgxGen.parse(rgxGenProperties, "[0-9]+");
+
+        StringIterator stringIterator = rgxGen.iterateUnique();
+        List<String> values = new ArrayList<>();
+
+        int count = 0;
+        while (stringIterator.hasNext()) {
+            values.add(stringIterator.next());
+            count++;
+            if (count > 10) {
+                fail("Expected only 10 unique values, due to INFINITE_PATTERN_REPETITION limit");
+            }
+        }
+        assertEquals(List.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9"), values);
+    }
+
+    @Test
+    void bug116_supportForNamedCaptureGroupTest() {
+        String pattern = "^(?<parliamentaryTerm>[0-9]{1,2})$";
+        assertDoesNotThrow(() -> RgxGen.parse(pattern));
     }
 }

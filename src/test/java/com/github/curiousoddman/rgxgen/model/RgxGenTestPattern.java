@@ -6,10 +6,10 @@ import java.util.regex.Pattern;
 public class RgxGenTestPattern {
     private static final Pattern COMPILE = Pattern.compile("\\{\\d+}");
 
-    private final String          pattern;
-    private final Pattern         compiled;
+    private final String pattern;
+    private final Pattern compiled;
     private final UnicodeCategory unicodeCategory;
-    private final boolean         expectToMatch;
+    private final boolean expectToMatch;
 
     public RgxGenTestPattern(String pattern, Pattern compiled, UnicodeCategory unicodeCategory, boolean expectToMatch) {
         this.pattern = pattern;

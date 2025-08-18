@@ -21,9 +21,7 @@ import com.github.curiousoddman.rgxgen.util.chars.CharList;
 /**
  * Range of symbols
  */
-public class SymbolRange {
-    private final int from;
-    private final int to;
+public record SymbolRange(int from, int to) {
 
     /**
      * Create inclusive range of symbols.
@@ -45,19 +43,6 @@ public class SymbolRange {
      */
     public static SymbolRange range(char from, char to) {
         return range((int) from, to);
-    }
-
-    private SymbolRange(int from, int to) {
-        this.from = from;
-        this.to = to;
-    }
-
-    public int getFrom() {
-        return from;
-    }
-
-    public int getTo() {
-        return to;
     }
 
     public int size() {
@@ -87,13 +72,6 @@ public class SymbolRange {
             return false;
         }
         return to == range.to;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = from;
-        result = 31 * result + to;
-        return result;
     }
 
     @Override

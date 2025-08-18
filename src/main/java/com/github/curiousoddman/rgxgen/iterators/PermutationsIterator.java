@@ -31,8 +31,7 @@ public class PermutationsIterator implements StringIterator {
         aIterators = new StringIterator[iteratorsSuppliers.size()];
 
         for (int i = 0; i < aIterators.length; i++) {
-            StringIterator iterator = iteratorsSuppliers.get(i)
-                                                        .get();
+            StringIterator iterator = iteratorsSuppliers.get(i).get();
             aIterators[i] = iterator;
         }
 
@@ -43,7 +42,7 @@ public class PermutationsIterator implements StringIterator {
     @Override
     public boolean hasNext() {
         return !aInitialized || Arrays.stream(aIterators)
-                                      .anyMatch(Iterator::hasNext);
+                .anyMatch(Iterator::hasNext);
     }
 
     @Override
@@ -84,7 +83,7 @@ public class PermutationsIterator implements StringIterator {
     @Override
     public String current() {
         return Arrays.stream(aIterators)
-                     .map(StringIterator::current)
-                     .reduce("", String::concat);
+                .map(StringIterator::current)
+                .reduce("", String::concat);
     }
 }

@@ -48,13 +48,16 @@ Enter your pattern and see the results.
 <dependency>
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
 </dependency>
 ```
 
+---
+
 ### Code:
 
-Note - RgxGen is not thread safe - there were reports on errors - see [#91](https://github.com/curious-odd-man/RgxGen/issues/91).
+Note - RgxGen is not thread safe - there were reports on errors -
+see [#91](https://github.com/curious-odd-man/RgxGen/issues/91).
 
 ```java
 public class Main {
@@ -112,7 +115,8 @@ public class Main {
 |              `{a}` and `{a,b}` | Repeat a; or min a max b times. Use {n,} to repeat at least n times.                                                                 |
 |                        `[...]` | Single character from ones that are inside brackets. `[a-zA-Z]` (dash) also supported                                                |
 |                       `[^...]` | Single character except the ones in brackets. `[^a]` - any symbol except 'a'                                                         |
-|                           `()` | To group multiple characters for the repetitions                                                                                     |
+|                        `(...)` | To group multiple characters for the repetitions                                                                                     |
+|                 `(?<name>...)` | Named group                                                                                                                          |
 | `foo(?=bar)` and `(?<=foo)bar` | Limited support. Positive lookahead and lookbehind. These are equivalent to `foobar`. Please see `Lookahead and Lookbehind` section. |
 | `foo(?!bar)` and `(?<!foo)bar` | Limited support. Negative lookahead and lookbehind. Please see `Lookahead and Lookbehind` section.                                   |
 |        <code>(a&#124;b)</code> | Alternatives                                                                                                                         |

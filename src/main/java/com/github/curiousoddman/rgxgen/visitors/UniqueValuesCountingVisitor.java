@@ -27,11 +27,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class UniqueValuesCountingVisitor implements NodeVisitor {
+    private final Node aParentNode;
+    private final RgxGenProperties aProperties;
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This value is returned to user later
     private Optional<BigInteger> aCount = Optional.of(BigInteger.ZERO);
-
-    private final Node             aParentNode;
-    private final RgxGenProperties aProperties;
 
     public UniqueValuesCountingVisitor(RgxGenProperties properties) {
         this(null, properties);
@@ -42,6 +41,12 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         aProperties = properties;
     }
 
+    private static Optional<BigInteger> countSeparately(Node parentNode, Node node, RgxGenProperties properties) {
+        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode, properties);
+        node.visit(countingVisitor);
+        return countingVisitor.aCount;
+    }
+
     private void applyOrSkip(Function<BigInteger, Optional<BigInteger>> func) {
         aCount = aCount.flatMap(func);
     }
@@ -49,9 +54,9 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(SymbolSet node) {
         applyOrSkip(v -> {
-            int size = RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)
-                       ? node.getCaseInsensitiveSymbolSetIndexer().size()
-                       : node.getSymbolSetIndexer().size();
+            int size = RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)
+                    ? node.getCaseInsensitiveSymbolSetIndexer().size()
+                    : node.getSymbolSetIndexer().size();
             return Optional.of(v.add(BigInteger.valueOf(size)));
         });
     }
@@ -65,7 +70,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
 
     @Override
     public void visit(FinalSymbol node) {
-        if (RgxGenOption.CASE_INSENSITIVE.getFromProperties(aProperties)) {
+        if (RgxGenOption.CASE_INSENSITIVE.getFromPropertiesOrDefault(aProperties)) {
             applyOrSkip(v -> Optional.of(v.add(Util.countCaseInsensitiveVariations(node.getValue()))));
         } else {
             applyOrSkip(v -> Optional.of(v.add(BigInteger.ONE)));
@@ -77,7 +82,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         if (aCount.isPresent()) {
             UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(node, aProperties);
             node.getNode()
-                .visit(countingVisitor);
+                    .visit(countingVisitor);
 
             if (node.getMax() < 0 || !countingVisitor.aCount.isPresent()) {
                 aCount = Optional.empty();
@@ -113,12 +118,6 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
         }
     }
 
-    private static Optional<BigInteger> countSeparately(Node parentNode, Node node, RgxGenProperties properties) {
-        UniqueValuesCountingVisitor countingVisitor = new UniqueValuesCountingVisitor(parentNode, properties);
-        node.visit(countingVisitor);
-        return countingVisitor.aCount;
-    }
-
     @Override
     public void visit(NotSymbol node) {
         aCount = Optional.empty();
@@ -140,7 +139,7 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
     @Override
     public void visit(Group group) {
         group.getNode()
-             .visit(this);
+                .visit(this);
     }
 
     /**

@@ -26,12 +26,6 @@ public final class TestingUtilities {
         return lst;
     }
 
-    public static Character[] getAllDigits() {
-        return IntStream.rangeClosed('0', '9')
-                        .mapToObj(i -> (char) i)
-                        .toArray(Character[]::new);
-    }
-
     /**
      * This method helps to overcome the issue that is described here: StrangeBehaviourTests::randomIsNotSoRandomTest
      *

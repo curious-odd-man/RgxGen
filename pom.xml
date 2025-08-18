@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.curious-odd-man</groupId>
     <artifactId>rgxgen</artifactId>
-    <version>3.0</version>
+    <version>3.1</version>
 
     <packaging>jar</packaging>
 
@@ -18,24 +18,24 @@
         <!-- Configuration -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <min.maven.version>3.6.1</min.maven.version>
+        <min.maven.version>3.6.3</min.maven.version>
 
         <!-- Dependencies versions -->
-        <junit.jupiter.version>5.10.2</junit.jupiter.version>
-        <junit.platform.version>1.10.2</junit.platform.version>
+        <junit.jupiter.version>5.13.4</junit.jupiter.version>
+        <junit.platform.version>1.13.4</junit.platform.version>
         <jmh.version>1.37</jmh.version>
 
         <!-- Plugins versions -->
-        <maven.compiler.plugin.version>3.12.1</maven.compiler.plugin.version>
-        <maven.surefire.plugin.version>3.2.5</maven.surefire.plugin.version>
-        <maven.sources.plugin.version>3.3.0</maven.sources.plugin.version>
-        <maven.javadoc.plugin.version>3.6.3</maven.javadoc.plugin.version>
-        <maven.gpg.plugin.version>3.1.0</maven.gpg.plugin.version>
-        <maven.enforcer.plugin.version>3.4.1</maven.enforcer.plugin.version>
+        <maven.compiler.plugin.version>3.14.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
+        <maven.sources.plugin.version>3.3.1</maven.sources.plugin.version>
+        <maven.javadoc.plugin.version>3.11.3</maven.javadoc.plugin.version>
+        <maven.gpg.plugin.version>3.2.8</maven.gpg.plugin.version>
+        <maven.enforcer.plugin.version>3.6.1</maven.enforcer.plugin.version>
         <nexus.staging.maven.plugin.version>1.6.13</nexus.staging.maven.plugin.version>
-        <maven.versions.plugin.version>2.16.2</maven.versions.plugin.version>
+        <maven.versions.plugin.version>2.18.0</maven.versions.plugin.version>
 
-        <jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
+        <jacoco.maven.plugin.version>0.8.13</jacoco.maven.plugin.version>
     </properties>
 
     <licenses>
@@ -59,17 +59,6 @@
         <developerConnection>scm:git:ssh://github.com/curious-odd-man/RgxGen.git</developerConnection>
         <url>https://github.com/curious-odd-man/RgxGen</url>
     </scm>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
 
     <profiles>
         <profile>
@@ -113,7 +102,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <source>8</source>
+                    <source>17</source>
                 </configuration>
             </plugin>
 
@@ -130,6 +119,11 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
             </plugin>
         </plugins>
 
@@ -199,14 +193,14 @@
                 </plugin>
 
                 <plugin>
-                    <groupId>org.sonatype.plugins</groupId>
-                    <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>${nexus.staging.maven.plugin.version}</version>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
                     <extensions>true</extensions>
                     <configuration>
-                        <serverId>ossrh</serverId>
-                        <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        <publishingServerId>central</publishingServerId>
+                        <autoPublish>true</autoPublish>
+                        <centralSnapshotsUrl>https://central.sonatype.com/repository/maven-snapshots/</centralSnapshotsUrl>
                     </configuration>
                 </plugin>
 
@@ -234,6 +228,16 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
                     <version>${maven.versions.plugin.version}</version>
+                    <configuration>
+                        <ruleSet>
+                            <ignoreVersions>
+                                <ignoreVersion>
+                                    <type>regex</type>
+                                    <version>(?i).*-(alpha|beta|m|rc)([-.]?\d+)?</version>
+                                </ignoreVersion>
+                            </ignoreVersions>
+                        </ruleSet>
+                    </configuration>
                     <executions>
                         <execution>
                             <phase>verify</phase>

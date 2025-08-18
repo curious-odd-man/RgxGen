@@ -6,6 +6,7 @@ import com.github.curiousoddman.rgxgen.data.DataInterface;
 import com.github.curiousoddman.rgxgen.data.TestPattern;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.NodePatternVerifyingVisitor;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
@@ -28,11 +29,14 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         return Arrays.stream(TestPattern.values());
     }
 
+    private static String createMessage(String generated, DataInterface pattern, int i, int j) {
+        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
+    }
 
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void parseTest(TestPattern testPattern) {
-        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), null);
+        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
         Node node = defaultTreeBuilder.get();
         assertEquals(testPattern.getResultNode().toString(), node.toString());
         NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(testPattern.getResultNode());
@@ -99,9 +103,5 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
                 assertTrue(result, createMessage(generated, testPattern, i, j));
             }
         }
-    }
-
-    private static String createMessage(String generated, DataInterface pattern, int i, int j) {
-        return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
     }
 }

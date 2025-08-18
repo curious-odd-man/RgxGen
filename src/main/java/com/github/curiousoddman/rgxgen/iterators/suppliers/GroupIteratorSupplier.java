@@ -25,10 +25,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class GroupIteratorSupplier implements Supplier<StringIterator> {
-    private final Supplier<StringIterator>              aIteratorSupplier;
+    private final Supplier<StringIterator> aIteratorSupplier;
     private final Map<Integer, List<ReferenceIterator>> aReferenceIteratorMap;
-    private final Map<Integer, StringIterator>          aGroupIteratorsMap;
-    private final int                                   aIndex;
+    private final Map<Integer, StringIterator> aGroupIteratorsMap;
+    private final int aIndex;
 
     public GroupIteratorSupplier(Supplier<StringIterator> iteratorSupplier, Map<Integer, List<ReferenceIterator>> referenceIteratorMap, Map<Integer, StringIterator> groupIteratorsMap, int index) {
         aIteratorSupplier = iteratorSupplier;

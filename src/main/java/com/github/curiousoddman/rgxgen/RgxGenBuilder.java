@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.model;
+package com.github.curiousoddman.rgxgen;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,21 +16,30 @@ package com.github.curiousoddman.rgxgen.model;
    limitations under the License.
 /* **************************************************************************/
 
-public enum WhitespaceChar {
-    SPACE(' '),
-    TAB('\t'),
-    CARRIAGE_RETURN('\r'),
-    LINE_FEED('\n'),
-    VERTICAL_TAB('\u000B'),
-    FORM_FEED('\f');
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
+import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 
-    private final char c;
+public class RgxGenBuilder {
+    private final String pattern;
 
-    WhitespaceChar(char c) {
-        this.c = c;
+    private RgxGenProperties properties;
+    private NodeCreator nodeCreator;
+
+    public RgxGenBuilder(String pattern) {
+        this.pattern = pattern;
     }
 
-    public char get() {
-        return c;
+    public RgxGenBuilder withProps(RgxGenProperties properties) {
+        this.properties = properties;
+        return this;
+    }
+
+    public RgxGenBuilder withNodeCreator(NodeCreator nodeCreator) {
+        this.nodeCreator = nodeCreator;
+        return this;
+    }
+
+    public RgxGen parse() {
+        return new RgxGen(properties, nodeCreator, pattern);
     }
 }

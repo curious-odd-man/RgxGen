@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnicodeCharacterArray;
 
@@ -41,44 +42,6 @@ import static com.github.curiousoddman.rgxgen.testutil.TestingUtilities.makeUnic
 public class UnicodeCategoryGeneration {
 
     public static final Path SYMBOL_RANGE_DUMP_PATH = Paths.get("data/symbols");
-
-    @Test
-    void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
-        Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
-        Map<UnicodeCategory, CharList> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
-
-        for (CharList value : matchedMap.values()) {
-            value.sort();
-        }
-
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
-        Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
-
-        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
-
-        modifySourceJavaFile(textPerCategory, rangesConstantNames);
-    }
-
-    @Test
-    void generateUnicodeCategoryDumps() throws IOException {
-        for (UnicodeCategory category : UnicodeCategory.values()) {
-            List<String> symbolFileLines = new ArrayList<>();
-
-            IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.getFrom(), range.getTo()));
-            IntStream.Builder streamBuilder = IntStream.builder();
-            for (char symbol : category.getSymbols()) {
-                streamBuilder.add(symbol);
-            }
-            List<Integer> sortedCharacters = IntStream.concat(intStream, streamBuilder.build())
-                                                      .sorted()
-                                                      .boxed()
-                                                      .collect(Collectors.toList());
-            for (Integer i : sortedCharacters) {
-                symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
-            }
-            Files.write(Paths.get("data/categories").resolve(category.name() + ".txt"), symbolFileLines);
-        }
-    }
 
     private static TreeMap<Integer, NamedSymbolRange> getNamedRanges() throws IOException {
         TreeMap<Integer, NamedSymbolRange> ranges = new TreeMap<>(Comparator.naturalOrder());
@@ -97,7 +60,7 @@ public class UnicodeCategoryGeneration {
                 RangeName upperCaseValidName = new RangeName(sectionName, prevName);
                 upperCaseValidName = ensureNameIsUnique(usedNames, upperCaseValidName);
                 SymbolRange range = SymbolRange.range(prevRangeStart, rangeStart - 1);
-                ranges.put(range.getFrom(), new NamedSymbolRange(range, upperCaseValidName));
+                ranges.put(range.from(), new NamedSymbolRange(range, upperCaseValidName));
             }
 
             prevName = parts[1];
@@ -106,7 +69,7 @@ public class UnicodeCategoryGeneration {
         RangeName upperCaseValidName = new RangeName(sectionName, prevName);
         upperCaseValidName = ensureNameIsUnique(usedNames, upperCaseValidName);
         SymbolRange range = SymbolRange.range(prevRangeStart, 0xFFFF);
-        ranges.put(range.getFrom(), new NamedSymbolRange(range, upperCaseValidName));
+        ranges.put(range.from(), new NamedSymbolRange(range, upperCaseValidName));
         return ranges;
     }
 
@@ -116,7 +79,7 @@ public class UnicodeCategoryGeneration {
         Path path = Paths.get("src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategoryConstants.java");
         Map<SymbolRange, String> rangesConstantsNames = assignNamesToRanges(allRanges);
         List<SymbolRange> sortedRanges = new ArrayList<>(rangesConstantsNames.keySet());
-        sortedRanges.sort(Comparator.comparingInt(SymbolRange::getFrom));
+        sortedRanges.sort(Comparator.comparingInt(SymbolRange::from));
 
         List<String> lines = new ArrayList<>();
         lines.add("package com.github.curiousoddman.rgxgen.model;");
@@ -124,8 +87,8 @@ public class UnicodeCategoryGeneration {
         lines.add("public class UnicodeCategoryConstants {");
         for (SymbolRange range : sortedRanges) {
             String name = rangesConstantsNames.get(range);
-            int from = range.getFrom();
-            int to = range.getTo();
+            int from = range.from();
+            int to = range.to();
             lines.add(String.format("    public static final SymbolRange %s = SymbolRange.range('%s', '%s');  // 0x%x - 0x%x", name, Utils.charAsString(from), Utils.charAsString(to), from, to));
             createSymbolRangeFile(name, from, to);
         }
@@ -136,9 +99,11 @@ public class UnicodeCategoryGeneration {
     }
 
     private static void cleanupDirectoryWithRangeTextFiles() throws IOException {
-        Files.walk(SYMBOL_RANGE_DUMP_PATH)
-             .filter(Files::isRegularFile)
-             .forEach(Utils::silentDeleteFile);
+        try (Stream<Path> pathStream = Files.walk(SYMBOL_RANGE_DUMP_PATH)) {
+            pathStream
+                    .filter(Files::isRegularFile)
+                    .forEach(Utils::silentDeleteFile);
+        }
     }
 
     private static void createSymbolRangeFile(String name, int from, int to) throws IOException {
@@ -156,21 +121,21 @@ public class UnicodeCategoryGeneration {
         TreeMap<Integer, NamedSymbolRange> namedRanges = getNamedRanges();
         for (SymbolRange range : allRanges) {
             RangeName name;
-            Map.Entry<Integer, NamedSymbolRange> floorEntry = namedRanges.floorEntry(range.getFrom());
+            Map.Entry<Integer, NamedSymbolRange> floorEntry = namedRanges.floorEntry(range.from());
             NamedSymbolRange namedSymbolRange = floorEntry.getValue();
-            if (namedSymbolRange.range.equals(range)) {
-                name = namedSymbolRange.name;
+            if (namedSymbolRange.range().equals(range)) {
+                name = namedSymbolRange.name();
             } else {
-                if (namedSymbolRange.range.getTo() >= range.getTo()) {
-                    name = new RangeName(namedSymbolRange.name.sectionName, namedSymbolRange.name.subrangeName + "_SUBSET", -1);
+                if (namedSymbolRange.range().to() >= range.to()) {
+                    name = new RangeName(namedSymbolRange.name().sectionName, namedSymbolRange.name().subrangeName + "_SUBSET", -1);
                 } else {
-                    int nextAfterThisRangeEnd = namedRanges.ceilingKey(range.getTo());
+                    int nextAfterThisRangeEnd = namedRanges.ceilingKey(range.to());
                     Map.Entry<Integer, NamedSymbolRange> lastRange = namedRanges.lowerEntry(nextAfterThisRangeEnd);
 
-                    String lastRangeSection = lastRange.getValue().name.sectionName;
-                    String floorRangeSection = floorEntry.getValue().name.sectionName;
-                    String lastRangeSubrange = lastRange.getValue().name.subrangeName;
-                    String floorRangeSubrange = floorEntry.getValue().name.subrangeName;
+                    String lastRangeSection = lastRange.getValue().name().sectionName;
+                    String floorRangeSection = floorEntry.getValue().name().sectionName;
+                    String lastRangeSubrange = lastRange.getValue().name().subrangeName;
+                    String floorRangeSubrange = floorEntry.getValue().name().subrangeName;
                     if (lastRangeSection.equals(floorRangeSection)) {
                         name = new RangeName(lastRangeSection, floorRangeSubrange + "_TO_" + lastRangeSubrange, -1);
                     } else {
@@ -247,8 +212,8 @@ public class UnicodeCategoryGeneration {
                     key,
                     key.getKeys(),
                     key.getDescription(),
-                    value.getRanges(),
-                    value.getCharacters()
+                    value.ranges(),
+                    value.characters()
             ));
         }
         return textPerCategory;
@@ -264,7 +229,7 @@ public class UnicodeCategoryGeneration {
                 UnicodeCategory category = entry.getKey();
                 if (value.matcher(str).matches()) {
                     matchedMap.computeIfAbsent(category, k -> CharList.empty())
-                              .add(character);
+                            .add(character);
                 }
             }
         }
@@ -285,6 +250,94 @@ public class UnicodeCategoryGeneration {
 
     }
 
+    private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, CharList> matchedMap) {
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = new EnumMap<>(UnicodeCategory.class);
+        for (Map.Entry<UnicodeCategory, CharList> entry : matchedMap.entrySet()) {
+            UnicodeCategoryDescriptor descriptor = descriptorMap
+                    .computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), CharList.empty()));
+
+            Character lastCharacter = null;
+            SymbolRange lastSymbolRange = null;
+            CharList value = entry.getValue();
+            for (int i = 0; i < value.size(); i++) {
+                char next = value.get(i);
+                if (lastCharacter != null) {
+                    if (lastSymbolRange == null) {
+                        if (lastCharacter == next - 1) {
+                            lastSymbolRange = SymbolRange.range(lastCharacter, next);
+                        } else {
+                            descriptor.characters().add(lastCharacter);
+                        }
+                    } else {
+                        if (lastCharacter == next - 1) {
+                            lastSymbolRange = SymbolRange.range(lastSymbolRange.from(), next);
+                        } else {
+                            descriptor.ranges().add(lastSymbolRange);
+                            lastSymbolRange = null;
+                        }
+                    }
+                }
+                lastCharacter = next;
+            }
+
+            if (lastSymbolRange == null) {
+                descriptor.characters().add(lastCharacter);
+            } else {
+                descriptor.ranges().add(lastSymbolRange);
+            }
+
+        }
+        return descriptorMap;
+    }
+
+    private static Optional<Pattern> getOptionalPattern(UnicodeCategory unicodeCategory) {
+        for (String key : unicodeCategory.getKeys()) {
+            try {
+                String regex = "\\p{" + key + "}+";
+                return Optional.of(Pattern.compile(regex));
+            } catch (Exception ignore) {
+            }
+        }
+        return Optional.empty();
+    }
+
+    @Test
+    void splitUnicodeSymbolsPerCharacterClasses() throws IOException {
+        Map<UnicodeCategory, Pattern> categoryPerPattern = compiledAllPatterns();
+        Map<UnicodeCategory, CharList> matchedMap = findMatchingSymbolsPerPattern(categoryPerPattern);
+
+        for (CharList value : matchedMap.values()) {
+            value.sort();
+        }
+
+        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = createDescriptorMap(matchedMap);
+        Map<UnicodeCategory, LineDescriptor> textPerCategory = formatDescriptorsIntoJavaCode(descriptorMap);
+
+        Map<SymbolRange, String> rangesConstantNames = writeConstants(textPerCategory);
+
+        modifySourceJavaFile(textPerCategory, rangesConstantNames);
+    }
+
+    @Test
+    void generateUnicodeCategoryDumps() throws IOException {
+        for (UnicodeCategory category : UnicodeCategory.values()) {
+            List<String> symbolFileLines = new ArrayList<>();
+
+            IntStream intStream = category.getSymbolRanges().stream().flatMapToInt(range -> IntStream.rangeClosed(range.from(), range.to()));
+            IntStream.Builder streamBuilder = IntStream.builder();
+            for (char symbol : category.getSymbols()) {
+                streamBuilder.add(symbol);
+            }
+            List<Integer> sortedCharacters = IntStream.concat(intStream, streamBuilder.build())
+                    .sorted()
+                    .boxed()
+                    .toList();
+            for (Integer i : sortedCharacters) {
+                symbolFileLines.add(String.format("%d\t0x%x\t0x%04x\t%s", i, i, i, Utils.charAsString(i)));
+            }
+            Files.write(Paths.get("data/categories").resolve(category.name() + ".txt"), symbolFileLines);
+        }
+    }
 
     @Test
     void testCreateDescriptorMap() {
@@ -304,55 +357,5 @@ public class UnicodeCategoryGeneration {
         for (Map.Entry<UnicodeCategory, UnicodeCategoryDescriptor> entry : descriptorMap.entrySet()) {
             System.out.println("\t " + entry.getKey() + " \t " + entry.getValue());
         }
-    }
-
-    private static Map<UnicodeCategory, UnicodeCategoryDescriptor> createDescriptorMap(Map<UnicodeCategory, CharList> matchedMap) {
-        Map<UnicodeCategory, UnicodeCategoryDescriptor> descriptorMap = new EnumMap<>(UnicodeCategory.class);
-        for (Map.Entry<UnicodeCategory, CharList> entry : matchedMap.entrySet()) {
-            UnicodeCategoryDescriptor descriptor = descriptorMap
-                    .computeIfAbsent(entry.getKey(), k -> new UnicodeCategoryDescriptor(new ArrayList<>(), CharList.empty()));
-
-            Character lastCharacter = null;
-            SymbolRange lastSymbolRange = null;
-            CharList value = entry.getValue();
-            for (int i = 0; i < value.size(); i++) {
-                char next = value.get(i);
-                if (lastCharacter != null) {
-                    if (lastSymbolRange == null) {
-                        if (lastCharacter == next - 1) {
-                            lastSymbolRange = SymbolRange.range(lastCharacter, next);
-                        } else {
-                            descriptor.getCharacters().add(lastCharacter);
-                        }
-                    } else {
-                        if (lastCharacter == next - 1) {
-                            lastSymbolRange = SymbolRange.range(lastSymbolRange.getFrom(), next);
-                        } else {
-                            descriptor.getRanges().add(lastSymbolRange);
-                            lastSymbolRange = null;
-                        }
-                    }
-                }
-                lastCharacter = next;
-            }
-
-            if (lastSymbolRange == null) {
-                descriptor.getCharacters().add(lastCharacter);
-            } else {
-                descriptor.getRanges().add(lastSymbolRange);
-            }
-
-        }
-        return descriptorMap;
-    }
-
-    private static Optional<Pattern> getOptionalPattern(UnicodeCategory unicodeCategory) {
-        for (String key : unicodeCategory.getKeys()) {
-            try {
-                return Optional.of(Pattern.compile("\\p{" + key + "}+"));
-            } catch (Exception ignore) {
-            }
-        }
-        return Optional.empty();
     }
 }

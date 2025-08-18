@@ -164,6 +164,17 @@ public class CharIteratorTests {
     }
 
     @Test
+    public void nextUntilStringCurrentIndexTest() {
+        CharIterator charIterator = new CharIterator("123masdxuu");
+        charIterator.skip(3);
+        charIterator.modifyBound(-3);
+        assertEquals("masd", charIterator.nextUntil("sdx"));
+        assertFalse(charIterator.hasNext());
+        assertEquals(0, charIterator.remaining());
+        assertEquals(6, charIterator.prevPos());
+    }
+
+    @Test
     public void peekReturnsNullByteWhenOutOfRangeTest() {
         String text = "012345";
         CharIterator charIterator = new CharIterator(text);

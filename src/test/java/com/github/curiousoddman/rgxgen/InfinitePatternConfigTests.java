@@ -9,6 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InfinitePatternConfigTests {
 
+    private static boolean isCorrect(String value) {
+        return value != null && value.isEmpty()
+                || "x".equals(value) || "xx".equals(value);
+    }
+
     @Test
     public void maxLengthIsRespectedTest() {
         RgxGenProperties properties_3 = new RgxGenProperties();
@@ -18,10 +23,5 @@ public class InfinitePatternConfigTests {
             String value = rgxGen_3.generate(TestingUtilities.newRandom(i));
             assertTrue(isCorrect(value), "Expected to have either empty, or 'x' or 'xx' string. But got " + value);
         }
-    }
-
-    private static boolean isCorrect(String value) {
-        return value != null && value.isEmpty()
-                || "x".equals(value) || "xx".equals(value);
     }
 }

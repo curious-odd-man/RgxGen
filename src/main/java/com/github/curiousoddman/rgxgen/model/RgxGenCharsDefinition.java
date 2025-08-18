@@ -30,7 +30,12 @@ import java.util.stream.Stream;
 public class RgxGenCharsDefinition {
 
     private final List<SymbolRange> rangeList;
-    private final CharList          characters;
+    private final CharList characters;
+
+    private RgxGenCharsDefinition(List<SymbolRange> rangeList, CharList characters) {
+        this.rangeList = new ArrayList<>(rangeList);
+        this.characters = characters.copy();
+    }
 
     public static RgxGenCharsDefinition of(List<SymbolRange> externalRanges) {
         return of(externalRanges, CharList.empty());
@@ -88,17 +93,12 @@ public class RgxGenCharsDefinition {
         return this;
     }
 
-    private RgxGenCharsDefinition(List<SymbolRange> rangeList, CharList characters) {
-        this.rangeList = new ArrayList<>(rangeList);
-        this.characters = characters.copy();
-    }
-
     public boolean isAsciiOnly() {
         return Stream.concat(
-                             rangeList.stream().map(SymbolRange::getTo),
-                             characters.stream().map(c -> (int) c)
-                     )
-                     .noneMatch(i -> i >= ConstantsProvider.DEL_ASCII_CODE);
+                        rangeList.stream().map(SymbolRange::to),
+                        characters.stream().map(c -> (int) c)
+                )
+                .noneMatch(i -> i >= ConstantsProvider.DEL_ASCII_CODE);
     }
 
     public List<SymbolRange> getRangeList() {

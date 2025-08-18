@@ -10,13 +10,13 @@ import java.util.stream.Collectors;
 
 public class LineDescriptor {
     private static final String S_S_S_S_S = "    %s(%s, %s, %s, %s),";
-    private static final String S_S_S_S   = "    %s(%s, %s, %s),";
+    private static final String S_S_S_S = "    %s(%s, %s, %s),";
 
-    public UnicodeCategory   unicodeCategory;
-    public List<String>      keys;
-    public String            description;
-    public List<SymbolRange> ranges;
-    public CharList          characters;
+    public final UnicodeCategory unicodeCategory;
+    public final List<String> keys;
+    public final String description;
+    public final List<SymbolRange> ranges;
+    public final CharList characters;
 
     public LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, CharList characters) {
         this.unicodeCategory = unicodeCategory;
@@ -26,32 +26,12 @@ public class LineDescriptor {
         this.characters = characters;
     }
 
-    public String formatToText(Map<SymbolRange, String> constantNames) {
-        String keysText = makeKeysText(unicodeCategory);
-        String descriptionText = makeDescription(unicodeCategory);
-        String rangesText = makeRanges(ranges, constantNames);
-        String charactersText = makeCharacters(characters);
-        if (ranges.isEmpty()) {
-            return String.format(
-                    S_S_S_S,
-                    unicodeCategory.name(), keysText, descriptionText, charactersText
-            );
-        } else if (characters.isEmpty()) {
-            return String.format(
-                    S_S_S_S,
-                    unicodeCategory.name(), keysText, descriptionText, rangesText
-            );
-        }
-
-        return String.format(S_S_S_S_S, unicodeCategory.name(), keysText, descriptionText, rangesText, charactersText);
-    }
-
     private static String makeCharacters(CharList characters) {
         if (characters.isEmpty()) {
             return "null";
         }
         return String.format("new Character[]{%s}",
-                             characters.stream().map(Utils::charAsString).map(LineDescriptor::sq).collect(Collectors.joining(","))
+                characters.stream().map(Utils::charAsString).map(LineDescriptor::sq).collect(Collectors.joining(","))
         );
     }
 
@@ -70,7 +50,7 @@ public class LineDescriptor {
     }
 
     private static String rangeOrConstant(Map<SymbolRange, String> constantNames, SymbolRange range) {
-        return constantNames.getOrDefault(range, String.format("range('%s', '%s')", Utils.charAsString(range.getFrom()), Utils.charAsString(range.getTo())));
+        return constantNames.getOrDefault(range, String.format("range('%s', '%s')", Utils.charAsString(range.from()), Utils.charAsString(range.to())));
     }
 
     private static String makeDescription(UnicodeCategory key) {
@@ -91,6 +71,26 @@ public class LineDescriptor {
 
     private static String sq(String text) {
         return '\'' + text + '\'';
+    }
+
+    public String formatToText(Map<SymbolRange, String> constantNames) {
+        String keysText = makeKeysText(unicodeCategory);
+        String descriptionText = makeDescription(unicodeCategory);
+        String rangesText = makeRanges(ranges, constantNames);
+        String charactersText = makeCharacters(characters);
+        if (ranges.isEmpty()) {
+            return String.format(
+                    S_S_S_S,
+                    unicodeCategory.name(), keysText, descriptionText, charactersText
+            );
+        } else if (characters.isEmpty()) {
+            return String.format(
+                    S_S_S_S,
+                    unicodeCategory.name(), keysText, descriptionText, rangesText
+            );
+        }
+
+        return String.format(S_S_S_S_S, unicodeCategory.name(), keysText, descriptionText, rangesText, charactersText);
     }
 
     public List<SymbolRange> getRanges() {

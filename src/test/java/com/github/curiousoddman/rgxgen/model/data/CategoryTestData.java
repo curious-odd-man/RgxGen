@@ -11,17 +11,24 @@ import java.util.stream.Stream;
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategoryGenerateTestBase.wrapInCurvy;
 
 public class CategoryTestData {
-    private final String          key;
+    private final String key;
     private final UnicodeCategory category;
-    private final Pattern         inCategoryPattern;
-    private final Pattern         notInCategoryPattern;
+    private final Pattern inCategoryPattern;
+    private final Pattern notInCategoryPattern;
+
+    public CategoryTestData(String key, UnicodeCategory category, Pattern inCategoryPattern, Pattern notInCategoryPattern) {
+        this.key = key;
+        this.category = category;
+        this.inCategoryPattern = inCategoryPattern;
+        this.notInCategoryPattern = notInCategoryPattern;
+    }
 
     public static CategoryTestData create(UnicodeCategory category) {
         List<String> keys = category
                 .getKeys()
                 .stream()
                 .flatMap(k -> k.length() == 1 ? Stream.of(k, wrapInCurvy(k)) : Stream.of(wrapInCurvy(k)))
-                .collect(Collectors.toList());
+                .toList();
         for (String key : keys) {
             try {
                 return new CategoryTestData(
@@ -33,13 +40,6 @@ public class CategoryTestData {
             }
         }
         throw new IllegalArgumentException("Couldn't compile pattern for category: " + category);
-    }
-
-    public CategoryTestData(String key, UnicodeCategory category, Pattern inCategoryPattern, Pattern notInCategoryPattern) {
-        this.key = key;
-        this.category = category;
-        this.inCategoryPattern = inCategoryPattern;
-        this.notInCategoryPattern = notInCategoryPattern;
     }
 
     public String getKey() {

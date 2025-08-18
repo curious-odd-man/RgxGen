@@ -6,6 +6,7 @@ import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
@@ -34,14 +35,14 @@ public class NotMatchingGenerationTests {
                 {"helloworld", new FinalSymbol("helloworld")},
                 {"a{2,3}", new Repeat("a{2,3}", new FinalSymbol("a"), 2, 3)},
                 {"a[a-z]", new Sequence("a[a-z]", new FinalSymbol("a"),
-                                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
+                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE))},
                 {"([a-z])\\1", new Sequence("([a-z])\\1", new Group("([a-z])", 1,
-                                                                    SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
-                                            new GroupRef("\\1", 1)
+                        SymbolSet.ofAsciiRanges("[a-z]", Collections.singletonList(SymbolRange.range('a', 'z')), MatchType.POSITIVE)),
+                        new GroupRef("\\1", 1)
                 )},
                 {"foo(?!bar)", new Sequence("foo(?!bar)",
-                                            new FinalSymbol("foo"),
-                                            new NotSymbol("bar", new FinalSymbol("bar"))
+                        new FinalSymbol("foo"),
+                        new NotSymbol("bar", new FinalSymbol("bar"))
                 )}
         });
     }
@@ -50,31 +51,31 @@ public class NotMatchingGenerationTests {
         return initialData()
                 .stream()
                 .flatMap(arr -> IntStream.range(0, 100)
-                                         .mapToObj(i -> Arguments.of(arr[0], arr[1], i)));
+                        .mapToObj(i -> Arguments.of(arr[0], arr[1], i)));
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
     public void nodeVisitingWorksTest(String pattern, Node expectedNode, int seed) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         Node node = builder.get();
         // Verify that nodes are correct
         assertEquals(expectedNode.toString(), node.toString());
 
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(TestingUtilities.newRandom(seed))
-                                                                .get();
+                .withRandom(TestingUtilities.newRandom(seed))
+                .get();
         node.visit(visitor);
         boolean matches = Pattern.compile(pattern)
-                                 .matcher(visitor.getString())
-                                 .matches();
+                .matcher(visitor.getString())
+                .matches();
         assertFalse(matches, "Should not match " + pattern + " got " + visitor.getString());
     }
 
     @ParameterizedTest
     @MethodSource("getTestData")
     public void caseInsensitiveVisitingWorksTest(String pattern, Node expectedNode, int seed) {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+        NodeTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         Node node = builder.get();
         // Verify that nodes are correct
         assertEquals(expectedNode.toString(), node.toString());
@@ -82,13 +83,13 @@ public class NotMatchingGenerationTests {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);
         GenerationVisitor visitor = NotMatchingGenerationVisitor.builder()
-                                                                .withRandom(TestingUtilities.newRandom(seed))
-                                                                .withProperties(properties)
-                                                                .get();
+                .withRandom(TestingUtilities.newRandom(seed))
+                .withProperties(properties)
+                .get();
         node.visit(visitor);
         boolean matches = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE)
-                                 .matcher(visitor.getString())
-                                 .matches();
+                .matcher(visitor.getString())
+                .matches();
         assertFalse(matches, "Should not match " + pattern + " got " + visitor.getString());
     }
 }

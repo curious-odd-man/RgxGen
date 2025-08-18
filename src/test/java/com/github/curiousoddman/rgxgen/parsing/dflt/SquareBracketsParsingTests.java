@@ -37,9 +37,9 @@ public class SquareBracketsParsingTests {
                 .of(chars)
                 .withCharacters('\t', '\n', '\u000B', '\f', '\r', ' ');
         return SymbolSet.ofAscii("",
-                                 RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
-                                 negativeMatchDefinitions,
-                                 MatchType.POSITIVE);
+                RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
+                negativeMatchDefinitions,
+                MatchType.POSITIVE);
     }
 
 
@@ -52,9 +52,10 @@ public class SquareBracketsParsingTests {
                 Arguments.of("[\\x30-\\x{0032}]", mkRange('0', '2')),
                 Arguments.of("[\\s-]", mkWhitespaceAnd('-')),
                 Arguments.of("[-]", mkSS('-')),
-                Arguments.of("[\\s-a-\\s]", new RgxGenParseException("Cannot make range with a shorthand escape sequences before '\n" +
-                                                                             "'s-a-\\s]'\n" +
-                                                                             "      ^'")),
+                Arguments.of("[\\s-a-\\s]", new RgxGenParseException("""
+                        Cannot make range with a shorthand escape sequences before '
+                        's-a-\\s]'
+                              ^'""")),
                 Arguments.of("[\\s-a]", mkWhitespaceAnd('a', '-')),
                 Arguments.of("[\\s]", mkWhitespaceAnd()),
                 Arguments.of("[a-]", mkSS('a', '-')));
@@ -64,15 +65,14 @@ public class SquareBracketsParsingTests {
     @MethodSource("data")
     public void parsingTest(String pattern, Object expected) {
         try {
-            DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern, null);
+            DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
             Node node = builder.get();
             assertEquals(expected.toString(), node.toString());
         } catch (RgxGenParseException e) {
             if (expected instanceof Throwable) {
                 assertEquals(e.getMessage(), ((Throwable) expected).getMessage(), e.getMessage());
             } else {
-                e.printStackTrace();
-                fail("Got exception when expected SymbolSet. " + e.getMessage());
+                fail("Got exception when expected SymbolSet. ", e);
             }
         }
     }
