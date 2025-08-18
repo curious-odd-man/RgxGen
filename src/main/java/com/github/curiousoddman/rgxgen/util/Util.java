@@ -135,15 +135,15 @@ public final class Util {
                                               SymbolRange allCharactersRange,
                                               List<SymbolRange> invertedRanges,
                                               CharList invertedCharacters) {
-        int firstCharInRange = allCharactersRange.getFrom();
-        int lastCharInRange = allCharactersRange.getTo();
+        int firstCharInRange = allCharactersRange.from();
+        int lastCharInRange = allCharactersRange.to();
 
         List<SymbolRange> sortedRanges = getApplicableSortedUniqueRanges(symbolRanges, symbols, allCharactersRange);
 
         int start = firstCharInRange;
         for (SymbolRange range : sortedRanges) {
-            int from = range.getFrom();
-            int to = range.getTo();
+            int from = range.from();
+            int to = range.to();
 
             if (start <= from) {
                 if (start + 1 == from) {
@@ -166,13 +166,13 @@ public final class Util {
     }
 
     private static List<SymbolRange> getApplicableSortedUniqueRanges(List<SymbolRange> symbolRanges, CharList symbols, SymbolRange allowedRange) {
-        int firstCharInRange = allowedRange.getFrom();
-        int lastCharInRange = allowedRange.getTo();
+        int firstCharInRange = allowedRange.from();
+        int lastCharInRange = allowedRange.to();
         List<SymbolRange> list = new ArrayList<>(symbolRanges.size() + symbolRanges.size());
 
         symbolRanges
                 .stream()
-                .filter(range -> range.getTo() >= firstCharInRange && range.getFrom() <= lastCharInRange)
+                .filter(range -> range.to() >= firstCharInRange && range.from() <= lastCharInRange)
                 .forEach(list::add);
         symbols
                 .stream()
@@ -180,7 +180,7 @@ public final class Util {
                 .map(symbol -> range(symbol, symbol))
                 .forEach(list::add);
 
-        list.sort(Comparator.comparing(SymbolRange::getFrom));
+        list.sort(Comparator.comparing(SymbolRange::from));
         return list;
     }
 
@@ -191,7 +191,7 @@ public final class Util {
                         originalSymbolRanges.stream(),
                         originalSymbols.stream().map(symbol -> range(symbol, symbol))
                 )
-                .sorted(Comparator.comparing(SymbolRange::getFrom))
+                .sorted(Comparator.comparing(SymbolRange::from))
                 .collect(Collectors.toList());
 
         if (sortedRanges.size() == 1) {
@@ -209,15 +209,15 @@ public final class Util {
                 sortedRanges.remove(i - 1);
             } else if (isRightCanContinueLeft(a, b)) {
                 sortedRanges.remove(i);
-                sortedRanges.set(i - 1, range(a.getFrom(), b.getTo()));
+                sortedRanges.set(i - 1, range(a.from(), b.to()));
             } else {
                 ++i;
             }
         }
 
         for (SymbolRange range : sortedRanges) {
-            if (range.getFrom() == range.getTo()) {
-                compactedSymbols.add((char) range.getFrom());
+            if (range.from() == range.to()) {
+                compactedSymbols.add((char) range.from());
             } else {
                 compactedRanges.add(range);
             }
@@ -225,10 +225,10 @@ public final class Util {
     }
 
     public static boolean isRightCanContinueLeft(SymbolRange left, SymbolRange right) {
-        return left.getFrom() <= right.getFrom() && right.getFrom() <= left.getTo() + 1 && left.getTo() < right.getTo();
+        return left.from() <= right.from() && right.from() <= left.to() + 1 && left.to() < right.to();
     }
 
     public static boolean isRightWithinLeft(SymbolRange left, SymbolRange right) {
-        return left.getFrom() <= right.getFrom() && left.getTo() >= right.getTo();
+        return left.from() <= right.from() && left.to() >= right.to();
     }
 }

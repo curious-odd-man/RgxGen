@@ -147,32 +147,41 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         GroupType groupType;
         int skip = 2;
         if (aCharIterator.peek() == '?') {
-            char pos2char = aCharIterator.peek(1);
-            switch (pos2char) {
-                case '<':
-                    skip = 3;
-                    char pos3char = aCharIterator.peek(2);
-                    if (pos3char == '!') {
-                        groupType = GroupType.NEGATIVE_LOOKBEHIND;
-                    } else if (pos3char == '=') {
-                        groupType = GroupType.POSITIVE_LOOKBEHIND;
-                    } else {
-                        aCharIterator.skip(skip);
-                        throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
-                    }
-                    break;
-                case '=':
-                    groupType = GroupType.POSITIVE_LOOKAHEAD;
-                    break;
-                case ':':
-                    groupType = GroupType.NON_CAPTURE_GROUP;
-                    break;
-                case '!':
-                    groupType = GroupType.NEGATIVE_LOOKAHEAD;
-                    break;
-                default:
+//          Non-capturing group (?:...)
+            if (aCharIterator.hasNext("?:")) {
+                groupType = GroupType.NON_CAPTURE_GROUP;
+            }
+//          Positive Lookahead (?=...)
+            else if (aCharIterator.hasNext("?=")) {
+                groupType = GroupType.POSITIVE_LOOKAHEAD;
+            }
+//          Negative Lookahead (?!...)
+            else if (aCharIterator.hasNext("?!")) {
+                groupType = GroupType.NEGATIVE_LOOKAHEAD;
+            }
+//          Positive Lookbehind (?<=...)
+            else if (aCharIterator.hasNext("?<=")) {
+                skip = 3;
+                groupType = GroupType.POSITIVE_LOOKBEHIND;
+            }
+//          Negative Lookbehind (?<!...)
+            else if (aCharIterator.hasNext("?<!")) {
+                skip = 3;
+                groupType = GroupType.NEGATIVE_LOOKBEHIND;
+            }
+//          Named Capturing Group (?<name>...)
+            else if (aCharIterator.hasNext("?<")) {
+                try {
+                    String groupNamePart = aCharIterator.peekUntil('>');
+                    skip = groupNamePart.length() + 1;
+                    groupType = GroupType.CAPTURE_GROUP;
+                } catch (Exception e) {
                     aCharIterator.skip(skip);
-                    throw new RgxGenParseException("Unexpected symbol in pattern: " + aCharIterator.context());
+                    throw new RgxGenParseException("Incomplete group structure: " + aCharIterator.context(), e);
+                }
+            } else {
+                aCharIterator.skip(skip);
+                throw new RgxGenParseException("Incomplete group structure: " + aCharIterator.context());
             }
         } else {
             return GroupType.CAPTURE_GROUP;
@@ -600,7 +609,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '?' -> nodeCreator.makeRepeat(aCharIterator.substringToCurrPos(startPos), repeatNode, 0, 1);
             case '+' -> nodeCreator.makeRepeatMinimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 1);
             case '{' -> handleRepeatInCurvyBraces(startPos, repeatNode);
-            default -> throw new RgxGenParseException("Unknown repetition with '" + c + '\'' + aCharIterator.context());
+            default -> throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
         };
 
         aNodesStartPos.put(node, startPos);

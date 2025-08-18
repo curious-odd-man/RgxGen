@@ -32,7 +32,7 @@ public class LicenseCheckerTest {
             try (Stream<Path> files = Files.walk(Paths.get("src/main"))) {
                 return files
                         .filter(Files::isRegularFile)
-                        .collect(Collectors.toList())
+                        .toList()
                         .stream();
             }
         } catch (IOException e) {

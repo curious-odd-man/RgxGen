@@ -12,11 +12,11 @@ public class LineDescriptor {
     private static final String S_S_S_S_S = "    %s(%s, %s, %s, %s),";
     private static final String S_S_S_S = "    %s(%s, %s, %s),";
 
-    public UnicodeCategory unicodeCategory;
-    public List<String> keys;
-    public String description;
-    public List<SymbolRange> ranges;
-    public CharList characters;
+    public final UnicodeCategory unicodeCategory;
+    public final List<String> keys;
+    public final String description;
+    public final List<SymbolRange> ranges;
+    public final CharList characters;
 
     public LineDescriptor(UnicodeCategory unicodeCategory, List<String> keys, String description, List<SymbolRange> ranges, CharList characters) {
         this.unicodeCategory = unicodeCategory;
@@ -50,7 +50,7 @@ public class LineDescriptor {
     }
 
     private static String rangeOrConstant(Map<SymbolRange, String> constantNames, SymbolRange range) {
-        return constantNames.getOrDefault(range, String.format("range('%s', '%s')", Utils.charAsString(range.getFrom()), Utils.charAsString(range.getTo())));
+        return constantNames.getOrDefault(range, String.format("range('%s', '%s')", Utils.charAsString(range.from()), Utils.charAsString(range.to())));
     }
 
     private static String makeDescription(UnicodeCategory key) {

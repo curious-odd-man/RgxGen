@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.makeAsciiCharacterArray;
 import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 class CharArrayListTest {
@@ -128,6 +128,14 @@ class CharArrayListTest {
         assertEquals('A', except.get(0));
         assertEquals('E', except.get(1));
         assertEquals('F', except.get(2));
+    }
+
+    @Test
+    void containsTest() {
+        CharList charList = CharList.rangeClosed('A', 'F');
+        assertTrue(charList.contains('B'));
+        assertFalse(charList.contains('a'));
+        assertFalse(charList.contains('G'));
     }
 
     @Nested

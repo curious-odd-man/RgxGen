@@ -123,6 +123,12 @@ public class RegressionTests {
     }
 
     @Test
+    void bug116_supportForNamedCaptureGroupTest() {
+        String pattern = "^(?<parliamentaryTerm>[0-9]{1,2})$";
+        assertDoesNotThrow(() -> RgxGen.parse(pattern));
+    }
+
+    @Test
     void tmpTestExampleTest() {
         NodeCreator myCustomNodeCreator = new DefaultNodeCreator() {
             @Override

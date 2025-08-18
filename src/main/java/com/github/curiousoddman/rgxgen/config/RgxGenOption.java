@@ -71,24 +71,6 @@ public class RgxGenOption<T> {
     }
 
     /**
-     * Get unique identifier of the property
-     *
-     * @return unique key
-     */
-    public String getKey() {
-        return key;
-    }
-
-    /**
-     * Get default value associated with the option
-     *
-     * @return default value
-     */
-    public T getDefault() {
-        return defaultValue;
-    }
-
-    /**
      * Get value from the properties object.
      *
      * @param properties object to get value from

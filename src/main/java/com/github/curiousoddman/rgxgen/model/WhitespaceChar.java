@@ -19,7 +19,7 @@ package com.github.curiousoddman.rgxgen.model;
 public enum WhitespaceChar {
     SPACE(' '),
     TAB('\t'),
-    CARRIAGE_RETUR('\r'),
+    CARRIAGE_RETURN('\r'),
     LINE_FEED('\n'),
     VERTICAL_TAB('\u000B'),
     FORM_FEED('\f');

@@ -76,11 +76,11 @@ public class SymbolSetIndexer {
         seed -= symbols.size();
 
         if (seed == 0) {
-            return (char) (symbolRanges.get(0).getFrom());
+            return (char) (symbolRanges.get(0).from());
         }
         int i = findRangeIndex(seed);
         int offset = rangeOffsets[i];
-        return (char) (symbolRanges.get(i).getFrom() + seed - offset);
+        return (char) (symbolRanges.get(i).from() + seed - offset);
     }
 
     private int findRangeIndex(int seed) {

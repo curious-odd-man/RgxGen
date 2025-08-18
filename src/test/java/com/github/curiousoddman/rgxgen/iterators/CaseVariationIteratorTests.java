@@ -42,7 +42,7 @@ public class CaseVariationIteratorTests {
     @MethodSource("parameters")
     public void testThrows(String aInput, List<String> aExpected) {
         CaseVariationIterator caseVariationIterator = new CaseVariationIterator(aInput);
-        List<String> strings = TestingUtilities.iteratorToList(caseVariationIterator);
+        TestingUtilities.iteratorToList(caseVariationIterator);
         assertFalse(caseVariationIterator.hasNext());
         assertThrows(NoSuchElementException.class, caseVariationIterator::next);
     }
