@@ -22,10 +22,7 @@ import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
-import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.NotMatchingGenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
-import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
+import com.github.curiousoddman.rgxgen.visitors.*;
 
 import java.math.BigInteger;
 import java.util.Optional;
@@ -154,5 +151,9 @@ public class RgxGen {
                 .get();
         node.visit(nmgv);
         return nmgv.getString();
+    }
+
+    public void visit(NodeVisitor customVisitor) {
+        node.visit(customVisitor);
     }
 }
