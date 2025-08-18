@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class RgxGenTest {
 
     @Test
-    void canVisitWithCustomVisitor() {
+    void canVisitWithCustomVisitorTest() {
         String pattern = "(a|b){1,2}\\1[a-z]";
         RgxGen rgxGen = RgxGen.parse(pattern);
         StringBuilder sb = new StringBuilder();
