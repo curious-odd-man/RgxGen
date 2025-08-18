@@ -29,77 +29,77 @@ import java.util.List;
 
 public class DefaultNodeCreator implements NodeCreator {
     @Override
-    public FinalSymbol makeFinalSymbol(String pattern) {
+    public FinalSymbol finalSymbol(String pattern) {
         return new FinalSymbol(pattern);
     }
 
     @Override
-    public NotSymbol makeNotSymbol(Node node) {
+    public NotSymbol notSymbol(Node node) {
         return new NotSymbol(node.getPattern(), node);
     }
 
     @Override
-    public GroupRef makeGroupRef(String pattern, int groupIndex) {
+    public GroupRef groupRef(String pattern, int groupIndex) {
         return new GroupRef(pattern, groupIndex);
     }
 
     @Override
-    public Repeat makeRepeat(String pattern, Node repeatNode, int repeatTimes) {
+    public Repeat repeat(String pattern, Node repeatNode, int repeatTimes) {
         return new Repeat(pattern, repeatNode, repeatTimes);
     }
 
     @Override
-    public Repeat makeRepeat(String pattern, Node repeatNode, int min, int max) {
+    public Repeat repeat(String pattern, Node repeatNode, int min, int max) {
         return new Repeat(pattern, repeatNode, min, max);
     }
 
     @Override
-    public Repeat makeRepeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
+    public Repeat repeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
         return new Repeat(pattern, repeatNode, repeatMinTimes, -1);
     }
 
     @Override
-    public Choice makeChoice(String pattern, Node[] alternatives) {
+    public Choice choice(String pattern, Node[] alternatives) {
         return new Choice(pattern, alternatives);
     }
 
     @Override
-    public Sequence makeSequence(String pattern, Node[] nodes) {
+    public Sequence sequence(String pattern, Node[] nodes) {
         return new Sequence(pattern, nodes);
     }
 
     @Override
-    public Group makeGroup(String pattern, Integer captureGroupIndex, Node node) {
+    public Group group(String pattern, Integer captureGroupIndex, Node node) {
         return new Group(pattern, captureGroupIndex, node);
     }
 
     @Override
-    public SymbolSet ofDotPattern(RgxGenProperties properties) {
+    public SymbolSet dotPatternSymbolSet(RgxGenProperties properties) {
         return SymbolSet.ofDotPattern(properties);
     }
 
     @Override
-    public SymbolSet ofAscii(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType) {
+    public SymbolSet asciiSymbolSet(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType) {
         return SymbolSet.ofAscii(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
     }
 
     @Override
-    public SymbolSet ofUnicode(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType) {
+    public SymbolSet unicodeSymbolSet(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType) {
         return SymbolSet.ofUnicode(pattern, positiveMatchDefinitions, negativeMatchDefinitions, matchType);
     }
 
     @Override
-    public SymbolSet ofAsciiRanges(String pattern, List<SymbolRange> symbolRanges, MatchType matchType) {
+    public SymbolSet asciiRangesSymbolSet(String pattern, List<SymbolRange> symbolRanges, MatchType matchType) {
         return SymbolSet.ofAsciiRanges(pattern, symbolRanges, matchType);
     }
 
     @Override
-    public SymbolSet ofAscii(String pattern, List<SymbolRange> asciiWordCharRanges, CharList charList, MatchType matchType) {
+    public SymbolSet asciiSymbolSet(String pattern, List<SymbolRange> asciiWordCharRanges, CharList charList, MatchType matchType) {
         return SymbolSet.ofAscii(pattern, asciiWordCharRanges, charList, matchType);
     }
 
     @Override
-    public SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType matchType) {
+    public SymbolSet unicodeCharacterClassSymbolSet(String pattern, UnicodeCategory unicodeCategory, MatchType matchType) {
         return SymbolSet.ofUnicodeCharacterClass(pattern, unicodeCategory, matchType);
     }
 }

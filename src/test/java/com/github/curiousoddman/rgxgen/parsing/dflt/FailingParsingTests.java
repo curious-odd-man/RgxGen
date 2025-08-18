@@ -69,14 +69,13 @@ public class FailingParsingTests {
 
     @Test
     public void unexpectedRepetitionCharacterTest() throws Throwable {
-
         Node dummyNode = new FinalSymbol("");
         String pattern = "a{1,2";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         try {
-            Field aNodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
-            aNodesStartPos.setAccessible(true);
-            Map<Node, Integer> o = (Map<Node, Integer>) aNodesStartPos.get(defaultTreeBuilder);
+            Field nodesStartPos = DefaultTreeBuilder.class.getDeclaredField("aNodesStartPos");
+            nodesStartPos.setAccessible(true);
+            Map<Node, Integer> o = (Map<Node, Integer>) nodesStartPos.get(defaultTreeBuilder);
             o.put(dummyNode, 0);
             Method handleRepeat = DefaultTreeBuilder.class.getDeclaredMethod("handleRepeat", char.class, Node.class);
             handleRepeat.setAccessible(true);
@@ -84,7 +83,7 @@ public class FailingParsingTests {
             Throwable cause = exception.getCause();
             assertSame(RgxGenParseException.class, cause.getClass());
             assertEquals("""
-                    Unknown repetition with 'x'
+                    Unknown repetition character 'x'
                     'a{1,'
                     ^""", cause.getMessage());
             //  handleRepeat.invoke(defaultTreeBuilder, 'x', dummyNode);

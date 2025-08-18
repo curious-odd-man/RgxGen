@@ -27,33 +27,33 @@ import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import java.util.List;
 
 public interface NodeCreator {
-    FinalSymbol makeFinalSymbol(String pattern);
+    FinalSymbol finalSymbol(String pattern);
 
-    NotSymbol makeNotSymbol(Node node);
+    NotSymbol notSymbol(Node node);
 
-    GroupRef makeGroupRef(String pattern, int groupIndex);
+    GroupRef groupRef(String pattern, int groupIndex);
 
-    Repeat makeRepeat(String pattern, Node repeatNode, int repeatTimes);
+    Repeat repeat(String pattern, Node repeatNode, int repeatTimes);
 
-    Repeat makeRepeat(String pattern, Node repeatNode, int min, int max);
+    Repeat repeat(String pattern, Node repeatNode, int min, int max);
 
-    Repeat makeRepeatMinimum(String pattern, Node repeatNode, int repeatMinTimes);
+    Repeat repeatMinimum(String pattern, Node repeatNode, int repeatMinTimes);
 
-    Choice makeChoice(String pattern, Node[] alternatives);
+    Choice choice(String pattern, Node[] alternatives);
 
-    Sequence makeSequence(String pattern, Node[] nodes);
+    Sequence sequence(String pattern, Node[] nodes);
 
-    Group makeGroup(String pattern, Integer captureGroupIndex, Node node);
+    Group group(String pattern, Integer captureGroupIndex, Node node);
 
-    SymbolSet ofDotPattern(RgxGenProperties properties);
+    SymbolSet dotPatternSymbolSet(RgxGenProperties properties);
 
-    SymbolSet ofAscii(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType);
+    SymbolSet asciiSymbolSet(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType);
 
-    SymbolSet ofUnicode(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType);
+    SymbolSet unicodeSymbolSet(String pattern, RgxGenCharsDefinition positiveMatchDefinitions, RgxGenCharsDefinition negativeMatchDefinitions, MatchType matchType);
 
-    SymbolSet ofAsciiRanges(String pattern, List<SymbolRange> symbolRanges, MatchType matchType);
+    SymbolSet asciiRangesSymbolSet(String pattern, List<SymbolRange> symbolRanges, MatchType matchType);
 
-    SymbolSet ofAscii(String pattern, List<SymbolRange> asciiWordCharRanges, CharList charList, MatchType matchType);
+    SymbolSet asciiSymbolSet(String pattern, List<SymbolRange> asciiWordCharRanges, CharList charList, MatchType matchType);
 
-    SymbolSet ofUnicodeCharacterClass(String pattern, UnicodeCategory unicodeCategory, MatchType matchType);
+    SymbolSet unicodeCharacterClassSymbolSet(String pattern, UnicodeCategory unicodeCategory, MatchType matchType);
 }

@@ -132,7 +132,7 @@ public class RegressionTests {
     void tmpTestExampleTest() {
         NodeCreator myCustomNodeCreator = new DefaultNodeCreator() {
             @Override
-            public Repeat makeRepeat(String pattern, Node repeatNode, int repeatTimes) {
+            public Repeat repeat(String pattern, Node repeatNode, int repeatTimes) {
                 return new Repeat(pattern, repeatNode, repeatTimes) {
                     @Override
                     public Node getNode() {
@@ -152,7 +152,7 @@ public class RegressionTests {
             }
 
             @Override
-            public Repeat makeRepeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
+            public Repeat repeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
                 return new Repeat(pattern, repeatNode, repeatMinTimes, -1) {
                     @Override
                     public Node getNode() {
