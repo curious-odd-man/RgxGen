@@ -20,15 +20,15 @@ This is a java library that, given a regex pattern, allows to:
 ## Status
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=plastic)](https://opensource.org/licenses/Apache-2.0)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.curious-odd-man/rgxgen/badge.svg?style=plastic)](https://search.maven.org/search?q=a:rgxgen)
+![Maven Central Version](https://img.shields.io/maven-central/v/com.github.curious-odd-man/rgxgen?style=plastic)
 [![javadoc](https://javadoc.io/badge2/com.github.curious-odd-man/rgxgen/javadoc.svg?style=plastic)](https://javadoc.io/doc/com.github.curious-odd-man/rgxgen)
 
 Build status:
 
-|                                                             Latest Release                                                             |                                                           Latest snapshot                                                           |
-|:--------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------:|
-|    [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=master)](https://travis-ci.com/curious-odd-man/RgxGen)     |    [![Build Status](https://travis-ci.com/curious-odd-man/RgxGen.svg?branch=dev)](https://travis-ci.com/curious-odd-man/RgxGen)     |
-| [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) | [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen) |
+|                                                                                             Latest Release                                                                                             |                                                                                          Latest snapshot                                                                                           |
+|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| [![CodeQL](https://github.com/curious-odd-man/RgxGen/actions/workflows/codeql-analysis.yml/badge.svg?branch=master&style=plastic)](https://github.com/curious-odd-man/RgxGen/actions/workflows/codeql-analysis.yml) | [![CodeQL](https://github.com/curious-odd-man/RgxGen/actions/workflows/codeql-analysis.yml/badge.svg?branch=dev&style=plastic)](https://github.com/curious-odd-man/RgxGen/actions/workflows/codeql-analysis.yml) |
+|                                 [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/master/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen)                                 |                                [![codecov](https://codecov.io/gh/curious-odd-man/RgxGen/branch/dev/graph/badge.svg)](https://codecov.io/gh/curious-odd-man/RgxGen)                                 |
 
 ## Try it now!!!
 
@@ -131,7 +131,8 @@ RgxGen treats any other characters as literals - those are generated as is.
 RgxGen can be configured per instance.
 
 Please refer to the following enum for all available
-properties: [`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
+properties: [
+`com.github.curiousoddman.rgxgen.config.RgxGenOption`](src/main/java/com/github/curiousoddman/rgxgen/config/RgxGenOption.java).
 
 ### Create and Use Configuration Properties
 
@@ -162,7 +163,8 @@ public class Main {
 In regex dot `.` means any symbol.
 
 By default, this would generate any value in a range defined in `ASCII_SYMBOL_RANGE`
-here [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+here [
+`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 i.e.: any character starting from `space` to `~`.
 
 You can modify range of allowed values using `DOT_MATCHES_ONLY` configuration property.
@@ -233,9 +235,11 @@ the ASCII only characters and another - for unicode characters.
 These ranges are defined here:
 
 - ASCII: `ASCII_SYMBOL_RANGE` constant
-  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+  in [
+  `com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 - Unicode: `UNICODE_SYMBOL_RANGE` constant
-  in [`com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
+  in [
+  `com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.java`](src/main/java/com/github/curiousoddman/rgxgen/parsing/dflt/ConstantsProvider.java)
 
 `UNICODE_SYMBOL_RANGE` is currently used ONLY when Character Classes are used `\p{}` ir `\P{}` patterns.
 By default `ASCII_SYMBOL_RANGE` is used.
@@ -259,7 +263,8 @@ For complete list of characters per category please refer to [this](data/categor
 Each file represents one category. Each line in a file describes one symbol from the category.
 
 Supported keys for categories can be found
-in [`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
+in [
+`com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
 
 ## Other tools to generate values by regex and why this might be better
 
