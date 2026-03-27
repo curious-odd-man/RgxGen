@@ -20,4 +20,12 @@ public interface ParsingFlags {
     EmptyParsingFlags EMPTY = new EmptyParsingFlags();
 
     boolean isChoice();
+
+    boolean hasDollar();
+
+    boolean hasCaret();
+
+    ParsingFlags copy();
+
+    void keepOnlyChoice();
 }

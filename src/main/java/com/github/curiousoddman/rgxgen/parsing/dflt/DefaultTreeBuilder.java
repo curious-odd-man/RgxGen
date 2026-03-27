@@ -133,7 +133,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      */
     private void sbToFinal(StringBuilder sb, Collection<Node> nodes, ParsingFlags parsingFlags) {
         if (!sb.isEmpty()) {
-            FinalSymbol finalSymbol = nodeCreator.finalSymbol(sb.toString(), parsingFlags);
+            FinalSymbol finalSymbol = nodeCreator.finalSymbol(sb.toString(), parsingFlags.copy());
+            parsingFlags.keepOnlyChoice();
             aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue().length());
             nodes.add(finalSymbol);
             sb.delete(0, Integer.MAX_VALUE);

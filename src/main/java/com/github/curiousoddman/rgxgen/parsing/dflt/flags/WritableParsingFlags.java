@@ -20,7 +20,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class WritableParsingFlags implements ParsingFlags {
-    private final Set<ParsingFlag> flags = EnumSet.noneOf(ParsingFlag.class);
+    final Set<ParsingFlag> flags = EnumSet.noneOf(ParsingFlag.class);
 
     public static WritableParsingFlags parsingFlags() {
         return new WritableParsingFlags();
@@ -55,5 +55,27 @@ public class WritableParsingFlags implements ParsingFlags {
 
     public boolean isChoice() {
         return flags.contains(ParsingFlag.IS_CHOICE);
+    }
+
+    @Override
+    public boolean hasDollar() {
+        return flags.contains(ParsingFlag.HAS_DOLLAR);
+    }
+
+    @Override
+    public boolean hasCaret() {
+        return flags.contains(ParsingFlag.HAS_CARET);
+    }
+
+    @Override
+    public ParsingFlags copy() {
+        WritableParsingFlags writableParsingFlags = new WritableParsingFlags();
+        writableParsingFlags.flags.addAll(flags);
+        return writableParsingFlags;
+    }
+
+    @Override
+    public void keepOnlyChoice() {
+        flags.removeIf(f -> !f.equals(ParsingFlag.IS_CHOICE));
     }
 }

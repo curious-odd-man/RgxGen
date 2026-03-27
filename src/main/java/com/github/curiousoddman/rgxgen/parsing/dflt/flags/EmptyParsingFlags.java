@@ -23,6 +23,26 @@ public class EmptyParsingFlags implements ParsingFlags {
     }
 
     @Override
+    public boolean hasDollar() {
+        return false;
+    }
+
+    @Override
+    public boolean hasCaret() {
+        return false;
+    }
+
+    @Override
+    public ParsingFlags copy() {
+        return this;
+    }
+
+    @Override
+    public void keepOnlyChoice() {
+
+    }
+
+    @Override
     public String toString() {
         return "";
     }
