@@ -3,16 +3,10 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
-import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.nodes.Repeat;
-import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
-import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.BIG_INTEGER_TWO;
@@ -126,5 +120,38 @@ public class RegressionTests {
     void bug116_supportForNamedCaptureGroupTest() {
         String pattern = "^(?<parliamentaryTerm>[0-9]{1,2})$";
         assertDoesNotThrow(() -> RgxGen.parse(pattern));
+    }
+
+    @Test
+    void bug120_dollarInsideTheExpressionTest() {
+        String pattern = "(axx$|byy)czz";
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        for (int i = 0; i < 10; i++) {
+            assertEquals("byyczz", rgxGen.generate(new Random(99)));
+        }
+    }
+
+    @Test
+    void bug120_caretInsideTheExpressionTest() {
+        String pattern = "czz(^axx|byy)";
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        for (int i = 0; i < 10; i++) {
+            assertEquals("czzbyy", rgxGen.generate(new Random(101)));
+        }
+    }
+
+    @Test
+    void bug120_originalExpressionSubmittedTest() {
+        String pattern = "^((1$|1,){0,1}(2$|2,){0,1}(3$|3,){0,1}(4$|4,){0,1}(5$|5,){0,1}(6$|6,){0,1}(7$|7,){0,1}(8$|8,){0,1}(9$|9,){0,1}(10$|10,){0,1}(11$|11,){0,1}(12$){0,1})$";
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        for (int i = 0; i < 10; i++) {
+            String generate = rgxGen.generate();
+            List<Integer> list = Arrays.stream(generate.split(",")).map(Integer::valueOf).toList();
+            List<Integer> orderedList = list.stream().sorted().toList();
+            assertEquals(orderedList, list);
+            IntSummaryStatistics intSummaryStatistics = list.stream().mapToInt(v -> v).summaryStatistics();
+            assertTrue(intSummaryStatistics.getMin() >= 1);
+            assertTrue(intSummaryStatistics.getMax() <= 12);
+        }
     }
 }
