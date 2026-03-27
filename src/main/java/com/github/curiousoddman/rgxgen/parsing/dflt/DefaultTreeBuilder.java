@@ -22,6 +22,8 @@ import com.github.curiousoddman.rgxgen.model.*;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import com.github.curiousoddman.rgxgen.util.chars.CharListCollector;
 
@@ -56,7 +58,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         this.properties = properties;
     }
 
-    private static void assertCorrectCharacter(char currentChar) {
+    private static void assertDollarOrCaretCharacter(char currentChar) {
         if (currentChar != '^' && currentChar != '$') {
             throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
         }
@@ -125,12 +127,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * Convert all text aggregated in StringBuilder into FinalSymbol node.
      * Does nothing, if sb is empty
      *
-     * @param sb    StringBuilder, that is read and emptied
-     * @param nodes nodes collection to add created node to.
+     * @param sb           StringBuilder, that is read and emptied
+     * @param nodes        nodes collection to add created node to.
+     * @param parsingFlags current parsing flags
      */
-    private void sbToFinal(StringBuilder sb, Collection<Node> nodes) {
+    private void sbToFinal(StringBuilder sb, Collection<Node> nodes, ParsingFlags parsingFlags) {
         if (!sb.isEmpty()) {
-            FinalSymbol finalSymbol = nodeCreator.finalSymbol(sb.toString());
+            FinalSymbol finalSymbol = nodeCreator.finalSymbol(sb.toString(), parsingFlags);
             aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() - finalSymbol.getValue().length());
             nodes.add(finalSymbol);
             sb.delete(0, Integer.MAX_VALUE);
@@ -191,22 +194,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return groupType;
     }
 
-    private Node handleGroupEndCharacter(int startPos, StringBuilder sb, List<Node> nodes, boolean isChoice, List<Node> choices, Integer captureGroupIndex, GroupType groupType) {
+    private Node handleGroupEndCharacter(int startPos, StringBuilder sb, List<Node> nodes,
+                                         List<Node> choices, Integer captureGroupIndex, GroupType groupType,
+                                         WritableParsingFlags parsingFlags) {
         if (sb.isEmpty() && nodes.isEmpty()) {
             // Special case when '(a|)' is used - like empty
-            FinalSymbol finalSymbol = nodeCreator.finalSymbol("");
+            FinalSymbol finalSymbol = nodeCreator.finalSymbol("", parsingFlags);
             aNodesStartPos.put(finalSymbol, startPos);
             nodes.add(finalSymbol);
         } else {
-            sbToFinal(sb, nodes);
+            sbToFinal(sb, nodes, parsingFlags);
         }
 
-        if (isChoice) {
+        if (parsingFlags.isChoice()) {
             choices.add(sequenceOrNot(startPos, nodes, choices, false, null));
             nodes.clear();
         }
 
-        Node node = sequenceOrNot(startPos, nodes, choices, isChoice, captureGroupIndex);
+        Node node = sequenceOrNot(startPos, nodes, choices, parsingFlags.isChoice(), captureGroupIndex);
 
         if (groupType.isNegative()) {
             return nodeCreator.notSymbol(node);
@@ -230,7 +235,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      *                    NOTE! Must be either caret or dollar sign
      */
     private void verifyStartEndMarkerConsistency(char currentChar) {
-        assertCorrectCharacter(currentChar);
+        assertDollarOrCaretCharacter(currentChar);
         char charAtPos = aCharIterator.peek(currentChar == '^' ? -2 : 0);
         String errorText;
         switch (charAtPos) {
@@ -284,50 +289,56 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         List<Node> choices = new ArrayList<>(remainingLength);
         List<Node> nodes = new ArrayList<>(remainingLength);
         StringBuilder sb = new StringBuilder(remainingLength);
-        boolean isChoice = false;
         int choicesStartPos = groupStartPos;
+        WritableParsingFlags parsingFlags = new WritableParsingFlags();
 
         while (aCharIterator.hasNext()) {
             char c = aCharIterator.next();
             switch (c) {
                 case '^':
-                case '$':
+                    parsingFlags.withCaret();
                     verifyStartEndMarkerConsistency(c);
                     break;
 
+                case '$':
+                    verifyStartEndMarkerConsistency(c);
+                    parsingFlags.withDollar();
+                    sbToFinal(sb, nodes, parsingFlags);
+                    break;
+
                 case '[':
-                    sbToFinal(sb, nodes);
-                    nodes.add(handleSquareBrackets());
+                    sbToFinal(sb, nodes, parsingFlags);
+                    nodes.add(handleSquareBrackets(parsingFlags));
                     break;
 
                 case '(':
-                    sbToFinal(sb, nodes);
+                    sbToFinal(sb, nodes, parsingFlags);
                     int intGroupStartPos = aCharIterator.prevPos();
                     GroupType groupType = processGroupType();
                     nodes.add(parseGroup(intGroupStartPos, groupType));
                     break;
 
                 case '|':
-                    choicesStartPos = handlePipeCharacter(choices, nodes, sb, choicesStartPos);
-                    isChoice = true;
+                    choicesStartPos = handlePipeCharacter(choices, nodes, sb, choicesStartPos, parsingFlags);
+                    parsingFlags.withChoice();
                     break;
 
                 case ')':
-                    return handleGroupEndCharacter(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex, currentGroupType);
+                    return handleGroupEndCharacter(groupStartPos, sb, nodes, choices, captureGroupIndex, currentGroupType, parsingFlags);
 
                 case '{':
                 case '*':
                 case '?':
                 case '+':
-                    handleRepeatCharacter(nodes, sb, c);
+                    handleRepeatCharacter(nodes, sb, c, parsingFlags);
                     break;
 
                 case '.':
-                    handleAnySymbolCharacter(nodes, sb);
+                    handleAnySymbolCharacter(nodes, sb, parsingFlags);
                     break;
 
                 case '\\':
-                    handleEscapedCharacter(sb, nodes, true);
+                    handleEscapedCharacter(sb, nodes, true, parsingFlags);
                     break;
 
                 default:
@@ -336,24 +347,24 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             }
         }
 
-        return handleGroupEndCharacter(groupStartPos, sb, nodes, isChoice, choices, captureGroupIndex, currentGroupType);
+        return handleGroupEndCharacter(groupStartPos, sb, nodes, choices, captureGroupIndex, currentGroupType, parsingFlags);
     }
 
-    private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb) {
-        sbToFinal(sb, nodes);
+    private void handleAnySymbolCharacter(Collection<Node> nodes, StringBuilder sb, ParsingFlags parsingFlags) {
+        sbToFinal(sb, nodes, parsingFlags);
         SymbolSet symbolSet = nodeCreator.dotPatternSymbolSet(properties);
         aNodesStartPos.put(symbolSet, aCharIterator.prevPos());
         nodes.add(symbolSet);
     }
 
-    private int handlePipeCharacter(List<Node> choices, List<Node> nodes, StringBuilder sb, int choicesStartPos) {
+    private int handlePipeCharacter(List<Node> choices, List<Node> nodes, StringBuilder sb, int choicesStartPos, ParsingFlags parsingFlags) {
         if (sb.isEmpty() && nodes.isEmpty()) {
             // Special case when '(|a)' is used - like empty or something
-            FinalSymbol finalSymbol = nodeCreator.finalSymbol("");
+            FinalSymbol finalSymbol = nodeCreator.finalSymbol("", parsingFlags);
             aNodesStartPos.put(finalSymbol, aCharIterator.prevPos() + 1);
             choices.add(finalSymbol);
         } else {
-            sbToFinal(sb, nodes);
+            sbToFinal(sb, nodes, parsingFlags);
             choices.add(sequenceOrNot(choicesStartPos, nodes, choices, false, null));
             choicesStartPos = aCharIterator.prevPos() + 1;
             nodes.clear();
@@ -361,7 +372,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         return choicesStartPos;
     }
 
-    private void handleRepeatCharacter(List<Node> nodes, StringBuilder sb, char c) {
+    private void handleRepeatCharacter(List<Node> nodes, StringBuilder sb, char c, ParsingFlags parsingFlags) {
         // We had separate characters before
         Node repeatNode;
         if (sb.isEmpty()) {
@@ -380,8 +391,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             // Repetition for the last character
             char charToRepeat = sb.charAt(sb.length() - 1);
             sb.deleteCharAt(sb.length() - 1);
-            sbToFinal(sb, nodes);
-            repeatNode = nodeCreator.finalSymbol(String.valueOf(charToRepeat));
+            sbToFinal(sb, nodes, parsingFlags);
+            repeatNode = nodeCreator.finalSymbol(String.valueOf(charToRepeat), parsingFlags);
             aNodesStartPos.put(repeatNode, aCharIterator.prevPos() - 1);
         }
         nodes.add(handleRepeat(c, repeatNode));
@@ -448,20 +459,20 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      * @param sb    string builder containing all previous characters before the escape
      * @param nodes previously created nodes; new node will be appended here
      */
-    private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed) {
+    private void handleEscapedCharacter(StringBuilder sb, Collection<Node> nodes, boolean groupRefAllowed, ParsingFlags parsingFlags) {
         char c = aCharIterator.next();
         Node createdNode = null;
         int nodeStartOffset = aCharIterator.prevPos() - 1;
         switch (c) {
             case 'd':  // Any decimal digit
             case 'D':  // Any non-decimal digit
-                sbToFinal(sb, nodes);
+                sbToFinal(sb, nodes, parsingFlags);
                 createdNode = nodeCreator.asciiRangesSymbolSet("\\" + c, Collections.singletonList(ASCII_DIGITS), getMatchType(c, 'd'));
                 break;
 
             case 's':  // Any white space
             case 'S':  // Any non-white space
-                sbToFinal(sb, nodes);
+                sbToFinal(sb, nodes, parsingFlags);
                 List<WhitespaceChar> whitespaceChars = RgxGenOption.WHITESPACE_DEFINITION.getFromPropertiesOrDefault(properties);
                 CharList whitespaceCharsList = whitespaceChars.stream().map(WhitespaceChar::get).collect(new CharListCollector());
                 createdNode = nodeCreator.asciiSymbolSet("\\" + c,
@@ -472,13 +483,13 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
 
             case 'w':  // Any word characters
             case 'W':  // Any non-word characters
-                sbToFinal(sb, nodes);
+                sbToFinal(sb, nodes, parsingFlags);
                 createdNode = nodeCreator.asciiSymbolSet("\\" + c, ConstantsProvider.getAsciiWordCharRanges(), CharList.charList('_'), getMatchType(c, 'w'));
                 break;
 
             case 'p':   // Character classes
             case 'P':   // Not-matching character classes
-                sbToFinal(sb, nodes);
+                sbToFinal(sb, nodes, parsingFlags);
                 createdNode = createUnicodeSymbolSetNode(c, getMatchType(c, 'p'));
                 break;
 
@@ -513,7 +524,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '7':
             case '8':
             case '9':
-                sbToFinal(sb, nodes);
+                sbToFinal(sb, nodes, parsingFlags);
                 handleGroupReference(groupRefAllowed, nodes, c);
                 break;
 
@@ -609,7 +620,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
             case '?' -> nodeCreator.repeat(aCharIterator.substringToCurrPos(startPos), repeatNode, 0, 1);
             case '+' -> nodeCreator.repeatMinimum(aCharIterator.substringToCurrPos(startPos), repeatNode, 1);
             case '{' -> handleRepeatInCurvyBraces(startPos, repeatNode);
-            default -> throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
+            default ->
+                    throw new RgxGenParseException("Unknown repetition character '" + c + '\'' + aCharIterator.context());
         };
 
         aNodesStartPos.put(node, startPos);
@@ -659,7 +671,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      *
      * @return Node representing expression in square brackets
      */
-    private Node handleSquareBrackets() {
+    private Node handleSquareBrackets(ParsingFlags parsingFlags) {
         int openSquareBraceIndex = aCharIterator.prevPos();
         MatchType matchType = determineSymbolSetMatchType(aCharIterator);
         StringBuilder characters = new StringBuilder(aCharIterator.remaining());
@@ -685,7 +697,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '\\':
-                    Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters);
+                    Optional<SymbolSet> symbolSet = handleBackslashInsideSquareBrackets(characters, parsingFlags);
 
                     if (rangeStarted) {
                         if (symbolSet.isPresent()) {
@@ -711,12 +723,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         throw new RgxGenParseException("Unexpected End Of Expression. Didn't find closing ']'" + aCharIterator.context(openSquareBraceIndex));
     }
 
-    private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters) {
+    private Optional<SymbolSet> handleBackslashInsideSquareBrackets(StringBuilder characters, ParsingFlags parsingFlags) {
         // Skip backslash and add next symbol to characters
         List<Node> nodes = new ArrayList<>();
 
         StringBuilder sb = new StringBuilder();
-        handleEscapedCharacter(sb, nodes, false);
+        handleEscapedCharacter(sb, nodes, false, parsingFlags);
         characters.append(sb);
 
         if (nodes.isEmpty()) {

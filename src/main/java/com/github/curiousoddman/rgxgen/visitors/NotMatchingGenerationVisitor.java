@@ -23,6 +23,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.ASCII_SYMBOL_RANGE;
+import static com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags.parsingFlags;
 
 
 public class NotMatchingGenerationVisitor extends GenerationVisitor {
@@ -158,7 +160,7 @@ public class NotMatchingGenerationVisitor extends GenerationVisitor {
     @Override
     public void visit(GroupRef node) {
         // Note: How will this work if we will change only some of the nodes???
-        FinalSymbol finalSymbol = new FinalSymbol(aGroupValues.get(node.getIndex()));
+        FinalSymbol finalSymbol = new FinalSymbol(aGroupValues.get(node.getIndex()), parsingFlags());
         visit(finalSymbol);
     }
 }

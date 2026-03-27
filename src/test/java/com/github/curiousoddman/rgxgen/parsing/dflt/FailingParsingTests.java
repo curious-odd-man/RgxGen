@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -69,7 +70,7 @@ public class FailingParsingTests {
 
     @Test
     public void unexpectedRepetitionCharacterTest() throws Throwable {
-        Node dummyNode = new FinalSymbol("");
+        Node dummyNode = new FinalSymbol("", ParsingFlags.EMPTY);
         String pattern = "a{1,2";
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
         try {

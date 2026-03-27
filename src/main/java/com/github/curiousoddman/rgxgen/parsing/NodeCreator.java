@@ -22,12 +22,13 @@ import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.List;
 
 public interface NodeCreator {
-    FinalSymbol finalSymbol(String pattern);
+    FinalSymbol finalSymbol(String pattern, ParsingFlags parsingFlags);
 
     NotSymbol notSymbol(Node node);
 

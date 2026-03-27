@@ -5,6 +5,8 @@ import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
@@ -27,12 +29,12 @@ import static java.util.Collections.singletonList;
 @SuppressWarnings("DoubleBraceInitialization")
 public enum TestPattern implements DataInterface {
     SIMPLE_A("a",
-            new FinalSymbol("a")) {{
+            new FinalSymbol("a", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("a");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     SIMPLE_A_WITH_START_END("^a$",
-            new FinalSymbol("a")) {{
+            new FinalSymbol("a", WritableParsingFlags.caretAndDollar())) {{
         setAllUniqueValues("a");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -68,17 +70,17 @@ public enum TestPattern implements DataInterface {
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SPACE("\\x20", // Space
-            new FinalSymbol(" ")
+            new FinalSymbol(" ", ParsingFlags.EMPTY)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SYMBOL("\\x{26F8}",
-            new FinalSymbol("⛸")),
+            new FinalSymbol("⛸", ParsingFlags.EMPTY)),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SPACE_THEN_A("\\x20a", // Space
-            new FinalSymbol(" a")),
+            new FinalSymbol(" a", ParsingFlags.EMPTY)),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     HEX_SYMBOL_THEN_A("\\x{26F8}a",
-            new FinalSymbol("⛸a")),
+            new FinalSymbol("⛸a", ParsingFlags.EMPTY)),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B("[ab]",
             SymbolSet.ofAsciiCharacters("[ab]",
@@ -92,31 +94,31 @@ public enum TestPattern implements DataInterface {
             new Sequence("[ab]c",
                     SymbolSet.ofAsciiCharacters("[ab]", new char[]{
                             'a', 'b'
-                    }, MatchType.POSITIVE), new FinalSymbol("c"))) {{
+                    }, MatchType.POSITIVE), new FinalSymbol("c", ParsingFlags.EMPTY))) {{
         setAllUniqueValues("ac", "bc");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     D_THEN_A_OR_B_THEN_C("d[ab]c",
             new Sequence("d[ab]c",
-                    new FinalSymbol("d"),
+                    new FinalSymbol("d", ParsingFlags.EMPTY),
                     SymbolSet.ofAsciiCharacters("[ab]", new char[]{
                             'a', 'b'
-                    }, MatchType.POSITIVE), new FinalSymbol("c"))) {{
+                    }, MatchType.POSITIVE), new FinalSymbol("c", ParsingFlags.EMPTY))) {{
         setAllUniqueValues("dac", "dbc");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_RANGE("a{2,5}",
-            new Repeat("a{2,5}", new FinalSymbol("a"), 2, 5)) {{
+            new Repeat("a{2,5}", new FinalSymbol("a", ParsingFlags.EMPTY), 2, 5)) {{
         setAllUniqueValues("aa", "aaa", "aaaa", "aaaaa");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_CONST("a{2}",
-            new Repeat("a{2}", new FinalSymbol("a"), 2)) {{
+            new Repeat("a{2}", new FinalSymbol("a", ParsingFlags.EMPTY), 2)) {{
         setAllUniqueValues("aa");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_60K("a{60000}",
-            new Repeat("a{60000}", new FinalSymbol("a"), 60000)) {{
+            new Repeat("a{60000}", new FinalSymbol("a", ParsingFlags.EMPTY), 60000)) {{
         setAllUniqueValues(Stream.generate(() -> "a")
                 .limit(60000)
                 .reduce("", String::concat));
@@ -125,38 +127,38 @@ public enum TestPattern implements DataInterface {
     A_OR_B_REPEAT_CONST(
             "(a|b){2}",
             new Repeat("(a|b){2}", new Group("(a|b)", 1,
-                    new Choice("(a|b)", new FinalSymbol("a"), new FinalSymbol("b"))), 2)) {{
+                    new Choice("(a|b)", new FinalSymbol("a", ParsingFlags.EMPTY), new FinalSymbol("b", ParsingFlags.EMPTY))), 2)) {{
         setAllUniqueValues("aa", "ab", "ba", "bb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_OR_B_REPEAT_RANGE("(a|b){0,2}",
             new Repeat("(a|b){0,2}",
                     new Group("(a|b)", 1,
-                            new Choice("(a|b)", new FinalSymbol("a"), new FinalSymbol("b"))), 0, 2)) {{
+                            new Choice("(a|b)", new FinalSymbol("a", ParsingFlags.EMPTY), new FinalSymbol("b", ParsingFlags.EMPTY))), 0, 2)) {{
         setAllUniqueValues("", "a", "b", "aa", "ab", "ba", "bb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_OR_B_REPEAT("(a{0,2}|b{0,2})",
             new Group("(a{0,2}|b{0,2})", 1,
                     new Choice("(a{0,2}|b{0,2})",
-                            new Repeat("a{0,2}", new FinalSymbol("a"), 0, 2),
-                            new Repeat("b{0,2}", new FinalSymbol("b"), 0, 2)))) {{
+                            new Repeat("a{0,2}", new FinalSymbol("a", ParsingFlags.EMPTY), 0, 2),
+                            new Repeat("b{0,2}", new FinalSymbol("b", ParsingFlags.EMPTY), 0, 2)))) {{
         setAllUniqueValues("", "a", "aa", "", "b", "bb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOTHING_OR_A_REPEAT_OR_B_REPEAT("(|(a{1,2}|b{1,2}))",
             new Group("(|(a{1,2}|b{1,2}))", 1,
                     new Choice("(|(a{1,2}|b{1,2}))",
-                            new FinalSymbol(""),
+                            new FinalSymbol("", ParsingFlags.EMPTY),
                             new Group("(a{1,2}|b{1,2})", 2,
                                     new Choice("(a{1,2}|b{1,2})",
-                                            new Repeat("a{1,2}", new FinalSymbol("a"), 1, 2),
-                                            new Repeat("b{1,2}", new FinalSymbol("b"), 1, 2)))))) {{
+                                            new Repeat("a{1,2}", new FinalSymbol("a", ParsingFlags.EMPTY), 1, 2),
+                                            new Repeat("b{1,2}", new FinalSymbol("b", ParsingFlags.EMPTY), 1, 2)))))) {{
         setAllUniqueValues("", "a", "aa", "b", "bb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_ANY("a.",
-            new Sequence("a.", new FinalSymbol("a"), SymbolSet.ofDotPattern(null))) {{
+            new Sequence("a.", new FinalSymbol("a", ParsingFlags.EMPTY), SymbolSet.ofDotPattern(null))) {{
         setAllUniqueValues(stream(makeAsciiCharacterArray())
                 .map(s -> String.valueOf('a') + s)
                 .collect(Collectors.toList()));
@@ -171,12 +173,12 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_ZERO_OR_MORE("a*",
-            new Repeat("a*", new FinalSymbol("a"), 0, -1)) {{
+            new Repeat("a*", new FinalSymbol("a", ParsingFlags.EMPTY), 0, -1)) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_REPEAT_MIN_4("a{4,}",
-            new Repeat("a{4,}", new FinalSymbol("a"), 4, -1)
+            new Repeat("a{4,}", new FinalSymbol("a", ParsingFlags.EMPTY), 4, -1)
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NOT_A("[^a]",
@@ -204,44 +206,44 @@ public enum TestPattern implements DataInterface {
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_A_OR_NOT("aa?",
             new Sequence("aa?",
-                    new FinalSymbol("a"),
-                    new Repeat("a?", new FinalSymbol("a"), 0, 1))) {{
+                    new FinalSymbol("a", ParsingFlags.EMPTY),
+                    new Repeat("a?", new FinalSymbol("a", ParsingFlags.EMPTY), 0, 1))) {{
         setAllUniqueValues("a", "aa");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_A_ONE_OR_MORE("aa+",
             new Sequence("aa+",
-                    new FinalSymbol("a"),
-                    new Repeat("a+", new FinalSymbol("a"), 1, -1))) {{
+                    new FinalSymbol("a", ParsingFlags.EMPTY),
+                    new Repeat("a+", new FinalSymbol("a", ParsingFlags.EMPTY), 1, -1))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     A_THEN_ANY_REPEAT_INFINITE("a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
             new Sequence("a.*",
-                    new FinalSymbol("a"),
+                    new FinalSymbol("a", ParsingFlags.EMPTY),
                     new Repeat(".*", SymbolSet.ofDotPattern(null), 0, -1))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKAHEAD("foo(?=bar)",
             new Sequence("foo(?=bar)",
-                    new FinalSymbol("foo"), new FinalSymbol("bar"))
+                    new FinalSymbol("foo", ParsingFlags.EMPTY), new FinalSymbol("bar", ParsingFlags.EMPTY))
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKAHEAD("foo(?!bar)",
             new Sequence("foo(?!bar)",
-                    new FinalSymbol("foo"), new NotSymbol("bar", new FinalSymbol("bar")))) {{
+                    new FinalSymbol("foo", ParsingFlags.EMPTY), new NotSymbol("bar", new FinalSymbol("bar", ParsingFlags.EMPTY)))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     POSITIVE_LOOKBEHIND("(?<=foo)bar",
             new Sequence("(?<=foo)bar",
-                    new FinalSymbol("foo"), new FinalSymbol("bar"))
+                    new FinalSymbol("foo", ParsingFlags.EMPTY), new FinalSymbol("bar", ParsingFlags.EMPTY))
     ),
     //-----------------------------------------------------------------------------------------------------------------------------------------
     NEGATIVE_LOOKBEHIND("(?<!not)foo",
             new Sequence("(?<!not)foo",
-                    new NotSymbol("not", new FinalSymbol("not")), new FinalSymbol("foo"))) {{
+                    new NotSymbol("not", new FinalSymbol("not", ParsingFlags.EMPTY)), new FinalSymbol("foo", ParsingFlags.EMPTY))) {{
         setInfinite();
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
@@ -249,8 +251,8 @@ public enum TestPattern implements DataInterface {
             new Sequence("(a|b)\\1",
                     new Group("(a|b)", 1,
                             new Choice("(a|b)",
-                                    new FinalSymbol("a"),
-                                    new FinalSymbol("b"))),
+                                    new FinalSymbol("a", ParsingFlags.EMPTY),
+                                    new FinalSymbol("b", ParsingFlags.EMPTY))),
                     new GroupRef("\\1", 1))) {{
         setAllUniqueValues("aa", "bb");
     }},
@@ -261,8 +263,8 @@ public enum TestPattern implements DataInterface {
                             new Group("(a|b)", 1,
                                     new Choice(
                                             "(a|b)",
-                                            new FinalSymbol("a"),
-                                            new FinalSymbol("b"))), 2, 3),
+                                            new FinalSymbol("a", ParsingFlags.EMPTY),
+                                            new FinalSymbol("b", ParsingFlags.EMPTY))), 2, 3),
                     new GroupRef("\\1", 1))) {{
         setAllUniqueValues("aaa", "abb", "baa", "bbb", "aaaa", "aabb", "abaa", "abbb", "baaa", "babb", "bbaa", "bbbb");
     }},
@@ -272,8 +274,8 @@ public enum TestPattern implements DataInterface {
                     new Repeat("(a|b){3}",
                             new Group("(a|b){3}", 1,
                                     new Choice("(a|b)",
-                                            new FinalSymbol("a"),
-                                            new FinalSymbol("b"))), 3, 3),
+                                            new FinalSymbol("a", ParsingFlags.EMPTY),
+                                            new FinalSymbol("b", ParsingFlags.EMPTY))), 3, 3),
                     new GroupRef("\\1", 1))) {{
         setAllUniqueValues("aaaa", "aabb", "abaa", "abbb", "baaa", "babb", "bbaa", "bbbb");
     }},
@@ -283,8 +285,8 @@ public enum TestPattern implements DataInterface {
                     new Repeat("(a|b){2}",
                             new Group("(a|b)", 1,
                                     new Choice("(a|b)",
-                                            new FinalSymbol("a"),
-                                            new FinalSymbol("b"))), 2, 2),
+                                            new FinalSymbol("a", ParsingFlags.EMPTY),
+                                            new FinalSymbol("b", ParsingFlags.EMPTY))), 2, 2),
                     new GroupRef("\\1", 1))) {{
         setAllUniqueValues("aaa", "abb", "baa", "bbb");
     }},
@@ -293,8 +295,8 @@ public enum TestPattern implements DataInterface {
             new Sequence("(a|b)\\1{2,3}",
                     new Group("(a|b)", 1,
                             new Choice("(a|b)",
-                                    new FinalSymbol("a"),
-                                    new FinalSymbol("b"))),
+                                    new FinalSymbol("a", ParsingFlags.EMPTY),
+                                    new FinalSymbol("b", ParsingFlags.EMPTY))),
                     new Repeat("\\1{2,3}",
                             new GroupRef("\\1", 1), 2, 3))) {{
         setAllUniqueValues("aaa", "aaaa", "bbb", "bbbb");
@@ -306,21 +308,21 @@ public enum TestPattern implements DataInterface {
                     new Repeat("(a|b){2,3}",
                             new Group("(a|b)", 1,
                                     new Choice("(a|b)",
-                                            new FinalSymbol("a"),
-                                            new FinalSymbol("b"))), 2, 3),
+                                            new FinalSymbol("a", ParsingFlags.EMPTY),
+                                            new FinalSymbol("b", ParsingFlags.EMPTY))), 2, 3),
                     new Repeat("\\1{2,3}",
                             new GroupRef("\\1", 1), 2, 3))) {{
         setAllUniqueValues("aaaa", "aaaaa", "abbb", "abbbb", "baaa", "baaaa", "bbbb", "bbbbb", "aaaaa", "aaaaaa", "aabbb", "aabbbb", "abaaa", "abaaaa", "abbbb", "abbbbb", "baaaa", "baaaaa", "babbb", "babbbb", "bbaaa", "bbaaaa", "bbbbb", "bbbbbb");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     XML_NODE("<([abc])>d<\\/\\1>",
-            new Sequence("<([abc])>d<\\/\\1>", new FinalSymbol("<"),
+            new Sequence("<([abc])>d<\\/\\1>", new FinalSymbol("<", ParsingFlags.EMPTY),
                     new Group("([abc])", 1, SymbolSet.ofAsciiCharacters("[abc]", new char[]{
                             'a', 'b', 'c'
                     }, MatchType.POSITIVE)),
-                    new FinalSymbol(">d</"),
+                    new FinalSymbol(">d</", ParsingFlags.EMPTY),
                     new GroupRef("\\1", 1),
-                    new FinalSymbol(">")
+                    new FinalSymbol(">", ParsingFlags.EMPTY)
             )) {{
         setAllUniqueValues("<a>d</a>", "<b>d</b>", "<c>d</c>");
     }},
@@ -334,65 +336,65 @@ public enum TestPattern implements DataInterface {
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     TOP_LEVEL_CHOICE_WITHOUT_PARENTHESIS("a|b",
-            new Choice("a|b", new FinalSymbol("a"), new FinalSymbol("b"))) {{
+            new Choice("a|b", new FinalSymbol("a", ParsingFlags.EMPTY), new FinalSymbol("b", ParsingFlags.EMPTY))) {{
         setAllUniqueValues("a", "b");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     EMPTY_CHOICE_AT_THE_START_OF_CHOICES("(|A)",
-            new Group("(|A)", 1, new Choice("(|A)", new FinalSymbol(""), new FinalSymbol("A")))) {{
+            new Group("(|A)", 1, new Choice("(|A)", new FinalSymbol("", ParsingFlags.EMPTY), new FinalSymbol("A", ParsingFlags.EMPTY)))) {{
         setAllUniqueValues("", "A");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     EMPTY_CHOICE_IN_THE_MIDDLE_OF_CHOICES("(B||A)",
-            new Group("(B||A)", 1, new Choice("(B||A)", new FinalSymbol("B"), new FinalSymbol(""), new FinalSymbol("A")))) {{
+            new Group("(B||A)", 1, new Choice("(B||A)", new FinalSymbol("B", ParsingFlags.EMPTY), new FinalSymbol("", ParsingFlags.EMPTY), new FinalSymbol("A", ParsingFlags.EMPTY)))) {{
         setAllUniqueValues("B", "", "A");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     EMPTY_CHOICE_AT_THE_END_OF_CHOICES("(A|)",
-            new Group("(A|)", 1, new Choice("(A|)", new FinalSymbol("A"), new FinalSymbol("")))) {{
+            new Group("(A|)", 1, new Choice("(A|)", new FinalSymbol("A", ParsingFlags.EMPTY), new FinalSymbol("", ParsingFlags.EMPTY)))) {{
         setAllUniqueValues("A", "");
     }},
     //-----------------------------------------------------------------------------------------------------------------------------------------
     GROUP_RESULT_USED_IN_CHOICES("(a)(\\1|b)",
             new Sequence("(a)(\\1|b)",
-                    new Group("(a)", 1, new FinalSymbol("a")),
+                    new Group("(a)", 1, new FinalSymbol("a", ParsingFlags.EMPTY)),
                     new Group("(\\1|b)", 2,
                             new Choice("(\\1|b)",
                                     new GroupRef("\\1", 1),
-                                    new FinalSymbol("b"))
+                                    new FinalSymbol("b", ParsingFlags.EMPTY))
                     ))) {{
         setAllUniqueValues("aa", "ab");
     }},
     SLASH_Q_AND_SLASH_E_BASIC("\\Qm\\E",
-            new FinalSymbol("m")) {{
+            new FinalSymbol("m", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("m");
     }},
     SLASH_Q_WITHOUT_SLASH_E_BASIC("\\Qmas",
-            new FinalSymbol("mas")) {{
+            new FinalSymbol("mas", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("mas");
     }},
     SLASH_E_WITHOUT_SLASH_Q_BASIC("mas\\E",
-            new FinalSymbol("mas")) {{
+            new FinalSymbol("mas", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("mas");
         setCannotCompilePattern();
     }},
     SLASH_Q_AND_SLASH_E_IGNORE_SPECIALS("\\Q[a]\\1(a|c).*\\W\\E",
-            new FinalSymbol("[a]\\1(a|c).*\\W")) {{
+            new FinalSymbol("[a]\\1(a|c).*\\W", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("[a]\\1(a|c).*\\W");
     }},
     SLASH_Q_AND_SLASH_E_WITH_PREFIX_SUFFIX("123\\Qm\\Ezxc",
-            new FinalSymbol("123mzxc")) {{
+            new FinalSymbol("123mzxc", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("123mzxc");
     }},
     SLASH_Q_AND_SLASH_E_WITH_REPEAT("123\\Qmass[]\\E{1,2}zxc",
             new Sequence("123\\Qmass[]\\E{1,2}zxc",
-                    new FinalSymbol("123mass["),
+                    new FinalSymbol("123mass[", ParsingFlags.EMPTY),
                     new Repeat("]",
-                            new FinalSymbol("]"), 1, 2),
-                    new FinalSymbol("zxc"))) {{
+                            new FinalSymbol("]", ParsingFlags.EMPTY), 1, 2),
+                    new FinalSymbol("zxc", ParsingFlags.EMPTY))) {{
         setAllUniqueValues("123mass[]zxc", "123mass[]]zxc");
     }},
-    UNICODE("\\u0041", new FinalSymbol("A")) {{
+    UNICODE("\\u0041", new FinalSymbol("A", ParsingFlags.EMPTY)) {{
         setAllUniqueValues("A");
     }},
     IN_CYRILLIC_CATEGORY("\\p{InCyrillic}{2}", new Repeat("\\p{InCyrillic}{2}",

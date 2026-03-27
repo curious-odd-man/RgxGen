@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.nodes;
+package com.github.curiousoddman.rgxgen.parsing.dflt.flags;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,37 +16,14 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
-import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
-
-public class FinalSymbol extends Node {
-    private final String aValue;
-    private final ParsingFlags parsingFlags;
-
-    public FinalSymbol(String value, ParsingFlags parsingFlags) {
-        super(value);
-        aValue = value;
-        this.parsingFlags = parsingFlags;
-    }
-
+public class EmptyParsingFlags implements ParsingFlags {
     @Override
-    public void visit(NodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    public String getValue() {
-        return aValue;
-    }
-
-    public ParsingFlags getParsingFlags() {
-        return parsingFlags;
+    public boolean isChoice() {
+        return false;
     }
 
     @Override
     public String toString() {
-        return "FinalSymbol{" +
-                '\'' + aValue + '\'' +
-                '\'' + parsingFlags + '\'' +
-                '}';
+        return "";
     }
 }

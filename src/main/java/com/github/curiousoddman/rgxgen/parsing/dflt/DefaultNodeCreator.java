@@ -23,14 +23,15 @@ import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
+import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.List;
 
 public class DefaultNodeCreator implements NodeCreator {
     @Override
-    public FinalSymbol finalSymbol(String pattern) {
-        return new FinalSymbol(pattern);
+    public FinalSymbol finalSymbol(String pattern, ParsingFlags parsingFlags) {
+        return new FinalSymbol(pattern, parsingFlags);
     }
 
     @Override
