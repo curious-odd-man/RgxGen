@@ -266,6 +266,15 @@ Supported keys for categories can be found
 in [
 `com.github.curiousoddman.rgxgen.model.UnicodeCategory`](src/main/java/com/github/curiousoddman/rgxgen/model/UnicodeCategory.java)
 
+### Dollar (`$` - position at the end of string) and Caret (`^` - position at the end of string) anchors
+
+`$` and `^` symbols are just ignored in current implementation.
+Cases such as `(a$|b)c`, `c(^a|b)`, or `(^a)+` will produce wrong results.
+
+The reasons are similar to those of Lookahead and Lookbehind.
+
+See [#120](https://github.com/curious-odd-man/RgxGen/issues/120).
+
 ## Other tools to generate values by regex and why this might be better
 
 There are 2 more libraries available to achieve same goal:
