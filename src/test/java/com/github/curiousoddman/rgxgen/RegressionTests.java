@@ -126,8 +126,9 @@ public class RegressionTests {
     void bug120_dollarInsideTheExpressionTest() {
         String pattern = "(axx$|byy)czz";
         RgxGen rgxGen = RgxGen.parse(pattern);
+        Random random = new Random(99);
         for (int i = 0; i < 10; i++) {
-            assertEquals("byyczz", rgxGen.generate(new Random(99)));
+            assertEquals("byyczz", rgxGen.generate(random));
         }
     }
 
@@ -135,8 +136,9 @@ public class RegressionTests {
     void bug120_caretInsideTheExpressionTest() {
         String pattern = "czz(^axx|byy)";
         RgxGen rgxGen = RgxGen.parse(pattern);
+        Random random = new Random(101);
         for (int i = 0; i < 10; i++) {
-            assertEquals("czzbyy", rgxGen.generate(new Random(101)));
+            assertEquals("czzbyy", rgxGen.generate(random));
         }
     }
 
