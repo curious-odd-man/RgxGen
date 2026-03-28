@@ -296,3 +296,43 @@ The cost is the architectural shift. But that cost is justified because:
 - The existing visitors can still be used for **parsing** — you're only replacing the generation phase, not the whole pipeline
 
 The recommended path: keep the parser and node tree as-is, add a graph-construction pass after parsing that applies anchor pruning during construction, then walk the graph for generation. The node tree becomes a parse artifact rather than the generation engine.
+
+# Prompt 5
+
+Last question. What if instead of transforming node tree into a graph I would build graph right at the parsing time. Would it work?
+
+# Response 5
+
+Yes, it would work, and it's arguably cleaner. But there are some real trade-offs to weigh.
+
+---
+
+## Why It Works
+
+The parser already traverses the pattern left-to-right, building structure incrementally. Graph edges are naturally discovered in the same order — you know what precedes a node at the moment you create it. So anchor pruning can happen **immediately**: when you're about to add an edge from a non-begin node to a `^` node, you simply don't add it. No second pass needed.
+
+---
+
+## Advantages Over Post-Parse Graph Construction
+
+- **Single pass** — parse and graph-build happen together, lower overhead
+- **Anchor violations caught early** — invalid structure is never materialized at all, rather than being built and then pruned
+- **Simpler overall pipeline** — parser → graph → generation, with no intermediate node tree as a persistent artifact
+
+---
+
+## The Real Trade-offs
+
+**The parser becomes responsible for two things.** Currently the parser's job is to understand regex syntax and produce a node tree. If it also builds the generation graph, it now owns syntax understanding *and* generation semantics. These are distinct concerns and mixing them makes the parser harder to maintain, test, and reason about independently.
+
+**Lookahead problems.** Some pruning decisions require context the parser doesn't have yet. Consider `(a$|c)x` — when the parser processes `a$` inside the group, it doesn't yet know that `x` follows the group. So it can't yet determine that `a$` is a dead branch. You'd need to either defer those decisions (partially defeating the single-pass advantage) or do a post-construction cleanup pass anyway.
+
+**The existing node tree has value beyond generation.** It's used for `getUniqueEstimation()`, non-matching generation, and unique iteration. If you skip building it entirely, you lose those for free — they'd need to be re-implemented against the graph.
+
+---
+
+## Bottom Line
+
+Building the graph at parse time works cleanly for **local** anchor constraints — ones where the parser has sufficient context at the moment it processes the anchor. For **non-local** constraints like `(a$|c)x`, you still need a cleanup pass after the full structure is known.
+
+So the most pragmatic answer is: **build the graph during parsing where you can, but design it to accept a lightweight post-parse pruning step** for the cases where lookahead is required. That gives you most of the single-pass benefit without painting yourself into a corner on the harder cases.
