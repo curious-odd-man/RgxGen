@@ -3,7 +3,6 @@ package com.github.curiousoddman.rgxgen.lineages;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -36,28 +35,28 @@ class PathGraphBuilderTest {
     /** Edges whose 'from' node has the given kind. */
     private static List<PathEdge> edgesFrom(PathGraph g, PathNode.Kind kind) {
         return g.getEdges().stream()
-                .filter(e -> e.getFrom().getKind() == kind)
+                .filter(e -> e.from().getKind() == kind)
                 .collect(Collectors.toList());
     }
 
     /** Edges whose 'to' node has the given kind. */
     private static List<PathEdge> edgesTo(PathGraph g, PathNode.Kind kind) {
         return g.getEdges().stream()
-                .filter(e -> e.getTo().getKind() == kind)
+                .filter(e -> e.to().getKind() == kind)
                 .collect(Collectors.toList());
     }
 
     /** Edges from a specific node. */
     private static List<PathEdge> edgesFromNode(PathGraph g, PathNode node) {
         return g.getEdges().stream()
-                .filter(e -> e.getFrom() == node)
+                .filter(e -> e.from() == node)
                 .collect(Collectors.toList());
     }
 
     /** Edges into a specific node. */
     private static List<PathEdge> edgesIntoNode(PathGraph g, PathNode node) {
         return g.getEdges().stream()
-                .filter(e -> e.getTo() == node)
+                .filter(e -> e.to() == node)
                 .collect(Collectors.toList());
     }
 
@@ -133,7 +132,7 @@ class PathGraphBuilderTest {
         while (!queue.isEmpty()) {
             PathNode current = queue.poll();
             if (visited.add(current)) {
-                edgesFromNode(g, current).forEach(e -> queue.add(e.getTo()));
+                edgesFromNode(g, current).forEach(e -> queue.add(e.to()));
             }
         }
 
@@ -164,8 +163,8 @@ class PathGraphBuilderTest {
     void singleLiteral_edgesAreOnceEach() {
         PathGraph g = buildGraph("a");
         for (PathEdge e : g.getEdges()) {
-            assertEquals(1, e.getMin(), "All edges in single literal should be [1..1]");
-            assertEquals(1, e.getMax(), "All edges in single literal should be [1..1]");
+            assertEquals(1, e.min(), "All edges in single literal should be [1..1]");
+            assertEquals(1, e.max(), "All edges in single literal should be [1..1]");
         }
     }
 
@@ -178,8 +177,8 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("[a-z]bc");
         // Every edge in a plain sequence is [1..1]
         for (PathEdge e : g.getEdges()) {
-            assertEquals(1, e.getMin());
-            assertEquals(1, e.getMax());
+            assertEquals(1, e.min());
+            assertEquals(1, e.max());
         }
     }
 
@@ -263,11 +262,11 @@ class PathGraphBuilderTest {
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         // Forward edge from REPEAT_ENTRY
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.to().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(1, forward.get(0).getMin());
-        assertEquals(PathEdge.UNBOUNDED, forward.get(0).getMax());
+        assertEquals(1, forward.get(0).min());
+        assertEquals(PathEdge.UNBOUNDED, forward.get(0).max());
     }
 
     @Test
@@ -275,11 +274,11 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("a*");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.to().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(0, forward.get(0).getMin());
-        assertEquals(PathEdge.UNBOUNDED, forward.get(0).getMax());
+        assertEquals(0, forward.get(0).min());
+        assertEquals(PathEdge.UNBOUNDED, forward.get(0).max());
     }
 
     @Test
@@ -287,11 +286,11 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("a?");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.to().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(0, forward.get(0).getMin());
-        assertEquals(1, forward.get(0).getMax());
+        assertEquals(0, forward.get(0).min());
+        assertEquals(1, forward.get(0).max());
     }
 
     @Test
@@ -299,11 +298,11 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("a{3}");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.to().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(3, forward.get(0).getMin());
-        assertEquals(3, forward.get(0).getMax());
+        assertEquals(3, forward.get(0).min());
+        assertEquals(3, forward.get(0).max());
     }
 
     @Test
@@ -311,11 +310,11 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("a{2,5}");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.to().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(2, forward.get(0).getMin());
-        assertEquals(5, forward.get(0).getMax());
+        assertEquals(2, forward.get(0).min());
+        assertEquals(5, forward.get(0).max());
     }
 
     @Test
@@ -324,7 +323,7 @@ class PathGraphBuilderTest {
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         // Back-edge: AST node → REPEAT_ENTRY
         List<PathEdge> backEdges = edgesIntoNode(g, rep).stream()
-                .filter(e -> e.getFrom().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.from().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(1, backEdges.size(), "Should have exactly one back-edge from body to REPEAT_ENTRY");
     }
@@ -335,7 +334,7 @@ class PathGraphBuilderTest {
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         PathNode end = singleNodeOfKind(g, PathNode.Kind.END);
         boolean repeatConnectsToEnd = edgesFromNode(g, rep).stream()
-                .anyMatch(e -> e.getTo() == end);
+                .anyMatch(e -> e.to() == end);
         assertTrue(repeatConnectsToEnd, "REPEAT_ENTRY should connect to END (it is the fragment exit)");
     }
 
@@ -369,7 +368,7 @@ class PathGraphBuilderTest {
         List<PathEdge> toEnd = edgesIntoNode(g, end);
         assertEquals(1, toEnd.size(), "Only x connects to END");
 
-        PathNode xNode = toEnd.get(0).getFrom();
+        PathNode xNode = toEnd.get(0).from();
         // Both alternative exits (a$ and c) connect to x
         List<PathEdge> toX = edgesIntoNode(g, xNode);
         assertEquals(2, toX.size(), "Both branches (a$ and c) should connect to x");
@@ -379,8 +378,8 @@ class PathGraphBuilderTest {
     void example1_allEdgesAreOnce() {
         PathGraph g = buildGraph("(a$|c)x");
         for (PathEdge e : g.getEdges()) {
-            assertEquals(1, e.getMin(), "All edges should be [1..1] for (a$|c)x");
-            assertEquals(1, e.getMax(), "All edges should be [1..1] for (a$|c)x");
+            assertEquals(1, e.min(), "All edges should be [1..1] for (a$|c)x");
+            assertEquals(1, e.max(), "All edges should be [1..1] for (a$|c)x");
         }
     }
 
@@ -403,11 +402,11 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("(a|^x)+");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
-                .filter(e -> e.getTo().getKind() == PathNode.Kind.CHOICE)
+                .filter(e -> e.to().getKind() == PathNode.Kind.CHOICE)
                 .collect(Collectors.toList());
         assertEquals(1, forward.size());
-        assertEquals(1, forward.get(0).getMin());
-        assertEquals(PathEdge.UNBOUNDED, forward.get(0).getMax());
+        assertEquals(1, forward.get(0).min());
+        assertEquals(PathEdge.UNBOUNDED, forward.get(0).max());
     }
 
     @Test
@@ -416,7 +415,7 @@ class PathGraphBuilderTest {
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         // Two AST nodes (a and ^x) should both have back-edges to REPEAT_ENTRY
         List<PathEdge> backEdges = edgesIntoNode(g, rep).stream()
-                .filter(e -> e.getFrom().getKind() == PathNode.Kind.AST)
+                .filter(e -> e.from().getKind() == PathNode.Kind.AST)
                 .collect(Collectors.toList());
         assertEquals(2, backEdges.size(),
                 "Both 'a' and '^x' must have back-edges to REPEAT_ENTRY");
@@ -434,7 +433,7 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("(a|^x)+");
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         PathNode end = singleNodeOfKind(g, PathNode.Kind.END);
-        assertTrue(edgesFromNode(g, rep).stream().anyMatch(e -> e.getTo() == end));
+        assertTrue(edgesFromNode(g, rep).stream().anyMatch(e -> e.to() == end));
     }
 
     // =========================================================================
@@ -452,7 +451,7 @@ class PathGraphBuilderTest {
         PathGraph g = buildGraph("(a+b)+");
         for (PathNode rep : nodesOfKind(g, PathNode.Kind.REPEAT_ENTRY)) {
             long backEdgeCount = edgesIntoNode(g, rep).stream()
-                    .filter(e -> e.getFrom().getKind() != PathNode.Kind.BEGIN)
+                    .filter(e -> e.from().getKind() != PathNode.Kind.BEGIN)
                     .count();
             assertTrue(backEdgeCount >= 1,
                     "Each REPEAT_ENTRY must have at least one back-edge, got 0 for " + rep);

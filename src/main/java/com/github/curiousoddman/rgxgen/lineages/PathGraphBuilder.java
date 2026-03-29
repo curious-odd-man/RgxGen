@@ -1,5 +1,21 @@
 package com.github.curiousoddman.rgxgen.lineages;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
@@ -111,10 +127,9 @@ public class PathGraphBuilder implements NodeVisitor {
      * Opens a new cluster scope.  All PathNodes created until the matching
      * {@link #popCluster()} call will be direct members of this cluster.
      */
-    private PathGraphCluster pushCluster(String label) {
+    private void pushCluster(String label) {
         PathGraphCluster cluster = new PathGraphCluster(label);
         clusterStack.push(cluster);
-        return cluster;
     }
 
     /**
@@ -181,10 +196,10 @@ public class PathGraphBuilder implements NodeVisitor {
         builder.graph.addNode(begin);
         builder.graph.addNode(end);
 
-        for (PathNode entry : rootFragment.getEntries()) {
+        for (PathNode entry : rootFragment.entries()) {
             builder.addEdge(PathEdge.once(begin, entry));
         }
-        for (PathNode exit : rootFragment.getExits()) {
+        for (PathNode exit : rootFragment.exits()) {
             builder.addEdge(PathEdge.once(exit, end));
         }
 
@@ -243,23 +258,15 @@ public class PathGraphBuilder implements NodeVisitor {
         String label = labelFor(node, "Sequence");
         pushCluster(label);
 
-        for (Node child : children) {
-            child.visit(this);
-        }
-
-        // Pop in reverse order then reverse so we get left-to-right
-        List<Fragment> childFragments = new ArrayList<>(children.length);
-        for (int i = 0; i < children.length; i++) {
-            childFragments.add(0, stack.pop());
-        }
+        List<Fragment> childFragments = getFragments(children);
 
         // Chain: exits of fragment[i] → entries of fragment[i+1]  with [1..1]
         List<PathEdge> sequenceEdges = new ArrayList<>();
         for (int i = 0; i < childFragments.size() - 1; i++) {
             Fragment current = childFragments.get(i);
             Fragment next = childFragments.get(i + 1);
-            for (PathNode exit : current.getExits()) {
-                for (PathNode entry : next.getEntries()) {
+            for (PathNode exit : current.exits()) {
+                for (PathNode entry : next.entries()) {
                     sequenceEdges.add(addEdge(PathEdge.once(exit, entry)));
                 }
             }
@@ -267,13 +274,13 @@ public class PathGraphBuilder implements NodeVisitor {
 
         List<PathEdge> allEdges = new ArrayList<>();
         for (Fragment f : childFragments) {
-            allEdges.addAll(f.getInternalEdges());
+            allEdges.addAll(f.internalEdges());
         }
         allEdges.addAll(sequenceEdges);
 
         Fragment composite = new Fragment(
-                childFragments.get(0).getEntries(),
-                childFragments.get(childFragments.size() - 1).getExits(),
+                childFragments.get(0).entries(),
+                childFragments.get(childFragments.size() - 1).exits(),
                 allEdges
         );
         stack.push(composite);
@@ -295,28 +302,19 @@ public class PathGraphBuilder implements NodeVisitor {
         // Synthetic CHOICE node – created inside the cluster scope
         PathNode choiceNode = createSyntheticNode(PathNode.choice(node, nextId()));
 
-        for (Node alt : alternatives) {
-            alt.visit(this);
-        }
-
-        // Pop in reverse order
-        List<Fragment> altFragments = new ArrayList<>(alternatives.length);
-        for (int i = 0; i < alternatives.length; i++) {
-            altFragments.add(0, stack.pop());
-        }
-
+        List<Fragment> altFragments = getFragments(alternatives);
         List<PathEdge> choiceEdges = new ArrayList<>();
 
         for (Fragment alt : altFragments) {
-            for (PathNode entry : alt.getEntries()) {
+            for (PathNode entry : alt.entries()) {
                 choiceEdges.add(addEdge(PathEdge.once(choiceNode, entry)));
             }
         }
 
         List<PathNode> exits = new ArrayList<>();
         for (Fragment alt : altFragments) {
-            exits.addAll(alt.getExits());
-            choiceEdges.addAll(alt.getInternalEdges());
+            exits.addAll(alt.exits());
+            choiceEdges.addAll(alt.internalEdges());
         }
 
         Fragment composite = new Fragment(
@@ -327,6 +325,19 @@ public class PathGraphBuilder implements NodeVisitor {
         stack.push(composite);
 
         popCluster();
+    }
+
+    private List<Fragment> getFragments(Node[] nodes) {
+        for (Node alt : nodes) {
+            alt.visit(this);
+        }
+
+        // Pop in reverse order
+        List<Fragment> fragments = new ArrayList<>(nodes.length);
+        for (int i = 0; i < nodes.length; i++) {
+            fragments.add(0, stack.pop());
+        }
+        return fragments;
     }
 
     // -------------------------------------------------------------------------
@@ -348,13 +359,13 @@ public class PathGraphBuilder implements NodeVisitor {
         node.getNode().visit(this);
         Fragment bodyFragment = stack.pop();
 
-        List<PathEdge> repeatEdges = new ArrayList<>(bodyFragment.getInternalEdges());
+        List<PathEdge> repeatEdges = new ArrayList<>(bodyFragment.internalEdges());
 
-        for (PathNode bodyEntry : bodyFragment.getEntries()) {
+        for (PathNode bodyEntry : bodyFragment.entries()) {
             repeatEdges.add(addEdge(PathEdge.repeat(repeatEntry, bodyEntry, min, max)));
         }
 
-        for (PathNode bodyExit : bodyFragment.getExits()) {
+        for (PathNode bodyExit : bodyFragment.exits()) {
             repeatEdges.add(addEdge(PathEdge.once(bodyExit, repeatEntry)));
         }
 

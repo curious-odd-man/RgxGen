@@ -1,5 +1,21 @@
 package com.github.curiousoddman.rgxgen.lineages;
 
+/* **************************************************************************
+   Copyright 2019 Vladislavs Varslavans
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+/* **************************************************************************/
+
 import java.util.*;
 
 /**
@@ -14,7 +30,6 @@ import java.util.*;
  *
  * <p>Clusters are <em>nested</em>: a cluster for a {@code Repeat} that wraps a
  * {@code Choice} will contain the Choice's cluster as a direct child.  The
- * {@link #toPlantUml(String)} method renders depth-first, indenting each level
  * by two spaces.
  */
 public class PathGraphCluster {
@@ -78,38 +93,6 @@ public class PathGraphCluster {
 
     public String getLabel() {
         return label;
-    }
-
-    // -------------------------------------------------------------------------
-    // PlantUML rendering
-    // -------------------------------------------------------------------------
-
-    /**
-     * Renders this cluster (and its children recursively) as indented PlantUML
-     * {@code rectangle} blocks.
-     *
-     * @param indent the leading whitespace for this level (e.g. {@code "  "})
-     * @return the PlantUML snippet, ready to be embedded inside a {@code @startuml} block
-     */
-    public String toPlantUml(String indent) {
-        StringBuilder sb = new StringBuilder();
-        String escapedLabel = label.replace("\"", "\\\"");
-        sb.append(indent).append("rectangle \"").append(escapedLabel).append("\" {\n");
-
-        String inner = indent + "  ";
-
-        // Render nested child clusters first (depth-first)
-        for (PathGraphCluster child : children) {
-            sb.append(child.toPlantUml(inner));
-        }
-
-        // Render direct member nodes as plain identifiers (PlantUML state/object refs)
-        for (String nodeId : directNodeIds) {
-            sb.append(inner).append("node_").append(nodeId).append('\n');
-        }
-
-        sb.append(indent).append("}\n");
-        return sb.toString();
     }
 
     @Override
