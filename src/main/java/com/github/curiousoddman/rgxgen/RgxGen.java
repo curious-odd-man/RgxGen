@@ -43,10 +43,7 @@ public class RgxGen {
             nodeCreator = new DefaultNodeCreator();
         }
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, nodeCreator, this.properties);
-        var node = defaultTreeBuilder.get();
-        CaretAndDollarProcessor caretAndDollarProcessor = new CaretAndDollarProcessor();
-        node.visit(caretAndDollarProcessor);
-        this.node = caretAndDollarProcessor.getResultNode();
+        node = defaultTreeBuilder.get();
     }
 
     public static RgxGenBuilder forPattern(String pattern) {
