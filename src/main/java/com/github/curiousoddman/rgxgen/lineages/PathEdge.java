@@ -71,6 +71,13 @@ public class PathEdge {
      * Human-readable label: {@code "1..1"}, {@code "0..∞"}, etc.
      */
     public String label() {
+        if (min == max) {
+            if (min == 1) {
+                return "";
+            } else {
+                return String.valueOf(min);
+            }
+        }
         String maxStr = (max == UNBOUNDED) ? "∞" : String.valueOf(max);
         return min + ".." + maxStr;
     }

@@ -11,8 +11,13 @@ import java.util.*;
  */
 public class PathGraph {
 
+    private final String pattern;
     private final Set<PathNode> nodes = new LinkedHashSet<>();
     private final List<PathEdge> edges = new ArrayList<>();
+
+    public PathGraph(String pattern) {
+        this.pattern = pattern;
+    }
 
     // -------------------------------------------------------------------------
     // Mutation – called only by PathGraphBuilder
@@ -65,6 +70,7 @@ public class PathGraph {
         sb.append("@startuml\n");
         sb.append("digraph G {\n");
         sb.append("  rankdir=LR\n");
+
         sb.append("\n");
 
         // Node declarations
@@ -89,6 +95,10 @@ public class PathGraph {
                     .append(quote(edge.label()))
                     .append("]\n");
         }
+
+        sb.append("  subgraph cluster_L { \"pattern\" [shape=box fontsize=16 label=\"Pattern: ")
+                .append(pattern)
+                .append("\" tooltip=\"[stackcollapse]\"] }\n");
 
         sb.append("}\n");
         sb.append("@enduml\n");

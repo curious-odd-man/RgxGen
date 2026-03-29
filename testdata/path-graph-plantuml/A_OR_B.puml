@@ -1,0 +1,13 @@
+@startuml
+digraph G {
+  rankdir=LR
+  subgraph cluster_L { "pattern" [shape=box fontsize=16 label="Pattern: [ab]" tooltip="[stackcollapse]"] }
+
+  "AST_0" [label="SymbolSet([ab])" shape=box]
+  "BEGIN_1" [label="BEGIN" shape=circle]
+  "END_2" [label="END" shape=circle]
+
+  "BEGIN_1" -> "AST_0" [label=""]
+  "AST_0" -> "END_2" [label=""]
+}
+@enduml

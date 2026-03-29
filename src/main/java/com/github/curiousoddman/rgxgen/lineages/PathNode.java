@@ -1,6 +1,7 @@
 package com.github.curiousoddman.rgxgen.lineages;
 
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.nodes.Repeat;
 import com.github.curiousoddman.rgxgen.util.Util;
 
 /**
@@ -83,7 +84,21 @@ public class PathNode {
     public static PathNode repeatEntry(com.github.curiousoddman.rgxgen.nodes.Repeat repeat, int seq) {
         String maxStr = (repeat.getMax() == -1) ? "∞" : String.valueOf(repeat.getMax());
         return new PathNode(Kind.REPEAT_ENTRY, null,
-                "Repeat[" + repeat.getMin() + ".." + maxStr + "](" + Util.plantumlEscape(repeat.getPattern()) + ")", seq);
+                getRepeatLabel(repeat, maxStr), seq);
+    }
+
+    private static String getRepeatLabel(Repeat repeat, String maxStr) {
+        int min = repeat.getMin();
+        int max = repeat.getMax();
+
+        String repeatLabel;
+        if (min == max) {
+            repeatLabel = String.valueOf(min);
+        } else {
+            repeatLabel = min + ".." + maxStr ;
+        }
+
+        return "Repeat[" + repeatLabel + "](" + Util.plantumlEscape(repeat.getPattern()) + ")";
     }
 
     /**
