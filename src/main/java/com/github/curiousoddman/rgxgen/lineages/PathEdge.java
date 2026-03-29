@@ -78,7 +78,7 @@ public class PathEdge {
                 return String.valueOf(min);
             }
         }
-        String maxStr = (max == UNBOUNDED) ? "∞" : String.valueOf(max);
+        String maxStr = (max == UNBOUNDED) ? "<&infinity>" : String.valueOf(max);
         return min + ".." + maxStr;
     }
 

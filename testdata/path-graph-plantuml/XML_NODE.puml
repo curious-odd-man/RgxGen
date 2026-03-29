@@ -1,0 +1,32 @@
+@startuml
+title
+""Pattern: `<([abc])>d<\/\1>`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_5
+component """END""" as node_END_6
+
+rectangle "Sequence: <([abc])>d<\/\1>" {
+  rectangle "Group 1: ([abc])" {
+    component """SymbolSet([abc])""" as node_AST_1
+  }
+  component """FinalSymbol(<)""" as node_AST_0
+  component """FinalSymbol(>d</)""" as node_AST_2
+  component """GroupRef(\1)""" as node_AST_3
+  component """FinalSymbol(>)""" as node_AST_4
+}
+
+node_AST_0 --> node_AST_1
+node_AST_1 --> node_AST_2
+node_AST_2 --> node_AST_3
+node_AST_3 --> node_AST_4
+node_BEGIN_5 --> node_AST_0
+node_AST_4 --> node_END_6
+}
+@enduml

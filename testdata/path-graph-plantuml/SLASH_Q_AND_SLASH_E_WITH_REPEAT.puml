@@ -1,0 +1,31 @@
+@startuml
+title
+""Pattern: `123\Qmass[]\E{1,2}zxc`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_4
+component """END""" as node_END_5
+
+rectangle "Sequence: 123\Qmass[]\E{1,2}zxc" {
+  rectangle "Repeat: E{1,2} 		 {1..2}" {
+    component """Repeat(E{1,2})""" as node_REPEAT_ENTRY_1 <<repeat>>
+    component """FinalSymbol(])""" as node_AST_2
+  }
+  component """FinalSymbol(123mass[)""" as node_AST_0
+  component """FinalSymbol(zxc)""" as node_AST_3
+}
+
+node_REPEAT_ENTRY_1 --> node_AST_2 : 1..2
+node_AST_2 --> node_REPEAT_ENTRY_1
+node_AST_0 --> node_REPEAT_ENTRY_1
+node_REPEAT_ENTRY_1 --> node_AST_3
+node_BEGIN_4 --> node_AST_0
+node_AST_3 --> node_END_5
+}
+@enduml

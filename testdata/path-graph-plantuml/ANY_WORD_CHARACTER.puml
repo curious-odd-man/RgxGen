@@ -1,6 +1,6 @@
 @startuml
 title
-""Pattern: `[ab]`""
+""Pattern: `\w`""
 end title
 
 skinparam rectangle {
@@ -9,7 +9,7 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """SymbolSet([ab])""" as node_AST_0
+component """SymbolSet(\w)""" as node_AST_0
 component """BEGIN""" as node_BEGIN_1
 component """END""" as node_END_2
 

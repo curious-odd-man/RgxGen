@@ -1,0 +1,26 @@
+@startuml
+title
+""Pattern: `d[ab]c`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_3
+component """END""" as node_END_4
+
+rectangle "Sequence: d[ab]c" {
+  component """FinalSymbol(d)""" as node_AST_0
+  component """SymbolSet([ab])""" as node_AST_1
+  component """FinalSymbol(c)""" as node_AST_2
+}
+
+node_AST_0 --> node_AST_1
+node_AST_1 --> node_AST_2
+node_BEGIN_3 --> node_AST_0
+node_AST_2 --> node_END_4
+}
+@enduml

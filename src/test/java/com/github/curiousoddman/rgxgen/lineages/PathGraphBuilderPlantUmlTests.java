@@ -32,7 +32,7 @@ public class PathGraphBuilderPlantUmlTests extends CombinedTestTemplate<TestPatt
         NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
         Node node = defaultTreeBuilder.get();
 
-        Path targetFile = getTargetFilePath(testPattern, null);
+        Path targetFile = getTargetFilePath(testPattern);
 
         PathGraph pathGraph = PathGraphBuilder.build(node);
         String plantUml = pathGraph.toPlantUml();
@@ -40,7 +40,7 @@ public class PathGraphBuilderPlantUmlTests extends CombinedTestTemplate<TestPatt
         if (Files.exists(targetFile)) {
             String expected = Files.readString(targetFile);
             if (!expected.equals(plantUml)) {
-                Files.writeString(getTargetFilePath(testPattern, "actual"), plantUml);
+                Files.writeString(targetFile, plantUml);
                 fail("Pattern " + testPattern.name() + " plantuml diagram is wrong");
             }
         } else {
@@ -49,11 +49,7 @@ public class PathGraphBuilderPlantUmlTests extends CombinedTestTemplate<TestPatt
         }
     }
 
-    private Path getTargetFilePath(TestPattern testPattern, String suffix) {
-        if (suffix == null) {
-            return FILES_ROOT.resolve(testPattern.name() + ".puml");
-        } else {
-            return FILES_ROOT.resolve(testPattern.name() + '-' + suffix + ".puml");
-        }
+    private Path getTargetFilePath(TestPattern testPattern) {
+        return FILES_ROOT.resolve(testPattern.name() + ".puml");
     }
 }

@@ -1,0 +1,29 @@
+@startuml
+title
+""Pattern: `(|A)`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_3
+component """END""" as node_END_4
+
+rectangle "Group 1: (|A)" {
+  rectangle "Choice: (|A)" {
+    component """Choice((|A))""" as node_CHOICE_0 <<choice>>
+    component """FinalSymbol()""" as node_AST_1
+    component """FinalSymbol(A)""" as node_AST_2
+  }
+}
+
+node_CHOICE_0 --> node_AST_1
+node_CHOICE_0 --> node_AST_2
+node_BEGIN_3 --> node_CHOICE_0
+node_AST_1 --> node_END_4
+node_AST_2 --> node_END_4
+}
+@enduml

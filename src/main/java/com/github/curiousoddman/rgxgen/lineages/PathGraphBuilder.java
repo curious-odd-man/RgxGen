@@ -10,7 +10,7 @@ import java.util.*;
  *
  * <h2>Usage</h2>
  * <pre>
- *   Node root = RgxGen.parse("(a|b)+x").getNode();   // however you obtain the root
+ *   Node root = RgxGen.parse("(a|b)+x").getNode();
  *   PathGraph graph = PathGraphBuilder.build(root);
  *   System.out.println(graph.toPlantUml());
  * </pre>
@@ -20,49 +20,140 @@ import java.util.*;
  * AST node into a {@link Fragment} and pushes it onto an internal stack.  Compound
  * nodes (Sequence, Choice, Repeat, Group) pop their children's fragments off the stack
  * and wire them together before pushing the composite fragment back.
- * <p>
- * Once the root AST node has been visited the stack contains exactly one Fragment.
- * {@link #build(Node)} then wraps it with BEGIN/END sentinels and returns the
- * fully assembled {@link PathGraph}.
+ *
+ * <h2>Cluster tracking</h2>
+ * In addition to building the graph, the builder maintains a <em>cluster scope
+ * stack</em>.  Before visiting the children of a compound node the builder pushes a
+ * fresh {@link PathGraphCluster} onto the scope stack.  Every newly created
+ * {@link PathNode} is registered as a direct member of whichever cluster is on top of
+ * the scope stack (or treated as unclustered if the stack is empty, which only happens
+ * for the BEGIN/END sentinels).  After all children have been visited the cluster is
+ * popped and attached as a child of the now-top cluster (or stored as a root cluster on
+ * the graph if the stack becomes empty).
+ *
+ * <p>This guarantees that nested compound nodes produce nested {@link PathGraphCluster}s,
+ * which are then rendered as nested {@code rectangle} blocks in PlantUML.
  *
  * <h2>Node treatment</h2>
  * <ul>
- *   <li><b>FinalSymbol, SymbolSet, NotSymbol, GroupRef</b> – terminals: one PathNode,
- *       no internal edges.</li>
- *   <li><b>Group</b> – transparent wrapper: delegates to its child, does not add its
- *       own PathNode.</li>
- *   <li><b>Sequence</b> – chains child fragments left-to-right with {@code [1..1]}
- *       edges.</li>
- *   <li><b>Choice</b> – creates a synthetic {@code CHOICE} PathNode; fans out to each
- *       alternative with {@code [1..1]} edges; exits are the union of all alternative
- *       exits.</li>
- *   <li><b>Repeat</b> – creates a synthetic {@code REPEAT_ENTRY} PathNode.
- *       <ul>
- *         <li>Forward edge: {@code REPEAT_ENTRY → child.entries}  with {@code [min..max]}.</li>
- *         <li>Back-edges:   {@code child.exits   → REPEAT_ENTRY}  with {@code [min..max]}
- *             (same bounds – each loop-back is governed by the same repetition rule).</li>
- *         <li>The fragment exits are the exits of REPEAT_ENTRY itself (i.e. the
- *             REPEAT_ENTRY node), so the parent can connect "after the loop".</li>
- *       </ul>
- *   </li>
+ *   <li><b>FinalSymbol, SymbolSet, NotSymbol, GroupRef</b> – terminals.</li>
+ *   <li><b>Group</b> – transparent wrapper; its cluster groups its single child's nodes.</li>
+ *   <li><b>Sequence</b> – chains child fragments left-to-right with {@code [1..1]} edges.</li>
+ *   <li><b>Choice</b> – synthetic {@code CHOICE} node fans out to alternatives.</li>
+ *   <li><b>Repeat</b> – synthetic {@code REPEAT_ENTRY} node with forward + back edges.</li>
  * </ul>
  */
 public class PathGraphBuilder implements NodeVisitor {
 
-    // Stack of fragments produced by child visits.
-    // Compound nodes pop N fragments (one per child) and push one composite fragment.
+    // -------------------------------------------------------------------------
+    // Fragment stack (unchanged from original)
+    // -------------------------------------------------------------------------
+
     private final Deque<Fragment> stack = new ArrayDeque<>();
-
-    // The graph being assembled – edges are registered here as they are created.
-    private final PathGraph graph = new PathGraph();
-
-    // Monotonic counter for node IDs, scoped to this builder instance.
-    // Resets to 0 for each new build(), so IDs are stable and start from 0
-    // regardless of how many graphs have been built in the same JVM.
+    private final PathGraph graph;
     private int nextId = 0;
+
+    // -------------------------------------------------------------------------
+    // Cluster scope stack
+    //
+    // Invariant: the TOP of this stack is the "current" cluster.  Every PathNode
+    // created via createPathNode() is registered as a direct member of the top
+    // cluster.  Compound visit methods bracket their child visits with
+    //   pushCluster(label) … popCluster()
+    // so that all nodes created inside a compound node end up inside its cluster.
+    // -------------------------------------------------------------------------
+
+    private final Deque<PathGraphCluster> clusterStack = new ArrayDeque<>();
+
+    private PathGraphBuilder(String pattern) {
+        graph = new PathGraph(pattern);
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
 
     private int nextId() {
         return nextId++;
+    }
+
+    /**
+     * Creates a PathNode for an AST terminal, registers it with the graph and
+     * with the current cluster (if any cluster scope is active).
+     */
+    private PathNode createPathNode(Node astNode) {
+        PathNode pathNode = PathNode.forAst(astNode, nextId());
+        graph.addNode(pathNode);
+        registerWithCurrentCluster(pathNode.getId());
+        return pathNode;
+    }
+
+    /**
+     * Creates a synthetic PathNode (CHOICE or REPEAT_ENTRY), registers it with
+     * the graph and with the current cluster.
+     */
+    private PathNode createSyntheticNode(PathNode synthetic) {
+        graph.addNode(synthetic);
+        registerWithCurrentCluster(synthetic.getId());
+        return synthetic;
+    }
+
+    /**
+     * Registers {@code nodeId} as a direct member of the top cluster, if present.
+     */
+    private void registerWithCurrentCluster(String nodeId) {
+        if (!clusterStack.isEmpty()) {
+            clusterStack.peek().addDirectNode(nodeId);
+        }
+    }
+
+    /**
+     * Opens a new cluster scope.  All PathNodes created until the matching
+     * {@link #popCluster()} call will be direct members of this cluster.
+     */
+    private PathGraphCluster pushCluster(String label) {
+        PathGraphCluster cluster = new PathGraphCluster(label);
+        clusterStack.push(cluster);
+        return cluster;
+    }
+
+    /**
+     * Closes the current cluster scope and wires it into its parent cluster (or
+     * adds it as a root-level cluster on the graph when the scope stack becomes
+     * empty).
+     *
+     * <p>The child cluster is <em>removed</em> from the parent's direct-node set
+     * for nodes that are already captured by the child cluster – PlantUML renders
+     * each node reference only once, so we must not list a node both in the parent
+     * and in a nested {@code rectangle}.
+     */
+    private void popCluster() {
+        PathGraphCluster finished = clusterStack.pop();
+
+        if (clusterStack.isEmpty()) {
+            // This was a top-level cluster (e.g. the root compound node).
+            graph.addRootCluster(finished);
+        } else {
+            PathGraphCluster parent = clusterStack.peek();
+
+            // The nodes that belong to 'finished' were registered on 'parent' as
+            // direct members (because registerWithCurrentCluster saw 'parent' as top
+            // at the time they were created – WRONG if we push before visiting children).
+            //
+            // Actually: we push BEFORE visiting children, so clusterStack.peek() at
+            // creation time IS 'finished', not 'parent'.  Therefore 'parent' does NOT
+            // contain those node IDs yet – we do NOT need to scrub them.  We simply
+            // attach 'finished' as a child of 'parent'.
+            parent.addChild(finished);
+        }
+    }
+
+    /**
+     * Registers an edge in the graph and returns it (for fluent chaining).
+     */
+    private PathEdge addEdge(PathEdge edge) {
+        graph.addEdge(edge);
+        return edge;
     }
 
     // -------------------------------------------------------------------------
@@ -73,15 +164,17 @@ public class PathGraphBuilder implements NodeVisitor {
      * Builds and returns the path graph for the given AST root node.
      */
     public static PathGraph build(Node root) {
-        PathGraphBuilder builder = new PathGraphBuilder();
+        PathGraphBuilder builder = new PathGraphBuilder(root.getPattern());
         root.visit(builder);
 
         Fragment rootFragment = builder.stack.pop();
         if (!builder.stack.isEmpty()) {
-            throw new IllegalStateException("Fragment stack should be empty after compilation; remaining: " + builder.stack.size());
+            throw new IllegalStateException(
+                    "Fragment stack should be empty after compilation; remaining: " + builder.stack.size());
         }
 
-        // Wrap with BEGIN and END sentinels
+        // BEGIN / END sentinels are NOT part of any cluster – they are added after
+        // all cluster scopes have been closed.
         PathNode begin = PathNode.begin(builder.nextId());
         PathNode end = PathNode.end(builder.nextId());
 
@@ -99,7 +192,7 @@ public class PathGraphBuilder implements NodeVisitor {
     }
 
     // -------------------------------------------------------------------------
-    // Terminal nodes  (leaf → one PathNode, no internal edges)
+    // Terminal nodes
     // -------------------------------------------------------------------------
 
     @Override
@@ -114,28 +207,29 @@ public class PathGraphBuilder implements NodeVisitor {
 
     @Override
     public void visit(NotSymbol node) {
-        // NotSymbol wraps a child but is itself treated as an opaque terminal for
-        // path-graph purposes (its child describes the negation set, not a sequence
-        // of visited nodes during generation).
         pushTerminal(node);
     }
 
     @Override
     public void visit(GroupRef node) {
-        // Backreference: treated as a terminal – the value is resolved at runtime.
         pushTerminal(node);
     }
 
     // -------------------------------------------------------------------------
-    // Group  (transparent wrapper)
+    // Group  (transparent wrapper – still gets its own cluster for visual grouping)
     // -------------------------------------------------------------------------
 
     @Override
     public void visit(Group node) {
-        // Groups are purely structural wrappers; they do not introduce a path node.
-        // Just compile the child and let its fragment bubble up.
+        // Open a cluster so the group's contents are visually enclosed.
+        String label = labelFor(node, "Group " + node.getIndex());
+        pushCluster(label);
+
         node.getNode().visit(this);
-        // Fragment is already on the stack from the child visit – nothing more to do.
+        // child fragment is on the stack – leave it; popCluster does not touch the stack.
+
+        popCluster();
+        // The child's fragment is already on the stack – nothing more to push.
     }
 
     // -------------------------------------------------------------------------
@@ -146,7 +240,9 @@ public class PathGraphBuilder implements NodeVisitor {
     public void visit(Sequence node) {
         Node[] children = node.getNodes();
 
-        // Visit all children – each pushes a fragment
+        String label = labelFor(node, "Sequence");
+        pushCluster(label);
+
         for (Node child : children) {
             child.visit(this);
         }
@@ -169,7 +265,6 @@ public class PathGraphBuilder implements NodeVisitor {
             }
         }
 
-        // Gather all internal edges from children plus the new connecting edges
         List<PathEdge> allEdges = new ArrayList<>();
         for (Fragment f : childFragments) {
             allEdges.addAll(f.getInternalEdges());
@@ -182,6 +277,8 @@ public class PathGraphBuilder implements NodeVisitor {
                 allEdges
         );
         stack.push(composite);
+
+        popCluster();
     }
 
     // -------------------------------------------------------------------------
@@ -192,7 +289,12 @@ public class PathGraphBuilder implements NodeVisitor {
     public void visit(Choice node) {
         Node[] alternatives = node.getNodes();
 
-        // Visit all alternatives – each pushes a fragment
+        String label = labelFor(node, "Choice");
+        pushCluster(label);
+
+        // Synthetic CHOICE node – created inside the cluster scope
+        PathNode choiceNode = createSyntheticNode(PathNode.choice(node, nextId()));
+
         for (Node alt : alternatives) {
             alt.visit(this);
         }
@@ -203,20 +305,14 @@ public class PathGraphBuilder implements NodeVisitor {
             altFragments.add(0, stack.pop());
         }
 
-        // Synthetic CHOICE dispatcher node
-        PathNode choiceNode = PathNode.choice(node, nextId());
-        graph.addNode(choiceNode);
-
         List<PathEdge> choiceEdges = new ArrayList<>();
 
-        // Fan out: choiceNode → each alternative's entries with [1..1]
         for (Fragment alt : altFragments) {
             for (PathNode entry : alt.getEntries()) {
                 choiceEdges.add(addEdge(PathEdge.once(choiceNode, entry)));
             }
         }
 
-        // Exits of the Choice fragment = union of all alternative exits
         List<PathNode> exits = new ArrayList<>();
         for (Fragment alt : altFragments) {
             exits.addAll(alt.getExits());
@@ -229,6 +325,8 @@ public class PathGraphBuilder implements NodeVisitor {
                 choiceEdges
         );
         stack.push(composite);
+
+        popCluster();
     }
 
     // -------------------------------------------------------------------------
@@ -237,41 +335,37 @@ public class PathGraphBuilder implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        // Visit the body child first
+        int min = node.getMin();
+        int max = node.getMax(); // -1 = unbounded
+
+        String label = labelFor(node, "Repeat") + " \t\t {" + min + ".." + (max < 0 ? "<&infinity>" : max) + "}";
+        pushCluster(label);
+
+        // Synthetic REPEAT_ENTRY node – inside the cluster scope
+        PathNode repeatEntry = createSyntheticNode(PathNode.repeatEntry(node, nextId()));
+
+        // Visit body inside the same cluster scope
         node.getNode().visit(this);
         Fragment bodyFragment = stack.pop();
 
-        int min = node.getMin();
-        int max = node.getMax();   // -1 = unbounded
-
-        // Synthetic REPEAT_ENTRY node – marks the loop re-entry point
-        PathNode repeatEntry = PathNode.repeatEntry(node, nextId());
-        graph.addNode(repeatEntry);
-
         List<PathEdge> repeatEdges = new ArrayList<>(bodyFragment.getInternalEdges());
 
-        // Forward edge: REPEAT_ENTRY → body entries  [min..max]
         for (PathNode bodyEntry : bodyFragment.getEntries()) {
             repeatEdges.add(addEdge(PathEdge.repeat(repeatEntry, bodyEntry, min, max)));
         }
 
-        // Back-edges: body exits → REPEAT_ENTRY  [min..max]
-        // These encode "loop again" – same bounds as the forward edge because each
-        // iteration is governed by the same Repeat node.
         for (PathNode bodyExit : bodyFragment.getExits()) {
-            repeatEdges.add(addEdge(PathEdge.repeat(bodyExit, repeatEntry, min, max)));
+            repeatEdges.add(addEdge(PathEdge.once(bodyExit, repeatEntry)));
         }
 
-        // The fragment for this Repeat has:
-        //   entry = REPEAT_ENTRY  (single stable entry point)
-        //   exit  = REPEAT_ENTRY  (control returns here after each iteration;
-        //                          the parent connects "after the loop" from here)
         Fragment composite = new Fragment(
                 Collections.singletonList(repeatEntry),
                 Collections.singletonList(repeatEntry),
                 repeatEdges
         );
         stack.push(composite);
+
+        popCluster();
     }
 
     // -------------------------------------------------------------------------
@@ -279,16 +373,21 @@ public class PathGraphBuilder implements NodeVisitor {
     // -------------------------------------------------------------------------
 
     private void pushTerminal(Node astNode) {
-        PathNode pathNode = PathNode.forAst(astNode, nextId());
-        graph.addNode(pathNode);
+        PathNode pathNode = createPathNode(astNode);
         stack.push(Fragment.terminal(pathNode));
     }
 
     /**
-     * Registers an edge in the graph and returns it (for fluent chaining).
+     * Derives a cluster label from the AST node's pattern text (if available)
+     * or falls back to the supplied default kind name.
      */
-    private PathEdge addEdge(PathEdge edge) {
-        graph.addEdge(edge);
-        return edge;
+    private static String labelFor(Node node, String kind) {
+        // Node.getPattern() returns the regex sub-expression this node was parsed from.
+        // Use it verbatim if available so the cluster header is self-documenting.
+        String pattern = node.getPattern();
+        if (pattern != null && !pattern.isEmpty()) {
+            return kind + ": " + pattern;
+        }
+        return kind;
     }
 }

@@ -1,0 +1,34 @@
+@startuml
+title
+""Pattern: `(a|b){0,2}`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_4
+component """END""" as node_END_5
+
+rectangle "Repeat: (a|b){0,2} 		 {0..2}" {
+  rectangle "Group 1: (a|b)" {
+    rectangle "Choice: (a|b)" {
+      component """Choice((a|b))""" as node_CHOICE_1 <<choice>>
+      component """FinalSymbol(a)""" as node_AST_2
+      component """FinalSymbol(b)""" as node_AST_3
+    }
+  }
+  component """Repeat((a|b){0,2})""" as node_REPEAT_ENTRY_0 <<repeat>>
+}
+
+node_CHOICE_1 --> node_AST_2
+node_CHOICE_1 --> node_AST_3
+node_REPEAT_ENTRY_0 --> node_CHOICE_1 : 0..2
+node_AST_2 --> node_REPEAT_ENTRY_0
+node_AST_3 --> node_REPEAT_ENTRY_0
+node_BEGIN_4 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_0 --> node_END_5
+}
+@enduml

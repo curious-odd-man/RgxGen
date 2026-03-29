@@ -82,23 +82,12 @@ public class PathNode {
      * Creates the synthetic re-entry node for a {@code Repeat} AST node.
      */
     public static PathNode repeatEntry(com.github.curiousoddman.rgxgen.nodes.Repeat repeat, int seq) {
-        String maxStr = (repeat.getMax() == -1) ? "∞" : String.valueOf(repeat.getMax());
         return new PathNode(Kind.REPEAT_ENTRY, null,
-                getRepeatLabel(repeat, maxStr), seq);
+                getRepeatLabel(repeat), seq);
     }
 
-    private static String getRepeatLabel(Repeat repeat, String maxStr) {
-        int min = repeat.getMin();
-        int max = repeat.getMax();
-
-        String repeatLabel;
-        if (min == max) {
-            repeatLabel = String.valueOf(min);
-        } else {
-            repeatLabel = min + ".." + maxStr ;
-        }
-
-        return "Repeat[" + repeatLabel + "](" + Util.plantumlEscape(repeat.getPattern()) + ")";
+    private static String getRepeatLabel(Repeat repeat) {
+        return "Repeat(" + Util.plantumlEscape(repeat.getPattern()) + ")";
     }
 
     /**
