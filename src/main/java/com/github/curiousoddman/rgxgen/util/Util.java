@@ -231,4 +231,12 @@ public final class Util {
     public static boolean isRightWithinLeft(SymbolRange left, SymbolRange right) {
         return left.from() <= right.from() && left.to() >= right.to();
     }
+
+    public static String plantumlEscape(String s) {
+        if (s == null) {
+            return "";
+        }
+        // Keep label short and safe for PlantUML/DOT embedding
+        return s.replace("\"", "\\\"").replace("\n", "\\n");
+    }
 }
