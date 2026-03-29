@@ -320,8 +320,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                     break;
 
                 case '|':
-                    choicesStartPos = handlePipeCharacter(choices, nodes, sb, choicesStartPos, parsingFlags);
                     parsingFlags.withChoice();
+                    choicesStartPos = handlePipeCharacter(choices, nodes, sb, choicesStartPos, parsingFlags);
                     break;
 
                 case ')':

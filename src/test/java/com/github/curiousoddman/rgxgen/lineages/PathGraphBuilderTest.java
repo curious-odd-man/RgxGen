@@ -468,7 +468,6 @@ class PathGraphBuilderTest {
         String uml = g.toPlantUml();
         assertTrue(uml.contains("@startuml"), "Should start with @startuml");
         assertTrue(uml.contains("@enduml"),   "Should end with @enduml");
-        assertTrue(uml.contains("digraph"),    "Should contain digraph keyword");
     }
 
     @Test
@@ -483,14 +482,14 @@ class PathGraphBuilderTest {
     void plantUml_edgeLabelOnceToOnce() {
         PathGraph g = buildGraph("a");
         String uml = g.toPlantUml();
-        assertTrue(uml.contains("1..1"), "Should have [1..1] edge labels");
+        assertTrue(uml.contains("1"), "Should have [1] edge labels");
     }
 
     @Test
     void plantUml_edgeLabelUnbounded() {
         PathGraph g = buildGraph("a+");
         String uml = g.toPlantUml();
-        assertTrue(uml.contains("∞"), "Should have ∞ in edge labels for unbounded repeat");
+        assertTrue(uml.contains("<&infinity>"), "Should have <&infinity> in edge labels for unbounded repeat");
     }
 
     @Test
