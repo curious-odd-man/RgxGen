@@ -1,0 +1,26 @@
+@startuml
+title
+""Pattern: `c(a|^b)`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_4
+component """END""" as node_END_5
+
+rectangle "Sequence: c(a)" {
+  rectangle "Group 1: (a)" {
+      component """FinalSymbol(a) """ as node_AST_2
+  }
+  component """FinalSymbol(c) """ as node_AST_0
+}
+
+node_BEGIN_4 --> node_AST_0
+node_AST_0 --> node_AST_2
+node_AST_2 --> node_END_5
+}
+@enduml

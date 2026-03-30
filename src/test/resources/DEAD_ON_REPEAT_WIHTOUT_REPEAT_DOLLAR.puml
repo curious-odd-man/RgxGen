@@ -1,0 +1,27 @@
+@startuml
+title
+""Pattern: `(a$|x){2,2}`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_4
+component """END""" as node_END_5
+
+rectangle "Repeat: (x){2,2} 		 {2..2}" {
+  rectangle "Group 1: (x)" {
+    component """FinalSymbol(x) """ as node_AST_3
+  }
+  component """Repeat((x){2,2})""" as node_REPEAT_ENTRY_0 <<repeat>>
+}
+
+node_AST_3 --> node_REPEAT_ENTRY_0
+node_BEGIN_4 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_0 --> node_END_5
+node_REPEAT_ENTRY_0 --> node_AST_3
+}
+@enduml

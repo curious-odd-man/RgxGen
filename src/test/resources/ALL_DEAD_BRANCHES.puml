@@ -1,0 +1,17 @@
+@startuml
+title
+""Pattern: `x(a$|^b)c`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_5
+component """END""" as node_END_6
+
+node_BEGIN_5 --> node_END_6
+}
+@enduml

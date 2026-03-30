@@ -1,0 +1,52 @@
+@startuml
+title
+""Pattern: `(1$|1,){0,1}(2$|2,){0,1}`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_8
+component """END""" as node_END_9
+
+rectangle "Sequence: (1$|1,){0,1}(2$|2,){0,1}" {
+  rectangle "Repeat: (1$|1,){0,1} 		 {0..1}" {
+    rectangle "Group 1: (1$|1,)" {
+      rectangle "Choice: (1$|1,)" {
+        component """Choice((1$|1,))""" as node_CHOICE_1 <<choice>>
+        component """FinalSymbol(1) <:26d4:>""" as node_AST_2
+        component """FinalSymbol(1,) """ as node_AST_3
+      }
+    }
+    component """Repeat((1$|1,){0,1})""" as node_REPEAT_ENTRY_0 <<repeat>>
+  }
+  rectangle "Repeat: (2$|2,){0,1} 		 {0..1}" {
+    rectangle "Group 2: (2$|2,)" {
+      rectangle "Choice: (2$|2,)" {
+        component """Choice((2$|2,))""" as node_CHOICE_5 <<choice>>
+        component """FinalSymbol(2) <:26d4:>""" as node_AST_6
+        component """FinalSymbol(2,) """ as node_AST_7
+      }
+    }
+    component """Repeat((2$|2,){0,1})""" as node_REPEAT_ENTRY_4 <<repeat>>
+  }
+}
+
+node_AST_2 --> node_END_9
+node_CHOICE_1 --> node_AST_2
+node_CHOICE_1 --> node_AST_3
+node_REPEAT_ENTRY_0 --> node_CHOICE_1 : 0..1
+node_AST_3 --> node_REPEAT_ENTRY_0
+node_CHOICE_5 --> node_AST_6
+node_CHOICE_5 --> node_AST_7
+node_REPEAT_ENTRY_4 --> node_CHOICE_5 : 0..1
+node_AST_7 --> node_REPEAT_ENTRY_4
+node_REPEAT_ENTRY_0 --> node_REPEAT_ENTRY_4
+node_BEGIN_8 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_4 --> node_END_9
+node_AST_6 --> node_END_9
+}
+@enduml

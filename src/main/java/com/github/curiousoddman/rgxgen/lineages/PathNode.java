@@ -71,7 +71,7 @@ public class PathNode {
      * @param sequenceNumber a monotonic counter supplied by the caller (e.g. PathGraphBuilder)
      *                       so that IDs are unique within one graph but reset between graphs.
      */
-    private PathNode(Kind kind, Node astNode, String label, int sequenceNumber) {
+    public PathNode(Kind kind, Node astNode, String label, int sequenceNumber) {
         this.id = kind.name() + "_" + sequenceNumber;
         this.kind = kind;
         this.astNode = astNode;
