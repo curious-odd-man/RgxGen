@@ -8,14 +8,19 @@ import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
-import com.github.curiousoddman.rgxgen.testutil.NodePatternVerifyingVisitor;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -29,27 +34,39 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         return Arrays.stream(TestPattern.values());
     }
 
+    private static final Map<TestPattern, Node> NODES_CACHE = new EnumMap<>(TestPattern.class);
+
+    public static Node getOrCreateNode(TestPattern testPattern) {
+        return NODES_CACHE.computeIfAbsent(testPattern, k -> {
+            NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
+            return defaultTreeBuilder.get();
+        });
+    }
+
     private static String createMessage(String generated, DataInterface pattern, int i, int j) {
         return "Text: '" + generated + "' does not match pattern '" + pattern.getPattern() + "'. Seed used = " + i + ',' + j;
     }
 
     @ParameterizedTest
     @MethodSource("getPatterns")
-    public void parseTest(TestPattern testPattern) {
-        NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
-        Node node = defaultTreeBuilder.get();
-        assertEquals(testPattern.getResultNode().toString(), node.toString());
-        NodePatternVerifyingVisitor visitor = new NodePatternVerifyingVisitor(testPattern.getResultNode());
-        node.visit(visitor);
-        assertTrue(visitor.getErrors().isEmpty(), visitor.getErrors().toString());
+    public void parseTest(TestPattern testPattern) throws IOException {
+        Node node = getOrCreateNode(testPattern);
+        try {
+            assertEquals(testPattern.getExpectedFromFile(), node.toString());
+        } catch (AssertionFailedError | NoSuchFileException e) {
+            Files.writeString(testPattern.getExpectedFilePath(), node.toString());
+            throw e;
+        }
     }
 
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void countUniqueUsingVisitorTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
+        Node node = getOrCreateNode(testPattern);
+
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(new RgxGenProperties());
-        testPattern.getResultNode().visit(v);
+        node.visit(v);
         assertEquals(testPattern.getEstimatedCount(), v.getEstimation().orElse(null));
     }
 
@@ -67,7 +84,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         assumeTrue(testPattern.hasAllUniqueValues());
 
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(new RgxGenProperties());
-        testPattern.getResultNode().visit(v);
+        getOrCreateNode(testPattern).visit(v);
         assertEquals(testPattern.getAllUniqueValues(), TestingUtilities.iteratorToList(v.getUniqueStrings()));
     }
 

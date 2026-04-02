@@ -1,11 +1,9 @@
 package com.github.curiousoddman.rgxgen.data;
 
-import com.github.curiousoddman.rgxgen.nodes.Node;
-
 import java.math.BigInteger;
 import java.util.List;
 
-public interface DataInterface {
+public interface DataInterface extends Named {
 
     boolean hasEstimatedCount();
 
@@ -16,8 +14,6 @@ public interface DataInterface {
     boolean isUsableWithJavaPattern();
 
     String getPattern();
-
-    Node getResultNode();
 
     BigInteger getEstimatedCount();
 
