@@ -1,0 +1,4 @@
+Sequence[2]`aa?`
+  FinalSymbol{'a'}
+  Repeat[0,1]`a?`
+    FinalSymbol{'a'}

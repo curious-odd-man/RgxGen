@@ -1,0 +1,9 @@
+Group[1]`(|(a{1,2}|b{1,2}))`
+  Choice[2]`(|(a{1,2}|b{1,2}))`
+    FinalSymbol{''}
+    Group[2]`(a{1,2}|b{1,2})`
+      Choice[2]`(a{1,2}|b{1,2})`
+        Repeat[1,2]`a{1,2}`
+          FinalSymbol{'a'}
+        Repeat[1,2]`b{1,2}`
+          FinalSymbol{'b'}

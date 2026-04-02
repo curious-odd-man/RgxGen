@@ -16,9 +16,10 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.SingleChildNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class Group extends Node {
+public class Group extends Node implements SingleChildNode {
     private final Node aNode;
     private final int aGroupIndex;
 
@@ -37,14 +38,13 @@ public class Group extends Node {
         visitor.visit(this);
     }
 
+    @Override
     public Node getNode() {
         return aNode;
     }
 
     @Override
     public String toString() {
-        return "Group[" + aGroupIndex +
-                "]{" + aNode +
-                '}';
+        return "Group[" + aGroupIndex + "]`" + getPattern() + '`';
     }
 }

@@ -2,6 +2,7 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.opentest4j.AssertionFailedError;
@@ -134,10 +135,13 @@ public class CaretAndDollarParsingTests {
 
         if (expectedException == null) {
             Node node = builder.get();
+            PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
+            node.visit(prettyPrintVisitor);
+            String prettyPrintedNodes = prettyPrintVisitor.getResult();
             try {
-                assertEquals(aTestCase.getExpectedFromFile(), node.toString());
+                assertEquals(aTestCase.getExpectedFromFile(), prettyPrintedNodes);
             } catch (AssertionFailedError | NoSuchFileException e) {
-                Files.writeString(aTestCase.getExpectedFilePath(), node.toString());
+                Files.writeString(aTestCase.getExpectedFilePath(), prettyPrintedNodes);
                 throw e;
             }
         } else {

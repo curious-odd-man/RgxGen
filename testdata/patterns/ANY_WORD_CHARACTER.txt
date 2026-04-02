@@ -1,0 +1,1 @@
+SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[SymbolRange{from=97, to=122}, SymbolRange{from=65, to=90}, SymbolRange{from=48, to=57}], characters=[_]}, negativeMatchExclusion=null, isAscii=true, symbolRanges=[SymbolRange{from=48, to=57}, SymbolRange{from=65, to=90}, SymbolRange{from=97, to=122}], symbols=[_]} `\w`

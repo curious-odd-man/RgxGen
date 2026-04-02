@@ -1,0 +1,2 @@
+SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[], characters=[a, -, 	,  ]}, negativeMatchExclusion=RgxGenCharsDefinition{rangeList=[], characters=[a, -, 	, 
+, , , ,  ]}, isAscii=true, symbolRanges=[], symbols=[	,  , -, a]} `[\s-a]`

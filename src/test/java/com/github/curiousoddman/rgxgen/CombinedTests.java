@@ -9,6 +9,7 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
+import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -51,10 +52,13 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     @MethodSource("getPatterns")
     public void parseTest(TestPattern testPattern) throws IOException {
         Node node = getOrCreateNode(testPattern);
+        PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
+        node.visit(prettyPrintVisitor);
+        String prettyPrintedNodes = prettyPrintVisitor.getResult();
         try {
-            assertEquals(testPattern.getExpectedFromFile(), node.toString());
+            assertEquals(testPattern.getExpectedFromFile(), prettyPrintedNodes);
         } catch (AssertionFailedError | NoSuchFileException e) {
-            Files.writeString(testPattern.getExpectedFilePath(), node.toString());
+            Files.writeString(testPattern.getExpectedFilePath(), prettyPrintedNodes);
             throw e;
         }
     }

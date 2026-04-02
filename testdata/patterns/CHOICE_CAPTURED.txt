@@ -1,0 +1,6 @@
+Sequence[2]`(a|b)\1`
+  Group[1]`(a|b)`
+    Choice[2]`(a|b)`
+      FinalSymbol{'a'}
+      FinalSymbol{'b'}
+  GroupRef{1}`\1`

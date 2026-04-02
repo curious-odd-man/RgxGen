@@ -16,9 +16,10 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.LeafNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class FinalSymbol extends Node {
+public class FinalSymbol extends Node implements LeafNode {
     private final String aValue;
 
     public FinalSymbol(String value) {

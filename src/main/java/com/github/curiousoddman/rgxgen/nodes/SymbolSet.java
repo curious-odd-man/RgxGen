@@ -22,6 +22,7 @@ import com.github.curiousoddman.rgxgen.model.MatchType;
 import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
 import com.github.curiousoddman.rgxgen.model.UnicodeCategory;
+import com.github.curiousoddman.rgxgen.nodes.type.LeafNode;
 import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
@@ -39,7 +40,7 @@ import static java.util.Collections.singletonList;
  * Generate Any printable character.
  */
 
-public class SymbolSet extends Node {
+public class SymbolSet extends Node implements LeafNode {
     protected final SymbolRange universeCharacters;
     private final MatchType originalMatchType;
     private final RgxGenCharsDefinition positiveGenerationChars;
@@ -201,7 +202,7 @@ public class SymbolSet extends Node {
                 ", isAscii=" + isAscii +
                 ", symbolRanges=" + symbolRanges +
                 ", symbols=" + symbols +
-                "} ";
+                "} `" + getPattern() + '`';
     }
 
     public boolean hasModifiedExclusionChars() {
