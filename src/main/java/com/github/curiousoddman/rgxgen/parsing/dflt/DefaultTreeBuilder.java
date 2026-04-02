@@ -293,6 +293,8 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '^':
                 case '$':
                     verifyStartEndMarkerConsistency(c);
+                    sbToFinal(sb, nodes);
+                    nodes.add(new AnchorNode(c));
                     break;
 
                 case '[':
