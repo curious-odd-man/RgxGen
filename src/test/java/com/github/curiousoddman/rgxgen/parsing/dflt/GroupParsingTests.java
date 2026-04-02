@@ -3,7 +3,6 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
 import com.github.curiousoddman.rgxgen.nodes.Group;
 import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -24,9 +23,9 @@ public class GroupParsingTests {
                 arguments("(?<123\\>)", new RgxGenParseException("Incomplete group structure: \n'(?<123\\'\n   ^")),
                 arguments("(?'123)", new RgxGenParseException("Incomplete group structure: \n'(?'123)'\n   ^")),
                 // Valid group
-                arguments("(\\?123)", new Group("(\\?123)", 1, new FinalSymbol("?123", ParsingFlags.EMPTY))),
-                arguments("(?<name>123)", new Group("(?<name>123)", 1, new FinalSymbol("123", ParsingFlags.EMPTY))),
-                arguments("(?<name\\>x>123)", new Group("(?<name\\>x>123)", 1, new FinalSymbol("123", ParsingFlags.EMPTY)))
+                arguments("(\\?123)", new Group("(\\?123)", 1, new FinalSymbol("?123"))),
+                arguments("(?<name>123)", new Group("(?<name>123)", 1, new FinalSymbol("123"))),
+                arguments("(?<name\\>x>123)", new Group("(?<name\\>x>123)", 1, new FinalSymbol("123")))
         );
     }
 

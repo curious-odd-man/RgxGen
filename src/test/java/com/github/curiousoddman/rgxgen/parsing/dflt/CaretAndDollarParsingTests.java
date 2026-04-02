@@ -2,60 +2,57 @@ package com.github.curiousoddman.rgxgen.parsing.dflt;
 
 import com.github.curiousoddman.rgxgen.nodes.*;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.parsing.dflt.flags.WritableParsingFlags.parsingFlags;
 import static org.junit.jupiter.api.Assertions.*;
 
 
 public class CaretAndDollarParsingTests {
     public static Stream<TestCase> data() {
-        return Stream.of(new TestCase("^a$", new FinalSymbol("a", WritableParsingFlags.caretAndDollar())),
-                new TestCase("^a", new FinalSymbol("a", parsingFlags().withCaret())),
-                new TestCase("a$", new FinalSymbol("a", parsingFlags().withDollar())),
-                new TestCase("(^a$)", new Group("(^a$)", 1, new FinalSymbol("a", WritableParsingFlags.caretAndDollar()))),
+        return Stream.of(new TestCase("^a$", new FinalSymbol("a")),
+                new TestCase("^a", new FinalSymbol("a")),
+                new TestCase("a$", new FinalSymbol("a")),
+                new TestCase("(^a$)", new Group("(^a$)", 1, new FinalSymbol("a"))),
                 new TestCase("(^a|^b|^c)", new Group("(^a|^b|^c)", 1, new Choice("(^a|^b|^c)",
-                        new FinalSymbol("a", parsingFlags().withCaret().withChoice()),
-                        new FinalSymbol("b", parsingFlags().withCaret().withChoice()),
-                        new FinalSymbol("c", parsingFlags().withCaret().withChoice())))),
+                        new FinalSymbol("a"),
+                        new FinalSymbol("b"),
+                        new FinalSymbol("c")))),
                 new TestCase("(a$|b$|c$)", new Group("(a$|b$|c$)", 1,
                         new Choice("(a$|b$|c$)",
-                                new FinalSymbol("a", parsingFlags().withDollar().withChoice()),
-                                new FinalSymbol("b", parsingFlags().withDollar().withChoice()),
-                                new FinalSymbol("c", parsingFlags().withDollar().withChoice())))),
+                                new FinalSymbol("a"),
+                                new FinalSymbol("b"),
+                                new FinalSymbol("c")))),
                 new TestCase("((^a|^b)xyz)", new Group("((^a|^b)xyz)", 1,
                         new Sequence("((^a|^b)xyz)",
                                 new Group("(^a|^b)", 2,
                                         new Choice("(^a|^b)",
-                                                new FinalSymbol("a", parsingFlags().withCaret().withChoice()),
-                                                new FinalSymbol("b", parsingFlags().withCaret().withChoice()))),
-                                new FinalSymbol("xyz", ParsingFlags.EMPTY)))),
+                                                new FinalSymbol("a"),
+                                                new FinalSymbol("b"))),
+                                new FinalSymbol("xyz")))),
                 new TestCase("(xyz(a$|b$))", new Group("(xyz(a$|b$))", 1,
-                        new Sequence("((a$|b$)xyz)",
-                                new FinalSymbol("xyz", ParsingFlags.EMPTY),
-                                new Group("(a$|b$)", 2,
-                                        new Choice("(a$|b$)",
-                                                new FinalSymbol("a", parsingFlags().withDollar().withChoice()),
-                                                new FinalSymbol("b", parsingFlags().withDollar().withChoice())))))),
-                new TestCase("(^a)+", new Repeat("(^a)+", new Group("(^a)", 1, new FinalSymbol("a", parsingFlags().withCaret())), 1, -1)), // Correctly matches first 'a' in string "aaaa"
-                new TestCase("(b$)+", new Repeat("(b$)+", new Group("(b$)", 1, new FinalSymbol("b", parsingFlags().withDollar())), 1, -1)), // Correctly matches last b letter in "bbbb"
-                new TestCase("a$\n^b", new FinalSymbol("a\nb", WritableParsingFlags.caretAndDollar())), // Correctly matches a and b on different lines. Note, would not work without newline
-                new TestCase("a\n^b", new FinalSymbol("a\nb", parsingFlags().withCaret())),
-                new TestCase("a$\nb", new FinalSymbol("a\nb", parsingFlags().withDollar())),
+                        new Sequence("((^a|^b)xyz)",
+                                new FinalSymbol("xyz"),
+                                new Group("(^a|^b)", 2,
+                                        new Choice("(^a|^b)",
+                                                new FinalSymbol("a"),
+                                                new FinalSymbol("b")))))),
+                new TestCase("(^a)+", new Repeat("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1, -1)), // Correctly matches first 'a' in string "aaaa"
+                new TestCase("(b$)+", new Repeat("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1, -1)), // Correctly matches last b letter in "bbbb"
+                new TestCase("a$\n^b", new FinalSymbol("a\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
+                new TestCase("a\n^b", new FinalSymbol("a\nb")),
+                new TestCase("a$\nb", new FinalSymbol("a\nb")),
                 new TestCase("(a\n^|c)", new Group("(a\n^|c)", 1,
                         new Choice("(a\n^|c)",
-                                new FinalSymbol("a\n", parsingFlags().withChoice().withCaret()), new FinalSymbol("c", parsingFlags().withChoice())))), // This pattern is good to go, since both parts may produce valid result
+                                new FinalSymbol("a\n"), new FinalSymbol("c")))), // This pattern is good to go, since both parts may produce valid result
                 new TestCase("(a$|c)\nx", new Sequence("(a$|c)\nx",
                         new Group("(a$|c)", 1,
                                 new Choice("(a$|c)",
-                                        new FinalSymbol("a", parsingFlags().withDollar().withChoice()),
-                                        new FinalSymbol("c", parsingFlags().withChoice()))),
-                        new FinalSymbol("\nx", ParsingFlags.EMPTY))), // This pattern successfully matches "a\nx" and "c\nx"
+                                        new FinalSymbol("a"),
+                                        new FinalSymbol("c"))),
+                        new FinalSymbol("\nx"))), // This pattern successfully matches "a\nx" and "c\nx"
 
                 // Error TokenNotQuantifiable for any repetition
                 new TestCase("^+", new TokenNotQuantifiableException("""

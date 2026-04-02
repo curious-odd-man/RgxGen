@@ -16,17 +16,14 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
 public class FinalSymbol extends Node {
     private final String aValue;
-    private final ParsingFlags parsingFlags;
 
-    public FinalSymbol(String value, ParsingFlags parsingFlags) {
+    public FinalSymbol(String value) {
         super(value);
         aValue = value;
-        this.parsingFlags = parsingFlags;
     }
 
     @Override
@@ -38,15 +35,10 @@ public class FinalSymbol extends Node {
         return aValue;
     }
 
-    public ParsingFlags getParsingFlags() {
-        return parsingFlags;
-    }
-
     @Override
     public String toString() {
         return "FinalSymbol{" +
                 '\'' + aValue + '\'' +
-                '\'' + parsingFlags + '\'' +
                 '}';
     }
 }

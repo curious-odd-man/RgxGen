@@ -2,7 +2,6 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
-import com.github.curiousoddman.rgxgen.parsing.dflt.flags.ParsingFlags;
 import com.github.curiousoddman.rgxgen.testutil.TestingUtilities;
 import com.github.curiousoddman.rgxgen.visitors.GenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
@@ -28,7 +27,7 @@ public class LimitedInfinitePatternsTests {
         return Stream.of(
                 arguments(
                         "a*", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Repeat("a*", new FinalSymbol("a", ParsingFlags.EMPTY), 0, 10),
+                        new Repeat("a*", new FinalSymbol("a"), 0, 10),
                         IntStream.iterate(0, value -> value + 1)
                                 .limit(11)
                                 .mapToObj(v -> Stream.generate(() -> "a")
@@ -38,7 +37,7 @@ public class LimitedInfinitePatternsTests {
                 ),
                 arguments(
                         "aa+", // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence("aa+", new FinalSymbol("a", ParsingFlags.EMPTY), new Repeat("a+", new FinalSymbol("a", ParsingFlags.EMPTY), 1, 10)),
+                        new Sequence("aa+", new FinalSymbol("a"), new Repeat("a+", new FinalSymbol("a"), 1, 10)),
                         IntStream.iterate(1, value -> value + 1)
                                 .limit(10)
                                 .mapToObj(v -> 'a' + Stream.generate(() -> "a")
@@ -48,7 +47,7 @@ public class LimitedInfinitePatternsTests {
                 ),
                 arguments(
                         "a.*",      // If use unlimited repetition that will cause an error when trying to save all data in memory, thus we limit repetition times
-                        new Sequence("a.*", new FinalSymbol("a", ParsingFlags.EMPTY), new Repeat(".*", SymbolSet.ofDotPattern(null), 0, 2)),
+                        new Sequence("a.*", new FinalSymbol("a"), new Repeat(".*", SymbolSet.ofDotPattern(null), 0, 2)),
                         Stream.concat(Stream.of(""), Stream.concat(stream(makeAsciiCharacterArray()),
                                         stream(makeAsciiCharacterArray())
                                                 .flatMap(symbol -> stream(makeAsciiCharacterArray())

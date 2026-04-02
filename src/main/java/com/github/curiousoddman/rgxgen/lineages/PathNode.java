@@ -16,6 +16,7 @@ package com.github.curiousoddman.rgxgen.lineages;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.AnchorNode;
 import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.nodes.Repeat;
@@ -85,11 +86,11 @@ public class PathNode {
     public static PathNode forAst(Node astNode, int seq) {
         String escapedPattern = Util.plantumlEscape(astNode.getPattern());
         String symbol = "";
-        if (astNode instanceof FinalSymbol finalSymbol) {
-            if (finalSymbol.getParsingFlags().hasCaret()) {
+        if (astNode instanceof AnchorNode anchorNode) {
+            if (anchorNode.isCaret()) {
                 symbol = "<:2693:>";
             }
-            if (finalSymbol.getParsingFlags().hasDollar()) {
+            if (anchorNode.isDollar()) {
                 symbol = "<:26d4:>";
             }
         }

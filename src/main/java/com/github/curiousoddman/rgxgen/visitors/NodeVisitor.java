@@ -34,4 +34,8 @@ public interface NodeVisitor {
     void visit(GroupRef node);
 
     void visit(Group node);
+
+    default void visit(AnchorNode anchorNode) {
+        // TODO: Should I change it later?
+    }
 }
