@@ -1,0 +1,5 @@
+Group[1]`(B||A)`
+  Choice[3]`(B||A)`
+    FinalSymbol{'B'}
+    FinalSymbol{''}
+    FinalSymbol{'A'}

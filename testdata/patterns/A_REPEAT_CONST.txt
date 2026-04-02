@@ -1,0 +1,2 @@
+Repeat[2]`a{2}`
+  FinalSymbol{'a'}

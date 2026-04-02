@@ -1,0 +1,2 @@
+Repeat[60000]`a{60000}`
+  FinalSymbol{'a'}

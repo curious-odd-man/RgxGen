@@ -1,0 +1,3 @@
+Repeat[1,♾]`(b$)+`
+  Group[1]`(b$)`
+    FinalSymbol{'b'}

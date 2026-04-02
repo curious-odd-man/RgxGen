@@ -1,0 +1,3 @@
+Sequence[2]`..`
+  SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[SymbolRange{from=32, to=126}], characters=[]}, negativeMatchExclusion=null, isAscii=true, symbolRanges=[SymbolRange{from=32, to=126}], symbols=[]} `.`
+  SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[SymbolRange{from=32, to=126}], characters=[]}, negativeMatchExclusion=null, isAscii=true, symbolRanges=[SymbolRange{from=32, to=126}], symbols=[]} `.`

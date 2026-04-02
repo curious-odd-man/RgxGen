@@ -14,6 +14,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.CombinedTests.getOrCreateNode;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
@@ -29,7 +30,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         GenerationVisitor generationVisitor = GenerationVisitor.builder()
                 .withRandom(TestingUtilities.newRandom(aSeed))
                 .get();
-        testPattern.getResultNode().visit(generationVisitor);
+        getOrCreateNode(testPattern).visit(generationVisitor);
         boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
         assertTrue(result, "Text: '" + generationVisitor.getString() + "'does not match pattern " + testPattern.getPattern());
     }
@@ -52,7 +53,7 @@ public class CombinedRepeatableTests extends CombinedTestTemplate<TestPattern> {
         GenerationVisitor generationVisitor = NotMatchingGenerationVisitor.builder()
                 .withRandom(TestingUtilities.newRandom(aSeed))
                 .get();
-        testPattern.getResultNode().visit(generationVisitor);
+        getOrCreateNode(testPattern).visit(generationVisitor);
         boolean result = isValidGenerated(testPattern, generationVisitor.getString(), 0);
         assertFalse(result, "Text: '" + generationVisitor.getString() + "' matches pattern " + testPattern.getPattern());
     }

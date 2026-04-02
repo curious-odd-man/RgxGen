@@ -1,0 +1,5 @@
+Group[1]`(^a|^b|^c)`
+  Choice[3]`(^a|^b|^c)`
+    FinalSymbol{'a'}
+    FinalSymbol{'b'}
+    FinalSymbol{'c'}

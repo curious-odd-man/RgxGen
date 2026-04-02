@@ -16,9 +16,10 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.LeafNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class GroupRef extends Node {
+public class GroupRef extends Node implements LeafNode {
     private final int aIndex;
 
     public GroupRef(String pattern, int index) {
@@ -37,6 +38,6 @@ public class GroupRef extends Node {
 
     @Override
     public String toString() {
-        return "GroupRef{" + aIndex + '}';
+        return "GroupRef{" + aIndex + "}`" + getPattern() + '`';
     }
 }

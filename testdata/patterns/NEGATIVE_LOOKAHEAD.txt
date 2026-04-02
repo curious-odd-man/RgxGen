@@ -1,0 +1,4 @@
+Sequence[2]`foo(?!bar)`
+  FinalSymbol{'foo'}
+  NotSymbol{}`bar`
+    FinalSymbol{'bar'}

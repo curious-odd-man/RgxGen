@@ -1,0 +1,7 @@
+Sequence[5]`<([abc])>d<\/\1>`
+  FinalSymbol{'<'}
+  Group[1]`([abc])`
+    SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[], characters=[a, b, c]}, negativeMatchExclusion=null, isAscii=true, symbolRanges=[SymbolRange{from=97, to=99}], symbols=[]} `[abc]`
+  FinalSymbol{'>d</'}
+  GroupRef{1}`\1`
+  FinalSymbol{'>'}

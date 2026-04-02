@@ -16,11 +16,10 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.ArrayChildNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-import java.util.Arrays;
-
-public class Sequence extends Node {
+public class Sequence extends Node implements ArrayChildNode {
     private final Node[] aNodes;
 
     public Sequence(String pattern, Node... nodes) {
@@ -28,6 +27,7 @@ public class Sequence extends Node {
         aNodes = nodes;
     }
 
+    @Override
     public Node[] getNodes() {
         return aNodes;
     }
@@ -39,6 +39,6 @@ public class Sequence extends Node {
 
     @Override
     public String toString() {
-        return "Sequence" + Arrays.toString(aNodes);
+        return "Sequence[" + aNodes.length + "]`" + getPattern() + '`';
     }
 }

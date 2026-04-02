@@ -1,0 +1,5 @@
+Sequence[3]`123\Qmass[]\E{1,2}zxc`
+  FinalSymbol{'123mass['}
+  Repeat[1,2]`E{1,2}`
+    FinalSymbol{']'}
+  FinalSymbol{'zxc'}

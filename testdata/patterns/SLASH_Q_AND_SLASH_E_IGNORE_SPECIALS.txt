@@ -1,0 +1,1 @@
+FinalSymbol{'[a]\1(a|c).*\W'}
