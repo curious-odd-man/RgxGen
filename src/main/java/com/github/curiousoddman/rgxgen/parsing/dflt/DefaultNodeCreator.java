@@ -27,6 +27,8 @@ import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
 import java.util.List;
 
+import static com.github.curiousoddman.rgxgen.nodes.Repeat.UNBOUNDED;
+
 public class DefaultNodeCreator implements NodeCreator {
     @Override
     public FinalSymbol finalSymbol(String pattern) {
@@ -55,7 +57,7 @@ public class DefaultNodeCreator implements NodeCreator {
 
     @Override
     public Repeat repeatMinimum(String pattern, Node repeatNode, int repeatMinTimes) {
-        return new Repeat(pattern, repeatNode, repeatMinTimes, -1);
+        return new Repeat(pattern, repeatNode, repeatMinTimes, UNBOUNDED);
     }
 
     @Override

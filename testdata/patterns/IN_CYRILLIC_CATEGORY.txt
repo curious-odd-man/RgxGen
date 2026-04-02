@@ -1,0 +1,2 @@
+Repeat[2]`\p{InCyrillic}{2}`
+  SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[SymbolRange{from=1024, to=1279}], characters=[]}, negativeMatchExclusion=null, isAscii=false, symbolRanges=[SymbolRange{from=1024, to=1279}], symbols=[]} `\p{InCyrillic}`

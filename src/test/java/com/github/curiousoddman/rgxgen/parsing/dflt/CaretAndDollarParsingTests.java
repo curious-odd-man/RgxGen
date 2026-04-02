@@ -1,10 +1,15 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
+import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -12,135 +17,110 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class CaretAndDollarParsingTests {
     public static Stream<TestCase> data() {
-        return Stream.of(new TestCase("^a$", new FinalSymbol("a")),
-                new TestCase("^a", new FinalSymbol("a")),
-                new TestCase("a$", new FinalSymbol("a")),
-                new TestCase("(^a$)", new Group("(^a$)", 1, new FinalSymbol("a"))),
-                new TestCase("(^a|^b|^c)", new Group("(^a|^b|^c)", 1, new Choice("(^a|^b|^c)",
-                        new FinalSymbol("a"),
-                        new FinalSymbol("b"),
-                        new FinalSymbol("c")))),
-                new TestCase("(a$|b$|c$)", new Group("(a$|b$|c$)", 1,
-                        new Choice("(a$|b$|c$)",
-                                new FinalSymbol("a"),
-                                new FinalSymbol("b"),
-                                new FinalSymbol("c")))),
-                new TestCase("((^a|^b)xyz)", new Group("((^a|^b)xyz)", 1,
-                        new Sequence("((^a|^b)xyz)",
-                                new Group("(^a|^b)", 2,
-                                        new Choice("(^a|^b)",
-                                                new FinalSymbol("a"),
-                                                new FinalSymbol("b"))),
-                                new FinalSymbol("xyz")))),
-                new TestCase("(xyz(a$|b$))", new Group("(xyz(a$|b$))", 1,
-                        new Sequence("((^a|^b)xyz)",
-                                new FinalSymbol("xyz"),
-                                new Group("(^a|^b)", 2,
-                                        new Choice("(^a|^b)",
-                                                new FinalSymbol("a"),
-                                                new FinalSymbol("b")))))),
-                new TestCase("(^a)+", new Repeat("(^a)+", new Group("(^a)", 1, new FinalSymbol("a")), 1, -1)), // Correctly matches first 'a' in string "aaaa"
-                new TestCase("(b$)+", new Repeat("(b$)+", new Group("(b$)", 1, new FinalSymbol("b")), 1, -1)), // Correctly matches last b letter in "bbbb"
-                new TestCase("a$\n^b", new FinalSymbol("a\nb")), // Correctly matches a and b on different lines. Note, would not work without newline
-                new TestCase("a\n^b", new FinalSymbol("a\nb")),
-                new TestCase("a$\nb", new FinalSymbol("a\nb")),
-                new TestCase("(a\n^|c)", new Group("(a\n^|c)", 1,
-                        new Choice("(a\n^|c)",
-                                new FinalSymbol("a\n"), new FinalSymbol("c")))), // This pattern is good to go, since both parts may produce valid result
-                new TestCase("(a$|c)\nx", new Sequence("(a$|c)\nx",
-                        new Group("(a$|c)", 1,
-                                new Choice("(a$|c)",
-                                        new FinalSymbol("a"),
-                                        new FinalSymbol("c"))),
-                        new FinalSymbol("\nx"))), // This pattern successfully matches "a\nx" and "c\nx"
+        return Stream.of(
+                new TestCase("start_a_end", "^a$"),
+                new TestCase("start_a", "^a"),
+                new TestCase("a_end", "a$"),
+                new TestCase("group_start_end_a", "(^a$)"),
+                new TestCase("start_alt_abc", "(^a|^b|^c)"),
+                new TestCase("end_alt_abc", "(a$|b$|c$)"),
+                new TestCase("start_alt_ab_xyz", "((^a|^b)xyz)"),
+                new TestCase("xyz_end_alt_ab", "(xyz(a$|b$))"),
+                new TestCase("repeat_start_a", "(^a)+"), // Correctly matches first 'a' in string "aaaa"
+                new TestCase("repeat_end_b", "(b$)+"), // Correctly matches last b letter in "bbbb"
+                new TestCase("newline_a_end_then_b_start", "a$\n^b"), // Correctly matches a and b on different lines. Note, would not work without newline
+                new TestCase("newline_a_then_b_start", "a\n^b"),
+                new TestCase("newline_a_end_then_b", "a$\nb"),
+                new TestCase("alt_a_newline_start_or_c", "(a\n^|c)"), // This pattern is good to go, since both parts may produce valid result
+                new TestCase("alt_a_end_or_c_then_newline_x", "(a$|c)\nx"), // This pattern successfully matches "a\nx" and "c\nx"
 
                 // Error TokenNotQuantifiable for any repetition
-                new TestCase("^+", new TokenNotQuantifiableException("""
+                new TestCase("", "^+", new TokenNotQuantifiableException("""
                         ^ at\s
                         '^+'
                           ^""")),
-                new TestCase("^*", new TokenNotQuantifiableException("""
+                new TestCase("", "^*", new TokenNotQuantifiableException("""
                         ^ at\s
                         '^*'
                           ^""")),
-                new TestCase("^{1,2}", new TokenNotQuantifiableException("""
+                new TestCase("", "^{1,2}", new TokenNotQuantifiableException("""
                         ^ at\s
                         '^{1,2}'
                           ^""")),
-                new TestCase("^?", new TokenNotQuantifiableException("""
+                new TestCase("", "^?", new TokenNotQuantifiableException("""
                         ^ at\s
                         '^?'
                           ^""")),
-                new TestCase("$+", new TokenNotQuantifiableException("""
+                new TestCase("", "$+", new TokenNotQuantifiableException("""
                         $ at\s
                         '$+'
                           ^""")),
-                new TestCase("$*", new TokenNotQuantifiableException("""
+                new TestCase("", "$*", new TokenNotQuantifiableException("""
                         $ at\s
                         '$*'
                           ^""")),
-                new TestCase("${1,2}", new TokenNotQuantifiableException("""
+                new TestCase("", "${1,2}", new TokenNotQuantifiableException("""
                         $ at\s
                         '${1,2}'
                           ^""")),
-                new TestCase("$?", new TokenNotQuantifiableException("""
+                new TestCase("", "$?", new TokenNotQuantifiableException("""
                         $ at\s
                         '$?'
                           ^""")),
 
                 // Error PatternDoesNotMatchAnything
-                new TestCase("a$^b", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "a$^b", new PatternDoesNotMatchAnythingException("""
                         Start and end of line markers cannot be put together.
                         'a$^b'
                           ^""")),
-                new TestCase("$^", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "$^", new PatternDoesNotMatchAnythingException("""
                         Start and end of line markers cannot be put together.
                         '$^'
                          ^""")),
-                new TestCase("^^", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "^^", new PatternDoesNotMatchAnythingException("""
                         Start and end of line markers cannot be put together.
                         '^^'
                           ^""")),
 
-                new TestCase("a$b", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "a$b", new PatternDoesNotMatchAnythingException("""
                         After dollar only new line is allowed!
                         'a$b'
                           ^""")),
-                new TestCase("a^b", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "a^b", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         'a^b'
                           ^""")),
-                new TestCase("a^", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "a^", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         'a^'
                           ^""")),
-                new TestCase("$b", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "$b", new PatternDoesNotMatchAnythingException("""
                         After dollar only new line is allowed!
                         '$b'
                          ^""")),
-                new TestCase("(a^)", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "(a^)", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         '(a^)'
                            ^""")),
 
-                new TestCase("(a^|c^)", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "(a^|c^)", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         '(a^|c^)'
                            ^""")),
-                new TestCase("(a^|c)", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "(a^|c)", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         '(a^|c)'
                            ^""")),      // Although this pattern will match 'c' letter - throw an exception, because from generation perspective a^ part is not valid.
-                new TestCase("(a^|c)\nx", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "(a^|c)\nx", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         '(a^|c)
                         '
                            ^""")),// Same as previous
-                new TestCase("(a)^x", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "(a)^x", new PatternDoesNotMatchAnythingException("""
                         Before caret only new line is allowed!
                         '(a)^x'
                             ^""")),
-                new TestCase("x$(a)", new PatternDoesNotMatchAnythingException("""
+                new TestCase("", "x$(a)", new PatternDoesNotMatchAnythingException("""
                         After dollar only new line is allowed!
                         'x$(a)'
                           ^"""))
@@ -149,14 +129,21 @@ public class CaretAndDollarParsingTests {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void parseTest(TestCase aTestCase) {
+    public void parseTest(TestCase aTestCase) throws IOException {
         NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.pattern(), new DefaultNodeCreator(), null);
         Exception expectedException = aTestCase.exception();
 
         if (expectedException == null) {
-            assertEquals(aTestCase.result()
-                    .toString(), builder.get()
-                    .toString());
+            Node node = builder.get();
+            PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
+            node.visit(prettyPrintVisitor);
+            String prettyPrintedNodes = prettyPrintVisitor.getResult();
+            try {
+                assertEquals(aTestCase.getExpectedFromFile(), prettyPrintedNodes);
+            } catch (AssertionFailedError | NoSuchFileException e) {
+                Files.writeString(aTestCase.getExpectedFilePath(), prettyPrintedNodes);
+                throw e;
+            }
         } else {
             try {
                 builder.get();

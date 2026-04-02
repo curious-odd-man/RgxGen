@@ -1,0 +1,7 @@
+Group[1]`((^a|^b)xyz)`
+  Sequence[2]`((^a|^b)xyz)`
+    Group[2]`(^a|^b)`
+      Choice[2]`(^a|^b)`
+        FinalSymbol{'a'}
+        FinalSymbol{'b'}
+    FinalSymbol{'xyz'}

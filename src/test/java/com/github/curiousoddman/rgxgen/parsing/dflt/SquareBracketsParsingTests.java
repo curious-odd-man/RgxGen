@@ -1,76 +1,84 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.model.MatchType;
-import com.github.curiousoddman.rgxgen.model.RgxGenCharsDefinition;
+import com.github.curiousoddman.rgxgen.data.Named;
 import com.github.curiousoddman.rgxgen.nodes.Node;
-import com.github.curiousoddman.rgxgen.nodes.SymbolSet;
-import com.github.curiousoddman.rgxgen.util.chars.CharList;
+import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class SquareBracketsParsingTests {
 
-    private static SymbolSet mkSS(char... chars) {
-        return SymbolSet.ofAsciiCharacters(Arrays.toString(chars), chars, MatchType.POSITIVE);
+    public enum Data implements Named {
+        SQBP_A_TO_C("[a-c]"),
+        SQBP_A_TO_C_DASH("[a-c-]"),
+        SQBP_A_TO_C_TO_X("[a-c-x]"),
+        SQBP_DASH_A_TO_C("[-a-c]"),
+        SQBP_HEX_CHARS("[\\x30-\\x{0032}]"),
+        SQBP_SPECIAL_DASH("[\\s-]"),
+        SQBP_DASH("[-]"),
+        SQBP_SPECIAL_DASH_A("[\\s-a]"),
+        SQBP_SPECIAL("[\\s]"),
+        SQBP_A_DASH("[a-]"),
+
+        SQBP_PARSING_ERROR("[\\s-a-\\s]", new RgxGenParseException("""
+                Cannot make range with a shorthand escape sequences before '
+                's-a-\\s]'
+                      ^'"""));
+
+        private final String pattern;
+        private final Exception e;
+
+        Data(String pattern, Exception e) {
+            this.pattern = pattern;
+            this.e = e;
+        }
+
+        Data(String pattern) {
+            this.pattern = pattern;
+            e = null;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public Exception getException() {
+            return e;
+        }
     }
 
-    private static SymbolSet mkRange(char start, char end) {
-        return SymbolSet.ofAsciiRanges(start + ":" + end, Collections.singletonList(range(start, end)), MatchType.POSITIVE);
-    }
-
-    private static SymbolSet mkRangeAndChars(char start, char end, char... chars) {
-        return SymbolSet.ofAscii(start + ":" + end, Collections.singletonList(range(start, end)), CharList.charList(chars), MatchType.POSITIVE);
-    }
-
-    private static SymbolSet mkWhitespaceAnd(char... chars) {
-        RgxGenCharsDefinition negativeMatchDefinitions = RgxGenCharsDefinition
-                .of(chars)
-                .withCharacters('\t', '\n', '\u000B', '\f', '\r', ' ');
-        return SymbolSet.ofAscii("",
-                RgxGenCharsDefinition.of(chars).withCharacters('\t', ' '),
-                negativeMatchDefinitions,
-                MatchType.POSITIVE);
-    }
-
-
-    public static Stream<Arguments> data() {
-        return Stream.of(
-                Arguments.of("[a-c]", mkRange('a', 'c')),
-                Arguments.of("[a-c-]", mkRangeAndChars('a', 'c', '-')),
-                Arguments.of("[a-c-x]", mkRangeAndChars('a', 'c', 'x', '-')),
-                Arguments.of("[-a-c]", mkRangeAndChars('a', 'c', '-')),
-                Arguments.of("[\\x30-\\x{0032}]", mkRange('0', '2')),
-                Arguments.of("[\\s-]", mkWhitespaceAnd('-')),
-                Arguments.of("[-]", mkSS('-')),
-                Arguments.of("[\\s-a-\\s]", new RgxGenParseException("""
-                        Cannot make range with a shorthand escape sequences before '
-                        's-a-\\s]'
-                              ^'""")),
-                Arguments.of("[\\s-a]", mkWhitespaceAnd('a', '-')),
-                Arguments.of("[\\s]", mkWhitespaceAnd()),
-                Arguments.of("[a-]", mkSS('a', '-')));
+    public static Stream<Data> data() {
+        return Arrays.stream(Data.values());
     }
 
     @ParameterizedTest
     @MethodSource("data")
-    public void parsingTest(String pattern, Object expected) {
+    public void parsingTest(Data data) throws IOException {
+        String prettyPrintedNodes = "";
         try {
-            DefaultTreeBuilder builder = new DefaultTreeBuilder(pattern, new DefaultNodeCreator(), null);
+            DefaultTreeBuilder builder = new DefaultTreeBuilder(data.getPattern(), new DefaultNodeCreator(), null);
             Node node = builder.get();
-            assertEquals(expected.toString(), node.toString());
+            PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
+            node.visit(prettyPrintVisitor);
+            prettyPrintedNodes = prettyPrintVisitor.getResult();
+            assertEquals(data.getExpectedFromFile(), prettyPrintedNodes);
+        } catch (AssertionFailedError | NoSuchFileException e) {
+            Files.writeString(data.getExpectedFilePath(), prettyPrintedNodes);
+            throw e;
         } catch (RgxGenParseException e) {
-            if (expected instanceof Throwable) {
-                assertEquals(e.getMessage(), ((Throwable) expected).getMessage(), e.getMessage());
+            if (data.getException() != null) {
+                assertEquals(e.getMessage(), data.getException().getMessage(), e.getMessage());
             } else {
                 fail("Got exception when expected SymbolSet. ", e);
             }

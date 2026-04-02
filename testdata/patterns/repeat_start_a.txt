@@ -1,0 +1,3 @@
+Repeat[1,♾]`(^a)+`
+  Group[1]`(^a)`
+    FinalSymbol{'a'}

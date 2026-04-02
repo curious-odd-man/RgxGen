@@ -16,9 +16,12 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.SingleChildNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class Repeat extends Node {
+public class Repeat extends Node implements SingleChildNode {
+    public static final int UNBOUNDED = -1;
+
     private final Node aNode;
     private final int aMin;
     private final int aMax;
@@ -39,6 +42,7 @@ public class Repeat extends Node {
         visitor.visit(this);
     }
 
+    @Override
     public Node getNode() {
         return aNode;
     }
@@ -53,9 +57,14 @@ public class Repeat extends Node {
 
     @Override
     public String toString() {
-        return "Repeat{" + aNode +
-                ", aMin=" + aMin +
-                ", aMax=" + aMax +
-                '}';
+        String range;
+        if (aMin == aMax) {
+            range = String.valueOf(aMax);
+        } else {
+            String maxStr = (aMax == UNBOUNDED) ? "♾" : String.valueOf(aMax);
+            range = aMin + "," + maxStr;
+        }
+
+        return "Repeat[" + range + "]`" + getPattern() + '`';
     }
 }

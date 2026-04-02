@@ -1,0 +1,2 @@
+Repeat[0,♾]`a*`
+  FinalSymbol{'a'}

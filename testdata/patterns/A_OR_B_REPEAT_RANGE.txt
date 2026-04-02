@@ -1,0 +1,5 @@
+Repeat[0,2]`(a|b){0,2}`
+  Group[1]`(a|b)`
+    Choice[2]`(a|b)`
+      FinalSymbol{'a'}
+      FinalSymbol{'b'}

@@ -1,0 +1,1 @@
+SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[], characters=[a, b]}, negativeMatchExclusion=null, isAscii=true, symbolRanges=[SymbolRange{from=97, to=98}], symbols=[]} `[ab]`

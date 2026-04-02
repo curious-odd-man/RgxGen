@@ -16,9 +16,10 @@ package com.github.curiousoddman.rgxgen.nodes;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.nodes.type.SingleChildNode;
 import com.github.curiousoddman.rgxgen.visitors.NodeVisitor;
 
-public class NotSymbol extends Node {
+public class NotSymbol extends Node implements SingleChildNode {
     private final Node aNode;
 
     public NotSymbol(String pattern, Node node) {
@@ -31,12 +32,13 @@ public class NotSymbol extends Node {
         visitor.visit(this);
     }
 
+    @Override
     public Node getNode() {
         return aNode;
     }
 
     @Override
     public String toString() {
-        return "NotSymbol{" + aNode + '}';
+        return "NotSymbol{}`" + getPattern() + '`';
     }
 }
