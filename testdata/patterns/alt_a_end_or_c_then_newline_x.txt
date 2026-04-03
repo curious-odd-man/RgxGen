@@ -1,8 +1,8 @@
-Sequence[2]`(a$|c)
-x`
+Sequence[2]`(a$|c)\nx`
   Group[1]`(a$|c)`
     Choice[2]`(a$|c)`
-      FinalSymbol{'a'}
+      Sequence[2]`(a$|`
+        FinalSymbol{'a'}
+        AnchorNode{$}
       FinalSymbol{'c'}
-  FinalSymbol{'
-x'}
+  FinalSymbol{'\nx'}

@@ -1,5 +1,11 @@
 Group[1]`(^a|^b|^c)`
   Choice[3]`(^a|^b|^c)`
-    FinalSymbol{'a'}
-    FinalSymbol{'b'}
-    FinalSymbol{'c'}
+    Sequence[2]`(^a|`
+      AnchorNode{^}
+      FinalSymbol{'a'}
+    Sequence[2]`^b|`
+      AnchorNode{^}
+      FinalSymbol{'b'}
+    Sequence[2]`(^a|^b|^c)`
+      AnchorNode{^}
+      FinalSymbol{'c'}

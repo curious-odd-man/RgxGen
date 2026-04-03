@@ -85,17 +85,8 @@ public class PathNode {
 
     public static PathNode forAst(Node astNode, int seq) {
         String escapedPattern = Util.plantumlEscape(astNode.getPattern());
-        String symbol = "";
-        if (astNode instanceof AnchorNode anchorNode) {
-            if (anchorNode.isCaret()) {
-                symbol = "<:2693:>";
-            }
-            if (anchorNode.isDollar()) {
-                symbol = "<:26d4:>";
-            }
-        }
         return new PathNode(Kind.AST, astNode,
-                astNode.getClass().getSimpleName() + "(" + escapedPattern + ") " + symbol, seq);
+                astNode.getClass().getSimpleName() + "(" + escapedPattern + ")", seq);
     }
 
     public static PathNode begin(int seq) {

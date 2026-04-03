@@ -2,6 +2,10 @@ Group[1]`((^a|^b)xyz)`
   Sequence[2]`((^a|^b)xyz)`
     Group[2]`(^a|^b)`
       Choice[2]`(^a|^b)`
-        FinalSymbol{'a'}
-        FinalSymbol{'b'}
+        Sequence[2]`(^a|`
+          AnchorNode{^}
+          FinalSymbol{'a'}
+        Sequence[2]`(^a|^b)`
+          AnchorNode{^}
+          FinalSymbol{'b'}
     FinalSymbol{'xyz'}

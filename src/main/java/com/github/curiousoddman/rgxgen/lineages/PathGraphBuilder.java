@@ -230,6 +230,11 @@ public class PathGraphBuilder implements NodeVisitor {
         pushTerminal(node);
     }
 
+    @Override
+    public void visit(AnchorNode node) {
+        pushTerminal(node);
+    }
+
     // -------------------------------------------------------------------------
     // Group  (transparent wrapper – still gets its own cluster for visual grouping)
     // -------------------------------------------------------------------------

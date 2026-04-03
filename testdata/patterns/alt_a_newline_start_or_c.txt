@@ -1,7 +1,6 @@
-Group[1]`(a
-^|c)`
-  Choice[2]`(a
-^|c)`
-    FinalSymbol{'a
-'}
+Group[1]`(a\n^|c)`
+  Choice[2]`(a\n^|c)`
+    Sequence[2]`(a\n^|`
+      FinalSymbol{'a\n'}
+      AnchorNode{^}
     FinalSymbol{'c'}

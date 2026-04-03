@@ -1,2 +1,6 @@
-FinalSymbol{'a
-b'}
+Sequence[5]`a$\n^b`
+  FinalSymbol{'a'}
+  AnchorNode{$}
+  FinalSymbol{'\n'}
+  AnchorNode{^}
+  FinalSymbol{'b'}

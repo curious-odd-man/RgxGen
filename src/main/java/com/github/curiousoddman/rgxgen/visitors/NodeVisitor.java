@@ -35,7 +35,5 @@ public interface NodeVisitor {
 
     void visit(Group node);
 
-    default void visit(AnchorNode anchorNode) {
-        // TODO: Should I change it later?
-    }
+    void visit(AnchorNode anchorNode);
 }

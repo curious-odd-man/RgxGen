@@ -100,6 +100,11 @@ public class GenerationVisitor implements NodeVisitor {
         aGroupValues.put(node.getIndex(), aStringBuilder.substring(start));
     }
 
+    @Override
+    public void visit(AnchorNode anchorNode) {
+
+    }
+
     public String getString() {
         return aStringBuilder.toString();
     }

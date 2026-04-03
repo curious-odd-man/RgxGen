@@ -1,6 +1,6 @@
 @startuml
 title
-""Pattern: `a`""
+""Pattern: `^a$`""
 end title
 
 skinparam rectangle {
@@ -9,11 +9,18 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """FinalSymbol(a)""" as node_AST_0
-component """BEGIN""" as node_BEGIN_1
-component """END""" as node_END_2
+component """BEGIN""" as node_BEGIN_3
+component """END""" as node_END_4
 
-node_BEGIN_1 --> node_AST_0
-node_AST_0 --> node_END_2
+rectangle "Sequence: ^a$" {
+  component """AnchorNode(^)""" as node_AST_0
+  component """FinalSymbol(a)""" as node_AST_1
+  component """AnchorNode($)""" as node_AST_2
+}
+
+node_AST_0 --> node_AST_1
+node_AST_1 --> node_AST_2
+node_BEGIN_3 --> node_AST_0
+node_AST_2 --> node_END_4
 }
 @enduml

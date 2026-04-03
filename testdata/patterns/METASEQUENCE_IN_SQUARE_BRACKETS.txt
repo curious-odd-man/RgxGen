@@ -1,2 +1,1 @@
-SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[], characters=[', -, /, ., 	,  ]}, negativeMatchExclusion=RgxGenCharsDefinition{rangeList=[], characters=[', -, /, ., 	, 
-, , , ,  ]}, isAscii=true, symbolRanges=[SymbolRange{from=45, to=47}], symbols=[	,  , ']} `['\-/\.\s]`
+SymbolSet{originalMatchType=POSITIVE, positiveGenerationChars=RgxGenCharsDefinition{rangeList=[], characters=[', -, /, ., \t,  ]}, negativeMatchExclusion=RgxGenCharsDefinition{rangeList=[], characters=[', -, /, ., \t, \n, , \f, \r,  ]}, isAscii=true, symbolRanges=[SymbolRange{from=45, to=47}], symbols=[\t,  , ']} `['\-/\.\s]`

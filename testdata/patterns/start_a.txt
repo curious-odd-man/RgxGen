@@ -1,1 +1,3 @@
-FinalSymbol{'a'}
+Sequence[2]`^a`
+  AnchorNode{^}
+  FinalSymbol{'a'}
