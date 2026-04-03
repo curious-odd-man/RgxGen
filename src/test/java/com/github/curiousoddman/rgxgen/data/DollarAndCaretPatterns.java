@@ -33,8 +33,12 @@ public enum DollarAndCaretPatterns implements AnalysisDataInterface {
     DollarAndCaretPatterns(String pattern, List<String> uniqueValues) {
         this.pattern = pattern;
         this.uniqueValues = uniqueValues;
-        Path path = Path.of("src/test/resources/" + name() + ".puml");
+        Path path = getExpectedFilePath();
         optimizedGraphPuml = getOptimizedGraphPuml(pattern, path);
+    }
+
+    public Path getExpectedFilePath() {
+        return Path.of("testdata/dollar-and-caret/" + name() + ".puml");
     }
 
     private String getOptimizedGraphPuml(String pattern, Path path) {

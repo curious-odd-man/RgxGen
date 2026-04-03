@@ -4,7 +4,11 @@ import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.data.DollarAndCaretPatterns;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.opentest4j.AssertionFailedError;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Spliterator;
@@ -21,14 +25,20 @@ public class GraphOptimizationTests {
 
     @ParameterizedTest
     @MethodSource("getPatterns")
-    public void parseTest(DollarAndCaretPatterns testPattern) {
+    public void parseTest(DollarAndCaretPatterns testPattern) throws IOException {
         RgxGen parse = RgxGen.parse(testPattern.getPattern());
         String pathGraph = parse.getPathGraph().toPlantUml();
 
-        assertEquals(
-                testPattern.getOptimizedGraph(),
-                pathGraph
-        );
+        try {
+            assertEquals(
+                    testPattern.getOptimizedGraph(),
+                    pathGraph
+            );
+        } catch (AssertionFailedError e) {
+            Path expectedFilePath = testPattern.getExpectedFilePath();
+            Files.writeString(expectedFilePath, pathGraph);
+            throw e;
+        }
 
         Spliterator<String> tSpliterator = Spliterators.spliteratorUnknownSize(parse.iterateUnique(), 0);
         List<String> list = StreamSupport.stream(tSpliterator, false).toList();
