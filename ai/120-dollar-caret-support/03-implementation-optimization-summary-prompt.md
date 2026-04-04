@@ -28,7 +28,7 @@ StringIterator it = rgxGen.iterateUnique(); // unique values iterator
 ```
 regex string
     │
-    ▼
+    ▼[03-implementation-optimization-summary-prompt.md](03-implementation-optimization-summary-prompt.md)
 DefaultTreeBuilder          (parsing/dflt/DefaultTreeBuilder.java)
     │  parses regex → builds Node tree
     ▼
@@ -60,24 +60,18 @@ The graph vertices are instances of node classes from `src/main/java/com/github/
 
 From the JAR class listing (v1.4 as baseline; later versions add more):
 
-| Class         | Regex concept                                     | Notes                                                 |
-|---------------|---------------------------------------------------|-------------------------------------------------------|
-| `Node`        | Abstract base                                     | All nodes extend this                                 |
-| `FinalSymbol` | Literal character(s)                              | e.g. `a`, `abc`, `\t`                                 |
-| `Choice`      | Alternation `(a\|b\|c)`                           | Holds array of child nodes, one chosen per generation |
-| `Group`       | Capturing group `(...)` / named group `(?<n>...)` | Wraps a child node; may be referenced via `GroupRef`  |
-| `GroupRef`    | Back-reference `\1`                               | Points to a previously generated `Group` value        |
-| `NotSymbol`   | Negated char class `[^...]`                       | Generates a character NOT in the specified set        |
-| `Repeat`      | Quantifiers `?`, `+`, `*`, `{n}`, `{n,m}`         | Wraps a child node; tracks min/max repetitions        |
-| `SymbolSet`   | Character class `[...]`                           | Generates a character from the specified set          |
-| `AnySymbol`   | `.` (dot)                                         | Generates any character from the configured range     |
-| `LineStart`   | `^` caret                                         | Asserts position at start of line/string              |
-| `LineEnd`     | `$` dollar                                        | Asserts position at end of line/string                |
-
-> **Note:** The exact names `LineStart` / `LineEnd` are assumed from the context. They may also be
-> called `StartOfLine` / `EndOfLine`, or be represented as enum values or special `FinalSymbol`
-> instances. **Check the actual source in `src/main/java/com/github/curiousoddman/rgxgen/nodes/`
-> on the branch before coding.**
+| Class         | Regex concept                                                  | Notes                                                 |
+|---------------|----------------------------------------------------------------|-------------------------------------------------------|
+| `Node`        | Abstract base                                                  | All nodes extend this                                 |
+| `FinalSymbol` | Literal character(s)                                           | e.g. `a`, `abc`, `\t`                                 |
+| `Choice`      | Alternation `(a\|b\|c)`                                        | Holds array of child nodes, one chosen per generation |
+| `Group`       | Group `(...)` / named group `(?<n>...)`                        | Wraps a child node; may be referenced via `GroupRef`  |
+| `GroupRef`    | Back-reference `\1`                                            | Points to a previously generated `Group` value        |
+| `NotSymbol`   | Not matching wrapper node                                      | Generates a string NOT matching underlying nodes      |
+| `Repeat`      | Quantifiers `?`, `+`, `*`, `{n}`, `{n,m}`                      | Wraps a child node; tracks min/max repetitions        |
+| `SymbolSet`   | Character class `[...]`, dot '.', char classes (`\d`, `\s`...) | Generates a character from the specified set          |
+| `AnchorNode`  | `^` caret  or  `$` dollar                                      | Asserts position at start or end of line/string       |
+| `Sequence`    | A container for sequence of nodes                              | Sequentially placed nodes                             | 
 
 ### Graph edges
 
@@ -95,9 +89,9 @@ Implicit sentinel nodes (may exist in the graph):
 
 ### What goes wrong
 
-The library currently **treats `^` and `$` as zero-width position markers** that generate no
-characters and pass through during generation. When they appear inside an alternation, the parser
-still produces all syntactic branches — including branches that are **semantically impossible** at
+The library currently **ignores `^` and `$`** during generation.
+When they appear inside an alternation, the parser still produces all syntactic branches — including branches that are *
+*semantically impossible** at
 generation time.
 
 ### Worked example
@@ -116,18 +110,13 @@ from Path 1 produces the string `"ax"` which does NOT match the original regex. 
 
 ### Other problematic cases
 
-| Pattern                               | Impossible path                   | Reason                         |
-|---------------------------------------|-----------------------------------|--------------------------------|
-| `(a$\|c)x`                            | `a` → `$` → `x`                   | `$` followed by non-end node   |
-| `(^a\|c)x` with `^` mid-pattern       | depends on context                | `^` not at actual start        |
-| `x(a$\|b)y`                           | `a` → `$` → `y`                   | same                           |
-| `(^a\|b)` when `^` is not graph-start | `^` → `a` without start-of-string | `^` preceded by non-begin node |
-
-### Historical context
-
-Release 1.2 changelog notes: *"Fixed: Caret `^` and dollar `$` markers can be used anywhere in
-pattern #32"* — this fix allowed them to parse without error, but did not eliminate the impossible
-paths they create during generation.
+| Pattern        | Impossible path      | Reason                                   |
+|----------------|----------------------|------------------------------------------|
+| `(a$\|c)x`     | `a` → `$` → `x`      | `$` followed by non-end node             |
+| `x(a$\|b)y`    | `a` → `$` → `y`      | same                                     |
+| `x(^a\|b)`     | `x` → `^` → `a`      | `^` preceded by non-begin node           |
+| `(^a)+`        | `^` → `a` → `^`→ `a` | when more than 1 repetition is generated | 
+| `(a$\|x){1,2}` | `a` → `$` → `x`      | repetition with alterations              |
 
 ---
 
@@ -149,11 +138,11 @@ This class presumably:
 ### Expected graph resources
 
 ```
-src/test/resources/   (referenced as ../../src/test/resources from the test file location)
+testdata/dollar-and-caret/<enum name>.puml
 ```
 
-Each file describes the expected optimized graph for a test case. The format is likely JSON or a
-custom serialization. The comment in the brief says *"Some of them are not entirely correct — I
+Each file describes the expected optimized graph for a test case. The format is PlantUml file.
+The comment in the brief says *"Some of them are not entirely correct — I
 need more thoughts on that"* — meaning some expected outputs may need revision once the optimizer
 logic is firmed up.
 
@@ -218,35 +207,6 @@ impossible paths due to anchor placement.
 
 ---
 
-### Approach B — Anchor-aware Path Annotation (Lightweight)
-
-**Idea:** Instead of actually removing nodes, annotate paths with "reachability" flags. The
-generation visitor then skips branches tagged as impossible.
-
-**Algorithm sketch:**
-
-```
-1. Walk the tree recursively.
-2. For each Choice node:
-   a. For each alternative, check whether the alternative's sub-tree contains a '$' 
-      that is not the last node in the sequence through the alternative.
-   b. Similarly check for '^' not at the start.
-   c. Tag impossible alternatives with @Impossible or similar.
-3. During generation, the visitor checks the tag and skips the alternative.
-```
-
-**Pros:**
-
-- Non-destructive: original tree intact
-- Easy to toggle (useful for debugging)
-
-**Cons:**
-
-- Tagging may be hard to propagate correctly through nested structures
-- Visitors need to be made anchor-aware
-
----
-
 ### Approach C — Rewrite as Explicit Graph + Reachability Analysis
 
 **Idea:** Fully convert the node tree into an explicit directed graph (adjacency list), then run
@@ -279,24 +239,6 @@ reachability from `end`) to find and remove impossible nodes.
 - Most work to implement
 - Requires either a round-trip tree↔graph conversion, or changing the generation
   layer to work directly on the graph
-
----
-
-### Approach D — Parser-level Anchor Constraint Propagation
-
-**Idea:** During parsing (`DefaultTreeBuilder`), track "position context" (are we at start? at
-end?) and refuse to build branches that violate anchor constraints.
-
-**Pros:**
-
-- Prevents bad paths from ever being created
-
-**Cons:**
-
-- Most invasive — modifies the parser
-- Context tracking during recursive descent parsing is complex
-- Harder to test in isolation
-- Likely to break existing parsing logic
 
 ---
 
@@ -355,14 +297,15 @@ boolean caretIsAtStart(List<Node> nodesBeforeCaret) {
 
 These are the cases that may make some expected test resource files uncertain:
 
-| Case            | Question                                                                                                                                                                                                                         |
-|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `(a$\|b$)x`     | Both alternatives of Choice have `$` before `x`. Should the whole pattern be considered invalid, or should generation skip it entirely?                                                                                          |
-| `^(a\|^b)`      | Nested `^` — the inner `^` is at a position that may or may not be valid depending on whether `(a\|^b)` can ever start from begin                                                                                                |
-| `(a$)?b`        | The `?` makes the `a$` optional. If it matches zero times, `b` can follow. If it matches once, `b` cannot follow. → the optimizer must treat `{1}` occurrence of the group as an impossible path, and `{0}` occurrences as valid |
-| `(a$\|)b`       | The empty alternative makes one path valid. The optimizer should keep the empty branch.                                                                                                                                          |
-| Multi-line mode | If `(?m)` is ever supported, `^` and `$` match line boundaries, not just string boundaries. This changes the semantics entirely.                                                                                                 |
-| `\b` and `\B`   | Currently ignored by the library. Similar zero-width assertion problem — leave out of scope for now.                                                                                                                             |
+| Case            | Comment                                                                                                                                                                                          | Answer                                                              |
+|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
+| `(a$\|b$)x`     | Both alternatives of Choice have `$` before `x`.                                                                                                                                                 | Whole pattern should be considered invalid - an exception is thrown |  
+| `^(a\|^b)`      | Nested `^` — the inner `^` is at a position that may or may not be valid depending on whether `(a\|^b)` can ever start from begin                                                                | Valid case. Both values `a` and `b` can be produced.                |              
+| `(a$)?b`        | The `?` makes the `a$` optional. If it matches zero times, `b` can follow. If it matches once, `b` cannot follow. → the optimizer must treat `{1}` occurrence of the group as an impossible path | Completely remove node with `a$`                                    |
+| `(a$\|)b`       | The empty alternative makes one path valid. The optimizer should keep the empty branch.                                                                                                          |                                                                     |
+| Multi-line mode | If `(?m)` is ever supported, `^` and `$` match line boundaries, not just string boundaries. This changes the semantics entirely.                                                                 | Ignore for now                                                      |
+| `\b` and `\B`   | Currently ignored by the library. Similar zero-width assertion problem — leave out of scope for now.                                                                                             | Ignore for now                                                      |
+| `(a\|^x){1,2}`  | First may choose, second iteration - only `a` is allowed.                                                                                                                                        | Should be transformed to `(a\|x)(a){0,1}`? or otherwise optimized   |
 
 ---
 
@@ -372,7 +315,7 @@ These are the cases that may make some expected test resource files uncertain:
 |--------------------------------------------------------------------------------------|----------------------------------------------------|
 | `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`     | **Create** — main class                            |
 | `src/test/java/com/github/curiousoddman/rgxgen/lineages/GraphOptimizationTests.java` | **Already exists** — add/verify test cases         |
-| `src/test/resources/<pattern>.json` (or similar)                                     | **Review / fix** expected optimized graph files    |
+| `testdata/dollar-and-caret/<pattern>.puml`                                           | **Review / fix** expected optimized graph files    |
 | `src/main/java/com/github/curiousoddman/rgxgen/RgxGen.java`                          | Possibly **modify** to run optimizer after parsing |
 
 ---
@@ -380,15 +323,11 @@ These are the cases that may make some expected test resource files uncertain:
 ## 11. Relevant Existing Patterns in Codebase
 
 - **Visitor pattern:** The codebase uses `GenerationVisitor`, `NotMatchingGenerationVisitor`,
-  `UniqueGenerationVisitor`, `UniqueValuesCountingVisitor`. The optimizer could be implemented as
-  a special visitor that rewrites the tree, or as a standalone recursive transformer.
-
-- **`DefaultTreeBuilder`:** Builds the node tree from the regex string. Understanding its output
-  structure is essential before writing the optimizer.
-
-- **`NodeTreeBuilder` interface:** The builder abstraction — the tree it produces is what the
-  optimizer consumes.
-
+  `UniqueGenerationVisitor`, `UniqueValuesCountingVisitor`. These are currently used to generate patterns from Node trees.
+- **`PathGraphBuilder`:** a visitor that creates a graph representation for node tree. Understanding its output
+  structure is essential before writing the optimizer. 
+- **`DefaultTreeBuilder`:** Builds the node tree from the regex string. 
+ 
 ---
 
 ## 12. Quick Reference: Anchor Rules Summary
