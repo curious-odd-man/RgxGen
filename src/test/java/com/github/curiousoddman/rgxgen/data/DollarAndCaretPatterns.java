@@ -23,7 +23,7 @@ public enum DollarAndCaretPatterns implements AnalysisDataInterface {
     LIVEDEAD_REPEAT_DOLLAR("(b$)*", List.of("", "b")),
     DEAD_ON_REPEAT_CARET("(a|^x){1,2}", List.of("a", "x", "aa")),
     DEAD_ON_REPEAT_DOLLAR("(a$|x){1,2}", List.of("a", "x", "xx")),
-    DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR("(a$|x){2,2}", List.of("xx")),
+    DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR("(a$|x){2,2}", List.of("xa", "xx")),
     LIVE_DOUBLE_START("^(a|^b)", List.of("a", "b")),
     LIVE_DOUBLE_END("(a$|b)$", List.of("a", "b"));
 

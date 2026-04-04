@@ -1,25 +1,26 @@
-# RgxGen — Graph Optimization Reference
+# RgxGen — GraphOptimizer Implementation Specification
 
-> **Branch:** `120.Generate-produces-invalid-strings-when-dollar-and-caret-inside-pattern`  
-> **Purpose:** Reference document for implementing `GraphOptimizer` — a class that prunes impossible
-> paths from the regex node graph caused by `^` (caret) and `$` (dollar) anchors appearing in the
-> middle of a pattern.
+> **Branch:** `120.Generate-produces-invalid-strings-when-dollar-and-caret-inside-pattern`
+
+> **Purpose:** Complete, self-sufficient specification for implementing `GraphOptimizer` — a class
+> that prunes impossible paths from the `PathGraph` caused by `^` (caret) and `$` (dollar) anchors
+> appearing in semantically invalid positions within a pattern.
 
 ---
 
 ## 1. Project Overview
 
-**RgxGen** is an open-source Java library that parses a regex pattern into a node tree (DAG), then
-walks it to generate strings. Core entry point:
+**RgxGen** is a Java library that parses a regex pattern into a node tree (AST), converts it into a
+directed `PathGraph`, then walks that graph to generate matching strings. Core entry point:
 
 ```java
 RgxGen rgxGen = RgxGen.parse("[^0-9]*[12]?[0-9]{1,2}[^0-9]*");
-String s = rgxGen.generate();          // random matching string
+String s = rgxGen.generate();             // random matching string
 String nm = rgxGen.generateNotMatching(); // random non-matching string
 StringIterator it = rgxGen.iterateUnique(); // unique values iterator
 ```
 
-**Repository:** https://github.com/curious-odd-man/RgxGen
+All packages are under `com.github.curiousoddman.rgxgen`.
 
 ---
 
@@ -28,99 +29,670 @@ StringIterator it = rgxGen.iterateUnique(); // unique values iterator
 ```
 regex string
     │
-    ▼[03-implementation-optimization-summary-prompt.md](03-implementation-optimization-summary-prompt.md)
-DefaultTreeBuilder          (parsing/dflt/DefaultTreeBuilder.java)
-    │  parses regex → builds Node tree
     ▼
-Node tree (DAG)             (nodes/ package)
-    │  visited by Visitors
+DefaultTreeBuilder              (parsing/dflt/DefaultTreeBuilder.java)
+    │  parses regex → builds AST Node tree
     ▼
-GenerationVisitor           (visitors/)
-    │  walks the tree, generates output
+Node tree (DAG)                 (nodes/ package)
+    │
+    ▼
+PathGraphBuilder.build(node)    (lineages/PathGraphBuilder.java)
+    │  visits AST → emits PathGraph
+    ▼
+PathGraph                       (lineages/PathGraph.java)
+    │  ← GraphOptimizer operates HERE (not on the AST)
+    ▼
+[generation visitors]           (visitors/ package)
+    │  walk PathGraph, generate output
     ▼
 String
 ```
 
 Key packages:
 
-| Package                                        | Role                                        |
-|------------------------------------------------|---------------------------------------------|
-| `com.github.curiousoddman.rgxgen`              | Entry point `RgxGen`                        |
-| `com.github.curiousoddman.rgxgen.nodes`        | Node types that form the DAG                |
-| `com.github.curiousoddman.rgxgen.parsing.dflt` | Tree builder, parser, constants             |
-| `com.github.curiousoddman.rgxgen.visitors`     | Generation, counting, not-matching visitors |
-| `com.github.curiousoddman.rgxgen.config`       | `RgxGenOption`, `RgxGenProperties`          |
-| `com.github.curiousoddman.rgxgen.model`        | `SymbolRange`, `UnicodeCategory`            |
+| Package               | Role                                         |
+|-----------------------|----------------------------------------------|
+| `rgxgen`              | Entry point: `RgxGen`                        |
+| `rgxgen.nodes`        | AST node types                               |
+| `rgxgen.lineages`     | `PathGraph`, `PathGraphBuilder`, graph model |
+| `rgxgen.parsing.dflt` | Tree builder, parser, constants              |
+| `rgxgen.visitors`     | Generation / counting visitors               |
+| `rgxgen.optimization` | **To be created** — `GraphOptimizer`         |
 
 ---
 
-## 3. Node Types
+## 3. AST Node Types
 
-The graph vertices are instances of node classes from `src/main/java/com/github/curiousoddman/rgxgen/nodes/`.
+All node classes live in `src/main/java/com/github/curiousoddman/rgxgen/nodes/`.
 
-From the JAR class listing (v1.4 as baseline; later versions add more):
+| Class         | Regex concept                                  | Key API                                      |
+|---------------|------------------------------------------------|----------------------------------------------|
+| `Node`        | Abstract base                                  | `getPattern()`, `visit(NodeVisitor)`         |
+| `FinalSymbol` | Literal character(s): `a`, `abc`, `\t`         | extends `Node`, `LeafNode`                   |
+| `Choice`      | Alternation `(a\|b\|c)`                        | `getNodes() → Node[]`                        |
+| `Group`       | Capturing group `(...)` / named `(?<n>...)`    | `getNode() → Node`, `getIndex() → int`       |
+| `GroupRef`    | Back-reference `\1`                            | extends `Node`, `LeafNode`                   |
+| `NotSymbol`   | Negative wrapper                               | extends `Node`, `LeafNode`                   |
+| `Repeat`      | Quantifiers `?`, `+`, `*`, `{n}`, `{n,m}`      | `getNode()`, `getMin()`, `getMax()` (-1 = ∞) |
+| `SymbolSet`   | Character class `[...]`, `.`, `\d`, `\s`, etc. | extends `Node`, `LeafNode`                   |
+| `AnchorNode`  | `^` or `$`                                     | `isCaret()`, `isDollar()`                    |
+| `Sequence`    | Ordered sequence of nodes                      | `getNodes() → Node[]`                        |
 
-| Class         | Regex concept                                                  | Notes                                                 |
-|---------------|----------------------------------------------------------------|-------------------------------------------------------|
-| `Node`        | Abstract base                                                  | All nodes extend this                                 |
-| `FinalSymbol` | Literal character(s)                                           | e.g. `a`, `abc`, `\t`                                 |
-| `Choice`      | Alternation `(a\|b\|c)`                                        | Holds array of child nodes, one chosen per generation |
-| `Group`       | Group `(...)` / named group `(?<n>...)`                        | Wraps a child node; may be referenced via `GroupRef`  |
-| `GroupRef`    | Back-reference `\1`                                            | Points to a previously generated `Group` value        |
-| `NotSymbol`   | Not matching wrapper node                                      | Generates a string NOT matching underlying nodes      |
-| `Repeat`      | Quantifiers `?`, `+`, `*`, `{n}`, `{n,m}`                      | Wraps a child node; tracks min/max repetitions        |
-| `SymbolSet`   | Character class `[...]`, dot '.', char classes (`\d`, `\s`...) | Generates a character from the specified set          |
-| `AnchorNode`  | `^` caret  or  `$` dollar                                      | Asserts position at start or end of line/string       |
-| `Sequence`    | A container for sequence of nodes                              | Sequentially placed nodes                             | 
+`LeafNode` is a marker interface. `SingleChildNode` defines `getNode()`. `ArrayChildNode` defines
+`getNodes()`.
 
-### Graph edges
+### `AnchorNode` in detail
 
-An edge `A → B` means **"B is used after A"** (sequential flow). In terms of the node tree this
-means `B` is the next sibling in a sequence, or the next node following a group/repeat.
+```java
+public class AnchorNode extends Node implements LeafNode {
+    public AnchorNode(char pattern) {
+        super(String.valueOf(pattern));
+    }
 
-Implicit sentinel nodes (may exist in the graph):
+    public boolean isCaret() {
+        return getPattern().equals("^");
+    }
 
-- **`begin`** — virtual start node representing position before the first character
-- **`end`** — virtual end node representing position after the last character
-
----
-
-## 4. The Core Problem (Issue #120)
-
-### What goes wrong
-
-The library currently **ignores `^` and `$`** during generation.
-When they appear inside an alternation, the parser still produces all syntactic branches — including branches that are *
-*semantically impossible** at
-generation time.
-
-### Worked example
-
-Pattern: `(a$|c)x`
-
-The parser builds the following paths through the graph:
-
-```
-Path 1:  begin → 'a' → '$' → 'x' → end
-Path 2:  begin → 'c' → 'x' → end
+    public boolean isDollar() {
+        return getPattern().equals("$");
+    }
+}
 ```
 
-**Path 1 is impossible.** After `$` (end-of-string anchor) there cannot follow `x`. Generating
-from Path 1 produces the string `"ax"` which does NOT match the original regex. This is the bug.
-
-### Other problematic cases
-
-| Pattern        | Impossible path      | Reason                                   |
-|----------------|----------------------|------------------------------------------|
-| `(a$\|c)x`     | `a` → `$` → `x`      | `$` followed by non-end node             |
-| `x(a$\|b)y`    | `a` → `$` → `y`      | same                                     |
-| `x(^a\|b)`     | `x` → `^` → `a`      | `^` preceded by non-begin node           |
-| `(^a)+`        | `^` → `a` → `^`→ `a` | when more than 1 repetition is generated | 
-| `(a$\|x){1,2}` | `a` → `$` → `x`      | repetition with alterations              |
+`AnchorNode` is a leaf. It produces no characters during generation. Its presence in an
+intermediate position in a sequence makes part of the pattern impossible to generate.
 
 ---
 
-## 5. Test Infrastructure
+## 4. PathGraph Model (the optimizer's input and output)
+
+The `PathGraphBuilder` compiles the AST into a `PathGraph`. The optimizer receives a `PathGraph`
+and returns a modified `PathGraph`. All classes are in `com.github.curiousoddman.rgxgen.lineages`.
+
+### 4.1 `PathGraph`
+
+```java
+public class PathGraph {
+    public PathGraph(String pattern) { ...}
+
+    public void addNode(PathNode node) { ...}
+
+    public void addEdge(PathEdge edge) { ...}
+
+    public void addRootCluster(PathGraphCluster cluster) { ...}
+
+    public List<PathNode> getNodes() { ...}        // unmodifiable
+
+    public List<PathEdge> getEdges() { ...}        // unmodifiable
+
+    // getters for rootClusters not yet public — optimizer may need to add one
+    public String toPlantUml() { ...}
+}
+```
+
+`toPlantUml()` produces the PlantUML diagram string that the tests compare against the `.puml`
+resource files.
+
+### 4.2 `PathNode`
+
+```java
+public class PathNode {
+    public enum Kind {AST, BEGIN, END, REPEAT_ENTRY, CHOICE}
+
+    // Factories:
+    public static PathNode forAst(Node astNode, int seq)
+
+    public static PathNode begin(int seq)
+
+    public static PathNode end(int seq)
+
+    public static PathNode repeatEntry(Repeat repeat, int seq)
+
+    public static PathNode choice(Choice choice, int seq)
+
+    public String getId()    // e.g. "AST_0", "BEGIN_5", "CHOICE_1"
+
+    public Kind getKind()
+
+    public String getLabel() // human-readable; used verbatim in PlantUML output
+}
+```
+
+IDs are constructed as `Kind.name() + "_" + sequenceNumber`. Labels for `AST` nodes are:
+`ClassName(escapedPattern)` — e.g. `FinalSymbol(a)`, `AnchorNode(^)`.
+
+The `Util.plantumlEscape(String)` method is used to escape labels:
+
+```java
+public static String plantumlEscape(String s) {
+    return s.replace("\"", "\\\"").replace("\n", "\\n");
+}
+```
+
+### 4.3 `PathEdge`
+
+```java
+public record PathEdge(PathNode from, PathNode to, int min, int max) {
+    public static final int UNBOUNDED = -1;
+
+    public static PathEdge once(PathNode from, PathNode to)              // min=1, max=1
+
+    public static PathEdge repeat(PathNode from, PathNode to, int min, int max)
+
+    public String label()  // "" for once; "N" for exact; "N..M" for range; "N..<&infinity>" for unbounded
+}
+```
+
+### 4.4 `PathGraphCluster`
+
+Clusters group nodes visually into nested `rectangle` blocks in PlantUML. Every compound AST node
+(Sequence, Choice, Repeat, Group) produces one cluster.
+
+```java
+public class PathGraphCluster {
+    public PathGraphCluster(String label) { ...}
+
+    public void addDirectNode(String nodeId) { ...}
+
+    public void addChild(PathGraphCluster child) { ...}
+
+    public Set<String> getDirectNodeIds() { ...}
+
+    public List<PathGraphCluster> getChildren() { ...}
+
+    public String getLabel() { ...}
+}
+```
+
+### 4.5 `Fragment`
+
+Used internally by `PathGraphBuilder` during construction (not needed by the optimizer directly):
+
+```java
+public record Fragment(List<PathNode> entries, List<PathNode> exits, List<PathEdge> internalEdges) {
+    public static Fragment terminal(PathNode node) { ...}
+}
+```
+
+### 4.6 How `PathGraphBuilder` builds the graph
+
+`PathGraphBuilder` implements `NodeVisitor` and uses a fragment stack. Key behaviors:
+
+- **BEGIN / END** sentinels are synthetic `PathNode`s added *after* all clusters are built. They
+  are never members of any cluster.
+- **`AnchorNode`** is treated as a terminal (`pushTerminal`) — it becomes an `AST`-kind `PathNode`
+  with label `AnchorNode(^)` or `AnchorNode($)`.
+- **`Choice`** creates a synthetic `CHOICE` node that fans out to each alternative's entries.
+- **`Repeat`** creates a synthetic `REPEAT_ENTRY` node. It connects to the body with
+  `PathEdge.repeat(repeatEntry, bodyEntry, min, max)` and back-edges from body exits to
+  `repeatEntry` with `PathEdge.once(bodyExit, repeatEntry)`. The repeat entry is both the entry
+  *and* exit of the repeat fragment (exit = zero-iterations path).
+- **`Group`** is transparent — it opens a cluster for visual grouping but does not introduce a
+  synthetic node. Its child's fragment is left on the stack unchanged.
+- **`Sequence`** chains child fragments left-to-right with `PathEdge.once` edges.
+
+---
+
+## 5. The Core Problem
+
+The library currently **ignores `^` and `$`** during generation; `AnchorNode.visit()` in
+`GenerationVisitor` is a no-op. When anchors appear inside alternations, the parser still builds
+all branches — including branches that are **semantically impossible** at generation time.
+
+### Worked example: `(a$|b)c`
+
+After `PathGraphBuilder`, the unoptimized graph has these logical paths:
+
+```
+Path 1:  BEGIN → Choice → AnchorNode($) ... wait, no.
+```
+
+More precisely — the parser for `(a$|b)c` builds:
+
+- A `Choice` with two alternatives: a `Sequence[a, $]` and a `FinalSymbol(b)`
+- Followed by `FinalSymbol(c)`
+
+So the PathGraph (before optimization) contains paths:
+
+```
+Path 1:  BEGIN → CHOICE → AnchorNode($) → FinalSymbol(c) → END   [via 'a' then '$']
+Path 2:  BEGIN → CHOICE → FinalSymbol(b) → FinalSymbol(c) → END
+```
+
+Wait — the `AnchorNode($)` is an `AST` node in the graph. The actual layout (using the
+`PathGraphBuilder` rules) is:
+
+```
+BEGIN → CHOICE_node → AST[FinalSymbol(a)] → AST[AnchorNode($)] → AST[FinalSymbol(c)] → END
+                    → AST[FinalSymbol(b)] ─────────────────────────────────────────────→ END
+```
+
+**Path 1 is impossible.** `$` asserts end-of-string; `FinalSymbol(c)` cannot follow it. Generating
+from Path 1 produces `"ac"` which does NOT match `(a$|b)c`. This is the bug.
+
+### Anchor semantics in the graph
+
+| Anchor | Meaning                | Constraint on graph position                            |
+|--------|------------------------|---------------------------------------------------------|
+| `^`    | Assert start-of-string | May only be preceded by BEGIN (no real nodes before it) |
+| `$`    | Assert end-of-string   | May only be succeeded by END (no real nodes after it)   |
+
+A path is **impossible** when either condition is violated:
+
+1. An `AST[AnchorNode($)]` node has any successor other than `END`.
+2. An `AST[AnchorNode(^)]` node has any predecessor other than `BEGIN`.
+
+---
+
+## 6. Expected Optimizer Output: Complete Test Case Catalogue
+
+The tests are driven by the enum `DollarAndCaretPatterns` (in
+`src/test/java/.../data/DollarAndCaretPatterns.java`). Each enum constant defines:
+
+- The regex pattern
+- The list of all unique values the optimized pattern can generate
+- A `.puml` file path at `testdata/dollar-and-caret/<ENUM_NAME>.puml`
+
+The test (`GraphOptimizationTests.parseTest`) calls:
+
+```java
+RgxGen parse = RgxGen.parse(testPattern.getPattern());
+String pathGraph = parse.getPathGraph().toPlantUml();
+
+assertEquals(testPattern.getOptimizedGraph(),pathGraph);
+```
+
+So `RgxGen.getPathGraph()` must return the **optimized** graph. The optimizer must run as part of
+`RgxGen` construction (after `PathGraphBuilder.build()`).
+
+### 6.1 Complete enum listing (as of the current source)
+
+```java
+DEAD_BRANCH_DOLLAR("(a$|b)c",List.of("bc"))
+
+LIVE_BRANCH_DOLLAR("c(a$|b)",List.of("ca", "cb"))
+
+LIVE_BRANCH_CARET("(^a|b)c",List.of("ac", "bc"))
+
+DEAD_BRANCH_CARET("c(a|^b)",List.of("ca"))
+
+DEAD_BRANCH_CARET_DOLLAR("(^a$|b)c",List.of("bc"))
+
+ALL_DEAD_BRANCHES("x(a$|^b)c",List.of())
+
+LIVE_BRANCHES_REPEAT_DOLLAR("(1$|1,){0,1}(2$|2,){0,1}",List.of("1","1,","1,2","1,2,","2","2,"))
+
+LIVE_BRANCHES_REPEAT_CARET("(^1|1,){0,1}(^2|2,){0,1}",List.of("1","1,","1,2","1,2,","2","2,"))
+
+DEAD_BRANCHES_REPEAT_DOLLAR("(1$|1,){0,1}(2$|2,)",List.of("1,2","2","2,"))
+
+DEAD_BRANCHES_REPEAT_CARET("(^1|1,)(^2|2,){0,1}",List.of("1","1,","1,2,","2,"))
+
+LIVEDEAD_REPEAT_CARET("(^a)+",List.of("a"))
+
+LIVEDEAD_REPEAT_DOLLAR("(b$)*",List.of("", "b"))
+
+DEAD_ON_REPEAT_CARET("(a|^x){1,2}",List.of("a", "x","aa"))
+
+DEAD_ON_REPEAT_DOLLAR("(a$|x){1,2}",List.of("a", "x","xx"))
+
+DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR("(a$|x){2,2}",List.of("xx"))   // note: typo "WIHTOUT" is intentional — matches the enum name
+
+LIVE_DOUBLE_START("^(a|^b)",List.of("a", "b"))
+
+LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
+```
+
+> **Note:** `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END` do not yet have `.puml` files in the
+> `testdata/dollar-and-caret/` directory. The optimizer must handle these patterns correctly; the
+> expected files will be generated on the first passing test run.
+
+### 6.3 Case-by-case expected behaviour
+
+#### `DEAD_BRANCH_DOLLAR` — `(a$|b)c`
+
+- Alternative `a$` is dead: `$` is followed by `c`.
+- Alternative `b` survives.
+- Result: `Choice` and `Group` containers are stripped down to a simple `Sequence: (b)c`.
+- `FinalSymbol(b)` and `FinalSymbol(c)` are the only content nodes.
+- Unique values: `["bc"]`
+
+#### `LIVE_BRANCH_DOLLAR` — `c(a$|b)`
+
+- Alternative `a$` is live: `$` is the last thing in the sequence, nothing follows.
+- Both alternatives survive. `$` node is removed; `FinalSymbol(a)` gets `<:26d4:>` label suffix.
+- Unique values: `["ca", "cb"]`
+
+#### `LIVE_BRANCH_CARET` — `(^a|b)c`
+
+- Alternative `^a` is live: `^` is at the very beginning.
+- Both alternatives survive. `^` node is removed; `FinalSymbol(a)` gets `<:2693:>` label suffix.
+- Unique values: `["ac", "bc"]`
+
+#### `DEAD_BRANCH_CARET` — `c(a|^b)`
+
+- Alternative `^b` is dead: `^` has `c` before it.
+- Alternative `a` survives. Result: `Sequence: c(a)` with only `FinalSymbol(a)` in `Group 1`.
+- Unique values: `["ca"]`
+
+#### `DEAD_BRANCH_CARET_DOLLAR` — `(^a$|b)c`
+
+- Alternative `^a$` is dead: even though `^` and `$` are both present, `$` is followed by `c`.
+- Alternative `b` survives.
+- Result: `Sequence: (b)c`.
+- Unique values: `["bc"]`
+
+#### `ALL_DEAD_BRANCHES` — `x(a$|^b)c`
+
+- Alternative `a$`: `$` is followed by `c` — dead.
+- Alternative `^b`: `^` is preceded by `x` — dead.
+- Both alternatives dead → entire pattern produces nothing.
+- Result graph: `BEGIN → END` only (no content nodes, no clusters).
+- Unique values: `[]`
+- This case must throw `PatternDoesNotMatchAnythingException`
+  (`com.github.curiousoddman.rgxgen.parsing.dflt.PatternDoesNotMatchAnythingException`) at
+  generation time, or the graph is left as BEGIN→END and generation returns nothing.
+
+#### `LIVE_BRANCHES_REPEAT_DOLLAR` — `(1$|1,){0,1}(2$|2,){0,1}`
+
+- `1$` is live: the repeat is optional (`{0,1}`), so if chosen, `1$` can be the last thing.
+  BUT `1$` cannot be followed by `(2$|2,)`. The dollar-annotated alternative `1$` must wire
+  directly to `END` and skip the second group.
+- `1,` can be followed by anything (second group, or end).
+- `2$` is live when it is last.
+- `2,` is live always.
+- The optimizer keeps all alternatives but rewires the dollar-terminated ones directly to `END`.
+- `FinalSymbol(1)` gets `<:26d4:>`, `FinalSymbol(2)` gets `<:26d4:>`.
+- Unique values: `["1","1,","1,2","1,2,","2","2,"]`
+
+#### `LIVE_BRANCHES_REPEAT_CARET` — `(^1|1,){0,1}(^2|2,){0,1}`
+
+- `^1` is live in the first group (it can be at start).
+- `^2` in second group: `^` is only valid at the very beginning. If the first group generates
+  something, `^2` is preceded by content — dead in that context. But the first group is `{0,1}`,
+  so it may generate nothing, making `^2` still at start.
+- The optimizer keeps both anchored alternatives but annotates them.
+- `FinalSymbol(1)` gets `<:2693:>`, `FinalSymbol(2)` gets `<:2693:>`.
+- Unique values: `["1","1,","1,2","1,2,","2","2,"]`
+
+#### `DEAD_BRANCHES_REPEAT_DOLLAR` — `(1$|1,){0,1}(2$|2,)`
+
+- First group: `1$` cannot be followed by the mandatory second group — dead. Only `1,` survives.
+  The first group becomes `(1,){0,1}`.
+- Second group: `2$` is at the end — live. `2,` is also live.
+- `FinalSymbol(2)` (from `2$`) gets `<:26d4:>`.
+- Unique values: `["1,2","2","2,"]`
+
+#### `DEAD_BRANCHES_REPEAT_CARET` — `(^1|1,)(^2|2,){0,1}`
+
+- First group (mandatory): `^1` is live at start; `1,` is also live.
+  `FinalSymbol(1)` gets `<:2693:>`.
+- Second group (optional): `^2` is dead — always preceded by the first group's output.
+  Only `2,` survives. The second group becomes `(2,){0,1}`.
+- Unique values: `["1","1,","1,2,","2,"]`
+
+#### `LIVEDEAD_REPEAT_CARET` — `(^a)+`
+
+- `^a` in a repeat: first iteration is valid (at start), but the back-edge makes a second
+  iteration invalid (`^` is now preceded by `a`).
+- The repeat collapses to exactly one occurrence. The `Repeat` node is removed entirely from the
+  graph; only `FinalSymbol(a) <:2693:>` remains between `BEGIN` and `END`.
+- Unique values: `["a"]`
+
+#### `LIVEDEAD_REPEAT_DOLLAR` — `(b$)*`
+
+- `b$` in a repeat: one iteration is valid (at end), but iteration back makes a second
+  iteration invalid (`b` after `$`).
+- The repeat bounds change from `{0,∞}` to `{0,1}`. The structure is kept but `max` is clamped
+  to 1. `FinalSymbol(b)` gets `<:26d4:>`.
+- Unique values: `["", "b"]`
+
+#### `DEAD_ON_REPEAT_CARET` — `(a|^x){1,2}`
+
+- First iteration: both `a` and `^x` are valid. `^` is at start.
+- Second iteration: `^x` is dead (preceded by first iteration output).
+- The optimizer splits the structure: the first iteration uses `Choice(a|^x)`, and subsequent
+  iterations only allow `a`. The result is:
+  `begin → Choice(a|^x) → [a or x⚓] → Repeat(a){0,1} → end`
+- `FinalSymbol(x)` gets `<:2693:>`.
+- Unique values: `["a","x","aa"]`
+
+#### `DEAD_ON_REPEAT_DOLLAR` — `(a$|x){1,2}`
+
+- First iteration: both `a$` and `x` are valid if `a$` terminates.
+- Second iteration: `a$` is dead (followed by another iteration), only `x` survives for
+  non-terminal passes.
+- The dollar-terminated alternative `a$` can only fire on the **last** iteration.
+- Structure: `Repeat(a$|x){1,2}` where `a⛔` connects directly to `END`, bypassing further
+  repetitions, and `x` feeds back into the repeat. The repeat remains `{1,2}` but `a⛔` exits
+  to `END`.
+- `FinalSymbol(a)` gets `<:26d4:>`.
+- Unique values: `["a","x","xx"]`
+
+#### `DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR` — `(a$|x){2,2}` *(note: enum name has typo "WIHTOUT")*
+
+- Exactly 2 repetitions required. `a$` on the first pass is always followed by the second pass —
+  dead. Only `x` survives.
+- The entire `Choice` collapses to just `FinalSymbol(x)`. The repeat becomes `(x){2,2}`.
+- Unique values: `["xx"]`
+
+#### `LIVE_DOUBLE_START` — `^(a|^b)`
+
+- Outer `^` is at start — valid.
+- Inner `^b` alternative: the inner `^` is redundant (already at start) — but it is not invalid.
+  Both `a` and `b` can be generated.
+- Both alternatives survive. Inner `^` node removed; `FinalSymbol(b)` gets `<:2693:>`.
+- Unique values: `["a","b"]`
+
+#### `LIVE_DOUBLE_END` — `(a$|b)$`
+
+- Outer `$` is at end — valid.
+- Inner `a$` alternative: inner `$` followed by outer `$` which is also at end — valid.
+  Both `a` and `b` can be generated.
+- Both alternatives survive. Inner `$` node removed; `FinalSymbol(a)` gets `<:26d4:>`.
+- Unique values: `["a","b"]`
+
+---
+
+## 7. Implementation Plan
+
+### 7.1 New class: `GraphOptimizer`
+
+**Package:** `com.github.curiousoddman.rgxgen.optimization`
+**File:** `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`
+
+The optimizer receives a `PathGraph` (already built by `PathGraphBuilder`) and returns a new or
+mutated `PathGraph` with impossible anchor paths removed and anchor annotations applied.
+
+```java
+package com.github.curiousoddman.rgxgen.optimization;
+
+import com.github.curiousoddman.rgxgen.lineages.PathGraph;
+import com.github.curiousoddman.rgxgen.nodes.Node;
+
+public class GraphOptimizer {
+
+    /**
+     * Optimize the PathGraph by removing impossible paths caused by ^ and $ anchor
+     * nodes appearing in semantically invalid positions.
+     *
+     * @param graph the PathGraph produced by PathGraphBuilder
+     * @return the optimized PathGraph (may be the same instance mutated, or a new one)
+     */
+    public PathGraph optimize(PathGraph graph) { ...}
+}
+```
+
+### 7.2 Integrate into `RgxGen`
+
+Modify `RgxGen` constructor to run the optimizer after building the graph:
+
+```java
+// In RgxGen constructor (RgxGen.java):
+node =defaultTreeBuilder.
+
+get();
+
+PathGraph rawGraph = PathGraphBuilder.build(node);
+pathGraph =new
+
+GraphOptimizer().
+
+optimize(rawGraph);
+```
+
+`RgxGen.getPathGraph()` already exists and returns `this.pathGraph`.
+
+### 7.3 Algorithm
+
+The optimizer must handle three distinct sub-problems:
+
+#### Sub-problem 1: Simple dead-branch removal in Choice
+
+**Input pattern:** `(a$|b)c` — `a$` is followed by `c`, so that branch is dead.
+
+**Algorithm:**
+
+1. Traverse the PathGraph. For each `AnchorNode($)` AST node:
+    - Find its successors in the graph.
+    - If any successor is not `END`, the path containing this `$` is impossible.
+2. For each `AnchorNode(^)` AST node:
+    - Find its predecessors in the graph.
+    - If any predecessor is not `BEGIN`, the path containing this `^` is impossible.
+3. Trace each impossible anchor back to the `CHOICE` node it belongs to (if any).
+4. Remove the dead alternative from the `Choice`'s fan-out edges.
+5. If all alternatives of a `Choice` are removed, propagate the death upward.
+6. Remove the anchor node itself from the graph.
+7. Annotate the adjacent non-anchor node's label:
+    - For `$`: the predecessor of `$` (last real node in the surviving path) gets ` <:26d4:>`
+      appended to its label.
+    - For `^`: the successor of `^` (first real node in the surviving path) gets ` <:2693:>`
+      appended to its label.
+
+#### Sub-problem 2: Repeat with anchored alternatives
+
+**Input patterns:** `(a$|x){1,2}`, `(^a)+`, `(b$)*`
+
+The key insight: **an anchor-containing alternative can only fire on the first (`^`) or last (`$`)
+iteration of a repeat.** For other iterations, it is dead.
+
+**Algorithm for `$` inside repeat:**
+
+- `(a$|x){min,max}`: `a$` can only be chosen on the final iteration (nothing follows).
+    - In the PathGraph, the `$`-terminated path's exit must go directly to `END`, not back to
+      `REPEAT_ENTRY`.
+    - The back-edge from the dollar-terminated node to `REPEAT_ENTRY` is removed.
+    - The edge from the dollar-terminated node to `END` is added (if not already present via
+      normal flow).
+    - If `max` is unbounded (∞) or strictly greater than the minimum mandatory count, this is valid.
+    - If the dollar alternative is the **only** one (no other exit from REPEAT_ENTRY goes back),
+      then max is clamped to 1.
+
+**Algorithm for `^` inside repeat:**
+
+- `(^a)+`: `^a` can only fire on the first iteration.
+    - On the first iteration (entry from `BEGIN`), `^a` is valid.
+    - On subsequent iterations (re-entry from the back-edge), `^a` is dead.
+    - Remove the back-edge from the caret-terminated node to `REPEAT_ENTRY`.
+    - If only caret alternatives exist (no non-caret alternative can loop), the repeat effectively
+      runs at most once. Remove the `REPEAT_ENTRY` node entirely; connect `BEGIN` directly to the
+      body node.
+    - Adjust `REPEAT_ENTRY` bounds accordingly.
+
+**Clamping rules:**
+
+| Pattern        | Before       | After                           |
+|----------------|--------------|---------------------------------|
+| `(^a)+`        | min=1, max=∞ | Repeat removed; exactly one `a` |
+| `(b$)*`        | min=0, max=∞ | min=0, max=1                    |
+| `(a$\|x){1,2}` | min=1, max=2 | `a$` exits to END; `x` loops    |
+| `(a$\|x){2,2}` | min=2, max=2 | `a$` fully dead; only `x{2,2}`  |
+
+#### Sub-problem 3: Cascading death
+
+When a dead branch causes an entire `Choice` to die, the death propagates to the parent. If the
+parent is a `Repeat`, the repeat must be removed. If the parent is a `Sequence`, the sequence
+itself is impossible, which may cascade further upward.
+
+**Algorithm:**
+
+- After removing dead alternatives, check if any `CHOICE` node has zero outgoing edges.
+- If so, mark the `CHOICE` node as dead.
+- Propagate: any node whose only predecessor is a dead node is also dead.
+- If `BEGIN` can no longer reach `END`, the graph represents a pattern that matches nothing.
+- In this case, simplify to `BEGIN → END` and ensure generation throws
+  `PatternDoesNotMatchAnythingException`.
+
+### 7.4 Label mutation
+
+The optimizer must mutate the label of `PathNode` objects when removing anchor nodes. Since
+`PathNode.label` is a `private final String`, the optimizer cannot directly modify it. Two options:
+
+**Option A — Add a `withLabel(String)` copy method to `PathNode`:**
+
+```java
+// In PathNode:
+public PathNode withLabel(String newLabel) {
+    return new PathNode(this.kind, this.astNode, newLabel, /* keep same id somehow */);
+}
+```
+
+However this changes the `id` (which encodes the sequence number) unless the constructor is
+extended to accept a pre-formed id string.
+
+**Option B — Add a mutable label field with a setter:**
+
+```java
+// In PathNode:
+private String label;  // remove final
+
+public void setLabel(String label) {
+    this.label = label;
+}
+```
+
+**Option B is simpler and recommended.** Add `setLabel(String)` to `PathNode`.
+
+### 7.5 Cluster label updates
+
+When a `Choice` loses an alternative (e.g., `(a$|b)c` → only `b` survives), the cluster
+hierarchy must also be updated. Specifically:
+
+- The `PathGraphCluster` whose label includes the original pattern (e.g., `"Choice: (a$|b)"`)
+  should have its label updated to reflect the optimized pattern (e.g., `"Choice: (b)"` — though
+  checking the puml files, the labels in surviving structures appear to be rewritten to reflect
+  only the remaining content).
+- Cluster label updates are visible in the expected `.puml` files. For example,
+  `DEAD_BRANCHES_REPEAT_DOLLAR` shows:
+
+  ```
+  rectangle "Sequence: (1,){0,1}(2$|2,)" {
+  ```
+  — the `(1$|1,)` part became `(1,)` because `1$` was pruned.
+
+This means cluster labels must be recomputed from the surviving nodes after optimization, or the
+optimizer must update them to match. The simplest approach is to recompute labels by walking the
+surviving AST structure; alternatively, the optimizer can build a fresh `PathGraph` from the
+pruned AST.
+
+---
+
+## 8. Files to Create / Modify
+
+| File                                                                                 | Action                                                                           |
+|--------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`     | **Create** — main optimizer class                                                |
+| `src/main/java/com/github/curiousoddman/rgxgen/RgxGen.java`                          | **Modify** — run optimizer after `PathGraphBuilder.build()`                      |
+| `src/main/java/com/github/curiousoddman/rgxgen/lineages/PathNode.java`               | **Modify** — add `setLabel(String)` (remove `final` from field)                  |
+| `src/main/java/com/github/curiousoddman/rgxgen/lineages/PathGraph.java`              | **Modify** — expose `getRootClusters()` and node/edge mutation methods if needed |
+| `src/test/java/com/github/curiousoddman/rgxgen/lineages/GraphOptimizationTests.java` | **Already exists** — verify all enum cases pass                                  |
+| `src/test/java/com/github/curiousoddman/rgxgen/data/DollarAndCaretPatterns.java`     | **Already exists** — add cases if needed                                         |
+| `testdata/dollar-and-caret/LIVE_DOUBLE_START.puml`                                   | **Create** — auto-generated on first passing run                                 |
+| `testdata/dollar-and-caret/LIVE_DOUBLE_END.puml`                                     | **Create** — auto-generated on first passing run                                 |
+
+---
+
+## 9. Test Infrastructure
 
 ### Test class
 
@@ -128,229 +700,172 @@ from Path 1 produces the string `"ax"` which does NOT match the original regex. 
 src/test/java/com/github/curiousoddman/rgxgen/lineages/GraphOptimizationTests.java
 ```
 
-This class presumably:
-
-- Parses various regex patterns
-- Builds the node graph
-- Runs the graph optimizer
-- Compares the resulting optimized graph against expected graphs stored as resource files
-
-### Expected graph resources
-
-```
-testdata/dollar-and-caret/<enum name>.puml
-```
-
-Each file describes the expected optimized graph for a test case. The format is PlantUml file.
-The comment in the brief says *"Some of them are not entirely correct — I
-need more thoughts on that"* — meaning some expected outputs may need revision once the optimizer
-logic is firmed up.
-
----
-
-## 6. Graph Model for Optimization
-
-Before implementing, it helps to think of the node tree as a directed graph:
-
-```
-Nodes  = regex expression parts (Node instances)
-Edges  = "used after" relation: A → B means B follows A in the generated string
-Paths  = sequences from 'begin' to 'end'
-```
-
-### Anchor semantics in graph terms
-
-| Anchor          | Valid predecessors                                                   | Valid successors                     |
-|-----------------|----------------------------------------------------------------------|--------------------------------------|
-| `^` (LineStart) | Only `begin` (or nothing — it must be the first meaningful position) | Any node                             |
-| `$` (LineEnd)   | Any node                                                             | Only `end` (nothing real may follow) |
-
-A path is **impossible** if:
-
-- It contains `$` and has any non-`end` node after it, OR
-- It contains `^` at a position that is not the graph start (i.e., has real predecessors before it)
-
----
-
-## 7. Approaches to Graph Optimization
-
-### Approach A — Post-parse Graph Pruning (Recommended starting point)
-
-**Idea:** After the tree is built, traverse it and mark or remove nodes/edges that create
-impossible paths due to anchor placement.
-
-**Algorithm sketch:**
-
-```
-1. Build the full node graph as normal (existing behavior).
-2. Run GraphOptimizer.optimize(rootNode):
-   a. DFS/BFS through all paths from 'begin' to 'end'.
-   b. For each path, check for violations:
-      - A '$' node that has a non-terminal successor → mark path as DEAD.
-      - A '^' node that has a non-begin predecessor → mark path as DEAD.
-   c. For each DEAD path:
-      - Remove or disable the branch (e.g., remove the alternative from a Choice node).
-3. If a Choice node has all its alternatives removed → the whole Choice is impossible
-   (this itself may cascade upward).
-```
-
-**Pros:**
-
-- Cleanest separation from parsing
-- Works on already-built tree; no parser changes needed
-- Fits naturally into the visitor pattern already used in the codebase
-
-**Cons:**
-
-- Need to re-represent the tree as a graph with explicit edges, or annotate nodes with
-  successor/predecessor info
-
----
-
-### Approach C — Rewrite as Explicit Graph + Reachability Analysis
-
-**Idea:** Fully convert the node tree into an explicit directed graph (adjacency list), then run
-standard graph algorithms (e.g., dead-end elimination, reachability from `begin`, reverse
-reachability from `end`) to find and remove impossible nodes.
-
-**Algorithm sketch:**
-
-```
-1. Convert Node tree → DirectedGraph<Node> with explicit edges.
-2. Add virtual 'begin' and 'end' nodes.
-3. For '$':
-   - Remove all outgoing edges except to 'end'.
-4. For '^':
-   - Remove all incoming edges except from 'begin'.
-5. Run forward reachability from 'begin' → nodes not reachable are dead.
-6. Run backward reachability from 'end' → nodes with no path to 'end' are dead.
-7. Dead nodes and their edges are removed.
-8. Convert back to Node tree (or use graph directly for generation).
-```
-
-**Pros:**
-
-- Most correct and complete — handles chains of impossible nodes
-- Graph algorithms well-understood
-- Can handle complex nested cases
-
-**Cons:**
-
-- Most work to implement
-- Requires either a round-trip tree↔graph conversion, or changing the generation
-  layer to work directly on the graph
-
----
-
-## 8. Recommended Approach and Implementation Plan
-
-Based on the existing visitor pattern and the test structure, **Approach A (Post-parse Graph
-Pruning)** is the best starting point, possibly upgraded toward **Approach C** if simple pruning
-misses edge cases.
-
-### Proposed class: `GraphOptimizer`
-
 ```java
-package com.github.curiousoddman.rgxgen.optimization;
+public class GraphOptimizationTests {
+    public static Stream<DollarAndCaretPatterns> getPatterns() {
+        return Arrays.stream(DollarAndCaretPatterns.values());
+    }
 
-public class GraphOptimizer {
+    @ParameterizedTest
+    @MethodSource("getPatterns")
+    public void parseTest(DollarAndCaretPatterns testPattern) throws IOException {
+        RgxGen parse = RgxGen.parse(testPattern.getPattern());
+        String pathGraph = parse.getPathGraph().toPlantUml();
 
-    /**
-     * Optimize the node graph by removing impossible paths caused by
-     * ^ and $ anchor nodes appearing in semantically invalid positions.
-     *
-     * @param root the root node of the parsed regex graph
-     * @return the root of the optimized graph (may be same instance or a new tree)
-     */
-    public Node optimize(Node root) { ...}
+        try {
+            assertEquals(testPattern.getOptimizedGraph(), pathGraph);
+        } catch (AssertionFailedError e) {
+            // On failure, writes the actual output to the expected file for comparison
+            Path expectedFilePath = testPattern.getExpectedFilePath();
+            Files.writeString(expectedFilePath, pathGraph);
+            throw e;
+        }
 
-    /**
-     * Determine whether a given sequence (list of nodes in a path) 
-     * is valid with respect to anchor placement.
-     */
-    private boolean isPathValid(List<Node> path) { ...}
-
-    /**
-     * Recursively prune Choice nodes whose alternatives are all impossible.
-     */
-    private Node pruneChoiceNode(Choice choice) { ...}
+        // Also validates that unique value generation matches expected list
+        Spliterator<String> tSpliterator =
+                Spliterators.spliteratorUnknownSize(parse.iterateUnique(), 0);
+        List<String> list = StreamSupport.stream(tSpliterator, false).toList();
+        assertEquals(testPattern.getAllUniqueValues(), list);
+    }
 }
 ```
 
-### Key rules to encode
+The test has two assertions:
 
-```java
-// Rule 1: $ must only be followed by end-of-path (no real nodes after it)
-boolean dollarIsTerminal(List<Node> nodesAfterDollar) {
-    return nodesAfterDollar.isEmpty() || allAreZeroWidth(nodesAfterDollar);
+1. `toPlantUml()` output matches the `.puml` file exactly (character-for-character).
+2. `iterateUnique()` returns exactly the expected list of unique values.
+
+### How `.puml` files are bootstrapped
+
+`DollarAndCaretPatterns` constructor reads the `.puml` file; if it does not exist it calls
+`RgxGen.parse(pattern).getPathGraph().toPlantUml()` and writes it. This means if no `.puml` file
+exists, the first run writes whatever the optimizer currently produces. For `LIVE_DOUBLE_START` and
+`LIVE_DOUBLE_END`, the expected `.puml` files will be created automatically on the first run — but
+only if the optimizer produces correct output.
+
+### Expected `.puml` resource files
+
+```
+testdata/dollar-and-caret/<ENUM_NAME>.puml
+```
+
+The 15 existing files cover all enum constants except `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END`.
+The PlantUML format (full example — `DEAD_BRANCH_DOLLAR`, pattern `(a$|b)c`):
+
+```plantuml
+@startuml
+title
+""Pattern: `(a$|b)c`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
 }
 
-// Rule 2: ^ must only be preceded by start-of-path (no real nodes before it)
-boolean caretIsAtStart(List<Node> nodesBeforeCaret) {
-    return nodesBeforeCaret.isEmpty() || allAreZeroWidth(nodesBeforeCaret);
+component """BEGIN""" as node_BEGIN_4
+component """END""" as node_END_5
+
+rectangle "Sequence: (b)c" {
+  rectangle "Group 1: (b)" {
+    component """FinalSymbol(b) """ as node_AST_2
+  }
+  component """FinalSymbol(c) """ as node_AST_3
 }
+
+node_BEGIN_4 --> node_AST_2
+node_AST_2 --> node_AST_3
+node_AST_3 --> node_END_5
+}
+@enduml
+```
+
+Observations from this format:
+
+- The title block uses the **original** pattern string (before optimization).
+- `BEGIN` and `END` sentinels are declared as top-level `component` entries (outside all clusters).
+- Clusters are `rectangle` blocks, potentially nested.
+- Node aliases use the form `node_<KIND>_<seq>`.
+- Sequence numbers in node aliases reflect the AST build order — these are stable across runs for
+  the same pattern.
+- A trailing `}` appears before `@enduml` — this is part of the existing `toPlantUml()` output.
+
+---
+
+## 10. Anchor Rules Summary
+
+```
+VALID positions:
+  BEGIN → [content] → END                  ← baseline
+  BEGIN → ^ → [content] → END              ← ^ at start is valid
+  BEGIN → [content] → $ → END              ← $ at end is valid
+  BEGIN → ^ → [content] → $ → END          ← both anchors valid
+
+INVALID positions (must be pruned):
+  BEGIN → [content] → $ → [more content] → END    ← $ not at end
+  BEGIN → [content] → ^ → [content] → END         ← ^ not at start
+
+In a repeat context:
+  (^x)+  → ^ valid only on first iteration; collapse repeat to exactly 1
+  (x$)*  → $ valid only on last iteration; clamp max to 1
+  (a$|x){1,2} → a$ can terminate any iteration by going directly to END
+  (a$|x){2,2} → a$ is dead (a second iteration is always required after it)
+
+Annotation rule:
+  When an AnchorNode is removed, the non-anchor neighbour is annotated:
+    predecessor of $  →  label += " <:26d4:>"   (⛔)
+    successor of ^    →  label += " <:2693:>"    (⚓)
 ```
 
 ---
 
-## 9. Edge Cases and Open Questions
+## 11. Edge Cases and Decisions
 
-These are the cases that may make some expected test resource files uncertain:
-
-| Case            | Comment                                                                                                                                                                                          | Answer                                                              |
-|-----------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------|
-| `(a$\|b$)x`     | Both alternatives of Choice have `$` before `x`.                                                                                                                                                 | Whole pattern should be considered invalid - an exception is thrown |  
-| `^(a\|^b)`      | Nested `^` — the inner `^` is at a position that may or may not be valid depending on whether `(a\|^b)` can ever start from begin                                                                | Valid case. Both values `a` and `b` can be produced.                |              
-| `(a$)?b`        | The `?` makes the `a$` optional. If it matches zero times, `b` can follow. If it matches once, `b` cannot follow. → the optimizer must treat `{1}` occurrence of the group as an impossible path | Completely remove node with `a$`                                    |
-| `(a$\|)b`       | The empty alternative makes one path valid. The optimizer should keep the empty branch.                                                                                                          |                                                                     |
-| Multi-line mode | If `(?m)` is ever supported, `^` and `$` match line boundaries, not just string boundaries. This changes the semantics entirely.                                                                 | Ignore for now                                                      |
-| `\b` and `\B`   | Currently ignored by the library. Similar zero-width assertion problem — leave out of scope for now.                                                                                             | Ignore for now                                                      |
-| `(a\|^x){1,2}`  | First may choose, second iteration - only `a` is allowed.                                                                                                                                        | Should be transformed to `(a\|x)(a){0,1}`? or otherwise optimized   |
+| Case                   | Decision                                                                                                                                                      |
+|------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `(a$\|b$)x`            | Both alternatives have `$` before `x`. Entire pattern is invalid → throw `PatternDoesNotMatchAnythingException`.                                              |
+| `^(a\|^b)`             | Outer `^` at start. Inner `^b`: inner `^` is redundant (already at start) but valid. Both `a` and `b` survive. Inner `^` removed; `b` annotated ⚓.            |
+| `(a$\|b)$`             | Outer `$` at end. Inner `a$`: inner `$` followed by outer `$` — valid (both at end). Both survive. Inner `$` removed; `a` annotated ⛔.                        |
+| `(a$)?b`               | Equivalent to `(a$){0,1}b`. With 1 occurrence, `$` is followed by `b` — dead. With 0 occurrences, `b` is fine. → Remove the `a$` body entirely; treat as `b`. |
+| `(a$\|)b`              | The empty alternative makes one path valid. Keep the empty branch; remove `a$`.                                                                               |
+| Multi-line mode `(?m)` | Not in scope. Ignore. `^` and `$` are treated as string-boundary anchors only.                                                                                |
+| `\b` and `\B`          | Not in scope. Leave as-is.                                                                                                                                    |
 
 ---
 
-## 10. Files to Create / Modify
+## 12. PlantUML Node Label Format Reference
 
-| File                                                                                 | Action                                             |
-|--------------------------------------------------------------------------------------|----------------------------------------------------|
-| `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`     | **Create** — main class                            |
-| `src/test/java/com/github/curiousoddman/rgxgen/lineages/GraphOptimizationTests.java` | **Already exists** — add/verify test cases         |
-| `testdata/dollar-and-caret/<pattern>.puml`                                           | **Review / fix** expected optimized graph files    |
-| `src/main/java/com/github/curiousoddman/rgxgen/RgxGen.java`                          | Possibly **modify** to run optimizer after parsing |
+Node labels in the optimized graph follow this convention (derived from `PathNode` factories):
 
----
+| PathNode kind  | Label format                                              | Example                          |
+|----------------|-----------------------------------------------------------|----------------------------------|
+| `AST`          | `ClassName(escapedPattern)`                               | `FinalSymbol(a)`, `SymbolSet(.)` |
+| `AST` (caret)  | `ClassName(escapedPattern) <:2693:>` (after optimization) | `FinalSymbol(x) <:2693:>`        |
+| `AST` (dollar) | `ClassName(escapedPattern) <:26d4:>` (after optimization) | `FinalSymbol(a) <:26d4:>`        |
+| `BEGIN`        | `BEGIN`                                                   | —                                |
+| `END`          | `END`                                                     | —                                |
+| `CHOICE`       | `Choice(escapedPattern)`                                  | `Choice((^a\|b))`                |
+| `REPEAT_ENTRY` | `Repeat(escapedPattern)`                                  | `Repeat((b$)*)`                  |
 
-## 11. Relevant Existing Patterns in Codebase
+`escapedPattern` = `Util.plantumlEscape(node.getPattern())`, which escapes `"` and `\n`.
 
-- **Visitor pattern:** The codebase uses `GenerationVisitor`, `NotMatchingGenerationVisitor`,
-  `UniqueGenerationVisitor`, `UniqueValuesCountingVisitor`. These are currently used to generate patterns from Node trees.
-- **`PathGraphBuilder`:** a visitor that creates a graph representation for node tree. Understanding its output
-  structure is essential before writing the optimizer. 
-- **`DefaultTreeBuilder`:** Builds the node tree from the regex string. 
- 
----
-
-## 12. Quick Reference: Anchor Rules Summary
+The `component` declaration in PlantUML wraps the label in triple-quotes:
 
 ```
-VALID paths:
-  begin → [nodes] → end
-  begin → ^ → [nodes] → end          ← ^ at start is fine
-  begin → [nodes] → $ → end          ← $ at end is fine
-  begin → ^ → [nodes] → $ → end      ← both anchors, fully bounded
+component """<label>""" as node_<ID>
+```
 
-INVALID paths (must be pruned):
-  begin → [nodes] → $ → [more nodes] → end   ← $ not at end
-  begin → [nodes] → ^ → [nodes] → end        ← ^ not at start
+For `CHOICE` and `REPEAT_ENTRY` nodes, a stereotype is appended:
 
-In a Choice (a$|c)x:
-  Alternative 1:  ... → 'a' → '$' → 'x' ...   INVALID ($ followed by 'x')
-  Alternative 2:  ... → 'c' → 'x' ...          VALID
-  → Prune alternative 1, keep alternative 2
+```
+component """Choice((a|b))""" as node_CHOICE_1 <<choice>>
+component """Repeat((a)+)""" as node_REPEAT_ENTRY_0 <<repeat>>
 ```
 
 ---
 
-*Document prepared for branch `#120.Generate-produces-invalid-strings-when-dollar-and-caret-inside-pattern`.*  
-*Node type names should be verified against actual source files
-in `src/main/java/com/github/curiousoddman/rgxgen/nodes/` before implementation.*
+*Specification prepared for branch `#120.Generate-produces-invalid-strings-when-dollar-and-caret-inside-pattern`.*
+*All class and method signatures verified against source files in `src/main/java/`.*
+*All test cases and expected behaviours cross-referenced against `DollarAndCaretPatterns.java` and the `.puml` resource
+files.*
