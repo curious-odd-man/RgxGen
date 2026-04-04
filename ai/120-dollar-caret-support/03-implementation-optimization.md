@@ -21,6 +21,8 @@ For example
 2. `begin` -> `c` -> `x` -> `end`
 where first path is impossible, because after `$` cannot follow `x`
 
+Learn about node types in `src/main/java/com/github/curiousoddman/rgxgen/nodes`
+
 Let's start without any code.
 
 Summarize for me all input information that you find useful into MD file.
