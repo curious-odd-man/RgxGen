@@ -1,7 +1,6 @@
 # RgxGen — GraphOptimizer Implementation Specification
 
 > **Branch:** `120.Generate-produces-invalid-strings-when-dollar-and-caret-inside-pattern`
-
 > **Purpose:** Complete, self-sufficient specification for implementing `GraphOptimizer` — a class
 > that prunes impossible paths from the `PathGraph` caused by `^` (caret) and `$` (dollar) anchors
 > appearing in semantically invalid positions within a pattern.
@@ -336,18 +335,17 @@ DEAD_ON_REPEAT_CARET("(a|^x){1,2}",List.of("a", "x","aa"))
 
 DEAD_ON_REPEAT_DOLLAR("(a$|x){1,2}",List.of("a", "x","xx"))
 
-DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR("(a$|x){2,2}",List.of("xx"))   // note: typo "WIHTOUT" is intentional — matches the enum name
+DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR("(a$|x){2,2}",List.of("xa", "xx"))  
 
 LIVE_DOUBLE_START("^(a|^b)",List.of("a", "b"))
 
 LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 ```
 
-> **Note:** `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END` do not yet have `.puml` files in the
-> `testdata/dollar-and-caret/` directory. The optimizer must handle these patterns correctly; the
-> expected files will be generated on the first passing test run.
+> **Note:** `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END` `.puml` files exist in the
+> `testdata/dollar-and-caret/` directory and will be verified by the test suite on the first run.
 
-### 6.3 Case-by-case expected behaviour
+### 6.2 Case-by-case expected behaviour
 
 #### `DEAD_BRANCH_DOLLAR` — `(a$|b)c`
 
@@ -360,13 +358,13 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 #### `LIVE_BRANCH_DOLLAR` — `c(a$|b)`
 
 - Alternative `a$` is live: `$` is the last thing in the sequence, nothing follows.
-- Both alternatives survive. `$` node is removed; `FinalSymbol(a)` gets `<:26d4:>` label suffix.
+- Both alternatives survive. The `$` `AnchorNode` is removed from the graph.
 - Unique values: `["ca", "cb"]`
 
 #### `LIVE_BRANCH_CARET` — `(^a|b)c`
 
 - Alternative `^a` is live: `^` is at the very beginning.
-- Both alternatives survive. `^` node is removed; `FinalSymbol(a)` gets `<:2693:>` label suffix.
+- Both alternatives survive. The `^` `AnchorNode` is removed from the graph.
 - Unique values: `["ac", "bc"]`
 
 #### `DEAD_BRANCH_CARET` — `c(a|^b)`
@@ -396,23 +394,22 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 #### `LIVE_BRANCHES_REPEAT_DOLLAR` — `(1$|1,){0,1}(2$|2,){0,1}`
 
 - `1$` is live: the repeat is optional (`{0,1}`), so if chosen, `1$` can be the last thing.
-  BUT `1$` cannot be followed by `(2$|2,)`. The dollar-annotated alternative `1$` must wire
+  But `1$` cannot be followed by `(2$|2,)`. The dollar-terminated alternative `1$` must wire
   directly to `END` and skip the second group.
 - `1,` can be followed by anything (second group, or end).
 - `2$` is live when it is last.
 - `2,` is live always.
 - The optimizer keeps all alternatives but rewires the dollar-terminated ones directly to `END`.
-- `FinalSymbol(1)` gets `<:26d4:>`, `FinalSymbol(2)` gets `<:26d4:>`.
+  All `$` `AnchorNode`s are removed from the graph.
 - Unique values: `["1","1,","1,2","1,2,","2","2,"]`
 
 #### `LIVE_BRANCHES_REPEAT_CARET` — `(^1|1,){0,1}(^2|2,){0,1}`
 
 - `^1` is live in the first group (it can be at start).
-- `^2` in second group: `^` is only valid at the very beginning. If the first group generates
+- `^2` in the second group: `^` is only valid at the very beginning. If the first group generates
   something, `^2` is preceded by content — dead in that context. But the first group is `{0,1}`,
-  so it may generate nothing, making `^2` still at start.
-- The optimizer keeps both anchored alternatives but annotates them.
-- `FinalSymbol(1)` gets `<:2693:>`, `FinalSymbol(2)` gets `<:2693:>`.
+  so it may generate nothing, making `^2` still valid at start.
+- The optimizer keeps both anchored alternatives; all `^` `AnchorNode`s are removed from the graph.
 - Unique values: `["1","1,","1,2","1,2,","2","2,"]`
 
 #### `DEAD_BRANCHES_REPEAT_DOLLAR` — `(1$|1,){0,1}(2$|2,)`
@@ -420,13 +417,13 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 - First group: `1$` cannot be followed by the mandatory second group — dead. Only `1,` survives.
   The first group becomes `(1,){0,1}`.
 - Second group: `2$` is at the end — live. `2,` is also live.
-- `FinalSymbol(2)` (from `2$`) gets `<:26d4:>`.
+- The `$` `AnchorNode` for `2$` is removed from the graph.
 - Unique values: `["1,2","2","2,"]`
 
 #### `DEAD_BRANCHES_REPEAT_CARET` — `(^1|1,)(^2|2,){0,1}`
 
 - First group (mandatory): `^1` is live at start; `1,` is also live.
-  `FinalSymbol(1)` gets `<:2693:>`.
+  The `^` `AnchorNode` for `^1` is removed from the graph.
 - Second group (optional): `^2` is dead — always preceded by the first group's output.
   Only `2,` survives. The second group becomes `(2,){0,1}`.
 - Unique values: `["1","1,","1,2,","2,"]`
@@ -436,7 +433,7 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 - `^a` in a repeat: first iteration is valid (at start), but the back-edge makes a second
   iteration invalid (`^` is now preceded by `a`).
 - The repeat collapses to exactly one occurrence. The `Repeat` node is removed entirely from the
-  graph; only `FinalSymbol(a) <:2693:>` remains between `BEGIN` and `END`.
+  graph; only `FinalSymbol(a)` remains between `BEGIN` and `END`. The `^` `AnchorNode` is removed.
 - Unique values: `["a"]`
 
 #### `LIVEDEAD_REPEAT_DOLLAR` — `(b$)*`
@@ -444,7 +441,7 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 - `b$` in a repeat: one iteration is valid (at end), but iteration back makes a second
   iteration invalid (`b` after `$`).
 - The repeat bounds change from `{0,∞}` to `{0,1}`. The structure is kept but `max` is clamped
-  to 1. `FinalSymbol(b)` gets `<:26d4:>`.
+  to 1. The `$` `AnchorNode` is removed from the graph.
 - Unique values: `["", "b"]`
 
 #### `DEAD_ON_REPEAT_CARET` — `(a|^x){1,2}`
@@ -453,8 +450,8 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 - Second iteration: `^x` is dead (preceded by first iteration output).
 - The optimizer splits the structure: the first iteration uses `Choice(a|^x)`, and subsequent
   iterations only allow `a`. The result is:
-  `begin → Choice(a|^x) → [a or x⚓] → Repeat(a){0,1} → end`
-- `FinalSymbol(x)` gets `<:2693:>`.
+  `begin → Choice(a|^x) → [a or x] → Repeat(a){0,1} → end`
+  The `^` `AnchorNode` is removed; `x` is reachable only on the first pass.
 - Unique values: `["a","x","aa"]`
 
 #### `DEAD_ON_REPEAT_DOLLAR` — `(a$|x){1,2}`
@@ -463,33 +460,42 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 - Second iteration: `a$` is dead (followed by another iteration), only `x` survives for
   non-terminal passes.
 - The dollar-terminated alternative `a$` can only fire on the **last** iteration.
-- Structure: `Repeat(a$|x){1,2}` where `a⛔` connects directly to `END`, bypassing further
-  repetitions, and `x` feeds back into the repeat. The repeat remains `{1,2}` but `a⛔` exits
-  to `END`.
-- `FinalSymbol(a)` gets `<:26d4:>`.
+- Structure: `Repeat(a$|x){1,2}` where `a` (from the dollar alternative) connects directly to
+  `END`, bypassing further repetitions, and `x` feeds back into the repeat. The repeat remains
+  `{1,2}`. The `$` `AnchorNode` is removed from the graph.
 - Unique values: `["a","x","xx"]`
 
-#### `DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR` — `(a$|x){2,2}` *(note: enum name has typo "WIHTOUT")*
+#### `DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR` — `(a$|x){2,2}` 
 
-- Exactly 2 repetitions required. `a$` on the first pass is always followed by the second pass —
-  dead. Only `x` survives.
-- The entire `Choice` collapses to just `FinalSymbol(x)`. The repeat becomes `(x){2,2}`.
-- Unique values: `["xx"]`
+- Exactly 2 repetitions are required (`min=2, max=2`).
+- On any non-final iteration, `a$` is dead because another iteration always follows — `$` cannot
+  be succeeded by more content.
+- On the final (last) iteration, both `a$` and `x` are valid since the last iteration exits to
+  `END`.
+- The optimizer therefore **splits the repeat**: the first `{n−1}` iterations (`{1,1}` here) can
+  only choose `x`, while the last iteration can choose either `a` or `x`.
+- Result structure:
+  ```
+  BEGIN → Repeat(x){1,1} → Choice(a|x) → END
+  ```
+  i.e., one mandatory `x`, followed by a final choice of `a` or `x`.
+- The `$` `AnchorNode` is removed from the graph.
+- Unique values: `["xa", "xx"]`
 
 #### `LIVE_DOUBLE_START` — `^(a|^b)`
 
 - Outer `^` is at start — valid.
-- Inner `^b` alternative: the inner `^` is redundant (already at start) — but it is not invalid.
+- Inner `^b` alternative: the inner `^` is redundant (already at start) but not invalid.
   Both `a` and `b` can be generated.
-- Both alternatives survive. Inner `^` node removed; `FinalSymbol(b)` gets `<:2693:>`.
+- Both alternatives survive. Inner `^` `AnchorNode` is removed from the graph.
 - Unique values: `["a","b"]`
 
 #### `LIVE_DOUBLE_END` — `(a$|b)$`
 
 - Outer `$` is at end — valid.
-- Inner `a$` alternative: inner `$` followed by outer `$` which is also at end — valid.
+- Inner `a$` alternative: inner `$` is followed by outer `$`, which is also at end — valid.
   Both `a` and `b` can be generated.
-- Both alternatives survive. Inner `$` node removed; `FinalSymbol(a)` gets `<:26d4:>`.
+- Both alternatives survive. Inner `$` `AnchorNode` is removed from the graph.
 - Unique values: `["a","b"]`
 
 ---
@@ -502,7 +508,7 @@ LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 **File:** `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`
 
 The optimizer receives a `PathGraph` (already built by `PathGraphBuilder`) and returns a new or
-mutated `PathGraph` with impossible anchor paths removed and anchor annotations applied.
+mutated `PathGraph` with impossible anchor paths removed and `AnchorNode` graph nodes eliminated.
 
 ```java
 package com.github.curiousoddman.rgxgen.optimization;
@@ -514,7 +520,8 @@ public class GraphOptimizer {
 
     /**
      * Optimize the PathGraph by removing impossible paths caused by ^ and $ anchor
-     * nodes appearing in semantically invalid positions.
+     * nodes appearing in semantically invalid positions. AnchorNode PathNodes are
+     * removed from the graph entirely; no label annotation is applied to adjacent nodes.
      *
      * @param graph the PathGraph produced by PathGraphBuilder
      * @return the optimized PathGraph (may be the same instance mutated, or a new one)
@@ -562,12 +569,7 @@ The optimizer must handle three distinct sub-problems:
 3. Trace each impossible anchor back to the `CHOICE` node it belongs to (if any).
 4. Remove the dead alternative from the `Choice`'s fan-out edges.
 5. If all alternatives of a `Choice` are removed, propagate the death upward.
-6. Remove the anchor node itself from the graph.
-7. Annotate the adjacent non-anchor node's label:
-    - For `$`: the predecessor of `$` (last real node in the surviving path) gets ` <:26d4:>`
-      appended to its label.
-    - For `^`: the successor of `^` (first real node in the surviving path) gets ` <:2693:>`
-      appended to its label.
+6. Remove the anchor `PathNode` itself from the graph (along with all its edges).
 
 #### Sub-problem 2: Repeat with anchored alternatives
 
@@ -601,12 +603,12 @@ iteration of a repeat.** For other iterations, it is dead.
 
 **Clamping rules:**
 
-| Pattern        | Before       | After                           |
-|----------------|--------------|---------------------------------|
-| `(^a)+`        | min=1, max=∞ | Repeat removed; exactly one `a` |
-| `(b$)*`        | min=0, max=∞ | min=0, max=1                    |
-| `(a$\|x){1,2}` | min=1, max=2 | `a$` exits to END; `x` loops    |
-| `(a$\|x){2,2}` | min=2, max=2 | `a$` fully dead; only `x{2,2}`  |
+| Pattern        | Before       | After                                         |
+|----------------|--------------|-----------------------------------------------|
+| `(^a)+`        | min=1, max=∞ | Repeat removed; exactly one `a`               |
+| `(b$)*`        | min=0, max=∞ | min=0, max=1                                  |
+| `(a$\|x){1,2}` | min=1, max=2 | `a$` exits to END on any iteration; `x` loops |
+| `(a$\|x){2,2}` | min=2, max=2 | Split: `x{1,1}` then final `Choice(a\|x)`     |
 
 #### Sub-problem 3: Cascading death
 
@@ -623,37 +625,7 @@ itself is impossible, which may cascade further upward.
 - In this case, simplify to `BEGIN → END` and ensure generation throws
   `PatternDoesNotMatchAnythingException`.
 
-### 7.4 Label mutation
-
-The optimizer must mutate the label of `PathNode` objects when removing anchor nodes. Since
-`PathNode.label` is a `private final String`, the optimizer cannot directly modify it. Two options:
-
-**Option A — Add a `withLabel(String)` copy method to `PathNode`:**
-
-```java
-// In PathNode:
-public PathNode withLabel(String newLabel) {
-    return new PathNode(this.kind, this.astNode, newLabel, /* keep same id somehow */);
-}
-```
-
-However this changes the `id` (which encodes the sequence number) unless the constructor is
-extended to accept a pre-formed id string.
-
-**Option B — Add a mutable label field with a setter:**
-
-```java
-// In PathNode:
-private String label;  // remove final
-
-public void setLabel(String label) {
-    this.label = label;
-}
-```
-
-**Option B is simpler and recommended.** Add `setLabel(String)` to `PathNode`.
-
-### 7.5 Cluster label updates
+### 7.4 Cluster label updates
 
 When a `Choice` loses an alternative (e.g., `(a$|b)c` → only `b` survives), the cluster
 hierarchy must also be updated. Specifically:
@@ -683,12 +655,11 @@ pruned AST.
 |--------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
 | `src/main/java/com/github/curiousoddman/rgxgen/optimization/GraphOptimizer.java`     | **Create** — main optimizer class                                                |
 | `src/main/java/com/github/curiousoddman/rgxgen/RgxGen.java`                          | **Modify** — run optimizer after `PathGraphBuilder.build()`                      |
-| `src/main/java/com/github/curiousoddman/rgxgen/lineages/PathNode.java`               | **Modify** — add `setLabel(String)` (remove `final` from field)                  |
 | `src/main/java/com/github/curiousoddman/rgxgen/lineages/PathGraph.java`              | **Modify** — expose `getRootClusters()` and node/edge mutation methods if needed |
 | `src/test/java/com/github/curiousoddman/rgxgen/lineages/GraphOptimizationTests.java` | **Already exists** — verify all enum cases pass                                  |
-| `src/test/java/com/github/curiousoddman/rgxgen/data/DollarAndCaretPatterns.java`     | **Already exists** — add cases if needed                                         |
-| `testdata/dollar-and-caret/LIVE_DOUBLE_START.puml`                                   | **Create** — auto-generated on first passing run                                 |
-| `testdata/dollar-and-caret/LIVE_DOUBLE_END.puml`                                     | **Create** — auto-generated on first passing run                                 |
+| `src/test/java/com/github/curiousoddman/rgxgen/data/DollarAndCaretPatterns.java`     | **Already exists** — update `DEAD_ON_REPEAT_WIHTOUT_REPEAT_DOLLAR` values        |
+| `testdata/dollar-and-caret/LIVE_DOUBLE_START.puml`                                   | **Already exists** — verify content matches optimizer output                     |
+| `testdata/dollar-and-caret/LIVE_DOUBLE_END.puml`                                     | **Already exists** — verify content matches optimizer output                     |
 
 ---
 
@@ -738,10 +709,8 @@ The test has two assertions:
 ### How `.puml` files are bootstrapped
 
 `DollarAndCaretPatterns` constructor reads the `.puml` file; if it does not exist it calls
-`RgxGen.parse(pattern).getPathGraph().toPlantUml()` and writes it. This means if no `.puml` file
-exists, the first run writes whatever the optimizer currently produces. For `LIVE_DOUBLE_START` and
-`LIVE_DOUBLE_END`, the expected `.puml` files will be created automatically on the first run — but
-only if the optimizer produces correct output.
+`RgxGen.parse(pattern).getPathGraph().toPlantUml()` and writes it. All 17 enum constants now have
+corresponding `.puml` files in `testdata/dollar-and-caret/`.
 
 ### Expected `.puml` resource files
 
@@ -749,8 +718,8 @@ only if the optimizer produces correct output.
 testdata/dollar-and-caret/<ENUM_NAME>.puml
 ```
 
-The 15 existing files cover all enum constants except `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END`.
-The PlantUML format (full example — `DEAD_BRANCH_DOLLAR`, pattern `(a$|b)c`):
+All 17 files exist — one per enum constant. The PlantUML format (full example — `DEAD_BRANCH_DOLLAR`,
+pattern `(a$|b)c`):
 
 ```plantuml
 @startuml
@@ -807,15 +776,14 @@ INVALID positions (must be pruned):
   BEGIN → [content] → ^ → [content] → END         ← ^ not at start
 
 In a repeat context:
-  (^x)+  → ^ valid only on first iteration; collapse repeat to exactly 1
-  (x$)*  → $ valid only on last iteration; clamp max to 1
-  (a$|x){1,2} → a$ can terminate any iteration by going directly to END
-  (a$|x){2,2} → a$ is dead (a second iteration is always required after it)
+  (^x)+       → ^ valid only on first iteration; collapse to exactly 1 occurrence (repeat removed)
+  (x$)*       → $ valid only on last iteration; clamp max to 1
+  (a$|x){1,2} → a$ can exit to END on any iteration; x loops back
+  (a$|x){2,2} → split: first (n-1) iterations allow only x; last iteration allows Choice(a|x)
 
-Annotation rule:
-  When an AnchorNode is removed, the non-anchor neighbour is annotated:
-    predecessor of $  →  label += " <:26d4:>"   (⛔)
-    successor of ^    →  label += " <:2693:>"    (⚓)
+In all cases:
+  AnchorNode is removed from the graph after optimization.
+  No label annotation is applied to adjacent nodes.
 ```
 
 ---
@@ -825,8 +793,8 @@ Annotation rule:
 | Case                   | Decision                                                                                                                                                      |
 |------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `(a$\|b$)x`            | Both alternatives have `$` before `x`. Entire pattern is invalid → throw `PatternDoesNotMatchAnythingException`.                                              |
-| `^(a\|^b)`             | Outer `^` at start. Inner `^b`: inner `^` is redundant (already at start) but valid. Both `a` and `b` survive. Inner `^` removed; `b` annotated ⚓.            |
-| `(a$\|b)$`             | Outer `$` at end. Inner `a$`: inner `$` followed by outer `$` — valid (both at end). Both survive. Inner `$` removed; `a` annotated ⛔.                        |
+| `^(a\|^b)`             | Outer `^` at start. Inner `^b`: inner `^` is redundant (already at start) but valid. Both `a` and `b` survive. Inner `^` `AnchorNode` removed from graph.     |
+| `(a$\|b)$`             | Outer `$` at end. Inner `a$`: inner `$` followed by outer `$` — valid (both at end). Both survive. Inner `$` `AnchorNode` removed from graph.                 |
 | `(a$)?b`               | Equivalent to `(a$){0,1}b`. With 1 occurrence, `$` is followed by `b` — dead. With 0 occurrences, `b` is fine. → Remove the `a$` body entirely; treat as `b`. |
 | `(a$\|)b`              | The empty alternative makes one path valid. Keep the empty branch; remove `a$`.                                                                               |
 | Multi-line mode `(?m)` | Not in scope. Ignore. `^` and `$` are treated as string-boundary anchors only.                                                                                |
@@ -838,15 +806,16 @@ Annotation rule:
 
 Node labels in the optimized graph follow this convention (derived from `PathNode` factories):
 
-| PathNode kind  | Label format                                              | Example                          |
-|----------------|-----------------------------------------------------------|----------------------------------|
-| `AST`          | `ClassName(escapedPattern)`                               | `FinalSymbol(a)`, `SymbolSet(.)` |
-| `AST` (caret)  | `ClassName(escapedPattern) <:2693:>` (after optimization) | `FinalSymbol(x) <:2693:>`        |
-| `AST` (dollar) | `ClassName(escapedPattern) <:26d4:>` (after optimization) | `FinalSymbol(a) <:26d4:>`        |
-| `BEGIN`        | `BEGIN`                                                   | —                                |
-| `END`          | `END`                                                     | —                                |
-| `CHOICE`       | `Choice(escapedPattern)`                                  | `Choice((^a\|b))`                |
-| `REPEAT_ENTRY` | `Repeat(escapedPattern)`                                  | `Repeat((b$)*)`                  |
+| PathNode kind  | Label format                | Example                          |
+|----------------|-----------------------------|----------------------------------|
+| `AST`          | `ClassName(escapedPattern)` | `FinalSymbol(a)`, `SymbolSet(.)` |
+| `BEGIN`        | `BEGIN`                     | —                                |
+| `END`          | `END`                       | —                                |
+| `CHOICE`       | `Choice(escapedPattern)`    | `Choice((^a\|b))`                |
+| `REPEAT_ENTRY` | `Repeat(escapedPattern)`    | `Repeat((b$)*)`                  |
+
+`AnchorNode` `PathNode`s are removed from the graph by the optimizer and do not appear in the
+final output. No label annotation is applied to adjacent nodes.
 
 `escapedPattern` = `Util.plantumlEscape(node.getPattern())`, which escapes `"` and `\n`.
 
