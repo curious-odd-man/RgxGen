@@ -1,6 +1,6 @@
 @startuml
 title
-""Pattern: `(^1|1,)(^2|2,){0,1}`""
+""Pattern: `(^1|x,)(^2|y,){0,1}`""
 end title
 
 skinparam rectangle {
@@ -9,32 +9,36 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """BEGIN""" as node_BEGIN_7
-component """END""" as node_END_8
+component """BEGIN""" as node_BEGIN_9
+component """END""" as node_END_10
 
-rectangle "Sequence: (^1|1,)(2,){0,1}" {
-  rectangle "Group 1: (^1|1,)" {
-    rectangle "Choice: (^1|1,)" {
-      component """Choice((^1|1,))""" as node_CHOICE_0 <<choice>>
-      component """FinalSymbol(1) <:2693:>""" as node_AST_1
-      component """FinalSymbol(1,) """ as node_AST_2
+rectangle "Sequence: (^1|x,)(y,){0,1}" {
+  rectangle "Group 1: (^1|x,)" {
+    rectangle "Choice: (^1|x,)" {
+      rectangle "Sequence: (^1|" {
+        component """AnchorNode(^)""" as node_AST_1
+        component """FinalSymbol(1)""" as node_AST_2
+      }
+      component """Choice((^1|x,))""" as node_CHOICE_0 <<choice>>
+      component """FinalSymbol(x,)""" as node_AST_3
     }
   }
-  rectangle "Repeat: (2,){0,1} 		 {0..1}" {
-    rectangle "Group 2: (2,)" {
-      component """FinalSymbol(2,) """ as node_AST_6
+  rectangle "Repeat: (y,){0,1} 		 {0..1}" {
+    rectangle "Group 2: (y,)" {
+      component """FinalSymbol(y,)""" as node_AST_8
     }
-    component """Repeat((2,){0,1})""" as node_REPEAT_ENTRY_3 <<repeat>>
+    component """Repeat((y,){0,1})""" as node_REPEAT_ENTRY_4 <<repeat>>
   }
 }
 
+node_AST_1 --> node_AST_2
 node_CHOICE_0 --> node_AST_1
-node_CHOICE_0 --> node_AST_2
-node_AST_6 --> node_REPEAT_ENTRY_3
-node_AST_1 --> node_REPEAT_ENTRY_3
-node_AST_2 --> node_REPEAT_ENTRY_3
-node_BEGIN_7 --> node_CHOICE_0
-node_REPEAT_ENTRY_3 --> node_AST_6
-node_REPEAT_ENTRY_3 --> node_END_8
+node_CHOICE_0 --> node_AST_3
+node_REPEAT_ENTRY_4 --> node_AST_8 : 0..1
+node_AST_8 --> node_REPEAT_ENTRY_4
+node_AST_2 --> node_REPEAT_ENTRY_4
+node_AST_3 --> node_REPEAT_ENTRY_4
+node_BEGIN_9 --> node_CHOICE_0
+node_REPEAT_ENTRY_4 --> node_END_10
 }
 @enduml

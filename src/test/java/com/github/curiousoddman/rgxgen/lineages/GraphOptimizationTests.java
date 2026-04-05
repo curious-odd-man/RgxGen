@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class GraphOptimizationTests {
     public static Stream<DollarAndCaretPatterns> getPatterns() {
@@ -26,7 +27,20 @@ public class GraphOptimizationTests {
     @ParameterizedTest
     @MethodSource("getPatterns")
     public void parseTest(DollarAndCaretPatterns testPattern) throws IOException {
-        RgxGen parse = RgxGen.parse(testPattern.getPattern());
+        boolean matchesNothing = testPattern.getAllUniqueValues().isEmpty();
+        RgxGen parse;
+        try {
+            parse = RgxGen.parse(testPattern.getPattern());
+            if (matchesNothing) {
+                fail("Expected an exception");
+            }
+        } catch (Exception e) {
+            if (matchesNothing && PatternMatchesNothingException.class == e.getClass()) {
+                // PASS;
+                return;
+            }
+            throw e;
+        }
         String pathGraph = parse.getPathGraph().toPlantUml();
 
         try {

@@ -298,7 +298,7 @@ The test (`GraphOptimizationTests.parseTest`) calls:
 RgxGen parse = RgxGen.parse(testPattern.getPattern());
 String pathGraph = parse.getPathGraph().toPlantUml();
 
-assertEquals(testPattern.getOptimizedGraph(),pathGraph);
+assertEquals(testPattern.getOptimizedGraph(), pathGraph);
 ```
 
 So `RgxGen.getPathGraph()` must return the **optimized** graph. The optimizer must run as part of
@@ -308,42 +308,23 @@ So `RgxGen.getPathGraph()` must return the **optimized** graph. The optimizer mu
 
 ```java
 DEAD_BRANCH_DOLLAR("(a$|b)c",List.of("bc"))
-
 LIVE_BRANCH_DOLLAR("c(a$|b)",List.of("ca", "cb"))
-
 LIVE_BRANCH_CARET("(^a|b)c",List.of("ac", "bc"))
-
 DEAD_BRANCH_CARET("c(a|^b)",List.of("ca"))
-
 DEAD_BRANCH_CARET_DOLLAR("(^a$|b)c",List.of("bc"))
-
 ALL_DEAD_BRANCHES("x(a$|^b)c",List.of())
-
 LIVE_BRANCHES_REPEAT_DOLLAR("(1$|1,){0,1}(2$|2,){0,1}",List.of("1","1,","1,2","1,2,","2","2,"))
-
 LIVE_BRANCHES_REPEAT_CARET("(^1|1,){0,1}(^2|2,){0,1}",List.of("1","1,","1,2","1,2,","2","2,"))
-
 DEAD_BRANCHES_REPEAT_DOLLAR("(1$|1,){0,1}(2$|2,)",List.of("1,2","2","2,"))
-
 DEAD_BRANCHES_REPEAT_CARET("(^1|1,)(^2|2,){0,1}",List.of("1","1,","1,2,","2,"))
-
 LIVEDEAD_REPEAT_CARET("(^a)+",List.of("a"))
-
 LIVEDEAD_REPEAT_DOLLAR("(b$)*",List.of("", "b"))
-
 DEAD_ON_REPEAT_CARET("(a|^x){1,2}",List.of("a", "x","aa"))
-
 DEAD_ON_REPEAT_DOLLAR("(a$|x){1,2}",List.of("a", "x","xx"))
-
 DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR("(a$|x){2,2}",List.of("xa", "xx"))  
-
 LIVE_DOUBLE_START("^(a|^b)",List.of("a", "b"))
-
 LIVE_DOUBLE_END("(a$|b)$",List.of("a", "b"))
 ```
-
-> **Note:** `LIVE_DOUBLE_START` and `LIVE_DOUBLE_END` `.puml` files exist in the
-> `testdata/dollar-and-caret/` directory and will be verified by the test suite on the first run.
 
 ### 6.2 Case-by-case expected behaviour
 

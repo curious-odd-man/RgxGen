@@ -9,18 +9,18 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """BEGIN""" as node_BEGIN_4
-component """END""" as node_END_5
+component """BEGIN""" as node_BEGIN_6
+component """END""" as node_END_7
 
 rectangle "Sequence: (b)c" {
   rectangle "Group 1: (b)" {
-    component """FinalSymbol(b) """ as node_AST_2
+      component """FinalSymbol(b)""" as node_AST_4
   }
-  component """FinalSymbol(c) """ as node_AST_3
+  component """FinalSymbol(c)""" as node_AST_5
 }
 
-node_BEGIN_4 --> node_AST_2
-node_AST_2 --> node_AST_3
-node_AST_3 --> node_END_5
+node_BEGIN_6 --> node_AST_4
+node_AST_4 --> node_AST_5
+node_AST_5 --> node_END_7
 }
 @enduml

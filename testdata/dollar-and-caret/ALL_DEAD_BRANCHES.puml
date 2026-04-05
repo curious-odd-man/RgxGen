@@ -9,9 +9,9 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """BEGIN""" as node_BEGIN_5
-component """END""" as node_END_6
+component """BEGIN""" as node_BEGIN_7
+component """END""" as node_END_8
 
-node_BEGIN_5 --> node_END_6
+node_BEGIN_7 --> node_END_8
 }
 @enduml
