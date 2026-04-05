@@ -19,11 +19,12 @@ package com.github.curiousoddman.rgxgen;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.lineages.PathGraph;
-import com.github.curiousoddman.rgxgen.lineages.PathGraphBuilder;
 import com.github.curiousoddman.rgxgen.nodes.Node;
+import com.github.curiousoddman.rgxgen.optimization.GraphOptimizer;
 import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
+import com.github.curiousoddman.rgxgen.parsing.dflt.PatternDoesNotMatchAnythingException;
 import com.github.curiousoddman.rgxgen.visitors.*;
 
 import java.math.BigInteger;
@@ -39,6 +40,7 @@ public class RgxGen {
     private final Node node;
     private final RgxGenProperties properties;
     private final PathGraph pathGraph;
+    private final boolean allDead;
 
     RgxGen(RgxGenProperties properties, NodeCreator nodeCreator, String pattern) {
         this.properties = properties;
@@ -46,8 +48,14 @@ public class RgxGen {
             nodeCreator = new DefaultNodeCreator();
         }
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, nodeCreator, this.properties);
-        node = defaultTreeBuilder.get();
-        pathGraph = PathGraphBuilder.build(node);
+        Node parsedNode = defaultTreeBuilder.get();
+
+        GraphOptimizer optimizer = new GraphOptimizer(pattern);
+        GraphOptimizer.OptimizationResult result = optimizer.optimize(parsedNode);
+
+        this.node = result.allDead ? null : result.optimisedRoot;
+        this.pathGraph = result.graph;
+        this.allDead = result.allDead;
     }
 
     public static RgxGenBuilder forPattern(String pattern) {
@@ -82,6 +90,9 @@ public class RgxGen {
      * though actual count is only 5, because right and left part of group can yield same value
      */
     public Optional<BigInteger> getUniqueEstimation() {
+        if (allDead) {
+            return Optional.of(BigInteger.ZERO);
+        }
         UniqueValuesCountingVisitor v = new UniqueValuesCountingVisitor(properties);
         node.visit(v);
         return v.getEstimation();
@@ -103,6 +114,10 @@ public class RgxGen {
      * @return Iterator over unique values
      */
     public StringIterator iterateUnique() {
+        if (allDead) {
+            throw new PatternDoesNotMatchAnythingException(
+                    "Pattern produces no valid strings after anchor optimisation");
+        }
         UniqueGenerationVisitor ugv = new UniqueGenerationVisitor(properties);
         node.visit(ugv);
         return ugv.getUniqueStrings();
@@ -125,6 +140,10 @@ public class RgxGen {
      * @return generated string.
      */
     public String generate(RandomGenerator random) {
+        if (allDead) {
+            throw new PatternDoesNotMatchAnythingException(
+                    "Pattern produces no valid strings after anchor optimisation");
+        }
         GenerationVisitor gv = GenerationVisitor.builder()
                 .withRandom(random)
                 .withProperties(properties)
@@ -150,6 +169,10 @@ public class RgxGen {
      * @return generated string.
      */
     public String generateNotMatching(RandomGenerator random) {
+        if (allDead) {
+            throw new PatternDoesNotMatchAnythingException(
+                    "Pattern produces no valid strings after anchor optimisation");
+        }
         GenerationVisitor nmgv = NotMatchingGenerationVisitor.builder()
                 .withRandom(random)
                 .get();

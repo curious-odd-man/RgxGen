@@ -176,6 +176,37 @@ public class PathGraphBuilder implements NodeVisitor {
     // -------------------------------------------------------------------------
 
     /**
+     * Builds and returns the path graph for the given AST root node, using a custom pattern
+     * string for the graph title (useful when the AST has been optimised and the root's
+     * {@code getPattern()} no longer reflects the original user-supplied pattern).
+     */
+    public static PathGraph build(Node root, String titlePattern) {
+        PathGraphBuilder builder = new PathGraphBuilder(titlePattern);
+        root.visit(builder);
+
+        Fragment rootFragment = builder.stack.pop();
+        if (!builder.stack.isEmpty()) {
+            throw new IllegalStateException(
+                    "Fragment stack should be empty after compilation; remaining: " + builder.stack.size());
+        }
+
+        PathNode begin = PathNode.begin(builder.nextId());
+        PathNode end = PathNode.end(builder.nextId());
+
+        builder.graph.addNode(begin);
+        builder.graph.addNode(end);
+
+        for (PathNode entry : rootFragment.entries()) {
+            builder.addEdge(PathEdge.once(begin, entry));
+        }
+        for (PathNode exit : rootFragment.exits()) {
+            builder.addEdge(PathEdge.once(exit, end));
+        }
+
+        return builder.graph;
+    }
+
+    /**
      * Builds and returns the path graph for the given AST root node.
      */
     public static PathGraph build(Node root) {
