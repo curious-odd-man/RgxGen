@@ -9,26 +9,34 @@ skinparam rectangle {
   FontStyle bold
 }
 
-component """BEGIN""" as node_BEGIN_4
-component """END""" as node_END_5
+component """BEGIN""" as node_BEGIN_5
+component """END""" as node_END_6
 
-rectangle "Group 1: (a|^x)" {
-  rectangle "Choice: (a|^x)" {
-    component """Choice((a|^x))""" as node_CHOICE_1 <<choice>>
-    component """FinalSymbol(a) """ as node_AST_2
-    component """FinalSymbol(x) <:2693:>""" as node_AST_3
-  }
-  rectangle "Repeat: (a){0,1} 		 {0..1}" {
-    component """Repeat((a){0,1})""" as node_REPEAT_ENTRY_0 <<repeat>>
+rectangle "Sequence: (?:a|^x)(a){0,1}" {
+  rectangle "Group null: (a|^x)" {
+    rectangle "Choice: (a|^x)" {
+      rectangle "Sequence: (^x)" {
+        component """AnchorNode(^)""" as node_AST_3
+        component """FinalSymbol(x)""" as node_AST_4
+      }
+      component """Choice((a|^x))""" as node_CHOICE_1 <<choice>>
+      component """FinalSymbol(a)""" as node_AST_2
+    }
+    rectangle "Repeat: (a){0,1} 		 {0..1}" {
+      component """FinalSymbol(a)""" as node_AST_5
+    }
+    component """Repeat: (a){0,1} 		 {0..1}""" as node_REPEAT_ENTRY_0 <<repeat>>
   }
 }
+node_BEGIN_5 --> node_CHOICE_1
 
+node_AST_3 --> node_AST_4
 node_CHOICE_1 --> node_AST_2
 node_CHOICE_1 --> node_AST_3
-node_REPEAT_ENTRY_0 --> node_AST_2 : 0..1
+node_REPEAT_ENTRY_0 --> node_AST_5 : 0..1
 node_AST_2 --> node_REPEAT_ENTRY_0
-node_AST_3 --> node_REPEAT_ENTRY_0
-node_BEGIN_4 --> node_CHOICE_1
-node_REPEAT_ENTRY_0 --> node_END_5
+node_AST_4 --> node_REPEAT_ENTRY_0
+node_AST_5 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_0 --> node_END_6
 }
 @enduml
