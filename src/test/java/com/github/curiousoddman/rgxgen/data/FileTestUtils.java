@@ -16,7 +16,7 @@ public interface FileTestUtils {
     default Path getExpectedFilePath(String suffix) {
         Path path = rootPath().resolve(name() + suffix + ".txt");
         try {
-            Files.createDirectories(path);
+            Files.createDirectories(path.getParent());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

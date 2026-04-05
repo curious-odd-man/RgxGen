@@ -46,7 +46,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
         PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
         node.visit(prettyPrintVisitor);
         String prettyPrintedNodes = prettyPrintVisitor.getResult();
-        testPattern.getExpectedFromFile(prettyPrintedNodes);
+        testPattern.assertFileContents(prettyPrintedNodes);
     }
 
     @ParameterizedTest
