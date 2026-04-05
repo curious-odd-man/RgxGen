@@ -5,11 +5,8 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -138,12 +135,7 @@ public class CaretAndDollarParsingTests {
             PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
             node.visit(prettyPrintVisitor);
             String prettyPrintedNodes = prettyPrintVisitor.getResult();
-            try {
-                assertEquals(aTestCase.getExpectedFromFile(), prettyPrintedNodes);
-            } catch (AssertionFailedError | NoSuchFileException e) {
-                Files.writeString(aTestCase.getExpectedFilePath(), prettyPrintedNodes);
-                throw e;
-            }
+            aTestCase.assertFileContents(prettyPrintedNodes);
         } else {
             try {
                 builder.get();

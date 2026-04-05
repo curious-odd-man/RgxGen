@@ -56,7 +56,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         this.properties = properties;
     }
 
-    private static void assertCorrectCharacter(char currentChar) {
+    private static void assertDollarOrCaretCharacter(char currentChar) {
         if (currentChar != '^' && currentChar != '$') {
             throw new RgxGenParseException("This method should not be called for character '" + currentChar + "'. Please inform developers.");
         }
@@ -230,7 +230,7 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
      *                    NOTE! Must be either caret or dollar sign
      */
     private void verifyStartEndMarkerConsistency(char currentChar) {
-        assertCorrectCharacter(currentChar);
+        assertDollarOrCaretCharacter(currentChar);
         char charAtPos = aCharIterator.peek(currentChar == '^' ? -2 : 0);
         String errorText;
         switch (charAtPos) {

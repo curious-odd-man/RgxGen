@@ -1,2 +1,1 @@
-FinalSymbol{'a
-b'}
+FinalSymbol{'a\nb'}

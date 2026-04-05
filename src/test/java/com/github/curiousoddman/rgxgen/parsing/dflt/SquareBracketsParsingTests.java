@@ -1,17 +1,13 @@
 package com.github.curiousoddman.rgxgen.parsing.dflt;
 
-import com.github.curiousoddman.rgxgen.data.Named;
+import com.github.curiousoddman.rgxgen.data.FileTestUtils;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.opentest4j.AssertionFailedError;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.util.Arrays;
-import java.util.stream.Stream;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -19,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class SquareBracketsParsingTests {
 
-    public enum Data implements Named {
+    public enum Data implements FileTestUtils {
         SQBP_A_TO_C("[a-c]"),
         SQBP_A_TO_C_DASH("[a-c-]"),
         SQBP_A_TO_C_TO_X("[a-c-x]"),
@@ -56,14 +52,15 @@ public class SquareBracketsParsingTests {
         public Exception getException() {
             return e;
         }
-    }
 
-    public static Stream<Data> data() {
-        return Arrays.stream(Data.values());
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/patterns");
+        }
     }
 
     @ParameterizedTest
-    @MethodSource("data")
+    @EnumSource(Data.class)
     public void parsingTest(Data data) throws IOException {
         String prettyPrintedNodes = "";
         try {
@@ -72,10 +69,7 @@ public class SquareBracketsParsingTests {
             PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
             node.visit(prettyPrintVisitor);
             prettyPrintedNodes = prettyPrintVisitor.getResult();
-            assertEquals(data.getExpectedFromFile(), prettyPrintedNodes);
-        } catch (AssertionFailedError | NoSuchFileException e) {
-            Files.writeString(data.getExpectedFilePath(), prettyPrintedNodes);
-            throw e;
+            data.assertFileContents(prettyPrintedNodes);
         } catch (RgxGenParseException e) {
             if (data.getException() != null) {
                 assertEquals(e.getMessage(), data.getException().getMessage(), e.getMessage());
