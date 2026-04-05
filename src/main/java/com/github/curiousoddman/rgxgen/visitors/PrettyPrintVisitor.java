@@ -35,7 +35,13 @@ public class PrettyPrintVisitor implements NodeVisitor {
 
     private void appendLine(Node node) {
         appendIndent();
-        sb.append(node.toString()).append("\n");
+        String text = node.toString()
+                .replace("\r", "\\r")
+                .replace("\n", "\\n")
+                .replace("\t", "\\t")
+                .replace("\f", "\\f")
+                .replace("\b", "\\b");
+        sb.append(text).append("\n");
     }
 
     private void visitChildren(Node node) {
