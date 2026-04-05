@@ -6,8 +6,6 @@ import org.junit.jupiter.api.*;
 
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.github.curiousoddman.rgxgen.model.UnicodeCategory.OTHER_LETTER;
@@ -43,7 +41,7 @@ public class UnicodeCategoryGenerateTestBase {
         testedCategories.add(category);
     }
 
-    ValidationResult validateGeneratedText(RgxGenTestPattern testPattern, Supplier<String> generateFunction, ValidationResult validationResult) {
+    void validateGeneratedText(RgxGenTestPattern testPattern, Supplier<String> generateFunction, ValidationResult validationResult) {
         String generatedText = assertDoesNotThrow(generateFunction::get);
         Set<Character> generatedCharactersForCategory = generatedCharacters.computeIfAbsent(testPattern.getUnicodeCategory(), k -> new HashSet<>());
         char[] generatedTextCharArray = generatedText.toCharArray();
@@ -52,30 +50,28 @@ public class UnicodeCategoryGenerateTestBase {
         }
 
         if (testPattern.getCompiled().matcher(generatedText).matches() == testPattern.isExpectToMatch()) {
-            return validationResult.addMatched();
+            validationResult.addMatched();
+            return;
         }
 
-        Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + '*');
-        boolean[] matches = new boolean[generatedText.length()];
-        for (int i = 0; i < generatedTextCharArray.length; i++) {
-            matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
-        }
-        System.out.println("Failed for text '" + generatedText + '\'');
-        System.out.println("Match debug: " + testPattern.getUnicodeCategory());
-        System.out.println('\t' + generatedText + "\t length = " + generatedText.length());
-        StringBuilder lettersBuilder = new StringBuilder("\t");
-        StringBuilder matchesBuilder = new StringBuilder("\t");
-        StringBuilder unmatchedCodes = new StringBuilder("\t");
-        for (int i = 0; i < generatedText.length(); i++) {
-            lettersBuilder.append('\'').append(generatedText.charAt(i)).append("' ");
-            boolean isOk = matches[i] == testPattern.isExpectToMatch();
-            matchesBuilder.append(' ').append(isOk ? "." : '!').append("  ");
-            unmatchedCodes.append(' ').append(isOk ? " " : ((int) generatedText.charAt(i))).append("  ");
-        }
-        System.out.println(lettersBuilder);
-        System.out.println(matchesBuilder);
-        System.out.println(unmatchedCodes);
-        return validationResult.addNotMatched();
+//        Pattern singleLetterPattern = Pattern.compile(testPattern.getPatternWithoutLength() + '*');
+//        boolean[] matches = new boolean[generatedText.length()];
+//        for (int i = 0; i < generatedTextCharArray.length; i++) {
+//            matches[i] = singleLetterPattern.matcher(String.valueOf(generatedTextCharArray[i])).matches();
+//        }
+//        StringBuilder lettersBuilder = new StringBuilder("\t");
+//        StringBuilder matchesBuilder = new StringBuilder("\t");
+//        StringBuilder unmatchedCodes = new StringBuilder("\t");
+//        for (int i = 0; i < generatedText.length(); i++) {
+//            lettersBuilder.append('\'').append(generatedText.charAt(i)).append("' ");
+//            boolean isOk = matches[i] == testPattern.isExpectToMatch();
+//            matchesBuilder.append(' ').append(isOk ? "." : '!').append("  ");
+//            unmatchedCodes.append(' ').append(isOk ? " " : ((int) generatedText.charAt(i))).append("  ");
+//        }
+//        System.out.println(lettersBuilder);
+//        System.out.println(matchesBuilder);
+//        System.out.println(unmatchedCodes);
+        validationResult.addNotMatched();
     }
 
     @AfterEach

@@ -7,14 +7,12 @@ import com.github.curiousoddman.rgxgen.parsing.NodeTreeBuilder;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultTreeBuilder;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -22,12 +20,8 @@ public class PathGraphBuilderPlantUmlTests extends CombinedTestTemplate<TestPatt
 
     private static final Path FILES_ROOT = Paths.get("testdata/path-graph-plantuml");
 
-    public static Stream<TestPattern> getPatterns() {
-        return Arrays.stream(TestPattern.values());
-    }
-
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void parseTest(TestPattern testPattern) throws IOException {
         NodeTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(testPattern.getPattern(), new DefaultNodeCreator(), null);
         Node node = defaultTreeBuilder.get();

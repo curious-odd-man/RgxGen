@@ -1,76 +1,190 @@
 package com.github.curiousoddman.rgxgen.data;
 
-import com.github.curiousoddman.rgxgen.RgxGen;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.List;
 
-public enum DollarAndCaretPatterns implements AnalysisDataInterface {
-    DEAD_BRANCH_DOLLAR("(a$|b)c", List.of("bc")),
-    LIVE_BRANCH_DOLLAR("c(a$|b)", List.of("ca", "cb")),
-    LIVE_BRANCH_CARET("(^a|b)c", List.of("ac", "bc")),
-    DEAD_BRANCH_CARET("c(a|^b)", List.of("ca")),
-    DEAD_BRANCH_CARET_DOLLAR("(^a$|b)c", List.of("bc")),
-    ALL_DEAD_BRANCHES("x(a$|^b)c", List.of()),      // Require an exception
-    LIVE_BRANCHES_REPEAT_DOLLAR("(1$|x,){0,1}(2$|y,){0,1}", List.of("", "1", "x,", "x,2", "x,y,", "2", "y,")),
-    LIVE_BRANCHES_REPEAT_CARET("(^1|x,){0,1}(^2|y,){0,1}", List.of("1", "1,", "1,2", "1,2,", "2", "2,")),
-    DEAD_BRANCHES_REPEAT_DOLLAR("(1$|x,){0,1}(2$|y,)", List.of("2", "y,", "x,2", "x,y,")),
-    DEAD_BRANCHES_REPEAT_CARET("(^1|x,)(^2|y,){0,1}", List.of("1", "x,", "1y,", "x,y,")),
-    LIVEDEAD_REPEAT_CARET("(^a)+", List.of("a")),
-    LIVEDEAD_REPEAT_DOLLAR("(b$)*", List.of("", "b")),
-    DEAD_ON_REPEAT_CARET("(a|^x){1,2}", List.of("a", "x", "aa", "xa")),
-    DEAD_ON_REPEAT_DOLLAR("(a$|x){1,2}", List.of("a", "x", "xx", "xa")),
-    DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR("(a$|x){2,2}", List.of("xa", "xx")),
-    LIVE_DOUBLE_START("^(a|^b)", List.of("a", "b")),
-    LIVE_DOUBLE_END("(a$|b)$", List.of("a", "b"));
+public class DollarAndCaretPatterns {
 
-    private final String pattern;
-    private final String optimizedGraphPuml;
-    private final List<String> uniqueValues;
+    public enum MatchingNothing implements FileTestUtils {
+        DEAD_PATTERN_DOLLAR(
+                "a$x"
+        ),
+        DEAD_PATTERN_CARET(
+                "a^x"
+        ),
+        ALL_DEAD_BRANCHES(
+                "x(a$|^b)c"
+        );
 
-    DollarAndCaretPatterns(String pattern, List<String> uniqueValues) {
-        this.pattern = pattern;
-        this.uniqueValues = uniqueValues;
-        Path path = getExpectedFilePath();
-        optimizedGraphPuml = getOptimizedGraphPuml(pattern, path);
-    }
+        private final String pattern;
 
-    public Path getExpectedFilePath() {
-        return Path.of("testdata/dollar-and-caret/" + name() + ".puml");
-    }
+        MatchingNothing(String pattern) {
+            this.pattern = pattern;
+        }
 
-    private String getOptimizedGraphPuml(String pattern, Path path) {
-        try {
-            return Files.readString(path);
-        } catch (NoSuchFileException e) {
-            String optimizedGraphPuml = RgxGen.parse(pattern).getPathGraph().toPlantUml();
-            try {
-                Files.writeString(path, optimizedGraphPuml);
-                return optimizedGraphPuml;
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        public String getPattern() {
+            return pattern;
+        }
+
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/matches-nothing");
         }
     }
 
-    @Override
-    public String getPattern() {
-        return pattern;
+    public enum EdgeCasesPotentialTrouble implements FileTestUtils {
+        REUSE_IN_GROUP_CARET("(a|^x)+ --> (\\1)"),
+        REUSE_IN_GROUP_DOLLAR("(a$|x)+ --> (\\1)"),
+        NO_GROUP_REPEAT("^x+");
+        private final String pattern;
+
+        EdgeCasesPotentialTrouble(String pattern) {
+            this.pattern = pattern;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/edge-cases");
+        }
     }
 
-    @Override
-    public String getOptimizedGraph() {
-        return optimizedGraphPuml;
+    public enum Optimizable implements FileTestUtils {
+        DEAD_BRANCH_DOLLAR(
+                "(a$|b)c",
+                "(b)c",         // b is still in group in case there are group references
+                List.of("bc")
+        ),
+        DEAD_BRANCH_CARET(
+                "c(b|^a)",
+                "c(a)",         // b is still in group in case there are group references
+                List.of("ca")
+        ),
+        DEAD_BRANCH_CARET_DOLLAR(
+                "(^a$|b)c",
+                "(b)c",         // b is still in group in case there are group references
+                List.of("bc")
+        ),
+        LIVE_BRANCHES_REPEAT_DOLLAR(
+                "(1$|x,){0,1}(2$|y,){0,1}",
+                "(1$|x,){0,1}(2$|y,){0,1}", // Pattern does not change, though $ nodes must point directly to END
+                List.of("", "1", "x,", "x,2", "x,y,", "2", "y,")
+        ),
+        LIVE_BRANCHES_REPEAT_CARET(
+                "(^1|x,){0,1}(^2|y,){0,1}",
+                "(^1|x,){0,1}(^2|y,){0,1}", // Pattern does not change, though ^ nodes are only accessible from START
+                List.of("1", "1,", "1,2", "1,2,", "2", "2,")
+        ),
+        DEAD_BRANCHES_REPEAT_DOLLAR(
+                "(1$|x,){0,1}(2$|y,)",
+                "(x,){0,1}(2$|y,)", // 1$ may never be used, because of mandatory second group
+                List.of("2", "y,", "x,2", "x,y,")
+        ),
+        DEAD_BRANCHES_REPEAT_CARET(
+                "(^1|x,)(^2|y,){0,1}",
+                "(^1|x,)(y,){0,1}", // ^2 may never be used, because of mandatory first group
+                List.of("1", "x,", "1y,", "x,y,")
+        ),
+        LIVEDEAD_REPEAT_CARET(
+                "(^a)+",
+                "(a)",      // Any subsequent repetition would break the match , 1+ repetitions transforms into group
+                List.of("a")
+        ),
+        LIVEDEAD_REPEAT_DOLLAR(
+                "(b$)*",
+                "(b)?", // Any more repetitions would break the match, 0+ repetitions transforms into 0 or 1
+                List.of("", "b")
+        ),
+        DEAD_ON_REPEAT_CARET(
+                "(a|^x){1,2}",
+                "(?:a|^x)(a)?", // Non-capture group to keep correct group indexes
+                List.of("a", "x", "aa", "xa")
+        ),
+        DEAD_ON_REPEAT_DOLLAR(
+                "(a$|x){1,2}",
+                "(?:x)?(a$|x)", // Non-capture group to keep correct group indexes
+                List.of("a", "x", "xx", "xa")
+        ),
+        DEAD_ON_REPEAT_WITHOUT_REPEAT_DOLLAR(
+                "(a$|x){2,2}",
+                "(?:x){1}(a$|x)",    // Non-capture group to keep correct group indexes
+                List.of("xa", "xx")
+        ),
+        DEAD_ON_REPEAT_WITHOUT_REPEAT_CARET(
+                "(a|^x){2,2}",
+                "(?:a|^x)(a){1}",    // Non-capture group to keep correct group indexes
+                List.of("xa", "xx")
+        );
+
+        private final String pattern;
+        private final String optimizedPattern;
+        private final List<String> uniqueValues;
+
+        Optimizable(String pattern, String optimizedPattern, List<String> uniqueValues) {
+            this.pattern = pattern;
+            this.optimizedPattern = optimizedPattern;
+            this.uniqueValues = uniqueValues;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public String getOptimizedPattern() {
+            return optimizedPattern;
+        }
+
+        public List<String> getUniqueValues() {
+            return uniqueValues;
+        }
+
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/optimizable");
+        }
     }
 
-    @Override
-    public List<String> getAllUniqueValues() {
-        return uniqueValues;
+    public enum Optimal implements FileTestUtils {
+
+        LIVE_BRANCH_DOLLAR(
+                "c(a$|b)",
+                List.of("ca", "cb")
+        ),
+        LIVE_BRANCH_CARET(
+                "(^a|b)c",
+                List.of("ac", "bc")
+        ),
+        LIVE_DOUBLE_START(
+                "^(a|^b)",
+                List.of("a", "b")
+        ),
+        LIVE_DOUBLE_END(
+                "(a$|b)$",
+                List.of("a", "b")
+        );
+
+        private final String pattern;
+        private final List<String> uniqueValues;
+
+        Optimal(String pattern, List<String> uniqueValues) {
+            this.pattern = pattern;
+            this.uniqueValues = uniqueValues;
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+
+        public List<String> getAllUniqueValues() {
+            return uniqueValues;
+        }
+
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/optimal");
+        }
     }
 }
-

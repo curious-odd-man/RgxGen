@@ -13,28 +13,19 @@ import com.github.curiousoddman.rgxgen.visitors.PrettyPrintVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueGenerationVisitor;
 import com.github.curiousoddman.rgxgen.visitors.UniqueValuesCountingVisitor;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.opentest4j.AssertionFailedError;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class CombinedTests extends CombinedTestTemplate<TestPattern> {
-    public static Stream<TestPattern> getPatterns() {
-        return Arrays.stream(TestPattern.values());
-    }
-
     private static final Map<TestPattern, Node> NODES_CACHE = new EnumMap<>(TestPattern.class);
 
     public static Node getOrCreateNode(TestPattern testPattern) {
@@ -49,22 +40,17 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void parseTest(TestPattern testPattern) throws IOException {
         Node node = getOrCreateNode(testPattern);
         PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
         node.visit(prettyPrintVisitor);
         String prettyPrintedNodes = prettyPrintVisitor.getResult();
-        try {
-            assertEquals(testPattern.getExpectedFromFile(), prettyPrintedNodes);
-        } catch (AssertionFailedError | NoSuchFileException e) {
-            Files.writeString(testPattern.getExpectedFilePath(), prettyPrintedNodes);
-            throw e;
-        }
+        testPattern.getExpectedFromFile(prettyPrintedNodes);
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void countUniqueUsingVisitorTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
         Node node = getOrCreateNode(testPattern);
@@ -75,7 +61,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void countUniqueTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasEstimatedCount());
         RgxGen rgxGen = RgxGen.parse(testPattern.getPattern());
@@ -83,7 +69,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void generateUniqueTest(TestPattern testPattern) {
         assumeTrue(testPattern.hasAllUniqueValues());
 
@@ -93,7 +79,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void classRgxGenTest(TestPattern testPattern) {
         RgxGen rgxGen = RgxGen.parse(testPattern.getPattern());
         if (testPattern.hasEstimatedCount()) {
@@ -110,7 +96,7 @@ public class CombinedTests extends CombinedTestTemplate<TestPattern> {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     public void classRgxGenCaseInsensitiveTest(TestPattern testPattern) {
         RgxGenProperties properties = new RgxGenProperties();
         RgxGenOption.CASE_INSENSITIVE.setInProperties(properties, true);

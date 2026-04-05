@@ -1,9 +1,10 @@
 package com.github.curiousoddman.rgxgen.data;
 
 import java.math.BigInteger;
+import java.nio.file.Path;
 import java.util.List;
 
-public interface DataInterface extends Named {
+public interface DataInterface extends FileTestUtils {
 
     boolean hasEstimatedCount();
 
@@ -18,4 +19,9 @@ public interface DataInterface extends Named {
     BigInteger getEstimatedCount();
 
     List<String> getAllUniqueValues();
+
+    @Override
+    default Path rootPath() {
+        return Path.of("testdata/patterns");
+    }
 }

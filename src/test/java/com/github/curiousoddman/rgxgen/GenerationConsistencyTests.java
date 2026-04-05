@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
@@ -16,7 +17,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
 import java.util.function.Function;
 import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
@@ -40,14 +40,6 @@ public class GenerationConsistencyTests {
     private static final int NUM_ITERATIONS = 100;
     private static final Path caseInsensitivePath = Paths.get("testdata/caseinsensitive/");
     private static final Path caseSensitivePath = Paths.get("testdata/casesensitive/");
-
-    public static Stream<TestPatternCaseInsensitive> getCaseInsensitivePatterns() {
-        return Arrays.stream(TestPatternCaseInsensitive.values());
-    }
-
-    public static Stream<TestPattern> getPatterns() {
-        return Arrays.stream(TestPattern.values());
-    }
 
     public static Stream<Arguments> getCompleteTestsPatterns() {
         return CompleteTests.getData();
@@ -83,7 +75,7 @@ public class GenerationConsistencyTests {
     }
 
     @ParameterizedTest
-    @MethodSource("getCaseInsensitivePatterns")
+    @EnumSource(TestPatternCaseInsensitive.class)
     void verifyThatAllCaseInsensitivePatternsStaysTheSameTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
@@ -98,7 +90,7 @@ public class GenerationConsistencyTests {
     }
 
     @ParameterizedTest
-    @MethodSource("getCaseInsensitivePatterns")
+    @EnumSource(TestPatternCaseInsensitive.class)
     void verifyThatAllCaseInsensitivePatternsStaysTheSameNotMatchingTest(TestPatternCaseInsensitive data) throws IOException {
         String name = data.name();
         Path fileName = caseInsensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
@@ -113,7 +105,7 @@ public class GenerationConsistencyTests {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     void verifyThatAllCaseSensitivePatternsStaysTheSameTest(TestPattern data) throws IOException {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("matching").resolve(createFileName(name)).toAbsolutePath();
@@ -126,7 +118,7 @@ public class GenerationConsistencyTests {
     }
 
     @ParameterizedTest
-    @MethodSource("getPatterns")
+    @EnumSource(TestPattern.class)
     void verifyThatAllCaseSensitivePatternsStaysTheSameNotMatchingTest(TestPattern data) throws IOException {
         String name = data.name();
         Path fileName = caseSensitivePath.resolve("notmatching").resolve(createFileName(name)).toAbsolutePath();
