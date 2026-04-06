@@ -232,6 +232,7 @@ public final class Util {
         return left.from() <= right.from() && left.to() >= right.to();
     }
 
+    // FIXME: Move it
     public static String plantumlEscape(String s) {
         if (s == null) {
             return "";

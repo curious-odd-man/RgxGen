@@ -350,7 +350,7 @@ class PathGraphBuilderTest {
         assertEquals(1, nodesOfKind(g, PathNode.Kind.END).size());
         assertEquals(1, nodesOfKind(g, PathNode.Kind.CHOICE).size());
         assertEquals(0, nodesOfKind(g, PathNode.Kind.REPEAT_ENTRY).size());
-        assertEquals(3, nodesOfKind(g, PathNode.Kind.AST).size()); // a$, c, x
+        assertEquals(4, nodesOfKind(g, PathNode.Kind.AST).size()); // a, $, c, x
     }
 
     @Test
@@ -394,7 +394,7 @@ class PathGraphBuilderTest {
         assertEquals(1, nodesOfKind(g, PathNode.Kind.END).size());
         assertEquals(1, nodesOfKind(g, PathNode.Kind.REPEAT_ENTRY).size());
         assertEquals(1, nodesOfKind(g, PathNode.Kind.CHOICE).size());
-        assertEquals(2, nodesOfKind(g, PathNode.Kind.AST).size()); // a, ^x
+        assertEquals(3, nodesOfKind(g, PathNode.Kind.AST).size()); // a, ^, x
     }
 
     @Test
@@ -403,7 +403,7 @@ class PathGraphBuilderTest {
         PathNode rep = singleNodeOfKind(g, PathNode.Kind.REPEAT_ENTRY);
         List<PathEdge> forward = edgesFromNode(g, rep).stream()
                 .filter(e -> e.to().getKind() == PathNode.Kind.CHOICE)
-                .collect(Collectors.toList());
+                .toList();
         assertEquals(1, forward.size());
         assertEquals(1, forward.get(0).min());
         assertEquals(PathEdge.UNBOUNDED, forward.get(0).max());
