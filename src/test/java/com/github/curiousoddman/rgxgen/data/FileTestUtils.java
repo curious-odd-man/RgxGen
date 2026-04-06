@@ -14,8 +14,10 @@ public interface FileTestUtils {
 
     Path rootPath();
 
+    String extension();
+
     default Path getExpectedFilePath(String suffix) {
-        Path path = rootPath().resolve(name() + suffix + ".txt");
+        Path path = rootPath().resolve(name() + suffix + extension());
         try {
             Files.createDirectories(path.getParent());
         } catch (IOException e) {

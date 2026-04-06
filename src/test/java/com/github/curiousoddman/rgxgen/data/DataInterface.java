@@ -24,4 +24,9 @@ public interface DataInterface extends FileTestUtils {
     default Path rootPath() {
         return Path.of("testdata/patterns");
     }
+
+    @Override
+    default String extension() {
+        return ".txt";
+    }
 }
