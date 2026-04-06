@@ -1,0 +1,60 @@
+@startuml
+title
+""Pattern: `(^1|x,){0,1}(^2|y,){0,1}`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_10
+component """END""" as node_END_11
+
+rectangle "Sequence: (^1|x,){0,1}(^2|y,){0,1}" {
+  rectangle "Repeat: (^1|x,){0,1} 		 {0..1}" {
+    rectangle "Group 1: (^1|x,)" {
+      rectangle "Choice: (^1|x,)" {
+        rectangle "Sequence: (^1|" {
+          component """AnchorNode(^)""" as node_AST_2
+          component """FinalSymbol(1)""" as node_AST_3
+        }
+        component """Choice((^1|x,))""" as node_CHOICE_1 <<choice>>
+        component """FinalSymbol(x,)""" as node_AST_4
+      }
+    }
+    component """Repeat((^1|x,){0,1})""" as node_REPEAT_ENTRY_0 <<repeat>>
+  }
+  rectangle "Repeat: (^2|y,){0,1} 		 {0..1}" {
+    rectangle "Group 2: (^2|y,)" {
+      rectangle "Choice: (^2|y,)" {
+        rectangle "Sequence: (^2|" {
+          component """AnchorNode(^)""" as node_AST_7
+          component """FinalSymbol(2)""" as node_AST_8
+        }
+        component """Choice((^2|y,))""" as node_CHOICE_6 <<choice>>
+        component """FinalSymbol(y,)""" as node_AST_9
+      }
+    }
+    component """Repeat((^2|y,){0,1})""" as node_REPEAT_ENTRY_5 <<repeat>>
+  }
+}
+
+node_AST_2 --> node_AST_3
+node_CHOICE_1 --> node_AST_2
+node_CHOICE_1 --> node_AST_4
+node_REPEAT_ENTRY_0 --> node_CHOICE_1 : 0..1
+node_AST_3 --> node_REPEAT_ENTRY_0
+node_AST_4 --> node_REPEAT_ENTRY_0
+node_AST_7 --> node_AST_8
+node_CHOICE_6 --> node_AST_7
+node_CHOICE_6 --> node_AST_9
+node_REPEAT_ENTRY_5 --> node_CHOICE_6 : 0..1
+node_AST_8 --> node_REPEAT_ENTRY_5
+node_AST_9 --> node_REPEAT_ENTRY_5
+node_REPEAT_ENTRY_0 --> node_REPEAT_ENTRY_5
+node_BEGIN_10 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_5 --> node_END_11
+}
+@enduml

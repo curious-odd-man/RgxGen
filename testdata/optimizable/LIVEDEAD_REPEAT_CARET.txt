@@ -1,0 +1,31 @@
+@startuml
+title
+""Pattern: `(^a)+`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_3
+component """END""" as node_END_4
+
+rectangle "Repeat: (^a)+ 		 {1..<&infinity>}" {
+  rectangle "Group 1: (^a)" {
+    rectangle "Sequence: (^a)" {
+      component """AnchorNode(^)""" as node_AST_1
+      component """FinalSymbol(a)""" as node_AST_2
+    }
+  }
+  component """Repeat((^a)+)""" as node_REPEAT_ENTRY_0 <<repeat>>
+}
+
+node_AST_1 --> node_AST_2
+node_REPEAT_ENTRY_0 --> node_AST_1 : 1..<&infinity>
+node_AST_2 --> node_REPEAT_ENTRY_0
+node_BEGIN_3 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_0 --> node_END_4
+}
+@enduml
