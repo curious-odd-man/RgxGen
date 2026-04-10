@@ -22,6 +22,8 @@ import com.github.curiousoddman.rgxgen.iterators.ReferenceIterator;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import com.github.curiousoddman.rgxgen.iterators.suppliers.*;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.util.MinMax;
+import com.github.curiousoddman.rgxgen.util.Util;
 
 import java.util.*;
 import java.util.function.Supplier;
@@ -79,10 +81,13 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         // Getting all possible sub node contents
         UniqueGenerationVisitor v = new UniqueGenerationVisitor(aReferenceIteratorMap, aGroupIterators, aProperties);
         node.getNode().visit(v);
+
+        MinMax minMax = Util.getMinMax(node, aProperties);
+
         aIterators.add(
                 new IncrementalLengthIteratorSupplier(
                         new PermutationsIteratorSupplier(v.aIterators),
-                        node.getMin(),
+                        minMax.min(),
                         calculateMaxRepetitions(node)
                 )
         );

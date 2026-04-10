@@ -29,11 +29,12 @@ import java.util.Optional;
  */
 public class RgxGenOption<T> {
     /**
-     * For infinite patterns, such as {@code a+}, {@code a*} and {@code a{n,}}, defines limit for the repetitions.
+     * For infinite patterns, such as {@code a+}, {@code a*} and {@code a{n,}}, defines (min)limit for the repetitions.
      *
      * @defaultValue 100
      */
     public static final RgxGenOption<Integer> INFINITE_PATTERN_REPETITION = new RgxGenOption<>("generation.infinite.repeat", 100);
+    public static final RgxGenOption<Integer> INFINITE_PATTERN_MINIMUM_REPETITION = new RgxGenOption<>("generation.infinite.repeat.min", 0);
 
     /**
      * Flag to use case-insensitive matching.
@@ -55,6 +56,8 @@ public class RgxGenOption<T> {
      * @defaultValue SPACE, TAB
      */
     public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
+
+
 
     private final String key;
     private final T defaultValue;
