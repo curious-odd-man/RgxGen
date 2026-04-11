@@ -141,7 +141,7 @@ public class InfinitePatternConfigTests {
 
     private static RgxGen getRgxGenWithMinRepetition(String pattern, int minRepetition) {
         RgxGenProperties props = new RgxGenProperties();
-        RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION.setInProperties(props, minRepetition);
+        RgxGenOption.GENERATION_MINIMUM_REPETITION.setInProperties(props, minRepetition);
         return RgxGen.parse(props, pattern);
     }
 }

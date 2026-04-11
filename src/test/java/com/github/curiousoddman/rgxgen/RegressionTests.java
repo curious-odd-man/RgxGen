@@ -128,7 +128,7 @@ public class RegressionTests {
     void feature124_optionForMinRepetitionTest() {
         RgxGenProperties rgxGenProperties = new RgxGenProperties();
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxGenProperties, 1);
-        RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION.setInProperties(rgxGenProperties, 1);
+        RgxGenOption.GENERATION_MINIMUM_REPETITION.setInProperties(rgxGenProperties, 1);
 
         RgxGen parse = RgxGen.parse(rgxGenProperties, ".*");
         for (int i = 0; i < 10; i++) {

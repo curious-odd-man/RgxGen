@@ -30,7 +30,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.github.curiousoddman.rgxgen.config.RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION;
+import static com.github.curiousoddman.rgxgen.config.RgxGenOption.GENERATION_MINIMUM_REPETITION;
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 
 public final class Util {
@@ -241,7 +241,7 @@ public final class Util {
         int max = node.getMax() == -1
                 ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromPropertiesOrDefault(properties)
                 : node.getMax();
-        int min = Math.max(node.getMin(), INFINITE_PATTERN_MINIMUM_REPETITION.getFromPropertiesOrDefault(properties));
+        int min = Math.max(node.getMin(), GENERATION_MINIMUM_REPETITION.getFromPropertiesOrDefault(properties));
         if (min > max) {
             throw new RgxGenConfigurationException("Min (" + min + ") repetition is greater than Max (" + max + "). Check configuration for infinite pattern repetition!");
         }

@@ -55,7 +55,7 @@ public class RgxGenOption<T> {
      * Assuming:
      * - {@code a+} is equivalent to {@code a{1,}}
      * - {@code a*} is equivalent to {@code a{0,}}
-     * Given that X is value for {@code INFINITE_PATTERN_MINIMUM_REPETITION}
+     * Given that X is value for {@code GENERATION_MINIMUM_REPETITION}
      * <ul>
      *     <li>For {@code a{n,}}:</li>
      *     <li><ul>
@@ -72,7 +72,7 @@ public class RgxGenOption<T> {
      *
      * @defaultValue 0
      */
-    public static final RgxGenOption<Integer> INFINITE_PATTERN_MINIMUM_REPETITION = new RgxGenOption<>("generation.infinite.repeat.min", 0);
+    public static final RgxGenOption<Integer> GENERATION_MINIMUM_REPETITION = new RgxGenOption<>("generation.repeat.min", 0);
 
     /**
      * Flag to use case-insensitive matching.

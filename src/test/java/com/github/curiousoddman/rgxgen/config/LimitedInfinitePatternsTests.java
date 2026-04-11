@@ -97,7 +97,7 @@ public class LimitedInfinitePatternsTests {
     public void generateUniqueMinLengthTest(String pattern, Node node, List<String> expectedUnique) {
         RgxGenProperties properties = new RgxGenProperties();
         int minLength = 2;
-        RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION.setInProperties(properties, minLength);
+        RgxGenOption.GENERATION_MINIMUM_REPETITION.setInProperties(properties, minLength);
         RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(properties, 10);
 
         var expectedFiltered = expectedUnique
