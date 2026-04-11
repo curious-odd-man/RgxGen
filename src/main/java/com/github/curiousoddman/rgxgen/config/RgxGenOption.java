@@ -36,13 +36,13 @@ public class RgxGenOption<T> {
      * Given that X is value for {@code INFINITE_PATTERN_REPETITION}, or default if not specified
      * <ul>
      *     <li>For {@code a{n,}}:</li>
-     *     <ul>
+     *     <li><ul>
      *         <li>Becomes {@code a{n,X}}</li>
-     *     </ul>
+     *     </ul></li>
      *     <li>For {@code a{n,m}}:</li>
-     *     <ul>
+     *     <li><ul>
      *         <li>Stays {@code a{n,m}}</li>
-     *     </ul>
+     *     </ul></li>
      * </ul>
      *
      * @defaultValue 100
@@ -58,16 +58,16 @@ public class RgxGenOption<T> {
      * Given that X is value for {@code INFINITE_PATTERN_MINIMUM_REPETITION}
      * <ul>
      *     <li>For {@code a{n,}}:</li>
-     *     <ul>
-     *         <li>X < n stays {@code a{n,}}</li>
-     *         <li>X > n turns into {@code a{X,}}</li>
-     *     </ul>
+     *     <li><ul>
+     *         <li>X &lt; n stays {@code a{n,}}</li>
+     *         <li>X &gt; n turns into {@code a{X,}}</li>
+     *     </ul></li>
      *     <li>For {@code a{n,m}}:</li>
-     *     <ul>
-     *         <li>X > m - RgxGenConfigurationException is thrown at generation time</li>
-     *         <li>X < n stays {@code a{n,m}}</li>
-     *         <li>X > n turns into {@code a{X,m}}</li>
-     *     </ul>
+     *     <li><ul>
+     *         <li>X &gt; m - RgxGenConfigurationException is thrown at generation time</li>
+     *         <li>X &lt; n stays {@code a{n,m}}</li>
+     *         <li>X &gt; n turns into {@code a{X,m}}</li>
+     *     </ul></li>
      * </ul>
      *
      * @defaultValue 0
