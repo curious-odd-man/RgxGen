@@ -21,9 +21,16 @@ import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
 import java.util.function.Supplier;
 
+/**
+ * A supplier for char array iterator
+ */
 public class ArrayIteratorSupplier implements Supplier<StringIterator> {
     private final char[] aSymbolSet;
 
+    /**
+     * Create supplier from char array
+     * @param symbolSet chars to iterate over
+     */
     public ArrayIteratorSupplier(char[] symbolSet) {
         aSymbolSet = symbolSet;
     }

@@ -21,17 +21,26 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 /**
+ * Adapter implementation of ArrayList to store char primitives
  * implementation copied from java.util.ArrayList
  */
 public class CharArrayList extends CharList {
     private char[] elementData;
     private int size;
 
+    /**
+     * Create CharArrayList and initialize it with chars
+     * @param arr initial data
+     */
     public CharArrayList(char[] arr) {
         elementData = arr;
         size = arr.length;
     }
 
+    /**
+     * Create CharArrayList and reserve space
+     * @param size initial array size
+     */
     public CharArrayList(int size) {
         elementData = new char[size];
         this.size = 0;

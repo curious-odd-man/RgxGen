@@ -18,6 +18,14 @@ package com.github.curiousoddman.rgxgen.nodes.type;
 
 import com.github.curiousoddman.rgxgen.nodes.Node;
 
+/**
+ * A marker interface for Nodes with multiple children nodes
+ */
 public interface ArrayChildNode {
+    /**
+     * Get all child nodes
+     *
+     * @return child nodes
+     */
     Node[] getNodes();
 }

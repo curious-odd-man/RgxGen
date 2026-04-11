@@ -21,6 +21,14 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+/**
+ * A StringIterator that based on the wrapped supplier.
+ * Creates min iterators from supplier
+ * Then incrementally advances those iterators.
+ * When iterators are exhausted
+ * Grows array of iterators, unless max is reached.
+ * Repeats increments unless all exhausted
+ */
 public class IncrementalLengthIterator implements StringIterator {
     private final Supplier<StringIterator> aSupplier;
     private final int aMin;
@@ -31,17 +39,22 @@ public class IncrementalLengthIterator implements StringIterator {
     private boolean aInit = true;
 
 
-    // (a|b){1} -> "a", "b" --> "a", "b"
-    // (a|b){2} -> "a", "b" --> "aa", "ab", "ba", "bb"
-    // (a|b){1,2} -> "a", "b" --> "a", "b", "aa", "ab", "ba", "bb"
-    // (a|b){0,2} -> "a", "b" --> "", "a", "b", "aa", "ab", "ba", "bb"
-
-
-    // Take 0 from list
-    // Take 1 from list
-    // Take and concatenate 2 from list
-    // ...
-
+    /**
+     *
+     * @param supplier value supplier
+     * @param min      number of chars
+     * @param max      number of chars
+     *                 <p>
+     *                 // (a|b){1} -> "a", "b" --> "a", "b"
+     *                 // (a|b){2} -> "a", "b" --> "aa", "ab", "ba", "bb"
+     *                 // (a|b){1,2} -> "a", "b" --> "a", "b", "aa", "ab", "ba", "bb"
+     *                 // (a|b){0,2} -> "a", "b" --> "", "a", "b", "aa", "ab", "ba", "bb"
+     *                 <p>
+     *                 // Take 0 from list
+     *                 // Take 1 from list
+     *                 // Take and concatenate 2 from list
+     *                 // ...
+     */
     public IncrementalLengthIterator(Supplier<StringIterator> supplier, int min, int max) {
         aSupplier = supplier;
         aMin = min;

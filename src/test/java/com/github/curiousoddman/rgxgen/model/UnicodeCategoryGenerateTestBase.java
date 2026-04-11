@@ -76,17 +76,17 @@ public class UnicodeCategoryGenerateTestBase {
 
     @AfterEach
     void printGenerationStatistics() {
-        for (Map.Entry<UnicodeCategory, Set<Character>> entry : generatedCharacters.entrySet()) {
-            Set<Character> charactersPresentInGroup = entry.getValue();
-            IntSummaryStatistics intSummaryStatistics = charactersPresentInGroup.stream().mapToInt(i -> (int) i).summaryStatistics();
-            UnicodeCategory category = entry.getKey();
-            System.out.println("Category " + category + " with keys " + category.getKeys() + " character stats: ");
-            System.out.println("\tMin: " + intSummaryStatistics.getMin() + "; '" + (char) intSummaryStatistics.getMin() + '\'');
-            System.out.println("\tMax: " + intSummaryStatistics.getMax() + "; '" + (char) intSummaryStatistics.getMax() + '\'');
-            double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.to() - range.from() + 1).sum();
-            double coveredRate = charactersPresentInGroup.size() / totalValueCount;
-            System.out.println("\tCovered: " + coveredRate);
-        }
+//        for (Map.Entry<UnicodeCategory, Set<Character>> entry : generatedCharacters.entrySet()) {
+//            Set<Character> charactersPresentInGroup = entry.getValue();
+//            IntSummaryStatistics intSummaryStatistics = charactersPresentInGroup.stream().mapToInt(i -> (int) i).summaryStatistics();
+//            UnicodeCategory category = entry.getKey();
+//            System.out.println("Category " + category + " with keys " + category.getKeys() + " character stats: ");
+//            System.out.println("\tMin: " + intSummaryStatistics.getMin() + "; '" + (char) intSummaryStatistics.getMin() + '\'');
+//            System.out.println("\tMax: " + intSummaryStatistics.getMax() + "; '" + (char) intSummaryStatistics.getMax() + '\'');
+//            double totalValueCount = category.getSymbols().length + category.getSymbolRanges().stream().mapToInt(range -> range.to() - range.from() + 1).sum();
+//            double coveredRate = charactersPresentInGroup.size() / totalValueCount;
+//            System.out.println("\tCovered: " + coveredRate);
+//        }
     }
 
     @AfterAll
