@@ -137,6 +137,5 @@ public class RegressionTests {
                     parse.generate(new Random(1234)).length()
             );
         }
-
     }
 }
