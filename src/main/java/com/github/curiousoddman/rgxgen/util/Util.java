@@ -16,7 +16,11 @@ package com.github.curiousoddman.rgxgen.util;
    limitations under the License.
 /* **************************************************************************/
 
+import com.github.curiousoddman.rgxgen.config.RgxGenConfigurationException;
+import com.github.curiousoddman.rgxgen.config.RgxGenOption;
+import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.model.SymbolRange;
+import com.github.curiousoddman.rgxgen.nodes.Repeat;
 import com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider;
 import com.github.curiousoddman.rgxgen.util.chars.CharList;
 
@@ -26,6 +30,7 @@ import java.util.random.RandomGenerator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.github.curiousoddman.rgxgen.config.RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION;
 import static com.github.curiousoddman.rgxgen.model.SymbolRange.range;
 
 public final class Util {
@@ -230,5 +235,16 @@ public final class Util {
 
     public static boolean isRightWithinLeft(SymbolRange left, SymbolRange right) {
         return left.from() <= right.from() && left.to() >= right.to();
+    }
+
+    public static MinMax getMinMax(Repeat node, RgxGenProperties properties) {
+        int max = node.getMax() == -1
+                ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromPropertiesOrDefault(properties)
+                : node.getMax();
+        int min = Math.max(node.getMin(), INFINITE_PATTERN_MINIMUM_REPETITION.getFromPropertiesOrDefault(properties));
+        if (min > max) {
+            throw new RgxGenConfigurationException("Min (" + min + ") repetition is greater than Max (" + max + "). Check configuration for infinite pattern repetition!");
+        }
+        return new MinMax(min, max);
     }
 }

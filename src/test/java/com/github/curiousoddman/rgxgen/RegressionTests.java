@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.regex.Pattern;
 
 import static com.github.curiousoddman.rgxgen.parsing.dflt.ConstantsProvider.BIG_INTEGER_TWO;
@@ -121,5 +122,20 @@ public class RegressionTests {
     void bug116_supportForNamedCaptureGroupTest() {
         String pattern = "^(?<parliamentaryTerm>[0-9]{1,2})$";
         assertDoesNotThrow(() -> RgxGen.parse(pattern));
+    }
+
+    @Test
+    void feature124_optionForMinRepetitionTest() {
+        RgxGenProperties rgxGenProperties = new RgxGenProperties();
+        RgxGenOption.INFINITE_PATTERN_REPETITION.setInProperties(rgxGenProperties, 1);
+        RgxGenOption.INFINITE_PATTERN_MINIMUM_REPETITION.setInProperties(rgxGenProperties, 1);
+
+        RgxGen parse = RgxGen.parse(rgxGenProperties, ".*");
+        for (int i = 0; i < 10; i++) {
+            assertEquals(
+                    1,
+                    parse.generate(new Random(1234)).length()
+            );
+        }
     }
 }

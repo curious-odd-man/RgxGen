@@ -16,9 +16,10 @@ package com.github.curiousoddman.rgxgen.visitors;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.config.RgxGenOption;
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.nodes.*;
+import com.github.curiousoddman.rgxgen.util.MinMax;
+import com.github.curiousoddman.rgxgen.util.Util;
 import com.github.curiousoddman.rgxgen.visitors.helpers.SymbolSetIndexer;
 
 import java.util.Map;
@@ -62,12 +63,10 @@ public class GenerationVisitor implements NodeVisitor {
 
     @Override
     public void visit(Repeat node) {
-        int max = node.getMax() == -1
-                ? RgxGenOption.INFINITE_PATTERN_REPETITION.getFromPropertiesOrDefault(properties)
-                : node.getMax();
-        int repeat = node.getMin() >= max ?
-                node.getMin() :
-                node.getMin() + aRandom.nextInt(max + 1 - node.getMin());
+        MinMax minMax = Util.getMinMax(node, properties);
+        int repeat = node.getMin() == minMax.max() ?
+                minMax.min() :
+                minMax.min() + aRandom.nextInt(minMax.max() + 1 - minMax.min());
 
         for (int i = 0; i < repeat; ++i) {
             node.getNode().visit(this);
