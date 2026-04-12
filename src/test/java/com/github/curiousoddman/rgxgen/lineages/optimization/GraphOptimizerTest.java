@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.lineages.optimization;
 import com.github.curiousoddman.rgxgen.RgxGen;
 import com.github.curiousoddman.rgxgen.lineages.PathGraph;
 import com.github.curiousoddman.rgxgen.lineages.PathNode;
+import com.github.curiousoddman.rgxgen.nodes.AnchorNode;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,13 +19,13 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests for {@link GraphOptimizer}.
  *
  * <p>Each test builds a real {@link PathGraph} from a regex string via
- * {@link RgxGen}, runs {@link GraphOptimizer#optimize}, and asserts the
+ * {@link RgxGen}, runs {@link GraphOptimizer#markNodesPositions}, and asserts the
  * {@link NodePosition.First} / {@link NodePosition.Last} marks on the AST nodes.
  *
  * <p>Expected values are derived by hand-tracing the BFS described in
  * {@link GraphOptimizer}. Traces are documented inline per test.
  */
-class GraphOptimizerTest {
+public class GraphOptimizerTest {
 
     // -------------------------------------------------------------------------
     // Helper
@@ -35,15 +36,16 @@ class GraphOptimizerTest {
      */
     private static PathGraph optimized(String pattern) {
         PathGraph graph = RgxGen.parse(pattern).getPathGraph();
-        return GraphOptimizer.optimize(graph);
+        return GraphOptimizer.markNodesPositions(graph);
     }
 
     /**
      * Returns all AST PathNodes from a graph, in graph insertion order.
      */
-    private static List<PathNode> astNodes(PathGraph graph) {
+    public static List<PathNode> astNodes(PathGraph graph) {
         return graph.getNodes().stream()
                 .filter(n -> n.getKind() == PathNode.Kind.AST)
+                .filter(n -> !(n.getAstNode() instanceof AnchorNode))
                 .collect(Collectors.toList());
     }
 
@@ -64,9 +66,9 @@ class GraphOptimizerTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void optimizeReturnsSameInstance() {
+    void markNodesPositionsReturnsSameInstance() {
         PathGraph graph = RgxGen.parse("a").getPathGraph();
-        PathGraph result = GraphOptimizer.optimize(graph);
+        PathGraph result = GraphOptimizer.markNodesPositions(graph);
         assertSame(graph, result, "optimize() must return the same PathGraph instance");
     }
 
@@ -400,10 +402,10 @@ class GraphOptimizerTest {
     // -------------------------------------------------------------------------
 
     @Test
-    void optimizeIsIdempotent() {
+    void markNodesPositionsIsIdempotent() {
         PathGraph graph = optimized("a*b");
         // Run a second time
-        GraphOptimizer.optimize(graph);
+        GraphOptimizer.markNodesPositions(graph);
 
         List<PathNode> ast = astNodes(graph);
         PathNode a = ast.get(0);

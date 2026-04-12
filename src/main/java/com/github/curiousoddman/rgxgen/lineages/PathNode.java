@@ -163,6 +163,10 @@ public class PathNode {
         this.lastPosition = lastPosition;
     }
 
+    public Node getAstNode() {
+        return astNode;
+    }
+
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------

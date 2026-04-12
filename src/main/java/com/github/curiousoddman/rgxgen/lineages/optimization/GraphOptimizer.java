@@ -3,6 +3,7 @@ package com.github.curiousoddman.rgxgen.lineages.optimization;
 import com.github.curiousoddman.rgxgen.lineages.PathEdge;
 import com.github.curiousoddman.rgxgen.lineages.PathGraph;
 import com.github.curiousoddman.rgxgen.lineages.PathNode;
+import com.github.curiousoddman.rgxgen.nodes.AnchorNode;
 
 import java.util.*;
 
@@ -49,7 +50,7 @@ public class GraphOptimizer {
      * Mutates {@code input} by setting {@link NodePosition.First} and
      * {@link NodePosition.Last} on every AST node, then returns it.
      */
-    public static PathGraph optimize(PathGraph input) {
+    public static PathGraph markNodesPositions(PathGraph input) {
         // Build adjacency maps from the flat edge list.
         Map<PathNode, List<PathNode>> forward = buildAdjacency(input, false);
         Map<PathNode, List<PathNode>> backward = buildAdjacency(input, true);
@@ -58,11 +59,12 @@ public class GraphOptimizer {
         PathNode end = findSentinel(input, PathNode.Kind.END);
 
         // seenAstStates[node] = set of boolean "seenAst" values that reached this node
-        Map<PathNode, Set<Boolean>> firstStates = bfs(begin, forward, true);
-        Map<PathNode, Set<Boolean>> lastStates = bfs(end, backward, true);
+        Map<PathNode, Set<Boolean>> firstStates = bfs(begin, forward);
+        Map<PathNode, Set<Boolean>> lastStates = bfs(end, backward);
 
         for (PathNode node : input.getNodes()) {
-            if (node.getKind() != PathNode.Kind.AST) {
+            if (node.getKind() != PathNode.Kind.AST
+                    || node.getAstNode() instanceof AnchorNode) {
                 continue;
             }
 
@@ -89,8 +91,7 @@ public class GraphOptimizer {
      */
     private static Map<PathNode, Set<Boolean>> bfs(
             PathNode origin,
-            Map<PathNode, List<PathNode>> adjacency,
-            boolean originIsAst) {
+            Map<PathNode, List<PathNode>> adjacency) {
 
         Map<PathNode, Set<Boolean>> reachedWith = new HashMap<>();
 
@@ -114,7 +115,7 @@ public class GraphOptimizer {
             boolean seenAst = current.seenAst();
 
             // After leaving an AST node, successors know an AST node was seen.
-            boolean seenAstForSuccessors = seenAst || (node.getKind() == PathNode.Kind.AST);
+            boolean seenAstForSuccessors = seenAst || (node.getKind() == PathNode.Kind.AST && !(node.getAstNode() instanceof AnchorNode));
 
             for (PathNode neighbour : adjacency.getOrDefault(node, Collections.emptyList())) {
                 State next = new State(neighbour, seenAstForSuccessors);

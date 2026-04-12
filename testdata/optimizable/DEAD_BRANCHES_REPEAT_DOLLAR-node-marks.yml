@@ -1,0 +1,13 @@
+# Pattern: (1$|x,){0,1}(2$|y,)
+- pattern: "1"
+  first: ALWAYS
+  last: NEVER
+- pattern: "x,"
+  first: ALWAYS
+  last: NEVER
+- pattern: "2"
+  first: SOMETIMES
+  last: ALWAYS
+- pattern: "y,"
+  first: SOMETIMES
+  last: ALWAYS

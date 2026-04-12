@@ -115,6 +115,8 @@ public class DollarAndCaretPatterns {
                 "(^1|x,)(y,){0,1}", // ^2 may never be used, because of mandatory first group
                 List.of("1", "x,", "1y,", "x,y,")
         ),
+        // FIXME: UNCOMMENT THOSE 2
+
         //        LIVEDEAD_REPEAT_CARET(
 //                "(^a)+",        // TODO: impossible repeat detected --> replaced repeat with group
 //                "(a)",      // Any subsequent repetition would break the match , 1+ repetitions transforms into group

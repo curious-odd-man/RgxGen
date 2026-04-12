@@ -1,0 +1,7 @@
+# Pattern: (a$|x){1,2}
+- pattern: "a"
+  first: SOMETIMES
+  last: SOMETIMES
+- pattern: "x"
+  first: SOMETIMES
+  last: SOMETIMES

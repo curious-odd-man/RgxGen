@@ -17,7 +17,8 @@ public interface FileTestUtils {
     String extension();
 
     default Path getExpectedFilePath(String suffix) {
-        Path path = rootPath().resolve(name() + suffix + extension());
+        String resolvablePath = name() + suffix + (suffix.contains(".") ? "" : extension());
+        Path path = rootPath().resolve(resolvablePath);
         try {
             Files.createDirectories(path.getParent());
         } catch (IOException e) {

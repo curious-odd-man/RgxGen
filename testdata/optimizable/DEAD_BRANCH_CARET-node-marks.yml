@@ -1,0 +1,10 @@
+# Pattern: c(b|^a)
+- pattern: "c"
+  first: ALWAYS
+  last: NEVER
+- pattern: "b"
+  first: NEVER
+  last: ALWAYS
+- pattern: "a"
+  first: NEVER
+  last: ALWAYS
