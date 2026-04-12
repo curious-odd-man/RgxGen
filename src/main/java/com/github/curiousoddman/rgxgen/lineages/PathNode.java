@@ -16,8 +16,7 @@ package com.github.curiousoddman.rgxgen.lineages;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.nodes.AnchorNode;
-import com.github.curiousoddman.rgxgen.nodes.FinalSymbol;
+import com.github.curiousoddman.rgxgen.lineages.optimization.NodePosition;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.nodes.Repeat;
 import com.github.curiousoddman.rgxgen.util.Util;
@@ -63,6 +62,10 @@ public class PathNode {
     private final Kind kind;
     private final Node astNode;   // null for synthetic nodes
     private final String label;
+
+    // Position marks – set by GraphOptimizer; null until the optimizer runs.
+    private NodePosition.First firstPosition;
+    private NodePosition.Last lastPosition;
 
     // -------------------------------------------------------------------------
     // Private constructor – use factories below
@@ -130,6 +133,34 @@ public class PathNode {
 
     public String getLabel() {
         return label;
+    }
+
+    // -------------------------------------------------------------------------
+    // Position mark accessors (set by GraphOptimizer)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Returns the {@link NodePosition.First} mark for this node, or {@code null}
+     * if the optimizer has not yet run.
+     */
+    public NodePosition.First getFirstPosition() {
+        return firstPosition;
+    }
+
+    public void setFirstPosition(NodePosition.First firstPosition) {
+        this.firstPosition = firstPosition;
+    }
+
+    /**
+     * Returns the {@link NodePosition.Last} mark for this node, or {@code null}
+     * if the optimizer has not yet run.
+     */
+    public NodePosition.Last getLastPosition() {
+        return lastPosition;
+    }
+
+    public void setLastPosition(NodePosition.Last lastPosition) {
+        this.lastPosition = lastPosition;
     }
 
     // -------------------------------------------------------------------------

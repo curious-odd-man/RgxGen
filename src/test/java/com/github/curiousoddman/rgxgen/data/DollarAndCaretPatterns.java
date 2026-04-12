@@ -62,6 +62,13 @@ public class DollarAndCaretPatterns {
         }
     }
 
+    /**
+     * Optimization rules:
+     * 1. Dead paths are removed
+     * ....1.1. Dead paths are those that contain dollar or caret in the middle of expression
+     * 2. Caret nodes are rewired from BEGIN, if not dead
+     * 3. Dollar nodes are rewired to END, if not dead
+     */
     public enum Optimizable implements FileTestUtils {
         DEAD_BRANCH_DOLLAR(
                 "(a$|b)c",      // TODO: Mark branch as dead --> Since only 1 option remains - convert to group with only `b`
