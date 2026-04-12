@@ -1,4 +1,4 @@
-package com.github.curiousoddman.rgxgen.iterators.suppliers;
+package com.github.curiousoddman.rgxgen.config;
 
 /* **************************************************************************
    Copyright 2019 Vladislavs Varslavans
@@ -16,27 +16,8 @@ package com.github.curiousoddman.rgxgen.iterators.suppliers;
    limitations under the License.
 /* **************************************************************************/
 
-import com.github.curiousoddman.rgxgen.iterators.ArrayIterator;
-import com.github.curiousoddman.rgxgen.iterators.StringIterator;
-
-import java.util.function.Supplier;
-
-/**
- * A supplier for char array iterator
- */
-public class ArrayIteratorSupplier implements Supplier<StringIterator> {
-    private final char[] aSymbolSet;
-
-    /**
-     * Create supplier from char array
-     * @param symbolSet chars to iterate over
-     */
-    public ArrayIteratorSupplier(char[] symbolSet) {
-        aSymbolSet = symbolSet;
-    }
-
-    @Override
-    public ArrayIterator get() {
-        return new ArrayIterator(aSymbolSet);
+public class RgxGenConfigurationException extends RuntimeException {
+    public RgxGenConfigurationException(String message) {
+        super(message);
     }
 }

@@ -29,11 +29,50 @@ import java.util.Optional;
  */
 public class RgxGenOption<T> {
     /**
-     * For infinite patterns, such as {@code a+}, {@code a*} and {@code a{n,}}, defines limit for the repetitions.
+     * For infinite patterns, such as {@code a+}, {@code a*} and {@code a{n,}} defines max limit for the repetitions.
+     * Assuming:
+     * - {@code a+} is equivalent to {@code a{1,}}
+     * - {@code a*} is equivalent to {@code a{0,}}
+     * Given that X is value for {@code INFINITE_PATTERN_REPETITION}, or default if not specified
+     * <ul>
+     *     <li>For {@code a{n,}}:</li>
+     *     <li><ul>
+     *         <li>Becomes {@code a{n,X}}</li>
+     *     </ul></li>
+     *     <li>For {@code a{n,m}}:</li>
+     *     <li><ul>
+     *         <li>Stays {@code a{n,m}}</li>
+     *     </ul></li>
+     * </ul>
      *
      * @defaultValue 100
      */
     public static final RgxGenOption<Integer> INFINITE_PATTERN_REPETITION = new RgxGenOption<>("generation.infinite.repeat", 100);
+
+    /**
+     * For patterns with repetition, such as {@code a+}, {@code a*}, {@code a{n,}} and {@code a{n,m}} defines min limit for the repetitions.
+     * Note, in contrast to {@code INFINITE_PATTERN_REPETITION}, min repetition config overrides min repetition value if it is greater than defined in pattern.
+     * Assuming:
+     * - {@code a+} is equivalent to {@code a{1,}}
+     * - {@code a*} is equivalent to {@code a{0,}}
+     * Given that X is value for {@code GENERATION_MINIMUM_REPETITION}
+     * <ul>
+     *     <li>For {@code a{n,}}:</li>
+     *     <li><ul>
+     *         <li>X &lt; n stays {@code a{n,}}</li>
+     *         <li>X &gt; n turns into {@code a{X,}}</li>
+     *     </ul></li>
+     *     <li>For {@code a{n,m}}:</li>
+     *     <li><ul>
+     *         <li>X &gt; m - RgxGenConfigurationException is thrown at generation time</li>
+     *         <li>X &lt; n stays {@code a{n,m}}</li>
+     *         <li>X &gt; n turns into {@code a{X,m}}</li>
+     *     </ul></li>
+     * </ul>
+     *
+     * @defaultValue 0
+     */
+    public static final RgxGenOption<Integer> GENERATION_MINIMUM_REPETITION = new RgxGenOption<>("generation.repeat.min", 0);
 
     /**
      * Flag to use case-insensitive matching.
@@ -55,6 +94,7 @@ public class RgxGenOption<T> {
      * @defaultValue SPACE, TAB
      */
     public static final RgxGenOption<List<WhitespaceChar>> WHITESPACE_DEFINITION = new RgxGenOption<>("whitespace.matches", Arrays.asList(WhitespaceChar.SPACE, WhitespaceChar.TAB));
+
 
     private final String key;
     private final T defaultValue;

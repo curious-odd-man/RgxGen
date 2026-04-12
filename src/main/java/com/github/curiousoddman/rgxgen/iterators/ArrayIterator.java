@@ -18,16 +18,25 @@ package com.github.curiousoddman.rgxgen.iterators;
 
 import java.util.NoSuchElementException;
 
+/**
+ * An iterator for character arrays.
+ * Each invocation of next() returns next character as string
+ */
 public class ArrayIterator implements StringIterator {
 
     private final int aMaxIndex;
-    private final char[] aStrings;
+    private final char[] aChars;
 
     private int aIndex = -1;
 
-    public ArrayIterator(char[] strings) {
-        aStrings = strings;
-        aMaxIndex = aStrings.length - 1;        // Because of prefix increment in nextImpl()
+    /**
+     * Create ArrayIterator for char array
+     *
+     * @param chars chars to iterate over
+     */
+    public ArrayIterator(char[] chars) {
+        aChars = chars;
+        aMaxIndex = aChars.length - 1;        // Because of prefix increment in nextImpl()
     }
 
     @Override
@@ -38,10 +47,10 @@ public class ArrayIterator implements StringIterator {
     @Override
     public String next() {
         ++aIndex;
-        if (aIndex >= aStrings.length) {
+        if (aIndex >= aChars.length) {
             throw new NoSuchElementException("Not enough elements in arrays");
         } else {
-            return String.valueOf(aStrings[aIndex]);
+            return String.valueOf(aChars[aIndex]);
         }
     }
 
@@ -52,6 +61,6 @@ public class ArrayIterator implements StringIterator {
 
     @Override
     public String current() {
-        return String.valueOf(aStrings[aIndex]);
+        return String.valueOf(aChars[aIndex]);
     }
 }

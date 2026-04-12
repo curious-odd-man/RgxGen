@@ -21,18 +21,26 @@ import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 
 import java.util.function.Supplier;
 
+/**
+ * A supplier for IncrementalLengthIterator
+ */
 public class IncrementalLengthIteratorSupplier implements Supplier<StringIterator> {
 
     private final int aMin;
     private final int aMax;
     private final Supplier<StringIterator> aIteratorSupplier;
 
+    /**
+     * Creates a supplier for IncrementalLengthIterator
+     * @param iteratorSupplier see {@link IncrementalLengthIterator}
+     * @param min see {@link IncrementalLengthIterator}
+     * @param max see {@link IncrementalLengthIterator}
+     */
     public IncrementalLengthIteratorSupplier(Supplier<StringIterator> iteratorSupplier, int min, int max) {
         aMin = min;
         aMax = max;
         aIteratorSupplier = iteratorSupplier;
     }
-
 
     @Override
     public StringIterator get() {
