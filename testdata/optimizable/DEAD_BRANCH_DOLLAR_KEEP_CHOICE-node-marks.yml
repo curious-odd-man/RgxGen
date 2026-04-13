@@ -1,0 +1,13 @@
+# Pattern: (a$|b|x)c
+- pattern: "a"
+  first: ALWAYS
+  last: NEVER
+- pattern: "b"
+  first: ALWAYS
+  last: NEVER
+- pattern: "x"
+  first: ALWAYS
+  last: NEVER
+- pattern: "c"
+  first: NEVER
+  last: ALWAYS

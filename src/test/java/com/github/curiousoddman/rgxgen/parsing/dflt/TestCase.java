@@ -18,4 +18,9 @@ public record TestCase(String name, String pattern, Exception exception) impleme
     public Path rootPath() {
         return Path.of("testdata/patterns");
     }
+
+    @Override
+    public String extension() {
+        return ".txt";
+    }
 }

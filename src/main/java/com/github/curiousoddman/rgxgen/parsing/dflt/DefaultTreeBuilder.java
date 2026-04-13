@@ -293,6 +293,10 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
                 case '^':
                 case '$':
                     verifyStartEndMarkerConsistency(c);
+                    sbToFinal(sb, nodes);
+                    AnchorNode anchorNode = new AnchorNode(c);
+                    nodes.add(anchorNode);
+                    aNodesStartPos.put(anchorNode, aCharIterator.prevPos());
                     break;
 
                 case '[':
@@ -367,14 +371,12 @@ public class DefaultTreeBuilder implements NodeTreeBuilder {
         if (sb.isEmpty()) {
             // Repetition for the last node
             if (nodes.isEmpty()) {
-                char previousChar = aCharIterator.peek(-2);
-                if (previousChar == '^' || previousChar == '$') {
-                    throw new TokenNotQuantifiableException(previousChar + " at " + aCharIterator.context());
-                } else {
-                    throw new RgxGenParseException("Cannot repeat nothing at" + aCharIterator.context());
-                }
+                throw new RgxGenParseException("Cannot repeat nothing at" + aCharIterator.context());
             } else {
                 repeatNode = nodes.remove(nodes.size() - 1);
+                if (repeatNode instanceof AnchorNode anchorNode) {
+                    throw new TokenNotQuantifiableException(anchorNode.getPattern() + " at " + aCharIterator.context());
+                }
             }
         } else {
             // Repetition for the last character

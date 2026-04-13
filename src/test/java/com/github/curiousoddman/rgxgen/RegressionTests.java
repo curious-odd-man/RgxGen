@@ -5,9 +5,11 @@ import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.Random;
 import java.util.regex.Pattern;
 
@@ -136,6 +138,45 @@ public class RegressionTests {
                     1,
                     parse.generate(new Random(1234)).length()
             );
+        }
+    }
+
+    @Test
+    void bug120_dollarInsideTheExpressionTest() throws IOException {
+        String pattern = "(axx$|byy)czz";       // NOTE: axx$ can never be used for a matching pattern
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        String plantUml = rgxGen.getPathGraph().toPlantUml();
+        Files.writeString(Path.of("bug120-1.puml"), plantUml);
+        Random random = new Random(99);
+        for (int i = 0; i < 10; i++) {
+            assertEquals("byyczz", rgxGen.generate(random));
+        }
+    }
+
+    @Test
+    void bug120_caretInsideTheExpressionTest() {
+        String pattern = "czz(^axx|byy)";       // NOTE: ^axx can never be used for a matching pattern
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        Random random = new Random(101);
+        for (int i = 0; i < 10; i++) {
+            assertEquals("czzbyy", rgxGen.generate(random));
+        }
+    }
+
+    @Test
+    void bug120_originalExpressionSubmittedTest() throws IOException {
+        String pattern = "^((1$|1,){0,1}(2$|2,){0,1}(3$|3,){0,1}(4$|4,){0,1}(5$|5,){0,1}(6$|6,){0,1}(7$|7,){0,1}(8$|8,){0,1}(9$|9,){0,1}(10$|10,){0,1}(11$|11,){0,1}(12$){0,1})$";
+        RgxGen rgxGen = RgxGen.parse(pattern);
+        String plantUml = rgxGen.getPathGraph().toPlantUml();
+        Files.writeString(Path.of("bug120.puml"), plantUml);
+        for (int i = 0; i < 10; i++) {
+            String generate = rgxGen.generate();
+            List<Integer> list = Arrays.stream(generate.split(",")).map(Integer::valueOf).toList();
+            List<Integer> orderedList = list.stream().sorted().toList();
+            assertEquals(orderedList, list);
+            IntSummaryStatistics intSummaryStatistics = list.stream().mapToInt(v -> v).summaryStatistics();
+            assertTrue(intSummaryStatistics.getMin() >= 1);
+            assertTrue(intSummaryStatistics.getMax() <= 12);
         }
     }
 }

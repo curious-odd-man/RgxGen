@@ -3,5 +3,9 @@ Group[1]`(xyz(a$|b$))`
     FinalSymbol{'xyz'}
     Group[2]`(a$|b$)`
       Choice[2]`(a$|b$)`
-        FinalSymbol{'a'}
-        FinalSymbol{'b'}
+        Sequence[2]`(a$|`
+          FinalSymbol{'a'}
+          AnchorNode{$}
+        Sequence[2]`(a$|b$)`
+          FinalSymbol{'b'}
+          AnchorNode{$}

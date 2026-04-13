@@ -142,6 +142,11 @@ public class UniqueValuesCountingVisitor implements NodeVisitor {
                 .visit(this);
     }
 
+    @Override
+    public void visit(AnchorNode anchorNode) {
+
+    }
+
     /**
      * Provides an estimation of number of unique values that can be generated using pattern.
      *

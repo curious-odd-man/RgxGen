@@ -1,3 +1,5 @@
 Repeat[1,♾]`(^a)+`
   Group[1]`(^a)`
-    FinalSymbol{'a'}
+    Sequence[2]`(^a)`
+      AnchorNode{^}
+      FinalSymbol{'a'}

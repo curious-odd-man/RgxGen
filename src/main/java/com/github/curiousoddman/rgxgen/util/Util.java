@@ -247,4 +247,13 @@ public final class Util {
         }
         return new MinMax(min, max);
     }
+
+    // FIXME: Move it
+    public static String plantumlEscape(String s) {
+        if (s == null) {
+            return "";
+        }
+        // Keep label short and safe for PlantUML/DOT embedding
+        return s.replace("\"", "\\\"").replace("\n", "\\n");
+    }
 }

@@ -57,6 +57,11 @@ public class SquareBracketsParsingTests {
         public Path rootPath() {
             return Path.of("testdata/patterns");
         }
+
+        @Override
+        public String extension() {
+            return ".puml";
+        }
     }
 
     @ParameterizedTest

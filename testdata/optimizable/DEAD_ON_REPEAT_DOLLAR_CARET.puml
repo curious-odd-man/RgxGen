@@ -1,0 +1,45 @@
+@startuml
+title
+""Pattern: `(a$|x|^y){1,3}`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_7
+component """END""" as node_END_8
+
+rectangle "Repeat: (a$|x|^y){1,3} 		 {1..3}" {
+  rectangle "Group 1: (a$|x|^y)" {
+    rectangle "Choice: (a$|x|^y)" {
+      rectangle "Sequence: (a$|" {
+        component """FinalSymbol(a)""" as node_AST_2
+        component """AnchorNode($)""" as node_AST_3
+      }
+      rectangle "Sequence: (a$|x|^y)" {
+        component """AnchorNode(^)""" as node_AST_5
+        component """FinalSymbol(y)""" as node_AST_6
+      }
+      component """Choice((a$|x|^y))""" as node_CHOICE_1 <<choice>>
+      component """FinalSymbol(x)""" as node_AST_4
+    }
+  }
+  component """Repeat((a$|x|^y){1,3})""" as node_REPEAT_ENTRY_0 <<repeat>>
+}
+
+node_AST_2 --> node_AST_3
+node_AST_5 --> node_AST_6
+node_CHOICE_1 --> node_AST_2
+node_CHOICE_1 --> node_AST_4
+node_REPEAT_ENTRY_0 --> node_CHOICE_1 : 1..3
+node_AST_3 --> node_END_8
+node_AST_4 --> node_REPEAT_ENTRY_0
+node_AST_6 --> node_REPEAT_ENTRY_0
+node_BEGIN_7 --> node_REPEAT_ENTRY_0
+node_REPEAT_ENTRY_0 --> node_END_8
+node_BEGIN_7 --> node_AST_5
+}
+@enduml

@@ -1,0 +1,4 @@
+# Pattern: a?
+- pattern: "a"
+  first: ALWAYS
+  last: ALWAYS

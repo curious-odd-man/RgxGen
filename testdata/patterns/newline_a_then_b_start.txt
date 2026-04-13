@@ -1,1 +1,4 @@
-FinalSymbol{'a\nb'}
+Sequence[3]`a\n^b`
+  FinalSymbol{'a\n'}
+  AnchorNode{^}
+  FinalSymbol{'b'}

@@ -1,5 +1,11 @@
 Group[1]`(a$|b$|c$)`
   Choice[3]`(a$|b$|c$)`
-    FinalSymbol{'a'}
-    FinalSymbol{'b'}
-    FinalSymbol{'c'}
+    Sequence[2]`(a$|`
+      FinalSymbol{'a'}
+      AnchorNode{$}
+    Sequence[2]`b$|`
+      FinalSymbol{'b'}
+      AnchorNode{$}
+    Sequence[2]`(a$|b$|c$)`
+      FinalSymbol{'c'}
+      AnchorNode{$}

@@ -1,0 +1,10 @@
+# Pattern: (a|b)(y)
+- pattern: "a"
+  first: ALWAYS
+  last: NEVER
+- pattern: "b"
+  first: ALWAYS
+  last: NEVER
+- pattern: "y"
+  first: NEVER
+  last: ALWAYS

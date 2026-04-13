@@ -107,4 +107,10 @@ public class PrettyPrintVisitor implements NodeVisitor {
         appendLine(node);
         visitChildren(node);
     }
+
+    @Override
+    public void visit(AnchorNode node) {
+        appendLine(node);
+        visitChildren(node);
+    }
 }

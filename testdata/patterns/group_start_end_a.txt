@@ -1,2 +1,5 @@
 Group[1]`(^a$)`
-  FinalSymbol{'a'}
+  Sequence[3]`(^a$)`
+    AnchorNode{^}
+    FinalSymbol{'a'}
+    AnchorNode{$}

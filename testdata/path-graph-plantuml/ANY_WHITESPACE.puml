@@ -1,0 +1,19 @@
+@startuml
+title
+""Pattern: `\s`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """SymbolSet(\s)""" as node_AST_0
+component """BEGIN""" as node_BEGIN_1
+component """END""" as node_END_2
+
+node_BEGIN_1 --> node_AST_0
+node_AST_0 --> node_END_2
+}
+@enduml

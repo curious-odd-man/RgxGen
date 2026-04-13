@@ -18,6 +18,8 @@ package com.github.curiousoddman.rgxgen;
 
 import com.github.curiousoddman.rgxgen.config.RgxGenProperties;
 import com.github.curiousoddman.rgxgen.iterators.StringIterator;
+import com.github.curiousoddman.rgxgen.lineages.PathGraph;
+import com.github.curiousoddman.rgxgen.lineages.PathGraphBuilder;
 import com.github.curiousoddman.rgxgen.nodes.Node;
 import com.github.curiousoddman.rgxgen.parsing.NodeCreator;
 import com.github.curiousoddman.rgxgen.parsing.dflt.DefaultNodeCreator;
@@ -36,6 +38,7 @@ import java.util.stream.Stream;
 public class RgxGen {
     private final Node node;
     private final RgxGenProperties properties;
+    private final PathGraph pathGraph;
 
     RgxGen(RgxGenProperties properties, NodeCreator nodeCreator, String pattern) {
         this.properties = properties;
@@ -44,6 +47,7 @@ public class RgxGen {
         }
         DefaultTreeBuilder defaultTreeBuilder = new DefaultTreeBuilder(pattern, nodeCreator, this.properties);
         node = defaultTreeBuilder.get();
+        pathGraph = PathGraphBuilder.build(node);
     }
 
     public static RgxGenBuilder forPattern(String pattern) {
@@ -155,5 +159,9 @@ public class RgxGen {
 
     public void visit(NodeVisitor customVisitor) {
         node.visit(customVisitor);
+    }
+
+    public PathGraph getPathGraph() {
+        return pathGraph;
     }
 }

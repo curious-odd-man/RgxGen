@@ -130,6 +130,11 @@ public class UniqueGenerationVisitor implements NodeVisitor {
         aIterators.add(new GroupIteratorSupplier(new PermutationsIteratorSupplier(v.aIterators), aReferenceIteratorMap, aGroupIterators, node.getIndex()));
     }
 
+    @Override
+    public void visit(AnchorNode anchorNode) {
+
+    }
+
     public StringIterator getUniqueStrings() {
         return aIterators.get(0)
                 .get();

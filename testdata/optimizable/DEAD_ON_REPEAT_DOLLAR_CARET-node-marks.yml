@@ -1,0 +1,10 @@
+# Pattern: (a$|x|^y){1,3}
+- pattern: "a"
+  first: SOMETIMES
+  last: SOMETIMES
+- pattern: "x"
+  first: SOMETIMES
+  last: SOMETIMES
+- pattern: "y"
+  first: SOMETIMES
+  last: SOMETIMES

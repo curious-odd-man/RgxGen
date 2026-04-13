@@ -1,0 +1,29 @@
+@startuml
+title
+""Pattern: `a.*`""
+end title
+
+skinparam rectangle {
+  BorderColor #888888
+  BackgroundColor #F8F8FF
+  FontStyle bold
+}
+
+component """BEGIN""" as node_BEGIN_3
+component """END""" as node_END_4
+
+rectangle "Sequence: a.*" {
+  rectangle "Repeat: .* 		 {0..<&infinity>}" {
+    component """Repeat(.*)""" as node_REPEAT_ENTRY_1 <<repeat>>
+    component """SymbolSet(.)""" as node_AST_2
+  }
+  component """FinalSymbol(a)""" as node_AST_0
+}
+
+node_REPEAT_ENTRY_1 --> node_AST_2 : 0..<&infinity>
+node_AST_2 --> node_REPEAT_ENTRY_1
+node_AST_0 --> node_REPEAT_ENTRY_1
+node_BEGIN_3 --> node_AST_0
+node_REPEAT_ENTRY_1 --> node_END_4
+}
+@enduml

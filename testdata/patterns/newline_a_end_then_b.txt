@@ -1,1 +1,4 @@
-FinalSymbol{'a\nb'}
+Sequence[3]`a$\nb`
+  FinalSymbol{'a'}
+  AnchorNode{$}
+  FinalSymbol{'\nb'}

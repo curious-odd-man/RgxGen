@@ -61,6 +61,11 @@ class RgxGenTest {
                 sb.append("Visited Group: ").append(node.getPattern()).append('\n');
                 node.getNode().visit(this);
             }
+
+            @Override
+            public void visit(AnchorNode node) {
+                sb.append("Visited AnchorNode: ").append(node.getPattern()).append('\n');
+            }
         });
 
         assertEquals("""

@@ -4,6 +4,7 @@ import org.opentest4j.AssertionFailedError;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,8 +14,11 @@ public interface FileTestUtils {
 
     Path rootPath();
 
+    String extension();
+
     default Path getExpectedFilePath(String suffix) {
-        Path path = rootPath().resolve(name() + suffix + ".txt");
+        String resolvablePath = name() + suffix + (suffix.contains(".") ? "" : extension());
+        Path path = rootPath().resolve(resolvablePath);
         try {
             Files.createDirectories(path.getParent());
         } catch (IOException e) {
@@ -40,7 +44,7 @@ public interface FileTestUtils {
                     getExpectedFromFile(fileSuffix),
                     actual
             );
-        } catch (AssertionFailedError e) {
+        } catch (AssertionFailedError | NoSuchFileException e) {
             Files.writeString(expectedFilePath, actual);
             throw e;
         }

@@ -126,16 +126,16 @@ public class CaretAndDollarParsingTests {
 
     @ParameterizedTest
     @MethodSource("data")
-    public void parseTest(TestCase aTestCase) throws IOException {
-        NodeTreeBuilder builder = new DefaultTreeBuilder(aTestCase.pattern(), new DefaultNodeCreator(), null);
-        Exception expectedException = aTestCase.exception();
+    public void parseTest(TestCase testCase) throws IOException {
+        NodeTreeBuilder builder = new DefaultTreeBuilder(testCase.pattern(), new DefaultNodeCreator(), null);
+        Exception expectedException = testCase.exception();
 
         if (expectedException == null) {
             Node node = builder.get();
             PrettyPrintVisitor prettyPrintVisitor = new PrettyPrintVisitor();
             node.visit(prettyPrintVisitor);
             String prettyPrintedNodes = prettyPrintVisitor.getResult();
-            aTestCase.assertFileContents(prettyPrintedNodes);
+            testCase.assertFileContents(prettyPrintedNodes);
         } else {
             try {
                 builder.get();

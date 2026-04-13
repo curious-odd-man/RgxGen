@@ -82,4 +82,6 @@ public interface NodeVisitor {
      * @param node the {@link Group} node to visit
      */
     void visit(Group node);
+
+    void visit(AnchorNode anchorNode);
 }
