@@ -71,6 +71,28 @@ public class GraphOptimizationTests {
     }
 
     @ParameterizedTest
+    @EnumSource(DollarAndCaretPatterns.OptimizableCasesMarks.class)
+    public void extendedOptimizablePatternsTests(DollarAndCaretPatterns.OptimizableCasesMarks testPattern) throws IOException {
+        RgxGen parse = RgxGen.parse(testPattern.getPattern());
+        PathGraph suboptimalGraph = parse.getPathGraph();
+
+        PathGraph markedNodesGraph = GraphOptimizer.markNodesPositions(suboptimalGraph);
+        List<PathNode> astPathNodes = astNodes(markedNodesGraph);
+
+        StringBuilder sb = new StringBuilder("# Pattern: ").append(testPattern.getPattern()).append('\n');
+        for (PathNode node : astPathNodes) {
+            String pattern = node.getAstNode().getPattern();
+            NodePosition.First firstPosition = node.getFirstPosition();
+            NodePosition.Last lastPosition = node.getLastPosition();
+            sb.append("- pattern: ").append('"').append(pattern).append('"').append('\n')
+                    .append("  first: ").append(firstPosition).append('\n')
+                    .append("  last: ").append(lastPosition).append('\n');
+        }
+
+        testPattern.assertFileContents(sb.toString());
+    }
+
+    @ParameterizedTest
     @EnumSource(DollarAndCaretPatterns.Optimal.class)
     public void optimalPatternsTests(DollarAndCaretPatterns.Optimal testPattern) throws IOException {
         RgxGen parse = RgxGen.parse(testPattern.getPattern());

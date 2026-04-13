@@ -7,7 +7,7 @@
   last: SOMETIMES
 - pattern: "2"
   first: NEVER
-  last: SOMETIMES
+  last: ALWAYS
 - pattern: "y,"
   first: NEVER
-  last: SOMETIMES
+  last: ALWAYS

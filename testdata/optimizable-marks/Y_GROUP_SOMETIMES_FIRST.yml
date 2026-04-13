@@ -1,0 +1,7 @@
+# Pattern: (a)?(y)
+- pattern: "a"
+  first: ALWAYS
+  last: NEVER
+- pattern: "y"
+  first: SOMETIMES
+  last: ALWAYS

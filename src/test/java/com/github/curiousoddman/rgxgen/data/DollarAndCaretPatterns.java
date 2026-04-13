@@ -186,6 +186,52 @@ public class DollarAndCaretPatterns {
         }
     }
 
+    public enum OptimizableCasesMarks implements FileTestUtils {
+        ALWAYS_FIRST_LAST("a"),
+        ALWAYS_FIRST_LAST_REPEAT("a{1}"),
+        ALWAYS_FIRST_LAST_Q("a?"),         // if it exists, it is first and last
+        SOMETIMES_FIRST_LAST_STAR("a*"),   // if len == 2 node is either first or last, len > 3 --> mid `a` is neither
+        SOMETIMES_FIRST_LAST_PLUS("a+"),   // if len == 2 node is either first or last, len > 3 --> mid `a` is neither
+
+        Y_GROUP_SOMETIMES_LAST("(y)(a)?"),
+        Y_GROUP_NEVER_LAST("(y)(a)+"),
+        Y_GROUP_SOMETIMES_FIRST("(a)?(y)"),
+        Y_GROUP_NEVER_FIRST("(a)+(y)"),
+
+        Y_GROUP_SOMETIMES_LAST_CHOICE("(y)(a|)"),
+        Y_GROUP_NEVER_LAST_CHOICE("(y)(a|b)"),
+        Y_GROUP_SOMETIMES_FIRST_CHOICE("(a|)(y)"),
+        Y_GROUP_NEVER_FIRST_CHOICE("(a|b)(y)"),
+
+        Y_GROUP_SOMETIMES_LAST_DOUBLE("(y)(a)?(b)?"),
+        Y_GROUP_SOMETIMES_FIRST_DOUBLE("(a)?(b)?(y)"),
+
+        Y_GROUP_SOMETIMES_LAST_DOUBLE_CHOICE("(y)(a|)(b|)"),
+        Y_GROUP_SOMETIMES_FIRST_DOUBLE_CHOICE("(a|)(b|)(y)"),
+
+        ;
+
+        private final String pattern;
+
+        OptimizableCasesMarks(String pattern) {
+            this.pattern = pattern;
+        }
+
+        @Override
+        public Path rootPath() {
+            return Path.of("testdata/optimizable-marks");
+        }
+
+        @Override
+        public String extension() {
+            return ".yml";
+        }
+
+        public String getPattern() {
+            return pattern;
+        }
+    }
+
     public enum Optimal implements FileTestUtils {
 
         LIVE_BRANCH_DOLLAR(
@@ -231,4 +277,6 @@ public class DollarAndCaretPatterns {
             return ".puml";
         }
     }
+
+
 }
